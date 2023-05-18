@@ -13,7 +13,7 @@ EKP2PMSG::EKP2PMSG(){
 }
 
 
-
+/*
 // raw to structure
 EKP2PMSG::EKP2PMSG( unsigned char* rawMSG ,unsigned int MSGSize ){
 
@@ -31,8 +31,30 @@ EKP2PMSG::EKP2PMSG( unsigned char* rawMSG ,unsigned int MSGSize ){
 		_kTag = new KTag( rawMSG + cpyPtr , _header->kTagSize() ); 
 		// memcpy( _kTag, rawMSG + cpyPtr , _header->kTagSize()); cpyPtr += _header->kTagSize();
 	}
-
 };
+*/
+
+
+
+bool EKP2PMSG::toMSG( unsigned char* rawMSG , unsigned int MSGSize ){
+
+	int cpyPtr = 0;
+
+	_header = new MSGHeader;
+	memcpy( _header->headerBody() , rawMSG, sizeof( struct MSGHeader::HeaderBody ) ); cpyPtr += sizeof( struct MSGHeader::HeaderBody );
+
+	_payload = (void *)malloc( _header->payloadSize() );
+
+	memset( _payload, 0x0, _header->payloadSize() ); // 念の為
+	memcpy( _payload , rawMSG + cpyPtr, _header->payloadSize() ); cpyPtr += _header->payloadSize();
+	
+	if( _header->kTagSize() > 0 ){
+		_kTag = new KTag( rawMSG + cpyPtr , _header->kTagSize() ); 
+		// memcpy( _kTag, rawMSG + cpyPtr , _header->kTagSize()); cpyPtr += _header->kTagSize();
+	}
+
+	return true;
+}
 
 
 
@@ -127,6 +149,8 @@ unsigned int EKP2PMSG::exportRawMSG( unsigned char **target )
 
 	return cpyPtr;
 }
+
+
 
 
 unsigned int EKP2PMSG::exportRawMSGSize(){

@@ -1,4 +1,4 @@
-#include "../k_routing_table.h"
+#include "../table_wrapper/table_wrapper.h"
 
 #include "../node.h"
 #include "../k_tag.h"
@@ -13,13 +13,11 @@ namespace ekp2p{
 
 
 
-
-void KRoutingTable::FIND_NODEHandler( Node* targetNode , int requestSize )
+/*
+void TableWrapper::FIND_NODEHandler( Node* targetNode , int requestSize )
 {
-	/*
-	 [ 重要 ]
-	  ActiveKBucketListから基準を出すために、activeBucketListを出す前にupdateを実行する必要がある
-	 */
+	 //[ 重要 ]
+	  //ActiveKBucketListから基準を出すために、activeBucketListを出す前にupdateを実行する必要がある
 
 	int offerSize;
 	KBucket *bucket = NULL;
@@ -64,6 +62,7 @@ void KRoutingTable::FIND_NODEHandler( Node* targetNode , int requestSize )
 	delete activeKBucketList;
 	return;
 };
+*/
 
 
 

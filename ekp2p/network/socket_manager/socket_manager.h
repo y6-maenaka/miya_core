@@ -17,12 +17,15 @@ class SocketManager{
 private:
 	int _sock;
 	int _port;
+	int _type;
 
 public:
 		// SocketManager();
 
 	int create();
 	int bind( int port );
+	int listen();
+	int accept();
 
 	int sock(); // getter
 	int port();
@@ -34,6 +37,9 @@ public:
 	bool sendTCP();
 
 };
+
+
+
 
 
 

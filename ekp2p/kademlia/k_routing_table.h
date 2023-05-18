@@ -2,13 +2,16 @@
 #define DA884985_2465_4516_9D37_08CC9BE11556
 
 
-
 #include <iostream>
 #include <bitset>
 #include <map>
 
 #include <stdlib.h>
 #include <arpa/inet.h>
+
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 
 
 namespace ekp2p{
@@ -26,6 +29,7 @@ class Node;
 class SocketManager;
 struct KTag;
 class KBucket;
+class TableWrapper;
 
 
 
@@ -40,24 +44,44 @@ class KBucket;
 class KRoutingTable{
 
 private:
+
+	std::mutex _mtx;
+	std::condition_variable _cv;
+
+
+	struct Wrapper
+	{
+		TableWrapper *_wrapper; 
+		std::thread _wrapperThread;
+	} _Wrapper;
+
+
 	short int _maxNodeCnt = 10;
 	KBucket *_bucketList[ K_BUCKET_SIZE ] = {NULL};
 
 	unsigned char* _myNodeID;
 
+
+protected:
+	void setupRoutingTable(); // 可変長引数でbootstrapNodeをもらう
+
+
 public:
-	void NodeID( struct in_addr* ip ); // setter ( generate and set from struct of ip )
-	char* NodeID(); // getter
 
 	KRoutingTable( unsigned char* nodeID , short int maxNodeCnt );
+	~KRoutingTable();
 	/* ekp2p( FILE );  セーブファイルからの復帰 */ 
 	// KRoutingTable( /* backup file */ ); セーブファイルから復元する場合
 
-	// インターフェース周り
-	bool autoKTagHandler( void* rawKTag , unsigned int kTagSize , SocketManager* activeSocketManager = NULL );
-	bool autoKTagHandler( KTag* kTag, SocketManager* activeSocketManager = NULL );
+	bool init(); // tablesetup + startWrapper
+
+
+	void NodeID( struct in_addr* ip ); // setter ( generate and set from struct of ip )
+	char* NodeID(); // getter
+
 
 	bool update( Node* targetNode );
+	Node* inquire( Node *targetNode ); // Nodeを与えて存在するかを確認している
 
 	//KBucket* operator []( short int branch ) return _bucketList[ branch ];	
 	KBucket* operator []( short int branch );
@@ -66,11 +90,6 @@ public:
 
 	unsigned char* myNodeID(); // getter
 
-	void setupKRoutingTable(); // 可変長引数でbootstrapNodeをもらう
-
-	void PINGHandler( Node *targetNode );
-	void PONGHandler( Node *targetNode );
-	void FIND_NODEHandler( Node* targetNode  , int requestSize );
 
 	std::map< unsigned short, KBucket* > *ActiveKBucketList(); // getter
 };

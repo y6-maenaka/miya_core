@@ -304,9 +304,11 @@ NodeListElem* KBucket::update( Node *targetNode ){
 
 	targetElem = _nodeList->findNode( targetNode );
 
+	/*
 	printf("%p\n", targetElem );
 	std::cout << _nodeList->size() << "\n";
 	std::cout << _nodeList->count() << "\n";
+	*/
 
   /* 既に対象のノードが登録されておりBucketに空きがある場合  */	
 	if(  targetElem != NULL &&_nodeList->count() < _nodeList->size() )

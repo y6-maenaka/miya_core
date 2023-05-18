@@ -22,6 +22,8 @@ add_library( SHARED_COMPONENTS SHARED
 							cipher/ecdsa_manager.cpp
 
 							hash/sha_hash.cpp
+
+							middle_buffer/middle_buffer.cpp
 								
 )
 

@@ -1,13 +1,16 @@
-#include "../k_routing_table.h"
+#include "../table_wrapper/table_wrapper.h"
 
 #include "../node.h"
 #include "../k_tag.h"
 #include "../k_bucket.h"
 
+
+
+
 namespace ekp2p{
 
 
-
+/*
 void KRoutingTable::PONGHandler( Node *targetNode )
 {
 
@@ -23,6 +26,7 @@ void KRoutingTable::PONGHandler( Node *targetNode )
 		
 	return;
 }
+*/
 
 
 

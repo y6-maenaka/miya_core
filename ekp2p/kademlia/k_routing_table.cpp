@@ -7,6 +7,8 @@
 
 #include "../network/socket_manager/socket_manager.h"
 
+#include "./table_wrapper/table_wrapper.h"
+
 
 namespace ekp2p{
 
@@ -19,13 +21,52 @@ namespace ekp2p{
 
 
 
+bool KRoutingTable::init()
+{
+	/*
+		1, ルーティングテーブルのセットアップ ファイルから復帰 of FIND_NODEによるノードの集計
+		2, wrapperの起動
+	 */
+
+
+	setupRoutingTable();
+
+	_Wrapper._wrapper = new TableWrapper(10000, this);	
+	_Wrapper._wrapper->startThread();
+
+}
+
+
+
+
+void KRoutingTable::setupRoutingTable()
+{
+
+}
+
+
+
+
+
+
+
 KRoutingTable::KRoutingTable( unsigned char* nodeID , short int maxNodeCnt ){
 
 	_maxNodeCnt = maxNodeCnt;
 
 	_myNodeID = nodeID;
 
+
+	// wrapperの起動 をここで行う
 }
+
+
+
+KRoutingTable::~KRoutingTable()
+{
+	delete _Wrapper._wrapper;
+}
+
 
 
 
@@ -34,58 +75,13 @@ KBucket* KRoutingTable::operator []( short int branch ){ return _bucketList[ bra
 
 
 
-
-
-bool KRoutingTable::autoKTagHandler( void* rawKTag , unsigned int kTagSize , SocketManager* activeSocketManager )
-{
-
-	KTag* kTag = new KTag( rawKTag, kTagSize );
-
-
-	return autoKTagHandler( kTag, activeSocketManager );
-}
-
-
-
-bool KRoutingTable::autoKTagHandler( KTag* kTag, SocketManager* activeSocketManager )
-{
-	switch( kTag->protocol() ){
-
-		case static_cast<int>(KADEMLIA_PROTOCOL::NORM): // case of NORM			
-			update( kTag->_kAddrList[0]->toNode( activeSocketManager ) );
-			break;
-			
-		case static_cast<int>(KADEMLIA_PROTOCOL::PING): // case of PING
-			update( kTag->_kAddrList[0]->toNode( activeSocketManager) );
-			kTag->_kAddrList[0]->toNode( activeSocketManager )->SendPONG();
-			break;
-		
-		case static_cast<int>(KADEMLIA_PROTOCOL::PONG): // case of PONG
-			PONGHandler( kTag->_kAddrList[0]->toNode( activeSocketManager ) ); // updateも内部で行われる
-			break;
-
-		case static_cast<int>(KADEMLIA_PROTOCOL::FIND_NODE): // case of FIND_NODE
-			FIND_NODEHandler( kTag->_kAddrList[0]->toNode( activeSocketManager) , 10 );
-			break;
-
-		default: // case of erro or undefined
-			break;
-			// error or not defined
-			
-	}
-
-	delete kTag;
-
-	return false;
-};
-
-
-
-bool KRoutingTable::update( Node* targetNode )
+bool KRoutingTable::update( Node* targetNode ) // 一部をクリティカルセクションとする
 {	
 
 	// 1, branchを算出 & KBucketを特定
 	// 2, bucket.findNode 
+
+	std::unique_lock<std::mutex> lock( _mtx ); // 以降をクリティカルセクションとする
 
 	short int branch;
 
@@ -110,6 +106,20 @@ bool KRoutingTable::update( Node* targetNode )
 
 
 
+Node* KRoutingTable::inquire( Node* targetNode )
+{
+	std::unique_lock<std::mutex> lock(_mtx);
+
+	short int branch;
+	KBucket *bucket;
+	bucket = _bucketList[( branch =  targetNode->calcBranch( myNodeID() ) )]; 
+
+	if( bucket == nullptr )
+		return nullptr;
+
+	return bucket->_nodeList->findNode( targetNode )->node();
+
+}
 
 
 

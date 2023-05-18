@@ -1,6 +1,7 @@
 #include "ver_0.h"
 
 #include "../../shared_components/cipher/ecdsa_manager.h"
+#include "../../shared_components/middle_buffer/middle_buffer.h"
 
 #include "../../miya_core/transaction/tx/tx_in.h"
 #include "../../miya_core/transaction/tx/tx_out.h"
@@ -9,6 +10,7 @@
 
 #include "../../miya_core/transaction/txcb_table_manager/txcb_table_manager.h"
 #include "../../miya_core/transaction/txcb_table_manager/txcb_table/txcb_table.h"
+
 
 #include "openssl/evp.h"
 

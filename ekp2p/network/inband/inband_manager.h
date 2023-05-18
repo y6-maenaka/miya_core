@@ -4,6 +4,7 @@
 #include <iostream>
 #include <pthread.h>
 #include <map>
+#include <functional>
 #include <errno.h>
 
 #include <unistd.h>
@@ -12,15 +13,15 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-
-
 namespace ekp2p{
 
 class SocketManager;
 class ReceiveHandler;
 class KRoutingTable;
 struct MSGHeader;
+class EKP2PMSG;
 struct KTag;
+
 
 /*
 class NetworkManager{
@@ -30,49 +31,39 @@ private: static UDPInbandManager _udpInbandManager;
 
 
 
+void DefaultMessageHandler( void *arg , EKP2PMSG *msg );
 
 
-// threadに複数の引数を渡すため
-struct ReceiveThreadArgs{
-	SocketManager* socketManager = NULL;
-	ReceiveHandler *receiveHandler = NULL;		
-	KRoutingTable *kRoutingTable = NULL;
-};
 
 
 
 // 単体では使用できない
-class InbandManager{
+class BaseInbandManager{
 
 protected:
 
+	//MiddleBuffer *_middleBuffer; // 全ての受信スレッドはMSGをこのバッファに投入する // 監視はKademlia側で行う
 	SocketManager *_socketManager;
-	ReceiveHandler* _receiveHandler;
-
-	std::map< short int , pthread_t* > _activeThreadIDList;
-
-	friend void* handlerCaller( void *arg );
-
+	
 	// 受信したメッセージがこのアプリケーションのものか
 	static bool ValidateMSGHeader( struct MSGHeader *header , unsigned int allowedDataSize = 100000 );
 
 
+	void *_handlerArg;
+
 public:
+	SocketManager *socketManager(); // getter 
 
-	InbandManager();
-	~InbandManager();
+	std::function< void(void*,EKP2PMSG*)> _messageHandler;
 
-	void receiveHandler( ReceiveHandler* receiveHandler ); // setter
-
-	// socketの作成と指定ポートのBind / receiveスレッドの起動
-	// pthread_t* start(  KRoutingTable* mainKRoutingTable = NULL , short int targetPort = 8080 );
-
-	/* stop : 失敗すると非0をリターンする */
-	int stop( short int targetPort );
-	int stop( pthread_t targetThreadID );
+	BaseInbandManager();
+	~BaseInbandManager();
 
   // マイナスの値だと正規のデータセグメントではない	
 	static MSGHeader *GetOutMSGHeader( int sock );
+
+	void handlerArg( void* arg ); // setter
+	void* handlerArg(); // getter
 };
 
 
@@ -80,19 +71,17 @@ public:
 
 
 
-class UDPInbandManager : public InbandManager {
+class UDPInbandManager : public BaseInbandManager {
 
 public:
 
-	pthread_t* start(  KRoutingTable* mainKRoutingTable = NULL , short int targetPort = 8080 );
-	friend void* UDP_HandlerCaller();
+	MSGHeader *GetOutMSGHeader( int sock );
 
-	static MSGHeader *UDP_GetOutMSGHeader( int sock );
 };
 
 
 
-class TCPInbandManager : public InbandManager {
+class TCPInbandManager : public BaseInbandManager {
 
 public:
 	// pthread_t start();	
@@ -100,6 +89,32 @@ public:
 
 	// static MSGHeader *UDP_GetOutMSGHeader( int sock )
 };
+
+
+
+
+
+
+class InbandNetworkManager{
+
+private:
+	
+	std::vector< std::pair<SocketManager*, std::thread> > _activeThreadList;
+	// socketManagerを強制的にcloseすればexitするように処理する
+
+
+
+public:
+	//friend void TCPPreHandler();
+
+	bool start( unsigned short targetPort , int type );
+
+	
+};
+
+
+
+
 
 
 
