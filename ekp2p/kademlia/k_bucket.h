@@ -6,6 +6,8 @@
 #include <iostream>
 #include <bitset>
 #include <arpa/inet.h>
+#include <mutex>
+#include <condition_variable>
 
 
 
@@ -37,17 +39,14 @@ struct ReplacementThreadArgs
 
 
 
-struct NodeListElem
-{
+struct NodeListElem {
 
 	struct Body
 	{
 		Node* _node;
 		bool _isReserved;
 
-		// Body():_isReserved(NULL){};
-	} _body;
-
+		// Body():_isReserved(NULL){}; } _body;
 	void swapNode( Node* targetNode );
 	NodeListElem::Body* body(); // getter
 
@@ -126,6 +125,8 @@ class KBucket{
 
 private:	
 	unsigned short _branch;
+	std::mutex _mtx;
+	std::condition_variable _cv;
 
 public:
 	NodeList *_nodeList; // move to private

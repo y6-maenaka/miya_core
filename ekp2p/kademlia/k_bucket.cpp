@@ -300,6 +300,8 @@ unsigned short KBucket::branch(){ // getter
 
 NodeListElem* KBucket::update( Node *targetNode ){
 
+	std::unique_lock<std::mutex> lock(_mtx); // unique_lockはスコープを抜けるとmutexを勝手に解放してくれる
+
 	NodeListElem *targetElem = NULL;
 
 	targetElem = _nodeList->findNode( targetNode );

@@ -26,7 +26,7 @@ class TableWrapper
 
 private:
 	
-	MiddleBuffer *_middleBuffer;
+	MiddleBuffer *_monitorBuffer;
 	KRoutingTable *_hostTable; // 更新対象のKademliaテーブル
 
 public:
@@ -34,7 +34,7 @@ public:
 	~TableWrapper();
 
 	// インターフェース周り
-	bool autoKTagHandler( void* rawKTag , unsigned int kTagSize , SocketManager* activeSocketManager = nullptr );
+	//bool autoKTagHandler( void* rawKTag , unsigned int kTagSize , SocketManager* activeSocketManager = nullptr );
 	bool autoKTagHandler( KTag* kTag, SocketManager* activeSocketManager = nullptr );
 
 	// KademliaProtocol関係のハンドラ
@@ -45,7 +45,7 @@ public:
 	void startThread();
 	void joinThread();
 
-	MiddleBuffer *middleBuffer();
+	MiddleBuffer *monitorBuffer();
 
 
 };

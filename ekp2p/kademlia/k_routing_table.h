@@ -40,14 +40,9 @@ class TableWrapper;
 
 
 
-
 class KRoutingTable{
 
 private:
-
-	std::mutex _mtx;
-	std::condition_variable _cv;
-
 
 	struct Wrapper
 	{
@@ -67,6 +62,7 @@ protected:
 
 
 public:
+	TableWrapper *wrapper(); // getter
 
 	KRoutingTable( unsigned char* nodeID , short int maxNodeCnt );
 	~KRoutingTable();

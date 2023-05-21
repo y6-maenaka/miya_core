@@ -48,7 +48,6 @@ protected:
 	// 受信したメッセージがこのアプリケーションのものか
 	static bool ValidateMSGHeader( struct MSGHeader *header , unsigned int allowedDataSize = 100000 );
 
-
 	void *_handlerArg;
 
 public:

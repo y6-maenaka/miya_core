@@ -43,20 +43,7 @@ KTag::KTag(){
 
 KTag::KTag( void* rawKTag, unsigned int kTagSize ){
 
-	memcpy( &_KTagMeta, rawKTag, sizeof( struct KTag::KTagMeta ));
-
-	if( !(this->_KTagMeta.validate() ))
-	{
-		return;
-	}
-	
-	for( int i=0; i<_KTagMeta.kAddrCnt(); i++ ){
-
-		KAddr *targetKAddr = new KAddr;
-		memcpy( targetKAddr, (unsigned char *)rawKTag + sizeof( struct KTag::KTagMeta) + ( i * sizeof( struct KAddr )), sizeof( struct KAddr ) );
-			
-		_kAddrList.push_back( targetKAddr );
-	}
+	importRaw( rawKTag , kTagSize ); // 取り込み
 
 };
 
@@ -88,6 +75,29 @@ unsigned int KTag::exportRawSize()
 	// size( meta ) + (size( kaddr ) * count )
 	return sizeof( struct KTag::KTagMeta ) + (sizeof( struct KAddr ) * _kAddrList.size()) ;
 }
+
+
+
+void KTag::importRaw( void* rawKTag , unsigned int kTagSize )
+{
+	memcpy( &_KTagMeta, rawKTag, sizeof( struct KTag::KTagMeta ));
+
+	if( !(this->_KTagMeta.validate() ))
+	{
+		return;
+	}
+	
+	for( int i=0; i<_KTagMeta.kAddrCnt(); i++ ){
+
+		KAddr *targetKAddr = new KAddr;
+		memcpy( targetKAddr, (unsigned char *)rawKTag + sizeof( struct KTag::KTagMeta) + ( i * sizeof( struct KAddr )), sizeof( struct KAddr ) );
+			
+		_kAddrList.push_back( targetKAddr );
+	}
+
+
+}
+
 
 
 void KTag::protocol( unsigned short protocol ){

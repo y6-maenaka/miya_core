@@ -31,12 +31,18 @@ bool KRoutingTable::init()
 
 	setupRoutingTable();
 
-	_Wrapper._wrapper = new TableWrapper(10000, this);	
-	_Wrapper._wrapper->startThread();
+	_Wrapper._wrapper = new TableWrapper(10000, this); // BufferSize + hostKRoutingTable
+	_Wrapper._wrapper->startThread();  // wrapperの起動　 
 
+	return true;
 }
 
 
+
+
+TableWrapper *KRoutingTable::wrapper(){
+	return _Wrapper._wrapper;
+}
 
 
 void KRoutingTable::setupRoutingTable()
@@ -80,8 +86,6 @@ bool KRoutingTable::update( Node* targetNode ) // 一部をクリティカルセ
 
 	// 1, branchを算出 & KBucketを特定
 	// 2, bucket.findNode 
-
-	std::unique_lock<std::mutex> lock( _mtx ); // 以降をクリティカルセクションとする
 
 	short int branch;
 

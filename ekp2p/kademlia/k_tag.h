@@ -40,6 +40,8 @@ struct KTag{
 	unsigned int exportRaw( unsigned char** ret );
 	unsigned int exportRawSize();
 
+	void importRaw( void* rawKTag , unsigned int kTagSize );
+
 	KTag();
 	KTag( void* rawKTag, unsigned int kTagSize );  // set kTag elements from raw k_tag
 

@@ -1,6 +1,5 @@
 #include "table_wrapper.h"
 
-#include "../"
 
 namespace ekp2p{
 
@@ -8,14 +7,14 @@ namespace ekp2p{
 TableWrapper::TableWrapper( unsigned int bufferSize ,KRoutingTable *hostTable ){
 
 	_hostTable = hostTable;
-	_middleBuffer = new MiddleBuffer( bufferSize );
+	_monitorBuffer = new MiddleBuffer( bufferSize );
 
 	return;
 }
 
 
 TableWrapper::~TableWrapper(){
-	delete _middleBuffer;
+	delete _monitorBuffer;
 }
 
 
@@ -24,13 +23,29 @@ TableWrapper::~TableWrapper(){
 
 void TablerWrapper::startThread()
 {
-	_wrapperThread = std::thread( [&]()
-	{
-		std::cout << "hello" << "\n";
+	std::thread wrapperThread( [&](){
 
-		// _midBuffer.pop();
-		
+		std::cout << "wrapper thread started" << "\n";
+
+		unsigned char* segment;
+		unsigned int segmentSize = 0;
+		KTagPack *kTagPack = nullptr;
+		//SocketManager *relatedSocketManager = nullptr;
+
+		for(;;)
+		{
+			_monitorBuffer.popOne( &segment , &segmentSize, true ); // blocking mode
+			// ここで取得されるKTagはRaw状態なのでstructedに変換する必要がある
+
+			kTagPack = (KTagPack *)segment;
+			KTag *kTag = new KTag( kTagPack->_rawKTag , segmentSize - sizeof(kTagPack->_relatedSocketManager) ); // あまりよくない方法
+
+			autoKTagHanalder( kTag , kTagPack->_relatedSocketManager );
+			delete kTag;
+		}
+
 	});
+
 
 }
 
@@ -51,16 +66,16 @@ bool TableWrapper::joinThread()
 
 
 
-MiddleBuffer *middleBuffer()
+MiddleBuffer *monitorBuffer()
 {
-	return _inbandMidBuffer;
+	return _monitorBuffer;
 }
 
 
 
 
 
-
+/*
 bool TableWrapper::autoKTagHandler( void* rawKTag , unsigned int kTagSize , SocketManager* activeSocketManager )
 {
 
@@ -68,12 +83,13 @@ bool TableWrapper::autoKTagHandler( void* rawKTag , unsigned int kTagSize , Sock
 
 	return autoKTagHandler( kTag, activeSocketManager );
 }
+*/
 
 
 
 
 
-bool TableWrapper::autoKTagHandler( KTag* kTag, SocketManager* activeSocketManager )
+bool TableWrapper::autoKTagHandler( KTag* kTag, SocketManager* activeSocketManager ) // nodeを作成する際に紐づけられているソケットディスクリプタが必要
 {
 	switch( kTag->protocol() ){
 

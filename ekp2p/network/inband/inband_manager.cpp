@@ -115,8 +115,8 @@ bool InbandNetworkManager::start( unsigned short targetPort , int type  )
 						
 						EKP2PMSG *structedMSG = new EKP2PMSG;
 						structedMSG->toMSG( rawMSG , rawMSGSize );	delete rawMSG;
-						
-						udpInbandManager->_messageHandler( udpInbandManager->handlerArg()  , structedMSG ); // 関数抜けるとメッセージは削除される
+
+						udpInbandManager->_messageHandler( (void *)this , structedMSG ); // 関数抜けるとメッセージは削除される
 																																																							// 関数内部で別領域に移動させる必要がある
 						delete structedMSG;
 				}

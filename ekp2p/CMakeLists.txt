@@ -13,10 +13,13 @@ add_library( EKP2P STATIC
 						 kademlia/k_protocol_handler/FIND_NODE.cpp
 						 kademlia/k_protocol_handler/PING.cpp
 						 kademlia/k_protocol_handler/PONG.cpp
+						 
+						 kademlia/table_wrapper/table_wrapper.cpp
 
 
 						 network/inband/inband_manager.cpp
 						 network/inband/receive_handler.cpp
+						 network/inband/default_message_handler.cpp
 						 #network/inband/udp_inband_manager.cpp
 
 						 network/message/header.cpp
