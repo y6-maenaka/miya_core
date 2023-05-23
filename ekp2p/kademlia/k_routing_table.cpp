@@ -112,7 +112,6 @@ bool KRoutingTable::update( Node* targetNode ) // 一部をクリティカルセ
 
 Node* KRoutingTable::inquire( Node* targetNode )
 {
-	std::unique_lock<std::mutex> lock(_mtx);
 
 	short int branch;
 	KBucket *bucket;
@@ -121,7 +120,7 @@ Node* KRoutingTable::inquire( Node* targetNode )
 	if( bucket == nullptr )
 		return nullptr;
 
-	return bucket->_nodeList->findNode( targetNode )->node();
+	return bucket->find( targetNode )->node();
 
 }
 

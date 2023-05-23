@@ -3,21 +3,34 @@
 
 
 
+#include "../unified_strage_engine/unified_strage_engine.h"
+
+
 namespace miya_db{
 
-class MMyISAM{ // 継承したほうがいい?
 
-private:
-	IndexManager;	
 
-	PageTableManager _indexPageTable;
 
-	PageTableManager _dataPageTable;
+struct Table
+{
+	char* _pathToDir;
+	
+	char *indexFilePath();
+	char *dataFilePath();
+}
 
-	char table_path;
-	FILE *table_path;
+
+
+
+class MMyISAM : public UnifiedStrageEngine { // 継承したほうがいい?
+
+private:	
 
 public:
+
+	void update();
+	void get();
+
 };
 
 }; // close miya_db namespace

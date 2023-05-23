@@ -108,8 +108,10 @@ NodeList::NodeList( int maxNodeCnt ) :  _front(NULL), _nodeCnt(0)
 
 
 // [ exist : return -1 ] , [ not exist : return idx ]
+/*
 NodeListElem *NodeList::findNode( Node* targetNode )
 {
+				
 	NodeListElem *ch;
 	ch = _front;
 
@@ -124,6 +126,7 @@ NodeListElem *NodeList::findNode( Node* targetNode )
 
 	return NULL;
 };
+*/
 
 
 
@@ -304,7 +307,7 @@ NodeListElem* KBucket::update( Node *targetNode ){
 
 	NodeListElem *targetElem = NULL;
 
-	targetElem = _nodeList->findNode( targetNode );
+	targetElem = find( targetNode );
 
 	/*
 	printf("%p\n", targetElem );
@@ -363,6 +366,27 @@ NodeListElem* KBucket::update( Node *targetNode ){
 	return nullptr;	
 }
 
+
+
+NodeListElem* KBucket::find( Node *targetNode )
+{
+	std::unique_lock<std::mutex> lock(_mtx);
+
+	NodeListElem *ch;
+	ch = _nodeList->_front;
+
+	if( ch == NULL ) return NULL;
+
+	do
+	{
+		if( ch->node() == targetNode ) return ch;
+		ch = ch->next();
+
+	}while( ch != _nodeList->_front );
+
+	return NULL;
+
+}
 
 
 

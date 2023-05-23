@@ -1,0 +1,35 @@
+application
+
+↓
+
+connection_manager 
+
+↓
+
+queryParse( テーブルとIDの取り出し )
+
+
+↓
+
+planner (テーブルとストレージエンジンの選定、記録)
+
+
+↓
+
+
+executer ( ストレージエンジンを用いてデータベースからデータを取り出す )
+
+↓
+
+selializer ( 結果をレスポンスに包む )
+
+↓
+
+connection_manager
+
+
+↓
+
+application
+ 
+

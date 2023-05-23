@@ -8,9 +8,6 @@
 #include <arpa/inet.h>
 #include <mutex>
 #include <condition_variable>
-
-
-
 // AwaikeThread
 
 namespace ekp2p{
@@ -45,6 +42,7 @@ struct NodeListElem {
 	{
 		Node* _node;
 		bool _isReserved;
+	} _body;
 
 		// Body():_isReserved(NULL){}; } _body;
 	void swapNode( Node* targetNode );
@@ -85,9 +83,9 @@ class NodeList{
 private:
 	unsigned short _nodeCnt;
 	unsigned short _listSize;
-	NodeListElem *_front;
 
 public:
+	NodeListElem *_front; // あとでprivateにする
 
 	unsigned short size();
 	unsigned short count();
@@ -97,7 +95,7 @@ public:
 	/* CONTROL */
 
 	// [ exist : return -1 ] , [ not exist : return idx ]
-	NodeListElem *findNode( Node *targetNode );
+	//NodeListElem *findNode( Node *targetNode );
 	
 	NodeListElem *front(); // getter
 
@@ -139,6 +137,7 @@ public:
 	// Node* nextNodePointer(); // getter
 
 	NodeListElem* update( Node *targetNode );
+	NodeListElem* find( Node *targetNode );
 
 	// Warning
 	// void add( Node *targetNode );

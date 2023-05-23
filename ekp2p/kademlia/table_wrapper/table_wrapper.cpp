@@ -37,16 +37,16 @@ void TablerWrapper::startThread()
 			_monitorBuffer.popOne( &segment , &segmentSize, true ); // blocking mode
 			// ここで取得されるKTagはRaw状態なのでstructedに変換する必要がある
 
-			kTagPack = (KTagPack *)segment;
-			KTag *kTag = new KTag( kTagPack->_rawKTag , segmentSize - sizeof(kTagPack->_relatedSocketManager) ); // あまりよくない方法
+			KTagPack kTagPack = new KTagPack;
+			kTagPack->importRaw( segment , segmentSize );
+
+			KTag *kTag = new KTag( kTagPack->rawKTag() , kTagPack->rawKTagSize() ); // あまりよくない方法
 
 			autoKTagHanalder( kTag , kTagPack->_relatedSocketManager );
 			delete kTag;
 		}
 
 	});
-
-
 }
 
 

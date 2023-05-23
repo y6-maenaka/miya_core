@@ -40,6 +40,7 @@ bool BufferSegment::validate()
 
 
 
+// return 空き容量
 int MiddleBuffer::pushOne( void *segment , unsigned int segmentSize , bool isBlocking )
 {
 
@@ -61,15 +62,15 @@ int MiddleBuffer::pushOne( void *segment , unsigned int segmentSize , bool isBlo
 
 	delete rawSegment;
 
-	return 0; //　鍵の解放
+	return _bufferSize - _offSet; //　鍵の解放
 
 }
 
 
 
+// return 空き容量
 int MiddleBuffer::popOne( void **segment , unsigned int *segmentSize , bool isBlocking  )
 { 
-
 	*segmentSize = 0;
 
 	std::unique_lock<std::mutex> lock(_mtx);
@@ -77,7 +78,7 @@ int MiddleBuffer::popOne( void **segment , unsigned int *segmentSize , bool isBl
 	if( _offset == 0  )
 	{ // バッファが空だった
 		if( isBlocking ) _cv.wait( lock );
-		else  return -1;
+		else  return 0;
 	}
 
 	if( (*segment = new unsigned char[_offset]) == nullptr ){ // 領域確保エラー
@@ -90,7 +91,7 @@ int MiddleBuffer::popOne( void **segment , unsigned int *segmentSize , bool isBl
 
 	if( !(bufferSegment._label <= std::numeric_limits<uint16_t>::max() && bufferSegment._label >= std::numeric_limits<uint16_t>::min()) ){
 		_offset = 0; // バッファ内がぐちゃぐちゃになっている可能性があるのでここでは簡単にバッファを論理的にリフレッシュする
-		return 0;
+		return _bufferSize - _offset;
 	}
 
 	unsigned char* rawBufferSegment = new unsigned char[ bufferSegment._label ];
@@ -100,7 +101,7 @@ int MiddleBuffer::popOne( void **segment , unsigned int *segmentSize , bool isBl
 
 	if( !bufferSegment.validate() ){
 		_offset = 0; // バッファ内がぐちゃぐちゃになっている可能性があるのでリフレッシュする
-		return 0;
+		return _bufferSize - _offset;
 	}
 	
 	memmove( _buffer , _buffer + bufferSegment._label , bufferSegment._label ); // 1segment分詰める
@@ -108,7 +109,7 @@ int MiddleBuffer::popOne( void **segment , unsigned int *segmentSize , bool isBl
 
 	*segment = bufferSegment._content._body;
 	// bufferSegment自体は勝手に解放される
-	return 0;
+	return _bufferSize - _offset;
 
 }
 
