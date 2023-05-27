@@ -41,7 +41,7 @@ bool BufferSegment::validate()
 
 
 // return 空き容量
-int MiddleBuffer::pushOne( void *segment , unsigned int segmentSize , bool isBlocking )
+int MiddleBuffer::pushOne( unsigned char *segment , unsigned int segmentSize , bool isBlocking )
 {
 
 	std::unique_lock<std::mutex> lock(_mtx); // ロックの獲得
@@ -62,14 +62,14 @@ int MiddleBuffer::pushOne( void *segment , unsigned int segmentSize , bool isBlo
 
 	delete rawSegment;
 
-	return _bufferSize - _offSet; //　鍵の解放
+	return _bufferSize - _offset; //　鍵の解放
 
 }
 
 
 
 // return 空き容量
-int MiddleBuffer::popOne( void **segment , unsigned int *segmentSize , bool isBlocking  )
+int MiddleBuffer::popOne( unsigned char **segment , unsigned int *segmentSize , bool isBlocking  )
 { 
 	*segmentSize = 0;
 

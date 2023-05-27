@@ -7,14 +7,17 @@
 #include <iostream>
 #include <thread>
 
+
+
 class MiddleBuffer;
+
+
+namespace ekp2p{
+
 class KRoutingTable;
 class SocketManager;
 class Node;
 struct KTag;
-
-
-namespace ekp2p{
 
 
 
@@ -46,7 +49,6 @@ public:
 	void joinThread();
 
 	MiddleBuffer *monitorBuffer();
-
 
 };
 

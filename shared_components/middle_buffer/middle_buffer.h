@@ -29,7 +29,6 @@ struct BufferSegment
 	uint16_t _delimiter;
 
 
-
 	BufferSegment( void* body , unsigned int bodySize ) : _delimiter(0x0020){
 		_content._body = static_cast<unsigned char*>(body); _content._bodySize = bodySize;
 		_label = htons( bodySize );
@@ -63,10 +62,8 @@ public:
 
 	//void bufferControl( std::function<int( void*, unsigned int, MiddleBuffer*)> func , void *segment, unsigned int segmentSize, bool isBlocking = true );
 
-	//friend int push( void *segment , unsigned int segmentSize , MiddleBuffer* _midBuffer );
-	int pushOne( void *segment , unsigned int segmentSize , bool isBlocking = true );
-	//friend int pop( void **segment , unsigned int &segmentSize , MiddleBuffer* _midBuffer );
-	int popOne( void **segment , unsigned int *segmentSize , bool isBlocking = true );
+	int pushOne( unsigned char *segment , unsigned int segmentSize , bool isBlocking = true );
+	int popOne( unsigned char **segment , unsigned int *segmentSize , bool isBlocking = true );
 
 
 	MiddleBuffer( unsigned int bufferSize )
@@ -78,6 +75,10 @@ public:
 
 		_offset = 0;
 	};
+
+	~MiddleBuffer(){
+		delete _buffer;
+	}
 
 
 };

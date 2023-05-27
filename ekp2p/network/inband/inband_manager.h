@@ -59,7 +59,7 @@ public:
 	~BaseInbandManager();
 
   // マイナスの値だと正規のデータセグメントではない	
-	static MSGHeader *GetOutMSGHeader( int sock );
+	virtual MSGHeader *GetOutMSGHeader( int sock );
 
 	void handlerArg( void* arg ); // setter
 	void* handlerArg(); // getter

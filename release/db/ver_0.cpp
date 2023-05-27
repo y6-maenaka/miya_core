@@ -1,5 +1,5 @@
 #include "ver_0.h"
-#include "../../miya_db/strage_manager/components/index_manager/b_tree.cpp"
+#include "../../miya_db/strage_manager/MMyISAM/components/index_manager/b_tree.cpp"
 
 
 
@@ -7,7 +7,7 @@ int main(){
 
 
 
-	miya_db::MiddleBuffer buffer(100);
+	MiddleBuffer buffer(100);
 
 	unsigned char* target = (unsigned char *)"helloworld";
 	unsigned int targetSize = 10;

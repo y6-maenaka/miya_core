@@ -1,7 +1,12 @@
 #include "table_wrapper.h"
 
+#include "../k_routing_table.cpp"
+#include "../../../shared_components/middle_buffer/middle_buffer.h"
+#include "../../network/inband/k_tag_pack.h"
+#include "../k_tag.h"
 
 namespace ekp2p{
+
 
 
 TableWrapper::TableWrapper( unsigned int bufferSize ,KRoutingTable *hostTable ){
@@ -21,7 +26,7 @@ TableWrapper::~TableWrapper(){
 
 
 
-void TablerWrapper::startThread()
+void TableWrapper::startThread()
 {
 	std::thread wrapperThread( [&](){
 
@@ -34,15 +39,16 @@ void TablerWrapper::startThread()
 
 		for(;;)
 		{
-			_monitorBuffer.popOne( &segment , &segmentSize, true ); // blocking mode
+			_monitorBuffer->popOne( &segment , &segmentSize, true ); // blocking mode
 			// ここで取得されるKTagはRaw状態なのでstructedに変換する必要がある
 
-			KTagPack kTagPack = new KTagPack;
+			KTagPack *kTagPack = new KTagPack;
 			kTagPack->importRaw( segment , segmentSize );
 
 			KTag *kTag = new KTag( kTagPack->rawKTag() , kTagPack->rawKTagSize() ); // あまりよくない方法
 
-			autoKTagHanalder( kTag , kTagPack->_relatedSocketManager );
+			autoKTagHandler( kTag, kTagPack->relatedSocketManager() );
+
 			delete kTag;
 		}
 
@@ -53,20 +59,21 @@ void TablerWrapper::startThread()
 
 
 
-bool TableWrapper::joinThread()
+void TableWrapper::joinThread()
 {
+				/*
 	if( _wrapperThread.joinable() )	{
 		_wrapperThread.join();
 		return true;
 	}
+	*/
 
-	return false;
 }
 
 
 
 
-MiddleBuffer *monitorBuffer()
+MiddleBuffer *TableWrapper::monitorBuffer()
 {
 	return _monitorBuffer;
 }
@@ -89,16 +96,16 @@ bool TableWrapper::autoKTagHandler( void* rawKTag , unsigned int kTagSize , Sock
 
 
 
-bool TableWrapper::autoKTagHandler( KTag* kTag, SocketManager* activeSocketManager ) // nodeを作成する際に紐づけられているソケットディスクリプタが必要
+bool TableWrapper::autoKTagHandler( KTag* kTag, SocketManager* activeSocketManager )
 {
 	switch( kTag->protocol() ){
 
 		case static_cast<int>(KADEMLIA_PROTOCOL::NORM): // case of NORM			
-			update( kTag->_kAddrList[0]->toNode( activeSocketManager ) );
+			_hostTable->update( kTag->_kAddrList[0]->toNode( activeSocketManager ) );
 			break;
 			
 		case static_cast<int>(KADEMLIA_PROTOCOL::PING): // case of PING
-			update( kTag->_kAddrList[0]->toNode( activeSocketManager) );
+			_hostTable->update( kTag->_kAddrList[0]->toNode( activeSocketManager) );
 			kTag->_kAddrList[0]->toNode( activeSocketManager )->SendPONG();
 			break;
 		

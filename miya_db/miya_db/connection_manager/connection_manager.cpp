@@ -17,8 +17,8 @@ unsigned int QueryPack::exportRaw( unsigned char **ret )
 	unsigned int exportSize;
 
 	*ret = new unsigned char[ _querySize + sizeof(_iexportTarget->_clientSock) ];
-	memcpy( *ret , _iexportTarget->_query , _querySize );
-	memcpy( *ret + sizeof(_iexportTarget->_clientSock) , _iexportTarget->_clientSock , sizeof(_iexportTarget->_clientSock) );
+	//memcpy( *ret , _iexportTarget->_query , _querySize );
+	memcpy( *ret , _iexportTarget->_clientSock , sizeof(_iexportTarget->_clientSock) );
 	memcpy( *ret + sizeof(_iexportTarget->_clientSock) , _iexportTarget->_query , _querySize );
 
 	return exportSize;
