@@ -11,14 +11,6 @@ namespace miya_db{
 
 
 
-struct Table
-{
-	char* _pathToDir;
-	
-	char *indexFilePath();
-	char *dataFilePath();
-}
-
 
 
 

@@ -8,6 +8,18 @@ class PageTableManager;
 
 
 
+struct IndexLogicAddr
+{
+private:
+	unsigned char _logicAddr[ 5 ]; // frame(3) + offset(2)
+
+	void operator	+ (int offset);
+
+}
+
+
+
+
 class IndexManager{
 
 
