@@ -54,26 +54,23 @@ private:
 	short int _maxNodeCnt = 10;
 	KBucket *_bucketList[ K_BUCKET_SIZE ] = {NULL};
 
-	unsigned char* _myNodeID;
+	unsigned char* _nodeID = nullptr;
 
 
 protected:
-	void setupRoutingTable(); // 可変長引数でbootstrapNodeをもらう
+	//void setupRoutingTable( sockaddr_in *globalAddr ); // 可変長引数でbootstrapNodeをもらう
 
 
 public:
 	TableWrapper *wrapper(); // getter
 
-	KRoutingTable( unsigned char* nodeID , short int maxNodeCnt );
+	KRoutingTable( short int maxNodeCnt );
 	~KRoutingTable();
 	/* ekp2p( FILE );  セーブファイルからの復帰 */ 
 	// KRoutingTable( /* backup file */ ); セーブファイルから復元する場合
 
-	bool init(); // tablesetup + startWrapper
-
-
-	void NodeID( struct in_addr* ip ); // setter ( generate and set from struct of ip )
-	char* NodeID(); // getter
+	bool init( sockaddr_in *globalAddr ); // tablesetup + startWrapper
+	//void setupRoutingTable( unsigned char *globalAddr ); 
 
 
 	bool update( Node* targetNode );
@@ -84,7 +81,7 @@ public:
 
 	void TEST_showAllBucket();
 
-	unsigned char* myNodeID(); // getter
+	unsigned char* NodeID(); // getter
 
 
 	std::map< unsigned short, KBucket* > *ActiveKBucketList(); // getter

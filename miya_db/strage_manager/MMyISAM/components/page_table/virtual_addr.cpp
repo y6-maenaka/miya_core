@@ -2,6 +2,9 @@
 
 
 
+namespace miya_db{
+
+
 unsigned char *VirtualAddr::frame()
 {
 	return _virtualAddr;
@@ -11,5 +14,8 @@ unsigned char *VirtualAddr::frame()
 
 unsigned char *VirtualAddr::offset()
 {
-	return _virtualAddr[3];
+	return &_virtualAddr[3];
 }
+
+
+}; // close miya_db namesapce

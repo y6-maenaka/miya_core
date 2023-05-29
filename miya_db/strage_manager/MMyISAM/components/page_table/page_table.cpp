@@ -1,17 +1,26 @@
 #include "page_table.h"
 
+#include "./cache_manager/cache_table.h"
+
 
 namespace miya_db{
 
 
 
-
+/*
 unsigned short Entry::frame(){
 	return static_cast<unsigned short>( _entryBit >> 4 );
-
 }
+*/
 
 
+unsigned short Entry::cachedIdx()
+{
+	unsigned short cachedIdx = 0;
+	cachedIdx  = ( (_entryBit & 0xfc) >> 2 );
+
+	return cachedIdx;
+}
 
 
 bool Entry::invalidBit(){
@@ -27,11 +36,11 @@ bool Entry::referenceBit() // getter
 
 
 
-void Entry::referenceBit( bool status )
+void Entry::referencedBit( bool status )
 {
 	
 	if( status ){ // ビットを1にしたい場合
-		_entryBit |= ( 1  ) 
+		_entryBit |= ( 1  );
 	}
 	else // ビットを0にしたい場合
 	{
@@ -71,29 +80,13 @@ PageTable::~PageTable()
 
 bool PageTable::init()
 {
-	if( (_fd = open( filePath , O_RDWR )) < 0 ) return false;
+	if( (_fd = open( _filePath , O_RDWR )) < 0 ) return false;
 
-	_cacheManager = new CacheManager( _fd );
+	_cacheManager = new CacheTable( _fd );
 
 	return true;
 }
 
-
-
-void PageTable::pageIn() // 間接的にmapperの操作を行う為パラメータの指定はダイレクトに
-{
-
-	_cacheTable
-
-
-	return;
-}
-
-
-void PageTable::pageOut()
-{
-	return;
-}
 
 
 
@@ -105,7 +98,7 @@ void* PageTable::inquire( unsigned char *logicAddr ){
 	unsigned char offset[2];  unsigned short Uoffset = 0;
 
 	memcpy( &frame , logicAddr, sizeof(frame) );
-	memcpy( &offset , logicAddr + sizeof(pageIdx) , sizeof(offset) );
+	memcpy( &offset , logicAddr + sizeof(frame) , sizeof(offset) );
 
 	Uframe = frame[0]; Uframe <<= 8;
 	Uframe = frame[1]; Uframe <<= 8;
@@ -115,24 +108,33 @@ void* PageTable::inquire( unsigned char *logicAddr ){
 	Uoffset = offset[1]; 
 
 	Entry *entry;
-	entry = _entryList[ Uframe ];
+	entry = &_entryList[ Uframe ];
 
+
+	unsigned short cachedIdx;
 
 	if( !(entry->invalidBit()) ){ // pageFault
 
-		unsigned short outIdx = _referenceControl->leastRecentlyUsedPage();
+		unsigned short outIdx = _referenceControl.leastRecentlyUsedPage();
 
-		return _cacheManager->pageFault( outIdx , Uframe );
+		cachedIdx = _cacheManager->pageFault( outIdx , Uframe );
+		return (*_cacheManager)[ cachedIdx ];
 	}
 
 	else{ 
-		_refelenceControl->incrementPtr();
-		return _cacheTable[ index ];
+		_referenceControl.incrementPtr();
+		cachedIdx = entry->cachedIdx();
+
+		return (*_cacheManager)[ cachedIdx ];
 	}
 
 	/* この後,Converterにかける？ */
 
-	return
-};
+	return nullptr;
+}
 
+
+
+}; // close miya_db namesapce
+ 
 

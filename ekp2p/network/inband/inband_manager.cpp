@@ -22,17 +22,21 @@
 namespace ekp2p{
 
 
-BaseInbandManager::BaseInbandManager(){
+BaseInbandManager::BaseInbandManager()
+{
 	_socketManager = new SocketManager;
 };
 
 
-BaseInbandManager::~BaseInbandManager(){
+BaseInbandManager::~BaseInbandManager()
+{
 	_messageHandler = DefaultMessageHandler;
 	delete _socketManager;
-}
+};
 
 	// 実行中のスレッドを全て停止させる };
+
+
 
 
 SocketManager *BaseInbandManager::socketManager()
@@ -59,12 +63,67 @@ void BaseInbandManager::handlerArg( void* arg ) // setter
 	_handlerArg = arg;
 }
 
-
 void *BaseInbandManager::handlerArg()
 {
 	return _handlerArg;
 }
 
+
+
+
+
+
+
+
+
+
+
+bool UDPInbandManager::standAlone( void *ioArg , bool allowEmpty )
+{
+	
+	int messageHandlerFlag;
+	struct sockaddr_in peerAddr;
+	socklen_t peerAddrLen;
+
+	unsigned char *rawMSG = nullptr; unsigned int rawMSGSize = 0;
+
+	MSGHeader *header; // 内部で領域確保する
+	int recvLen = 0;
+
+
+
+	for(;;){
+		// message_handlerが指定の値を返したら処理を終了する	
+		
+		if( (header = GetOutMSGHeader( _socketManager->sock()) ) == nullptr ) continue; // 内部でバリデーシィオンも行う
+
+		rawMSGSize = header->headerBodySize();
+		rawMSG = new unsigned char[ rawMSGSize ];
+		delete header; // ヘッダーはメッセージ到達用 // これ以降は不要
+
+		if ( (recvLen = recvfrom( _socketManager->sock(), rawMSG , rawMSGSize , 0 , (struct sockaddr *)&peerAddr , &peerAddrLen ))  < 0 ){ 
+			// 正しくデータを取得できなかった場合
+			if( errno == EWOULDBLOCK || errno == EAGAIN )	{
+				if( !allowEmpty ) continue;
+			}
+			else
+			{
+				delete rawMSG;
+				continue; // 取得できなかったら飛ばす
+			}
+		}
+						
+		EKP2PMSG *structedMSG = new EKP2PMSG;
+		structedMSG->toMSG( rawMSG , rawMSGSize );	delete rawMSG; // ヘッダーの処理も内部で行われる
+	
+		messageHandlerFlag = _messageHandler( (void*)this, structedMSG ); // バッファが空になるまで繰り返す
+		if( messageHandlerFlag != 0 ) break;
+
+		delete structedMSG;
+	}
+
+	return true;
+}
 
 
 
@@ -140,6 +199,13 @@ bool InbandNetworkManager::start( unsigned short targetPort , int type  )
 }
 
 
+/*
+MSGHeader *BaseInbandManager::GetOutMSGHeader( int sock )
+{
+	return nullptr;
+}
+*/
+
 
 MSGHeader *UDPInbandManager::GetOutMSGHeader( int sock )
 {
@@ -168,6 +234,12 @@ MSGHeader *UDPInbandManager::GetOutMSGHeader( int sock )
 }
 
 
+
+
+MSGHeader *TCPInbandManager::GetOutMSGHeader( int sock )
+{
+	return nullptr;
+}
 
 
 

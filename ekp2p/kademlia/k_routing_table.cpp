@@ -8,6 +8,7 @@
 #include "../network/socket_manager/socket_manager.h"
 
 #include "./table_wrapper/table_wrapper.h"
+#include "./common.h"
 
 
 namespace ekp2p{
@@ -21,21 +22,51 @@ namespace ekp2p{
 
 
 
-bool KRoutingTable::init()
+
+KRoutingTable::KRoutingTable( short int maxNodeCnt ){
+
+	_maxNodeCnt = maxNodeCnt;
+
+}
+
+
+
+
+bool KRoutingTable::init( sockaddr_in *globalAddr )
 {
 	/*
 		1, ルーティングテーブルのセットアップ ファイルから復帰 of FIND_NODEによるノードの集計
 		2, wrapperの起動
 	 */
 
-
-	setupRoutingTable();
-
 	_Wrapper._wrapper = new TableWrapper(10000, this); // BufferSize + hostKRoutingTable
 	_Wrapper._wrapper->startThread();  // wrapperの起動　 
 
+	// NodeIDの算出
+	unsigned char *nodeID = nullptr;
+	calcNodeID( globalAddr, &nodeID );
+
+	if( nodeID == nullptr ) {
+		free( nodeID );
+		return false;
+	}
+
+	_nodeID = nodeID;
+
 	return true;
 }
+
+
+
+/*
+void KRoutingTable::setupRoutingTable( sockaddr_in *globalAddr ) // Nat超えしてグローバルIPを取得する
+{
+	return;
+}
+*/
+
+
+
 
 
 
@@ -45,26 +76,6 @@ TableWrapper *KRoutingTable::wrapper(){
 }
 
 
-void KRoutingTable::setupRoutingTable()
-{
-
-}
-
-
-
-
-
-
-
-KRoutingTable::KRoutingTable( unsigned char* nodeID , short int maxNodeCnt ){
-
-	_maxNodeCnt = maxNodeCnt;
-
-	_myNodeID = nodeID;
-
-
-	// wrapperの起動 をここで行う
-}
 
 
 
@@ -90,7 +101,7 @@ bool KRoutingTable::update( Node* targetNode ) // 一部をクリティカルセ
 	short int branch;
 
 	KBucket *bucket;
-	bucket = _bucketList[( branch =  targetNode->calcBranch( myNodeID() ) )]; // ここは自分のekp2pに登録されているNodeIDをわたす
+	bucket = _bucketList[( branch =  targetNode->calcBranch( NodeID() ) )]; // ここは自分のekp2pに登録されているNodeIDをわたす
 
 
 	// 対象のbucketがない場合は新規作成
@@ -115,7 +126,7 @@ Node* KRoutingTable::inquire( Node* targetNode )
 
 	short int branch;
 	KBucket *bucket;
-	bucket = _bucketList[( branch =  targetNode->calcBranch( myNodeID() ) )]; 
+	bucket = _bucketList[( branch =  targetNode->calcBranch( NodeID() ) )]; 
 
 	if( bucket == nullptr )
 		return nullptr;
@@ -150,8 +161,9 @@ void KRoutingTable::TEST_showAllBucket()
 
 
 
-unsigned char* KRoutingTable::myNodeID(){
-	return _myNodeID;
+
+unsigned char* KRoutingTable::NodeID(){ // getter
+	return _nodeID;
 }
 
 
@@ -176,8 +188,7 @@ std::map< unsigned short, KBucket* > *KRoutingTable::ActiveKBucketList()
 }
 
 
-
-} // close ekp2p namespace 
+}; // close ekp2p namespace 
 
 
 

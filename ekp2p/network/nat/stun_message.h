@@ -17,7 +17,8 @@ constexpr uint16_t MATCHING_REQUEST = 0x0011;
 constexpr uint16_t MATCHING_RESPONSE = 0x0100;
 
 
-struct RequesterAddr{
+struct RequesterAddr
+{
 	u_char _ipv4[4];
 	uint16_t _port;
 } __attribute__((__packed__));
@@ -38,18 +39,25 @@ struct StunRequest{
 
 struct StunResponse{
 	
-	uint16_t message_type;
-	uint16_t message_size;
-	struct RequesterAddr requesterAddr;
+	uint16_t _message_type;
+	uint16_t _message_size;
+	struct RequesterAddr _requesterAddr;
 
-	unsigned int messageType(){ return ntohl(message_type); };
+	unsigned int messageType(){ return ntohs(_message_type); };
+	unsigned int message_size(){ return htons(_message_size); };
 
 	void setAddr( struct sockaddr *peerAddr )
 	{
-		memcpy(  requesterAddr._ipv4 , &(((struct sockaddr_in *)peerAddr)->sin_addr) , 4 );
-		requesterAddr._port = ((struct sockaddr_in *)peerAddr)->sin_port;
-
+		memcpy( _requesterAddr._ipv4 , &(((struct sockaddr_in *)peerAddr)->sin_addr) , 4 );
+		_requesterAddr._port = ((struct sockaddr_in *)peerAddr)->sin_port;
 	};
+
+	void sockaddr( sockaddr_in *targetAddr );
+	bool validate();
+
+	unsigned int exportRaw( unsigned char **ret );
+	unsigned int importRaw( unsigned char *from , unsigned int fromSize );
+
 
 } __attribute__ ((__packed__));
 

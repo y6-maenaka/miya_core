@@ -15,7 +15,7 @@ namespace ekp2p{
 
 
 
-void DefaultMessageHandler( void* arg , EKP2PMSG *msg ){
+int DefaultMessageHandler( void* arg , EKP2PMSG *msg ){
 
 
 	BaseInbandManager *inbandManager = (BaseInbandManager *)arg;
@@ -44,7 +44,7 @@ void DefaultMessageHandler( void* arg , EKP2PMSG *msg ){
 		delete exportedRawKTagPack; // pushしたら内部領域にコピーされる
 	}
 
-	return;
+	return 0;
 }
 
 

@@ -2,6 +2,14 @@
 #define CC58B2AA_3145_4696_ACF1_029658A27A58
 
 
+#include <iostream>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/mman.h>
+
+
+namespace miya_db{
+
 
 class Mapper
 {
@@ -23,7 +31,11 @@ public:
 																								 
 	void *expandRegion( unsigned int fileSize );
 
-}
+};
+
+
+
+};
 
 
 #endif // CC58B2AA_3145_4696_ACF1_029658A27A58

@@ -13,6 +13,9 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+#include <fcntl.h>
+#include <errno.h>
+
 namespace ekp2p{
 
 class SocketManager;
@@ -31,7 +34,7 @@ private: static UDPInbandManager _udpInbandManager;
 
 
 
-void DefaultMessageHandler( void *arg , EKP2PMSG *msg );
+int DefaultMessageHandler( void *arg , EKP2PMSG *msg );
 
 
 
@@ -53,13 +56,13 @@ protected:
 public:
 	SocketManager *socketManager(); // getter 
 
-	std::function< void(void*,EKP2PMSG*)> _messageHandler;
+	std::function< int(void*,EKP2PMSG*)> _messageHandler;
 
 	BaseInbandManager();
 	~BaseInbandManager();
 
   // マイナスの値だと正規のデータセグメントではない	
-	virtual MSGHeader *GetOutMSGHeader( int sock );
+	virtual MSGHeader *GetOutMSGHeader( int sock ) = 0;
 
 	void handlerArg( void* arg ); // setter
 	void* handlerArg(); // getter
@@ -76,6 +79,8 @@ public:
 
 	MSGHeader *GetOutMSGHeader( int sock );
 
+	bool standAlone( void *ioArg , bool allowEmpty ); // スレッドで起動する？
+
 };
 
 
@@ -83,6 +88,8 @@ public:
 class TCPInbandManager : public BaseInbandManager {
 
 public:
+
+	MSGHeader *GetOutMSGHeader( int sock );
 	// pthread_t start();	
 	// friend void* TCPHandlerCaller();
 

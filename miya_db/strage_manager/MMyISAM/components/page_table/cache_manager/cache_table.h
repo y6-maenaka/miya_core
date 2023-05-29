@@ -5,12 +5,18 @@
 
 #include <unistd.h>
 #include <iostream>
+#include <array>
 
 
 #define CACHE_BLOCK_COUNT 10;
 
 
 namespace miya_db{
+
+
+class Mapper;
+
+
 
 
 class CacheTable
@@ -20,7 +26,7 @@ private:
 
 	Mapper *_mapper;
 
-	std::array< void* , CACHE_BLOCK_COUNT > _cacheTable;
+	std::array< void* , 10 > _cacheTable; // arraySizeはどう最適化するか
 
 public:
 
@@ -36,7 +42,7 @@ public:
 		return _cacheTable[idx];
 	}
 
-	void pageFault( unsigned short idx , unsigned int frame ); // pageOutとpageInを組み合わせる
+	unsigned short pageFault( unsigned short idx , unsigned int frame ); // pageOutとpageInを組み合わせる
 
 	void pageOut( unsigned short idx );
 	void pageIn( unsigned int frame ); 

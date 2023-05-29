@@ -10,6 +10,10 @@
 
 namespace ekp2p{
 
+
+
+
+/*
 BitSet_160 *CalsNodeID( unsigned char* ip );
 
 
@@ -46,6 +50,27 @@ BitSet_160* CalcNodeID( unsigned char *ip ){
 	free( NodeID );
 
 	return b_NodeID;			
+}
+*/
+
+
+
+
+void calcNodeID( sockaddr_in *targetAddr ,unsigned char **ret )
+{
+
+	struct
+	{
+		unsigned char _ipv4[ sizeof( in_addr::s_addr ) ];
+		unsigned char _port[ sizeof( sockaddr_in::sin_port) ];
+		
+	} inAddr ;
+	
+	memcpy( &inAddr._ipv4 , &targetAddr->sin_addr.s_addr , sizeof( inAddr._ipv4 ) );
+	memcpy( &inAddr._port , &targetAddr->sin_port , sizeof( inAddr._port ) );
+
+	// ハッシュする
+	*ret = hash::SHAHash( (unsigned char*)&inAddr , sizeof(inAddr), "SHA1" );
 
 }
 

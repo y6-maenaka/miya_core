@@ -11,25 +11,19 @@
 #include "../../miya_core/transaction/txcb_table_manager/txcb_table_manager.h"
 #include "../../miya_core/transaction/txcb_table_manager/txcb_table/txcb_table.h"
 
-
 #include "openssl/evp.h"
 
-
-class MiyaCore{
-
-private:
-	// ekp2p
-	// tx_manager
-	// block_manager
-
-public:
-	int num;
-};
+#include "../../ekp2p/ekp2p.h"
+#include "../../ekp2p/kademlia/k_routing_table.h"
 
 
 
 int main(){
 	std::cout << " WELCOME TO MIYA COIN CLIENT [ MIYA_CORE ] " << "\n";
+
+
+
+
 
 	/*
 	MiyaCore miya_core;
@@ -102,6 +96,8 @@ int main(){
 	*/
 
 
+
+	/*
 	cipher::ECDSAManager ecdsaManager;
 	ecdsaManager.init( (unsigned char *)"hello", 6);
 
@@ -183,8 +179,11 @@ int main(){
 	std::cout << table_manager.add( new_p2pkh ) << "\n";
 	//std::cout << table_manager.add( _new_p2pkh ) << "\n";
 	std::cout << table_manager.find( new_p2pkh->txID() ) << "\n";
+	*/
 
 
+	ekp2p::KRoutingTable *kRoutingTable = new ekp2p::KRoutingTable(10);
+	ekp2p::EKP2P _ekp2p( kRoutingTable );
 			
 }
 

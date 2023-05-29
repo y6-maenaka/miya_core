@@ -1,5 +1,9 @@
 #include "ekp2p.h"
 
+#include "./network/inband/inband_manager.h"
+#include "./kademlia/k_routing_table.h"
+#include "./network/nat/client_nat_manager.h"
+
 
 namespace ekp2p{
 
@@ -8,10 +12,16 @@ namespace ekp2p{
 
 
 
-EKP2P::EKP2P()
+EKP2P::EKP2P( KRoutingTable *baseKRoutingTable )
 {
-	_kRoutingTable = new KRoutingTable;
-	_inbandManager = new InbandManager;
+	_inbandManager = new InbandNetworkManager;
+
+	_kRoutingTable = baseKRoutingTable;
+	if( _kRoutingTable == nullptr  ) return;
+
+	// Get Global Addr
+	
+
 }
 
 
@@ -20,21 +30,29 @@ EKP2P::EKP2P()
 void EKP2P::init()
 {
 
-	_kRoutingTable.init(); // wrapperも起動される
+	struct sockaddr_in globalAddr;
+
+	/* GlobalAddr を取得する */
+	ClientNatManager clientNatManager;
+	clientNatManager.natTraversal( &globalAddr );
+
+	_kRoutingTable->init( &globalAddr ); // wrapperも起動される
 		
 	return;
 }
 
 
 
-
-
-
-bool EKP2P::startMonitor( unsigned short port )
+void EKP2P::start( unsigned short port , int type )
 {
-	
-	_inbandManager->handlerArg((void*)_kRoutingTable->wrapper()->monitorBuffer() ); // ハンドラ引数の指定
-	_inbandManager->start( 0 , 8080 );
+	_inbandManager->start( port , type );
 }
+
+
+
+
+
+
+
 
 };

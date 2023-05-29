@@ -2,6 +2,8 @@
 
 
 
+namespace miya_db{
+
 /*
  
 	基本的にsystemPageサイズの倍数になっていると思う
@@ -11,7 +13,7 @@
 
 
 
-
+/*
 Mapper::Mapper( int fd )
 {
 	_fd = fd;
@@ -39,4 +41,7 @@ void Mapper::unmap( void *targetAddr )
 	// エラー発生したらどうするか
 	munmap( targetAddr , pow(2,16) );
 }
+*/
 
+
+}; // close miya_db namespace

@@ -23,7 +23,7 @@ void StunResponseHandler::takeInRawResponse( void* target )
 	}
 
 	_requesterAddr = new RequesterAddr;
-	_requesterAddr = &(response->requesterAddr);
+	_requesterAddr = &(response->_requesterAddr);
 
 	return;
 };

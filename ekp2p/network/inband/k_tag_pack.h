@@ -2,8 +2,16 @@
 #define AAE74D51_1FC2_4B79_9A8E_33318A1294BE
 
 
+#include <iostream>
+#include <unistd.h>
+
+
 
 namespace ekp2p{
+
+
+class SocketManager;
+
 
 
 struct KTagPack

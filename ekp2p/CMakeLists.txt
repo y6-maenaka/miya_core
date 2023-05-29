@@ -4,6 +4,8 @@ include_directories( ${OPENSSL_INCLUDE_DIRS} )
 
 add_library( EKP2P STATIC 
 
+						 ekp2p.cpp
+
 						 kademlia/common.cpp
 						 kademlia/k_bucket.cpp
 						 kademlia/k_routing_table.cpp
@@ -20,13 +22,17 @@ add_library( EKP2P STATIC
 						 network/inband/inband_manager.cpp
 						 network/inband/receive_handler.cpp
 						 network/inband/default_message_handler.cpp
-						 #network/inband/udp_inband_manager.cpp
+						 network/inband/k_tag_pack.cpp
 
 						 network/message/header.cpp
 						 network/message/message.cpp
 
 						 network/nat/request_handler.cpp
 						 network/nat/response_handler.cpp
+						 network/nat/stun_message.cpp
+						 network/nat/client_nat_manager.cpp
+						 network/nat/stun_message_handler.cpp
+						 
 
 						 network/outband/node_outband.cpp
 

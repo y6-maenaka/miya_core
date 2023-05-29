@@ -40,6 +40,12 @@ bool EKP2PMSG::toMSG( unsigned char* rawMSG , unsigned int MSGSize ){
 
 	int cpyPtr = 0;
 
+	if( MSGSize <= 0 )
+	{
+		rawMSG = nullptr;
+		return false;
+	}
+
 	_header = new MSGHeader;
 	memcpy( _header->headerBody() , rawMSG, sizeof( struct MSGHeader::HeaderBody ) ); cpyPtr += sizeof( struct MSGHeader::HeaderBody );
 

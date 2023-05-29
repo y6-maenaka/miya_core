@@ -1,9 +1,13 @@
 #include "table_wrapper.h"
 
-#include "../k_routing_table.cpp"
+#include "../k_routing_table.h"
 #include "../../../shared_components/middle_buffer/middle_buffer.h"
 #include "../../network/inband/k_tag_pack.h"
 #include "../k_tag.h"
+
+//#include "../k_protocol_handler/FIND_NODE.cpp"
+//#include "../k_protocol_handler/PING.cpp"
+//#include "../k_protocol_handler/PONG.cpp"
 
 namespace ekp2p{
 
@@ -106,15 +110,15 @@ bool TableWrapper::autoKTagHandler( KTag* kTag, SocketManager* activeSocketManag
 			
 		case static_cast<int>(KADEMLIA_PROTOCOL::PING): // case of PING
 			_hostTable->update( kTag->_kAddrList[0]->toNode( activeSocketManager) );
-			kTag->_kAddrList[0]->toNode( activeSocketManager )->SendPONG();
+			//kTag->_kAddrList[0]->toNode( activeSocketManager )->SendPONG();
 			break;
 		
 		case static_cast<int>(KADEMLIA_PROTOCOL::PONG): // case of PONG
-			PONGHandler( kTag->_kAddrList[0]->toNode( activeSocketManager ) ); // updateも内部で行われる
+			//PONGHandler( kTag->_kAddrList[0]->toNode( activeSocketManager ) ); // updateも内部で行われる
 			break;
 
 		case static_cast<int>(KADEMLIA_PROTOCOL::FIND_NODE): // case of FIND_NODE
-			FIND_NODEHandler( kTag->_kAddrList[0]->toNode( activeSocketManager) , 10 );
+			//FIND_NODEHandler( kTag->_kAddrList[0]->toNode( activeSocketManager) , 10 );
 			break;
 
 		default: // case of erro or undefined

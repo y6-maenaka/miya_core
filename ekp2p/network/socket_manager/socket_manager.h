@@ -36,6 +36,8 @@ public:
 	bool sendUDP();
 	bool sendTCP();
 
+	int setupUDPSock( unsigned short port );
+
 };
 
 

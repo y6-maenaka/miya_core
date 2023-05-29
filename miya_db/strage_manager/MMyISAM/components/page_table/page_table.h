@@ -3,10 +3,16 @@
 
 #include <iostream>
 #include <cmath>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 
 
 namespace miya_db{
+
+
+class CacheTable;
 
 
 /* POINTER SIZE は 5 バイト
@@ -20,7 +26,7 @@ namespace miya_db{
 
 
 
-constexpr unsigned int ENTRY_CNT = pow(2, 8*3);
+#define ENTRY_CNT = pow(2, 8*3);
 
 
 
@@ -30,10 +36,12 @@ struct Entry{
 													 //  000000(frame) , 0(存在ビット), 0(修正ビット), 0(参照ビット)
 													 //  000000 0 0 0 0 
 	
+	unsigned short cachedIdx();
+
 	bool invalidBit();
 
 	bool referenceBit(); // getter
-	void referencedBit( bool bit ); // setter
+	void referencedBit( bool status ); // setter
 
 
 	// bool exist(){ return (flags & 0x80) >> 7};
@@ -52,8 +60,8 @@ private:
 
 	const char *_filePath = nullptr;
 	int _fd;
-	
-	CacheManager *_cacheManager;
+	 
+	CacheTable *_cacheManager; // オブジェクト名を変更する
 
 	Entry	*_entryList; // exist(num), noexist(-1)
 
@@ -75,7 +83,7 @@ public:
 	PageTable( const char* targetFilePath );
 	~PageTable();
 
-	void init(); // 使い始めるにはinit必須
+	bool init(); // 使い始めるにはinit必須
 							 
 	void* inquire( unsigned char* logicAddr ); // localAddr -> 5 bit // 実際には
 

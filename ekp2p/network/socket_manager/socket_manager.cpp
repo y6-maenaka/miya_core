@@ -60,6 +60,14 @@ int SocketManager::send( unsigned char* sendBuff, unsigned int senfBuffSize )
 
 
 
+int SocketManager::setupUDPSock( unsigned short port )
+{
+	if( create() < 0 ) return -1;
+
+	if( bind( port ) < 0 ) return -1;
+
+	return _sock;
+}
 
 
 } // close ekp2p namespace 
