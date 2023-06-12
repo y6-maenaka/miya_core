@@ -1,6 +1,6 @@
 #include "k_routing_table.h"
-#include "./k_bucket.h"
 
+#include "./k_bucket.h"
 #include "./node.h"
 #include "./k_tag.h"
 #include "./protocol.h"
@@ -21,9 +21,7 @@ namespace ekp2p{
 /* ======================================================================= */
 
 
-
-
-KRoutingTable::KRoutingTable( short int maxNodeCnt ){
+KRoutingTable::KRoutingTable( unsigned short maxNodeCnt ){
 
 	_maxNodeCnt = maxNodeCnt;
 
@@ -32,7 +30,7 @@ KRoutingTable::KRoutingTable( short int maxNodeCnt ){
 
 
 
-bool KRoutingTable::init( sockaddr_in *globalAddr )
+bool KRoutingTable::init( sockaddr_in *globalAddr ) 
 {
 	/*
 		1, ルーティングテーブルのセットアップ ファイルから復帰 of FIND_NODEによるノードの集計
@@ -42,16 +40,20 @@ bool KRoutingTable::init( sockaddr_in *globalAddr )
 	_Wrapper._wrapper = new TableWrapper(10000, this); // BufferSize + hostKRoutingTable
 	_Wrapper._wrapper->startThread();  // wrapperの起動　 
 
+
 	// NodeIDの算出
 	unsigned char *nodeID = nullptr;
-	calcNodeID( globalAddr, &nodeID );
+	calcNodeID( globalAddr , &nodeID ); // 自身のNodeIDの算出
 
 	if( nodeID == nullptr ) {
 		free( nodeID );
 		return false;
 	}
 
-	_nodeID = nodeID;
+	//&(_kAddr->_nodeID) = nodeID; // nodeIDのセット
+	_kAddr->nodeID( nodeID ); // nodeIDのセット
+
+	std::cout << " === NatTraversal and Get GloablAddr Successfly Done === " << "\n";
 
 	return true;
 }
@@ -163,7 +165,7 @@ void KRoutingTable::TEST_showAllBucket()
 
 
 unsigned char* KRoutingTable::NodeID(){ // getter
-	return _nodeID;
+	return _kAddr->_nodeID;
 }
 
 
@@ -174,7 +176,7 @@ std::map< unsigned short, KBucket* > *KRoutingTable::ActiveKBucketList()
 {																														 
 	KBucket* bucket;
 	std::map< unsigned short, KBucket* > *activeKBucketList = new std::map<unsigned short , KBucket*>;
-
+	// branch( unsigned short ) , bucket( KBucket )
 
 	for( int i=0; i < K_BUCKET_SIZE ; i++)
 	{
@@ -188,7 +190,48 @@ std::map< unsigned short, KBucket* > *KRoutingTable::ActiveKBucketList()
 }
 
 
+
+
+/*
+std::vector<Node*> *KRoutingTable::closestNodeList( unsigned short maxCnt , Node* baseNode )
+{
+
+	unsigned short baseBranch = baseNode->calcBranch( _nodeID ); // baseNodeのブランチを確定する
+																															 
+	// 既存のバケットリストの回収	
+	std::map< unsigned short, KBucket *> *activeKBucketList;	
+	if( (activeKBucketList = ActiveKBucketList()) == nullptr || activeKBucketList->size() <= 0 ) return nullptr; // 空もしくは中身がなければ即リターン
+
+	std::vector< Node*> *closestNodeList = new std::vector< Node*>; // closestNodeListの作成
+																																
+	// 中心のバケットを探す	
+	// ここでは簡単に,base以上のバケットを中央とする ※要変更
+	std::map< unsigned short, KBucket*>::itr = activeKBucketList->lower_bound( baseNode ); // キー以上の最も近い要素を獲得する
+	if( itr == activeKBucketList->end() ) itr--; // 要素が見つからなければ一つ前の要素を中央とする
+
+
+	auto rippleSearch( bool isboundaryReached = false )
+	{
+		closestNodeList.push_back( (itr.second)->count() );
+
+		// 取り出し
+		while( itr.second() || closestNodeList->size() < maxCnt )
+		{
+
+		}
+		
+
+		
+	}
+
+	return nullptr;
+}
+*/
+
+
 }; // close ekp2p namespace 
+
+
 
 
 

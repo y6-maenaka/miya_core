@@ -6,6 +6,8 @@
 
 #include <arpa/inet.h>
 
+#include "openssl/crypto.h" // for use OPENSSL_free
+
 
 
 namespace ekp2p{
@@ -18,12 +20,10 @@ class SocketManager;
 
 
 
-
-
 struct KTag{
 
-	struct KTagMeta{
-
+	struct KTagMeta
+	{
 		uint16_t Protocol;
 		uint16_t KAddrCnt;
 		u_char Free[12];	
@@ -57,18 +57,24 @@ struct KTag{
 
 
 
-
-struct KAddr{
-
+struct KAddr
+{
 	// struct in_addr IP; // u_char[4]どっちがいい？
-	u_char IPv4[4];
-	uint16_t UDPPort;
-	uint16_t TCPPort;
+	// u_char _IPv4[4];
+	
+	struct inAddr{
+		uint32_t _ipv4;
+		uint16_t _port;
+	} _inAddr __attribute__((__packed__));
+
+	unsigned char _nodeID[20];
+	// おそらくsockaddr_inで持ったほうがいい -> port(), ipv4()メソッドを導入したほうが良い
 	
 	KAddr();
+	KAddr( sockaddr_in *addr );
 	Node* toNode( SocketManager *socketManager = NULL );	// socketManagerを登録していないとこのノードに対してデータを送信することができない
-
-	
+	unsigned char *nodeID(); // getter
+	void nodeID( unsigned char *nodeID );
 
 }__attribute__((__packed__));
 

@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include <errno.h>
+#include <fcntl.h>
 
 
 namespace ekp2p{
@@ -37,7 +38,9 @@ public:
 	bool sendTCP();
 
 	int setupUDPSock( unsigned short port );
-
+	
+	void toBlockingSocket();
+	void toNonBlockingSocket();
 };
 
 

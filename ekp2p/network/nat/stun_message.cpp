@@ -6,12 +6,13 @@ namespace ekp2p{
 
 
 
-void StunResponse::sockaddr( sockaddr_in *targetAddr )
+void StunResponse::sockaddr( sockaddr_in *ret )
 {
-	targetAddr->sin_port = htons( _requesterAddr._port );
 
-	in_addr_t	ipAddr = *(in_addr_t*)_requesterAddr._ipv4;
-	targetAddr->sin_addr.s_addr = ipAddr;
+	ret->sin_addr.s_addr = _requesterAddr._ipv4;
+	ret->sin_port = _requesterAddr._port;
+
+	//return &_requesterAddr;
 }
 
 

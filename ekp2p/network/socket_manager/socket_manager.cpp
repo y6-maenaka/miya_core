@@ -70,4 +70,21 @@ int SocketManager::setupUDPSock( unsigned short port )
 }
 
 
+
+void SocketManager::toBlockingSocket()
+{
+	int flag = fcntl( _sock , F_GETFL , 0 );
+	fcntl( _sock , F_SETFL  , flag | O_NONBLOCK ); // NONBLOCKING_FLAGを追加
+}
+
+
+void SocketManager::toNonBlockingSocket()
+{
+	int flag = fcntl( _sock , F_GETFL , 0 );
+	fcntl( _sock , F_SETFL , flag &= ~O_NONBLOCK ); // NON_BLOCKING属性を取り出す
+	
+}
+
+
+
 } // close ekp2p namespace 

@@ -18,6 +18,9 @@ MSGHeader::MSGHeader()
 
 MSGHeader::MSGHeader(  unsigned int payloadSize , unsigned int kTagSize , char* extra ){
 	std::cout << "Message Header Generated"	 << "\n";
+
+	_body.PayloadSize = htonl( payloadSize );
+	_body.KTagSize = htonl( kTagSize );
 };
 
 
@@ -39,7 +42,7 @@ unsigned int MSGHeader::headerBodySize()
 }
 
 
-unsigned int MSGHeader::overallDataSize()
+unsigned int MSGHeader::rawMSGSize()
 {
 	return ntohl(_body.PayloadSize) + ntohl(_body.KTagSize) + sizeof(struct MSGHeader::HeaderBody); // len(payload) + len(ktag) + len(header)
 }

@@ -37,9 +37,6 @@ endif()
 
 
 
-
-
-
 add_definitions( -std=c++14 )
 
 

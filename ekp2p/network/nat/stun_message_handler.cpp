@@ -11,19 +11,28 @@ namespace ekp2p
 
 int StunMessageHandler( void* arg , EKP2PMSG *msg )
 {
-	if( msg == nullptr ) return -1;
+	BaseInbandManager *inbandManager = (BaseInbandManager *)arg; // inbandManagerの取り出し
+	sockaddr_in* globalAddr = (sockaddr_in*)inbandManager->handlerArg(); // inbadManagerからハンドラ引数の取り出し
 
-	BaseInbandManager *inbandManager = (BaseInbandManager *)arg;
-
-	sockaddr_in* globalAddr = (sockaddr_in*)inbandManager->handlerArg();
+	if( msg == nullptr ){
+		globalAddr = nullptr;
+		return -1;
+	}
 
 	StunResponse *response = new StunResponse;
 	response = (StunResponse *)msg->payload();
 
-	response->sockaddr( globalAddr ); // globalAddr の取得
+	if( response->messageType() != BINDING_RESPONSE ){ // 受信したメッセージがstunのものではない
+		delete response;
+		return 0;
+	}
+
+	//response->sockaddr( globalAddr ); // globalAddr の取得
+	response->sockaddr( globalAddr );
+	//*globalAddr = *(response->sockaddr());
 
 	delete response;
-	return 0;
+	return 1;
 }
 
 

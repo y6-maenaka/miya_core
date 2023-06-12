@@ -26,7 +26,7 @@ public:
 	// EKP2PMSG( unsigned char* rawMSG , unsigned int MSGSize ); // ある程度前処理がされていることが前提のコンストラクタ
 	// ~EKP2PMSG();
 	
-	bool toMSG( unsigned char* rawMSG, unsigned int MSGSize );
+	bool toStructedMSG( unsigned char* rawMSG, unsigned int MSGSize );
 
 	/* HEADER */
 	void header( MSGHeader *header ); // setter
@@ -41,8 +41,8 @@ public:
 	KTag* kTag(); // getter
 	unsigned int rawKTagSize(); // getter	
 
-	unsigned int exportRawMSG( unsigned char** target );
-	unsigned int exportRawMSGSize();
+	unsigned int exportRaw( unsigned char** target );
+	unsigned int exportRawSize();
 };
 
 }; // close ekp2p namespace

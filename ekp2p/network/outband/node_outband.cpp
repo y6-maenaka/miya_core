@@ -30,7 +30,7 @@ int NodeOutband::send( unsigned char* payload, unsigned int payloadSize , KTag* 
 	unsigned char* exportedRawMSG;
 	unsigned int exportedRawMSGSize = 0;
 
-	exportedRawMSGSize = msg.exportRawMSG( &exportedRawMSG );
+	exportedRawMSGSize = msg.exportRaw( &exportedRawMSG );
 
 	sendSize = socketManager->send( exportedRawMSG, exportedRawMSGSize  );
 

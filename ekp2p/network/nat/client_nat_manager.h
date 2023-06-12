@@ -8,11 +8,19 @@
 
 namespace ekp2p{
 
+class SocketManager;
+
 
 class ClientNatManager
 {
 
+private:
+	SocketManager *_socketManager;
+
+
 public:
+	ClientNatManager( SocketManager *seupedSocketManager = nullptr );
+
 	bool natTraversal( struct sockaddr_in *globalAddr );
 	
 	bool validateSockaddrIn( sockaddr_in *targetAddr );

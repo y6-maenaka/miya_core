@@ -18,15 +18,15 @@ constexpr char MSG_EndString[4]   = { static_cast<char>(0xff), static_cast<char>
 
 
 
-struct MSGHeader{
+struct MSGHeader{ // rename to EKP@PMSGHeader
 
 	struct HeaderBody
 	{
 		char StartString[4];      // n(4)
 		uint32_t PayloadSize;     // n(4)
-		uint32_t KTagSize;        // n(4)
+		uint32_t KTagSize;        // n(4) // kTagCountに変えた方がいいかな KTagのサイズは固定長のため
 		unsigned char Free[12];   // n(12)
-		char* EndString[4];       // n(4)
+		char EndString[4];       // n(4)
 															
 	} _body __attribute__(( aligned(4)) );
 
@@ -40,7 +40,7 @@ struct MSGHeader{
 	// success -> true(1)
 	// bool GetOutHeaderElements();
 
-	unsigned int overallDataSize(); // getter
+	unsigned int rawMSGSize(); // getter
 	unsigned char* free(); // getter
 
 	void payloadSize( unsigned int payloadSize ); // setter

@@ -3,6 +3,9 @@
 #include "./k_tag.h"
 
 #include "../network/socket_manager/socket_manager.h"
+#include "./k_routing_table.h"
+#include "./common.h"
+#include "../../shared_components/hash/sha_hash.h"
 
 //#include "../hash/sha_hash.h"
 
@@ -34,12 +37,13 @@ short int Node::calcBranch( unsigned char* myNodeID ){
 unsigned char* Node::calcBranchRaw( unsigned char* myNodeID )
 {
 
-	if( myNodeID == NULL || _NodeID == NULL ) return NULL;
+	if( myNodeID == NULL || _kAddr->nodeID() == NULL ) return NULL;
 
 	unsigned char* nodeXORDistance = new unsigned char[20];
+	unsigned char* NodeID = _kAddr->nodeID();
 
 	for( int i=0; i<20; i++){
-		nodeXORDistance[i] = ((myNodeID[i]) ^ (_NodeID[i]));
+		nodeXORDistance[i] = ((myNodeID[i]) ^ ( NodeID[i]));
 	}
 
 	return nodeXORDistance;
@@ -48,14 +52,15 @@ unsigned char* Node::calcBranchRaw( unsigned char* myNodeID )
 
 
 	
-unsigned char* Node::ip() // getter
+uint32_t Node::ip() // getter
 {
-	return _kAddr->IPv4;
+	return _kAddr->_inAddr._ipv4;
 }
 
 
-void Node::ip( unsigned char* ip ){ // setter from unsigned char*
-	memcpy( _kAddr->IPv4 , ip , 4 );
+void Node::ip( uint32_t ip ){ // setter from unsigned char*
+	//memcpy( _kAddr->_IPv4 , ip , 4 );
+	_kAddr->_inAddr._ipv4 = ip;
 	//_ip = inet_addr( ip );
 }
 
@@ -68,30 +73,32 @@ Node::Node()
 };
 
 
-
-Node::Node( struct in_addr *ip )
+/* 
+Node::Node( struct in_addr *addr ) // initialize
 {
 	_leastSocketManager = NULL;
+	_kAddr = new KAddr( addr );
 
-	memcpy( _kAddr->IPv4, ip, 4 ); // set _ip
-
-	_NodeID = hash::SHAHash( _kAddr->IPv4 , 4 , "sha1" );// set _NodeID
-
-	
 };
+*/
 
 
 
 
-Node::Node( KAddr* kAddr )
+Node::Node( KAddr* kAddr, SocketManager *relatedSocketManager )
 {
-	_leastSocketManager = NULL;
+	if( relatedSocketManager != nullptr )
+		_leastSocketManager = relatedSocketManager;
+	_leastSocketManager = nullptr; // 二重で代入していることになるかな
 
 	_kAddr = kAddr;
 
+	// kAddrがすでに持っているはず
 	// _NodeID = kAddr->IPv4;
-	_NodeID = hash::SHAHash( kAddr->IPv4, 4, "sha1" );
-
+	//unsigned char *nodeID;
+	// nodeID = hash::SHAHash( kAddr->_IPv4, 4, "sha1" );
+	// _kAddr->nodeID( nodeID );
+	//OPENSSL_free( nodeID );
 };
 
 
@@ -119,11 +126,12 @@ SocketManager* Node::socketManager() // getter
 
 
 
-
+/*
 unsigned char* Node::nodeID()
 {
 	return _NodeID;
 }
+*/
 
 
 

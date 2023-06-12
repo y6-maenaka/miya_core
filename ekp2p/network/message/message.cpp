@@ -6,10 +6,11 @@
 namespace ekp2p{
 
 
-EKP2PMSG::EKP2PMSG(){
-	_header = NULL;
-	_payload = NULL;
-	_kTag = NULL;
+EKP2PMSG::EKP2PMSG(){ 
+	_header = new MSGHeader( 0 , 0 , nullptr ); // ( payloadSize , kTagSize , 予備 )
+	_payload = nullptr;
+	_kTag = nullptr;
+
 }
 
 
@@ -36,25 +37,27 @@ EKP2PMSG::EKP2PMSG( unsigned char* rawMSG ,unsigned int MSGSize ){
 
 
 
-bool EKP2PMSG::toMSG( unsigned char* rawMSG , unsigned int MSGSize ){
+bool EKP2PMSG::toStructedMSG( unsigned char* rawMSG , unsigned int MSGSize ){
 
 	int cpyPtr = 0;
 
-	if( MSGSize <= 0 )
+	if( MSGSize <= 0 || rawMSG == nullptr )
 	{
-		rawMSG = nullptr;
+		// _header = nullptr; // payload=0, ktag=0 のheaderを保持させたまま
 		return false;
 	}
 
-	_header = new MSGHeader;
+	//_header = new MSGHeader;
 	memcpy( _header->headerBody() , rawMSG, sizeof( struct MSGHeader::HeaderBody ) ); cpyPtr += sizeof( struct MSGHeader::HeaderBody );
 
-	_payload = (void *)malloc( _header->payloadSize() );
-
+	// _payload = (void *)malloc( _header->payloadSize() );
+	_payload = new unsigned char[ _header->payloadSize() ];
 	memset( _payload, 0x0, _header->payloadSize() ); // 念の為
+																									 
 	memcpy( _payload , rawMSG + cpyPtr, _header->payloadSize() ); cpyPtr += _header->payloadSize();
 	
-	if( _header->kTagSize() > 0 ){
+	if( _header->kTagSize() > 0 )
+	{
 		_kTag = new KTag( rawMSG + cpyPtr , _header->kTagSize() ); 
 		// memcpy( _kTag, rawMSG + cpyPtr , _header->kTagSize()); cpyPtr += _header->kTagSize();
 	}
@@ -86,6 +89,11 @@ MSGHeader* EKP2PMSG::header() // getter
 /* PAYLOAD */
 void EKP2PMSG::payload( void* payload, unsigned int payloadSize )
 {
+	if( payloadSize <= 0 ){
+		_header->payloadSize(0);
+		return;
+	}
+
 	_payload = payload;
  
 	if( _header != NULL ) // header NULL -> Error
@@ -120,7 +128,7 @@ KTag* EKP2PMSG::kTag()
 
 
 
-unsigned int EKP2PMSG::exportRawMSG( unsigned char **target )
+unsigned int EKP2PMSG::exportRaw( unsigned char **target )
 {
 
 	/* header の各要素をセットを確認 */
@@ -128,7 +136,7 @@ unsigned int EKP2PMSG::exportRawMSG( unsigned char **target )
 	// if( _payload != NULL )  これはセットされる時に必ず入力されている
 
 
-	*target = (unsigned char *)malloc( _header->overallDataSize() );
+	*target = (unsigned char *)malloc( _header->rawMSGSize() );
 
 	unsigned int cpyPtr = 0; 
 	memcpy( *target , _header->headerBody() , sizeof( MSGHeader::HeaderBody ));  cpyPtr += sizeof( MSGHeader::HeaderBody );
@@ -159,7 +167,7 @@ unsigned int EKP2PMSG::exportRawMSG( unsigned char **target )
 
 
 
-unsigned int EKP2PMSG::exportRawMSGSize(){
+unsigned int EKP2PMSG::exportRawSize(){
 	return _header->headerBodySize();
 }
 

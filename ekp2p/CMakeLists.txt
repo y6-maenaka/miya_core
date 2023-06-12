@@ -12,9 +12,9 @@ add_library( EKP2P STATIC
 						 kademlia/k_tag.cpp
 						 kademlia/node.cpp
 
-						 kademlia/k_protocol_handler/FIND_NODE.cpp
-						 kademlia/k_protocol_handler/PING.cpp
-						 kademlia/k_protocol_handler/PONG.cpp
+						 kademlia/kademlia_RPC/FIND_NODE.cpp
+						 kademlia/kademlia_RPC/PING.cpp
+						 kademlia/kademlia_RPC/PONG.cpp
 						 
 						 kademlia/table_wrapper/table_wrapper.cpp
 

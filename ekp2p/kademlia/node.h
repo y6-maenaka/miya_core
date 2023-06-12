@@ -13,12 +13,12 @@
 
 #include <arpa/inet.h>
 
-#include "./k_routing_table.h"
-#include "../../shared_components/hash/sha_hash.h"
 // link時 依存関係エラー 本CmakeファイルにInclude Dirを追記で解決
 
 // #include "../../ekp2p/ekp2p.h"
 
+
+#include "openssl/crypto.h"
 #include "../network/outband/node_outband.h"
 
 
@@ -47,28 +47,28 @@ private:
 	SocketManager *_leastSocketManager;
 
 public:
-	unsigned char *_NodeID; // sha1( _ip ) // length:20[bytes]
+	//unsigned char *_NodeID; // sha1( _ip ) // length:20[bytes]
 
 	short int calcBranch( unsigned char* myNodeID );
 	unsigned char* calcBranchRaw( unsigned char* myNodeID );
 
-	unsigned char* ip(); // getter
-	void ip( unsigned char* ip ); // setter
-	void ip( struct in_addr* ip );
+	uint32_t ip(); // getter
+	void ip( uint32_t ip ); // setter
+	//void ip( struct in_addr* ip );
 
 	//BitSet_160* toBitSet_160( unsigned char* ip );
 
 	Node();
-	Node( KAddr* kAddr );
-	Node( struct in_addr *ip );
+	Node( KAddr* kAddr , SocketManager *relatedSocketManager = nullptr );
+	// Node( struct in_addr *addr );
 	
 	~Node();
 
 	void socketManager( SocketManager *socketManager ); // setter
 	SocketManager* socketManager(); // getter
 
-	void NodeID( unsigned char *id ); // setter
-	unsigned char* nodeID();
+	//void NodeID( unsigned char *id ); // setter
+	//unsigned char* nodeID();
 
 
 	/* KADEMLIA HANDLER */

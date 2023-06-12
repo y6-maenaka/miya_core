@@ -182,9 +182,13 @@ int main(){
 	*/
 
 
-	ekp2p::KRoutingTable *kRoutingTable = new ekp2p::KRoutingTable(10);
+
+	ekp2p::KRoutingTable *kRoutingTable = new ekp2p::KRoutingTable();
 	ekp2p::EKP2P _ekp2p( kRoutingTable );
-			
+	_ekp2p.init(); // ルーティングテーブルを使用するのであればinitは必須 
+
+
+
 }
 
 

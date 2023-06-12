@@ -55,10 +55,11 @@ protected:
 
 public:
 	SocketManager *socketManager(); // getter 
+	void socketManager( SocketManager *socketManager );
 
 	std::function< int(void*,EKP2PMSG*)> _messageHandler;
 
-	BaseInbandManager();
+	BaseInbandManager( SocketManager *setupedSocketManager = nullptr );
 	~BaseInbandManager();
 
   // マイナスの値だと正規のデータセグメントではない	
@@ -77,9 +78,11 @@ class UDPInbandManager : public BaseInbandManager {
 
 public:
 
+	UDPInbandManager( SocketManager *setupedSocketManager ) : BaseInbandManager( setupedSocketManager ){};
+
 	MSGHeader *GetOutMSGHeader( int sock );
 
-	bool standAlone( void *ioArg , bool allowEmpty ); // スレッドで起動する？
+	bool standAlone( void *ioArg ,bool allowEmpty =true ); // スレッドで起動する？
 
 };
 
@@ -113,7 +116,7 @@ private:
 public:
 	//friend void TCPPreHandler();
 
-	bool start( unsigned short targetPort , int type );
+	bool start( unsigned short targetPort , int type , SocketManager *setupedSocketManager = nullptr );
 
 	
 };

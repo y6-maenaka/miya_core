@@ -1,6 +1,7 @@
 #include "k_tag.h"
 
 #include "./node.h"
+#include "./common.h"
 
 
 namespace ekp2p{
@@ -32,7 +33,6 @@ KTag::KTagMeta::KTagMeta() : KAddrCnt(0)
 
 
 
-
 KTag::KTag(){
 	return;
 }
@@ -42,7 +42,6 @@ KTag::KTag(){
 
 
 KTag::KTag( void* rawKTag, unsigned int kTagSize ){
-
 	importRaw( rawKTag , kTagSize ); // 取り込み
 
 };
@@ -131,23 +130,72 @@ void KTag::addKAddr( Node *node ){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 KAddr::KAddr(){
-	memset( IPv4, 0x0 , sizeof( IPv4)  );
-	UDPPort = htons( 0 );
-	TCPPort = htons( 0 );
+
+	// zero clear
+	_inAddr._ipv4 = htonl(0);
+	_inAddr._port = htons( 0 );
 }
 
 
 
-Node* KAddr::toNode( SocketManager *socketManager ){
+KAddr::KAddr( sockaddr_in *addr ) // import
+{
+	_inAddr._ipv4 = addr->sin_addr.s_addr;
+	_inAddr._port = addr->sin_port;
+
+	unsigned char *nodeID; unsigned int nodeIDSize = 0;
+	nodeIDSize = calcNodeID( this , &nodeID ); // nodeIDの算出
+	memcpy( _nodeID , nodeID , nodeIDSize );
+	OPENSSL_free( nodeID );
+}
+
+
+Node* KAddr::toNode( SocketManager *socketManager )
+{
 
 	Node* node = new Node( this );
 
-	if( socketManager != NULL )
+	if( socketManager != nullptr )
 		node->socketManager( socketManager );
 
 	return node;
 };
+
+
+unsigned char* KAddr::nodeID()
+{
+	return _nodeID;
+}
+
+
+void KAddr::nodeID( unsigned char *nodeID )
+{
+	memcpy( _nodeID , nodeID , sizeof(_nodeID) );
+}
+
+
+
+
 
 
 

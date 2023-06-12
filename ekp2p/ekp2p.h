@@ -4,7 +4,12 @@
 
 #include <iostream>
 #include <arpa/inet.h>
+#include <sys/_types/_int64_t.h>
 #include <sys/socket.h>
+
+
+constexpr unsigned short DEFAULT_BIND_PORT = 8080;
+
 
 
 namespace ekp2p{
@@ -13,8 +18,7 @@ class InbandNetworkManager;
 class KRoutingTable;
 
 
-
-class EKP2P
+class EKP2P // 基本的にNAT超え後はそのSocketManagerを使い回し続ける必要がありそう
 {
 
 private:
@@ -26,9 +30,11 @@ private:
 public:
 
 	EKP2P( KRoutingTable *baseKRoutingTable = nullptr );
-	
-	void init();
-	void start( unsigned short port , int type );
+	 
+	void init(); // KRoutingTableを使うのであれば必須 自身のグローバルアドレスを取得する
+
+	/* 複数portoを監視することも可能だが,NodeIDが変わる 初回監視ポートのみ相手に通知される -> 複数起動できるメリットはない　*/
+	void start( unsigned short port , int type ); // 通常とちらか一つのポート&一つのプロトコル
 
 	//bool startMonitor( unsigned short port );
 

@@ -22,16 +22,23 @@
 namespace ekp2p{
 
 
-BaseInbandManager::BaseInbandManager()
+BaseInbandManager::BaseInbandManager( SocketManager *setupedSocketManager )
 {
-	_socketManager = new SocketManager;
+	if( setupedSocketManager == nullptr )
+		_socketManager = new SocketManager;
+
+	_socketManager = setupedSocketManager;
+
+
+	_messageHandler = DefaultMessageHandler; // デフォルトハンドラの設定
+
 };
 
 
 BaseInbandManager::~BaseInbandManager()
 {
-	_messageHandler = DefaultMessageHandler;
-	delete _socketManager;
+	// setupedSocketManagerがセットされている場合破棄されては困る
+	//delete _socketManager;
 };
 
 	// 実行中のスレッドを全て停止させる };
@@ -42,6 +49,13 @@ BaseInbandManager::~BaseInbandManager()
 SocketManager *BaseInbandManager::socketManager()
 {
 	return _socketManager;
+}
+
+
+
+void BaseInbandManager::socketManager( SocketManager *socketManager )
+{
+	_socketManager = socketManager;
 }
 
 
@@ -77,9 +91,10 @@ void *BaseInbandManager::handlerArg()
 
 
 
-
+// socketManagerがノンブロッキングに設定されていると結果を即座に返す
 bool UDPInbandManager::standAlone( void *ioArg , bool allowEmpty )
 {
+	_handlerArg = ioArg;
 	
 	int messageHandlerFlag;
 	struct sockaddr_in peerAddr;
@@ -91,35 +106,35 @@ bool UDPInbandManager::standAlone( void *ioArg , bool allowEmpty )
 	int recvLen = 0;
 
 
-
 	for(;;){
 		// message_handlerが指定の値を返したら処理を終了する	
 		
-		if( (header = GetOutMSGHeader( _socketManager->sock()) ) == nullptr ) continue; // 内部でバリデーシィオンも行う
+		header = GetOutMSGHeader( _socketManager->sock()); // 取り出しに失敗したらheader == nullptr 
 
-		rawMSGSize = header->headerBodySize();
+		if( header == nullptr && !(allowEmpty)) continue;
+		else if( header == nullptr && allowEmpty ){ //  メッセージ受信を空でも許可する場合
+			messageHandlerFlag = _messageHandler( (void *)this, nullptr );
+			continue;
+		}
+
+
+		rawMSGSize = header->rawMSGSize();
 		rawMSG = new unsigned char[ rawMSGSize ];
 		delete header; // ヘッダーはメッセージ到達用 // これ以降は不要
 
-		if ( (recvLen = recvfrom( _socketManager->sock(), rawMSG , rawMSGSize , 0 , (struct sockaddr *)&peerAddr , &peerAddrLen ))  < 0 ){ 
-			// 正しくデータを取得できなかった場合
-			if( errno == EWOULDBLOCK || errno == EAGAIN )	{
-				if( !allowEmpty ) continue;
-			}
-			else
-			{
+		if ( (recvLen = recvfrom( _socketManager->sock(), rawMSG , rawMSGSize , 0 , (struct sockaddr *)&peerAddr , &peerAddrLen ))  < 0 )
+		{ // 正しくデータを取得できなかった場合	
 				delete rawMSG;
 				continue; // 取得できなかったら飛ばす
-			}
 		}
-						
-		EKP2PMSG *structedMSG = new EKP2PMSG;
-		structedMSG->toMSG( rawMSG , rawMSGSize );	delete rawMSG; // ヘッダーの処理も内部で行われる
+
+		EKP2PMSG *msg = new EKP2PMSG;
+		msg->toStructedMSG( rawMSG , rawMSGSize );	delete rawMSG; // ヘッダーの処理も内部で行われる
 	
-		messageHandlerFlag = _messageHandler( (void*)this, structedMSG ); // バッファが空になるまで繰り返す
+		messageHandlerFlag = _messageHandler( (void*)this, msg ); // バッファが空になるまで繰り返す
 		if( messageHandlerFlag != 0 ) break;
 
-		delete structedMSG;
+		delete msg;
 	}
 
 	return true;
@@ -129,13 +144,15 @@ bool UDPInbandManager::standAlone( void *ioArg , bool allowEmpty )
 
 
 // tableの更新処理もここに書く？
-bool InbandNetworkManager::start( unsigned short targetPort , int type  )
+bool InbandNetworkManager::start( unsigned short targetPort , int type , SocketManager *setupedSocketManager )
 {
 
 	if( type == 0 )
 	{
+		UDPInbandManager *udpInbandManager = new UDPInbandManager( setupedSocketManager );
 
-		UDPInbandManager *udpInbandManager = new UDPInbandManager;
+		
+
 		// ここでudnInbandManagerをbind状態に移行する
 		// if( udpInbandManager->monitorSetup() < 0 ) return false;
 
@@ -162,7 +179,7 @@ bool InbandNetworkManager::start( unsigned short targetPort , int type  )
 						// 受信したデータセグメントが指定のフォーマットではなかった場合
 						if( (header = udpInbandManager->GetOutMSGHeader( udpInbandManager->socketManager()->sock()) ) == nullptr ) continue;
 
-						rawMSGSize = header->headerBodySize();
+						rawMSGSize = header->rawMSGSize();
 						rawMSG = new unsigned char[ rawMSGSize ];
 						delete header; // ヘッダーはメッセージ到達用 // これ以降は不要
 
@@ -173,7 +190,7 @@ bool InbandNetworkManager::start( unsigned short targetPort , int type  )
 						}
 						
 						EKP2PMSG *structedMSG = new EKP2PMSG;
-						structedMSG->toMSG( rawMSG , rawMSGSize );	delete rawMSG;
+						structedMSG->toStructedMSG( rawMSG , rawMSGSize );	delete rawMSG;
 
 						udpInbandManager->_messageHandler( (void *)this , structedMSG ); // 関数抜けるとメッセージは削除される
 																																																							// 関数内部で別領域に移動させる必要がある
@@ -213,6 +230,10 @@ MSGHeader *UDPInbandManager::GetOutMSGHeader( int sock )
 	int recvSize = 0;
 	int msgLen;
 
+	/*
+	　ノンブロッキングかどうか判断する
+	*/
+
 	if(  (recvSize = recvfrom( sock , header->headerBody() , sizeof( struct MSGHeader::HeaderBody ), MSG_PEEK , NULL, NULL ))  < 0 )
 	{
 		delete header;
@@ -220,8 +241,9 @@ MSGHeader *UDPInbandManager::GetOutMSGHeader( int sock )
 	}
 
 
+
 	// 受信したデータセグメントの検証
-	if( !(BaseInbandManager::ValidateMSGHeader( header )) )
+	if( !(BaseInbandManager::ValidateMSGHeader( header )) ) // ヘッダーの内容が不正だったら
 	{
 		// データセグメントを破棄する
 		recvfrom( sock , NULL, 0 , 0 , NULL , NULL );
@@ -232,7 +254,6 @@ MSGHeader *UDPInbandManager::GetOutMSGHeader( int sock )
 
 	return header;
 }
-
 
 
 

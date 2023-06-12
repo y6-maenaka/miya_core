@@ -3,15 +3,16 @@
 
 
 #include <bitset>
-#include "./k_routing_table.h"
+// #include "./k_routing_table.h"
 #include "../../shared_components/hash/sha_hash.h"
-
+#include <arpa/inet.h>
 
 
 namespace ekp2p{
 
 
 
+class KAddr;
 
 /*
 BitSet_160 *CalsNodeID( unsigned char* ip );
@@ -56,28 +57,8 @@ BitSet_160* CalcNodeID( unsigned char *ip ){
 
 
 
-void calcNodeID( sockaddr_in *targetAddr ,unsigned char **ret )
-{
-
-	struct
-	{
-		unsigned char _ipv4[ sizeof( in_addr::s_addr ) ];
-		unsigned char _port[ sizeof( sockaddr_in::sin_port) ];
-		
-	} inAddr ;
-	
-	memcpy( &inAddr._ipv4 , &targetAddr->sin_addr.s_addr , sizeof( inAddr._ipv4 ) );
-	memcpy( &inAddr._port , &targetAddr->sin_port , sizeof( inAddr._port ) );
-
-	// ハッシュする
-	*ret = hash::SHAHash( (unsigned char*)&inAddr , sizeof(inAddr), "SHA1" );
-
-}
-
-
-
-
-
+unsigned int calcNodeID( sockaddr_in *targetAddr ,unsigned char **ret );
+unsigned int calcNodeID( KAddr *targetKAddr, unsigned char **ret );
 
 } // close ekp2p namespace
 
