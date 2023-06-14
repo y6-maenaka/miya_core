@@ -30,7 +30,7 @@ TableWrapper::~TableWrapper(){
 
 
 
-void TableWrapper::startThread()
+void TableWrapper::start()
 {
 	std::thread wrapperThread( [&](){
 
@@ -63,7 +63,7 @@ void TableWrapper::startThread()
 
 
 
-void TableWrapper::joinThread()
+void TableWrapper::stop()
 {
 				/*
 	if( _wrapperThread.joinable() )	{

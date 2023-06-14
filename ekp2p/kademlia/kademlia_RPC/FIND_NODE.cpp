@@ -63,25 +63,19 @@ void RequestFIND_NODE( unsigned char *nodeID , sockaddr_in *bootstrapNodeAddr  )
 
 
 
-unsigned int GenerateRawRPCQuery_FIND_NODE( unsigned char *NodeID , unsigned char **ret )
+unsigned int GenerateRawRPCQuery_FIND_NODE( KAddr *kAddr , unsigned char **ret )
 {
 
-	EKP2PMSG rpcFIND_NODE_MSG;
-	//MSGHeader *rpcFIND_NODE_MSGHeader;
+
 	
-	KTag kTag; // 自身のアドレスとノードIDを添付する
-	KAddr kaddr; // 自身のアドレスを格納してkTagにadd()する
+	KTag kTag( kAddr ); // 自身のkアドレスをセットしたKAddrの作成
 	kTag.protocol( static_cast<int>(KADEMLIA_RPC::FIND_NODE) );
-
-	// message操作	
-	rpcFIND_NODE_MSG.payload( nullptr , 0 ); // 内部でheaderも作成される	
-
-
-	//rpcFIND_NODE_MSGHeader = rpcFIND_NODE_MSG->header();
+	
+					
+	EKP2PMSG msg;
+	msg->kTag( &kTag );
 
 
-	unsigned int retSize;	
-	retSize = rpcFIND_NODE_MSG.exportRaw( ret );
 
 	return retSize;
 }

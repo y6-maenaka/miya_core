@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <mutex>
 #include <condition_variable>
+#include <vector>
 // AwaikeThread
 
 namespace ekp2p{
@@ -31,6 +32,7 @@ struct ReplacementThreadArgs
 		this->waitTime = _waitTime;
 	}
 };
+
 
 
 
@@ -78,6 +80,8 @@ struct NodeListElem {
 
 
 
+
+
 class NodeList{
 
 private:
@@ -106,8 +110,9 @@ public:
 
 	void toRear( NodeListElem* targetElem );
 	
-	std::vector<Node*> *exportNodeList(); // getter
-																						
+	//std::vector<Node*> *exportNodeList(); // getter
+	std::vector< Node* > *exportNodeVector(); 
+
 	void show_Test();
 };
 
@@ -122,7 +127,7 @@ public:
 class KBucket{
 
 private:	
-	unsigned short _branch;
+	unsigned short _branch; // ブランチ(0-160)
 	std::mutex _mtx;
 	std::condition_variable _cv;
 
@@ -147,6 +152,8 @@ public:
 
 	void StartReplacementThread( NodeListElem *targetElem ,  Node *candidateNode , unsigned int waitTime = 10 );
 	friend void* ReplacementThread( void* args );
+
+	std::vector< Node* >  *exportNodeVector();
 };
 
 

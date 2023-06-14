@@ -13,7 +13,10 @@
 
 namespace ekp2p{
 
- 
+
+using	ActiveKBucketMap = std::map< unsigned short , KBucket* >;
+
+
 
 
 /* ======================================================================= */
@@ -37,6 +40,7 @@ bool KRoutingTable::init( sockaddr_in *globalAddr )
 		2, wrapperの起動
 	 */
 
+	// ルーティングテーブルを使用するならTableWrapperの起動は必須
 	_Wrapper._wrapper = new TableWrapper(10000, this); // BufferSize + hostKRoutingTable
 	_Wrapper._wrapper->startThread();  // wrapperの起動　 
 
@@ -164,7 +168,8 @@ void KRoutingTable::TEST_showAllBucket()
 
 
 
-unsigned char* KRoutingTable::NodeID(){ // getter
+unsigned char* KRoutingTable::NodeID()
+{ // getter
 	return _kAddr->_nodeID;
 }
 
@@ -174,9 +179,11 @@ unsigned char* KRoutingTable::NodeID(){ // getter
 
 std::map< unsigned short, KBucket* > *KRoutingTable::ActiveKBucketList()
 {																														 
+
 	KBucket* bucket;
 	std::map< unsigned short, KBucket* > *activeKBucketList = new std::map<unsigned short , KBucket*>;
 	// branch( unsigned short ) , bucket( KBucket )
+	
 
 	for( int i=0; i < K_BUCKET_SIZE ; i++)
 	{
@@ -185,6 +192,7 @@ std::map< unsigned short, KBucket* > *KRoutingTable::ActiveKBucketList()
 		
 		(*activeKBucketList)[i] = bucket;
 	}	
+
 	
 	return activeKBucketList;
 }
@@ -192,41 +200,75 @@ std::map< unsigned short, KBucket* > *KRoutingTable::ActiveKBucketList()
 
 
 
-/*
-std::vector<Node*> *KRoutingTable::closestNodeList( unsigned short maxCnt , Node* baseNode )
+
+std::vector<Node*> *KRoutingTable::closestNodeVector( unsigned short maxCnt , Node* baseNode )
 {
 
-	unsigned short baseBranch = baseNode->calcBranch( _nodeID ); // baseNodeのブランチを確定する
-																															 
-	// 既存のバケットリストの回収	
+	unsigned short baseBranch = baseNode->calcBranch(_kAddr->nodeID() ); // baseNodeのブランチを確定する
+																													
+
 	std::map< unsigned short, KBucket *> *activeKBucketList;	
+	// 既存のバケットリストの取得
 	if( (activeKBucketList = ActiveKBucketList()) == nullptr || activeKBucketList->size() <= 0 ) return nullptr; // 空もしくは中身がなければ即リターン
 
-	std::vector< Node*> *closestNodeList = new std::vector< Node*>; // closestNodeListの作成
-																																
+	std::vector< Node*> *closestNodeVector = new std::vector< Node*>; // closestNodeListの作成
+	
+
 	// 中心のバケットを探す	
 	// ここでは簡単に,base以上のバケットを中央とする ※要変更
-	std::map< unsigned short, KBucket*>::itr = activeKBucketList->lower_bound( baseNode ); // キー以上の最も近い要素を獲得する
-	if( itr == activeKBucketList->end() ) itr--; // 要素が見つからなければ一つ前の要素を中央とする
+	std::map< unsigned short ,KBucket *>::iterator centerItr = activeKBucketList->lower_bound( baseBranch ); // キー以上の最も近い要素を獲得する
+	std::map< unsigned short ,KBucket *>::iterator leftItr = centerItr;
+	std::map< unsigned short ,KBucket *>::iterator rightItr = centerItr;
 
 
-	auto rippleSearch( bool isboundaryReached = false )
+	std::vector< Node* > *targetKBucketNodeVector; 
+	std::map< unsigned short , KBucket * >::iterator currentItr = centerItr;
+	bool reachedHead = false, reachedTail = false;
+
+
+	auto rippleSearch = [&]() // 波紋探索
 	{
-		closestNodeList.push_back( (itr.second)->count() );
-
-		// 取り出し
-		while( itr.second() || closestNodeList->size() < maxCnt )
+		targetKBucketNodeVector = (currentItr->second)->exportNodeVector(); // ターゲットバケット内のノードの取得
+		for( auto itr = targetKBucketNodeVector->begin() ; itr != targetKBucketNodeVector->end() ; itr++ )
 		{
-
+			closestNodeVector->push_back( *itr ); // ターゲットバケット内のノードの追加
+			if( closestNodeVector->size() >= maxCnt ) return;
 		}
-		
 
-		
-	}
 
-	return nullptr;
+		if( reachedHead && !reachedTail )	 // 先頭に達したら
+		{
+			currentItr = rightItr++;
+		}
+		else if( !reachedHead && reachedTail )  // 最後尾に達したら
+		{ 
+			currentItr = leftItr++;
+		}
+		else if( !reachedHead && !reachedTail ) // どちらも端に達していない場合
+		{
+			currentItr = (pow( centerItr->first - leftItr->first , 2 ) < pow( centerItr->first - rightItr->first , 2)) ? leftItr-- : rightItr++;
+		}
+		else // 先頭かつ最後尾に達したら
+		{
+			return;
+		}
+
+		if( currentItr == activeKBucketList->begin() ) reachedHead = true;
+		if( currentItr == std::prev(activeKBucketList->end()) ) reachedTail = true;
+	};
+
+
+	return closestNodeVector;
 }
-*/
+
+
+
+
+unsigned char* KRoutingTable::nodeID()
+{
+	return _kAddr->nodeID();
+}
+
 
 
 }; // close ekp2p namespace 

@@ -45,8 +45,8 @@ public:
 	void PONGHandler( Node *targetNode );
 	void FIND_NODEHandler( Node* targetNode  , int requestSize );
 
-	void startThread();
-	void joinThread();
+	void start();
+	void stop();
 
 	MiddleBuffer *monitorBuffer();
 

@@ -33,6 +33,9 @@ KTag::KTagMeta::KTagMeta() : KAddrCnt(0)
 
 
 
+
+
+
 KTag::KTag(){
 	return;
 }
@@ -153,7 +156,7 @@ KAddr::KAddr(){
 
 	// zero clear
 	_inAddr._ipv4 = htonl(0);
-	_inAddr._port = htons( 0 );
+	_inAddr._port = htons(0);
 }
 
 

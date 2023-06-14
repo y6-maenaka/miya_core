@@ -87,7 +87,10 @@ public:
 	std::map< unsigned short, KBucket* > *ActiveKBucketList(); // getter
 	
 	std::vector< Node *> *nodeIterationList( unsigned short maxCnt  , Node* baseNode );  
-	std::vector<Node*> *closestNodeList( unsigned short maxCnt , Node* baseNode ); // baseNodeに近い順にノードリストが作成される
+	std::vector<Node*> *closestNodeVector( unsigned short maxCnt , Node* baseNode ); // baseNodeに近い順にノードリストが作成される
+
+	unsigned char* nodeID(); // getter
+
 };
 
 

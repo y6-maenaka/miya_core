@@ -225,13 +225,12 @@ unsigned short NodeList::count()
 };
 
 
-std::vector<Node *> *NodeList::exportNodeList()
+std::vector<Node *> *NodeList::exportNodeVector()
 {
 	if( _front == NULL ) return NULL;
 
 	NodeListElem *pos = _front;
 	std::vector<Node*> *nodeList = new std::vector<Node*>;	
-
 
 	do{
 		nodeList->push_back( pos->node() );
@@ -454,8 +453,10 @@ void* ReplacementThread( void* args )
 
 
 
-
-
+std::vector< Node* > *KBucket::exportNodeVector()
+{
+	return _nodeList->exportNodeVector();
+}
 
 
 
