@@ -19,12 +19,13 @@
 
 
 #include "openssl/crypto.h"
-#include "../network/outband/node_outband.h"
+// #include "../network/outband/node_outband.h"
 
 
 namespace ekp2p{
 
 struct KAddr;
+struct KTag;
 class SocketManager;
 // class EKP2P;
 
@@ -38,7 +39,7 @@ constexpr int BIT_PER_BYTES = 8;
 
 
 
-class Node : public NodeOutband {
+class Node{
 private:
 	// unsigned char* _ip;
 	//unsigned long _ip;
@@ -75,6 +76,9 @@ public:
 	bool SendPING();
 	bool SendPONG();
 	bool SendFIND_NODE();
+
+	int send( unsigned char *payload , unsigned int payloadSize , KTag *kTag );
+	int send( unsigned char *msg , unsigned int msgSize );
 
 	KAddr* kAddr(); // getter
 };

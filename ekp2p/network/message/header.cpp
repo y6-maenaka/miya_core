@@ -18,6 +18,8 @@ MSGHeader::MSGHeader()
 
 MSGHeader::MSGHeader(  unsigned int payloadSize , unsigned int kTagSize , char* extra ){
 	std::cout << "Message Header Generated"	 << "\n";
+	memcpy( &(this->_body.StartString) , &(MSG_StartString) , sizeof(MSG_StartString) );
+	memcpy( &(this->_body.EndString) , &(MSG_EndString), sizeof(MSG_EndString) );
 
 	_body.PayloadSize = htonl( payloadSize );
 	_body.KTagSize = htonl( kTagSize );

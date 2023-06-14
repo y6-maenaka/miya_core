@@ -34,7 +34,7 @@ add_library( EKP2P STATIC
 						 network/nat/stun_message_handler.cpp
 						 
 
-						 network/outband/node_outband.cpp
+						 #network/outband/node_outband.cpp
 
 						 network/socket_manager/socket_manager.cpp
 

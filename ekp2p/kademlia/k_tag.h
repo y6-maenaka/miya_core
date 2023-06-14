@@ -18,6 +18,7 @@ class Node;
 class SocketManager;
 
 
+using KAddrVector = std::vector< KAddr* >;
 
 
 struct KTag{
@@ -43,6 +44,7 @@ struct KTag{
 	void importRaw( void* rawKTag , unsigned int kTagSize );
 
 	KTag();
+	KTag( KAddr *targetKAddr ); // import from kaddr
 	KTag( void* rawKTag, unsigned int kTagSize );  // set kTag elements from raw k_tag
 
 	unsigned char *generatePINGMSG();
@@ -52,7 +54,13 @@ struct KTag{
 
 	void addKAddr( KAddr *kAddr ); // setter
 	void addKAddr( Node *node ); // setter
+	void addKAddrBatch( std::vector< Node*> *nodeVector );
+
+	std::vector< KAddr* > *kAddrVector();
 };
+
+
+
 
 
 
@@ -72,7 +80,7 @@ struct KAddr
 	
 	KAddr();
 	KAddr( sockaddr_in *addr );
-	Node* toNode( SocketManager *socketManager = NULL );	// socketManagerを登録していないとこのノードに対してデータを送信することができない
+	Node* toNode( SocketManager *socketManager = nullptr );	// socketManagerを登録していないとこのノードに対してデータを送信することができない
 	unsigned char *nodeID(); // getter
 	void nodeID( unsigned char *nodeID );
 

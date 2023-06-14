@@ -14,6 +14,14 @@ EKP2PMSG::EKP2PMSG(){
 }
 
 
+
+EKP2PMSG::~EKP2PMSG()
+{
+	if( _payload != nullptr ) delete _payload;
+	if( _kTag != nullptr ) delete _kTag;
+}
+
+
 /*
 // raw to structure
 EKP2PMSG::EKP2PMSG( unsigned char* rawMSG ,unsigned int MSGSize ){
@@ -89,16 +97,21 @@ MSGHeader* EKP2PMSG::header() // getter
 /* PAYLOAD */
 void EKP2PMSG::payload( void* payload, unsigned int payloadSize )
 {
-	if( payloadSize <= 0 ){
+	if( _header == nullptr ){ // もしくはエラー返却にするか？
+		_header = new MSGHeader;		
+	}
+
+	if( payloadSize <= 0 || payload == nullptr ){
 		_header->payloadSize(0);
 		return;
 	}
 
-	_payload = payload;
- 
-	if( _header != NULL ) // header NULL -> Error
-		_header->payloadSize( payloadSize );
+	_payload = payload; 
+	_header->payloadSize( payloadSize );
+
 }
+
+
 
 
 void* EKP2PMSG::payload()
@@ -111,10 +124,15 @@ void* EKP2PMSG::payload()
 
 
 /* KTAG */
-void EKP2PMSG::kTag( KTag* kTag  )
+void EKP2PMSG::kTag( KTag* kTag  ) // setter
 {
+	if( _header == nullptr ){ // もしくはエラー返却にするか？
+		_header = new MSGHeader;
+	}
+
+	if( kTag == nullptr ) return;
+
 	_kTag = kTag;
-	// _kTag = new KTag( kTag, kTagSize );
 
 	return;
 }

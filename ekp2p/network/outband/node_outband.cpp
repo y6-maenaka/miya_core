@@ -21,20 +21,30 @@ int NodeOutband::send( unsigned char* payload, unsigned int payloadSize , KTag* 
 	int sendSize =  -1;	
 
 	EKP2PMSG msg;
-	MSGHeader header;
+	msg.payload( payload , payloadSize ); // payloadがnullptrでもうまくやってくれる
+	msg.kTag( kTag ); // kTagがnullptrでもうまくやってくれる
 
-	msg.header( &header );
-	msg.payload( payload , payloadSize );
-	msg.kTag( kTag  );
+	unsigned char *rawMSG; unsigned int rawMSGSize;
+	rawMSGSize = msg.exportRaw( &rawMSG );
 
-	unsigned char* exportedRawMSG;
-	unsigned int exportedRawMSGSize = 0;
+	sendSize = socketManager->send( rawMSG , rawMSGSize );
 
-	exportedRawMSGSize = msg.exportRaw( &exportedRawMSG );
+	return sendSize;
+}
 
-	sendSize = socketManager->send( exportedRawMSG, exportedRawMSGSize  );
 
-	free( exportedRawMSG );
+
+
+int NodeOutband::send( unsigned char* msg , unsigned int msgSize, SocketManager *socketManager )
+{
+	if( socketManager == nullptr ){
+		std::cout << " socket Manager not seted" << "\n";
+		return -1;
+	}
+
+	
+	int sendSize = -1;
+	sendSize = socketManager->send( msg , msgSize );
 
 	return sendSize;
 }

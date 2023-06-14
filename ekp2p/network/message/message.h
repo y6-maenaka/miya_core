@@ -23,6 +23,8 @@ private:
 public:
 
 	EKP2PMSG();
+	~EKP2PMSG();
+	
 	// EKP2PMSG( unsigned char* rawMSG , unsigned int MSGSize ); // ある程度前処理がされていることが前提のコンストラクタ
 	// ~EKP2PMSG();
 	

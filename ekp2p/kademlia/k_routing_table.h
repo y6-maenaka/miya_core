@@ -36,6 +36,8 @@ class TableWrapper;
 struct KAddr;
 
 
+using	ActiveKBucketMap = std::map< unsigned short , KBucket* >;
+
 
 
 
@@ -56,7 +58,7 @@ private:
 
 	
 	//unsigned char* _nodeID = nullptr;
-	KAddr *_kAddr;
+	KAddr *_selfAddr;
 
 protected:
 	//void setupRoutingTable( sockaddr_in *globalAddr ); // 可変長引数でbootstrapNodeをもらう

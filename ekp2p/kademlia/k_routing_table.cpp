@@ -14,7 +14,6 @@
 namespace ekp2p{
 
 
-using	ActiveKBucketMap = std::map< unsigned short , KBucket* >;
 
 
 
@@ -42,7 +41,7 @@ bool KRoutingTable::init( sockaddr_in *globalAddr )
 
 	// ルーティングテーブルを使用するならTableWrapperの起動は必須
 	_Wrapper._wrapper = new TableWrapper(10000, this); // BufferSize + hostKRoutingTable
-	_Wrapper._wrapper->startThread();  // wrapperの起動　 
+	_Wrapper._wrapper->start();  // wrapperの起動　 
 
 
 	// NodeIDの算出

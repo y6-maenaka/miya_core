@@ -3,10 +3,10 @@
 #include "./kademlia_rpc_protocol_map.h"
 
 #include "../node.h"
+#include "../k_routing_table.h"
 #include "../k_tag.h"
 #include "../k_bucket.h"
 #include "../common.h"
-
 
 #include "../../network/message/message.h"
 
@@ -20,7 +20,8 @@
 namespace ekp2p{
 
 
-
+EKP2PMSG *GenerateRawRPCMSG_FIND_NODE( KAddr *kAddr );
+void RequestRPC_FIND_NODE( Node *bootstrapNode, KAddr *selfKAddr );
 
 
 
@@ -63,39 +64,65 @@ void RequestFIND_NODE( unsigned char *nodeID , sockaddr_in *bootstrapNodeAddr  )
 
 
 
-unsigned int GenerateRawRPCQuery_FIND_NODE( KAddr *kAddr , unsigned char **ret )
+EKP2PMSG* GenerateRawRPCMSG_FIND_NODE( KAddr *selfKAddr )
 {
-
-
 	
-	KTag kTag( kAddr ); // 自身のkアドレスをセットしたKAddrの作成
-	kTag.protocol( static_cast<int>(KADEMLIA_RPC::FIND_NODE) );
-	
+	KTag *retKTag = new KTag( selfKAddr ); // 自身のKアドレスをセットしたKAddrの作成
+	retKTag->protocol( static_cast<int>(KADEMLIA_RPC::FIND_NODE));
+
 					
-	EKP2PMSG msg;
-	msg->kTag( &kTag );
+	EKP2PMSG *retMSG = new EKP2PMSG;
+	retMSG->kTag( retKTag );
 
 
-
-	return retSize;
+	return retMSG;
 }
 
 
 
 
 
-void RequestRPC_FIND_NODE()
+void RequestRPC_FIND_NODE( Node *bootstrapNode, KAddr *selfKAddr )
+{
+	EKP2PMSG *msg;
+	msg = GenerateRawRPCMSG_FIND_NODE( selfKAddr );
+
+	unsigned char* rawMSG; unsigned int rawMSGSize;
+	rawMSGSize = msg->exportRaw( &rawMSG );
+
+	bootstrapNode->send( rawMSG , rawMSGSize );
+}
+
+
+
+
+void TableWrapper::FIND_NODEHandler( KTag *findNodeQueryKTag , Node* querySourceNode )
 {
 
+	/*
+	 1, FIND_NODEの受信
+	 2, BaseNodeの取り出し
+	 3, ClosestNodeの収集
+	 4, ClosestNodeの送信
+	 */
+
+	// 不正なクエリが紛れ込んでいたら
+	if( findNodeQueryKTag->protocol() != static_cast<int>(KADEMLIA_PROTOCOL::FIND_NODE) ) return;
+
+
+	//KAddrVector *sourceKAddr;
+	std::vector< KAddr *> *sourceKAddr;
+	sourceKAddr = findNodeQueryKTag->kAddrVector();
+
+	std::vector< Node* > *closestNodeVector;
+	closestNodeVector = _hostTable->closestNodeVector( 5 , sourceKAddr->at(0)->toNode() );
+
+	KTag *responseKTag;
+	responseKTag->addKAddrBatch( closestNodeVector );
+
+	querySourceNode->send( nullptr, 0 , responseKTag );
+	
 }
-
-
-
-bool ResponseRPC_FIND_NODE()
-{
-	return false;
-}
-
 
 
 

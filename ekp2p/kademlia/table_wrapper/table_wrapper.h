@@ -44,6 +44,7 @@ public:
 	void PINGHandler( Node *targetNode );
 	void PONGHandler( Node *targetNode );
 	void FIND_NODEHandler( Node* targetNode  , int requestSize );
+	void FIND_NODEHandler( KTag* findNodeQueryKTag , Node *querySourceNode );
 
 	void start();
 	void stop();

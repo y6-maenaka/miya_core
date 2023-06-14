@@ -26,7 +26,10 @@ struct RequesterAddr
 
 
 
-// サーバ用
+
+
+
+
 
 struct StunRequest{
 	
@@ -34,6 +37,9 @@ struct StunRequest{
 	const int16_t _message_length = htons( 0x0000 );
 
 } __attribute__((__packed__));
+
+
+
 
 
 

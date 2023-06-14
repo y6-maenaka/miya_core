@@ -46,9 +46,14 @@ KTag::KTag(){
 
 KTag::KTag( void* rawKTag, unsigned int kTagSize ){
 	importRaw( rawKTag , kTagSize ); // 取り込み
-
 };
 
+
+
+KTag::KTag( KAddr *targetKAddr )
+{
+	addKAddr( targetKAddr );
+}
 
 
 
@@ -118,20 +123,34 @@ unsigned short KTag::protocol(){
 void KTag::addKAddr( KAddr *kAddr )
 {
 	_kAddrList.push_back( kAddr );
-	_KTagMeta.KAddrCnt += 1;
+	//_KTagMeta.KAddrCnt += 1;
+	_KTagMeta.KAddrCnt = _kAddrList.size();
 }
 
 
 
-void KTag::addKAddr( Node *node ){
+void KTag::addKAddr( Node *node )
+{
+	addKAddr( node->kAddr() );
+}
 
-	_kAddrList.push_back( node->kAddr() ); 
-	_KTagMeta.KAddrCnt += 1;
+
+
+void KTag::addKAddrBatch( std::vector< Node*> *nodeVector )
+{
+	for( auto itr : nodeVector )
+	{
+		addKAddr( itr );
+	}
 }
 
 
 
 
+std::vector< KAddr* > *KTag::kAddrVector()
+{
+	return _kAddrList;
+}
 
 
 
