@@ -149,7 +149,7 @@ bool Node::SendPING()
 	kTag->protocol( 2 );
 
 	// PINGMSGのみだからpayloadはなし
-	send( NULL , 0 , kTag , this->_leastSocketManager );
+	send( nullptr , 0 , kTag );
 	
 
 	delete kTag;
@@ -163,7 +163,7 @@ bool Node::SendPONG()
 	KTag *kTag = new KTag;
 	kTag->protocol( 3 );
 
-	send( NULL , 0 , kTag, this->_leastSocketManager );
+	send( NULL , 0 , kTag );
 
 	delete kTag;
 	return true;
@@ -176,7 +176,7 @@ bool Node::SendFIND_NODE()
 	kTag->addKAddr( _kAddr ); // 自身のkAddrを追加
 	kTag->protocol( 4 );
 
-	send( NULL , 0 , kTag , this->_leastSocketManager );
+	send( NULL , 0 , kTag );
 
 	delete kTag;
 	return true;

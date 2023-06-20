@@ -4,6 +4,8 @@
 #include <iostream>
 
 #include <sys/socket.h>
+#include <sys/types.h>
+
 #include <arpa/inet.h>
 #include <string.h>
 
@@ -41,6 +43,8 @@ public:
 	
 	void toBlockingSocket();
 	void toNonBlockingSocket();
+
+	int sockType();
 };
 
 

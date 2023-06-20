@@ -6,10 +6,12 @@
 #include "./protocol.h"
 
 #include "../network/socket_manager/socket_manager.h"
+#include "../network/inband/inband_manager.h"
 
 #include "./table_wrapper/table_wrapper.h"
 #include "./common.h"
 
+#include "./kademlia_RPC/FIND_NODE.cpp"
 
 namespace ekp2p{
 
@@ -32,7 +34,7 @@ KRoutingTable::KRoutingTable( unsigned short maxNodeCnt ){
 
 
 
-bool KRoutingTable::init( sockaddr_in *globalAddr ) 
+bool KRoutingTable::init( sockaddr_in *globalAddr, SocketManager *baseSocketManager ) 
 {
 	/*
 		1, ルーティングテーブルのセットアップ ファイルから復帰 of FIND_NODEによるノードの集計
@@ -54,11 +56,58 @@ bool KRoutingTable::init( sockaddr_in *globalAddr )
 	}
 
 	//&(_kAddr->_nodeID) = nodeID; // nodeIDのセット
-	_kAddr->nodeID( nodeID ); // nodeIDのセット
+	_selfKAddr->nodeID( nodeID ); // nodeIDのセット
 
 	std::cout << " === NatTraversal and Get GloablAddr Successfly Done === " << "\n";
 
 	return true;
+}
+
+
+
+bool KRoutingTable::collectStartUpNodes( SocketManager *baseSocketManager )
+{
+	// この時点でTableWrapperは起動している
+
+	/* FIND_NODEクエリ送信に先駆け,inbandManagerを起動する */
+	switch( baseSocketManager->sockType() )
+	{
+		case IPPROTO_TCP:
+			std::cout << "collect startup nodes with tcp" << "\n";
+			break;
+
+		case IPPROTO_UDP:
+			UDPInbandManager inbandManager( baseSocketManager );
+			break;
+		
+		}
+
+
+
+
+
+
+	Node* bootstrapNode;
+	RequestRPC_FIND_NODE( bootstrapNode , _selfKAddr ); // ブートストラップノードにFIND_NODEを送信
+
+
+
+	
+
+
+	// [ok] bootstrapnodeに送信
+	// closestNodeの受信
+	// closestNodeにLookUPuする
+	// ここまででK個に達さなかったら
+	// さらに既存のノードにFIND_NODEを送信する
+	// 受信したノードに対してFIND_NODEする
+	// ※　差分のノード取得機構が必要
+	// ※　テーブル内のノード数の把握も必要
+
+
+	return true;
+
+	
 }
 
 
@@ -169,7 +218,7 @@ void KRoutingTable::TEST_showAllBucket()
 
 unsigned char* KRoutingTable::NodeID()
 { // getter
-	return _kAddr->_nodeID;
+	return _selfKAddr->_nodeID;
 }
 
 
@@ -181,15 +230,17 @@ std::map< unsigned short, KBucket* > *KRoutingTable::ActiveKBucketList()
 
 	KBucket* bucket;
 	std::map< unsigned short, KBucket* > *activeKBucketList = new std::map<unsigned short , KBucket*>;
-	// branch( unsigned short ) , bucket( KBucket )
-	
+	// branch( unsigned short ) , bucket( KBucket )	
 
-	for( int i=0; i < K_BUCKET_SIZE ; i++)
+	for( int i=0 , j =0; i < K_BUCKET_SIZE ; i++)
 	{
 		bucket = (*this)[i];
-		if( bucket == NULL ) continue;
+		if( bucket == nullptr ) continue;
 		
-		(*activeKBucketList)[i] = bucket;
+		// (*activeKBucketList)[j] = bucket;     j++;
+		
+		//activeKBucketList->insert( std::make_pair(i, bucket) );
+		activeKBucketList->emplace( i , bucket );
 	}	
 
 	
@@ -203,7 +254,7 @@ std::map< unsigned short, KBucket* > *KRoutingTable::ActiveKBucketList()
 std::vector<Node*> *KRoutingTable::closestNodeVector( unsigned short maxCnt , Node* baseNode )
 {
 
-	unsigned short baseBranch = baseNode->calcBranch(_kAddr->nodeID() ); // baseNodeのブランチを確定する
+	unsigned short baseBranch = baseNode->calcBranch(_selfKAddr->nodeID() ); // baseNodeのブランチを確定する
 																													
 
 	std::map< unsigned short, KBucket *> *activeKBucketList;	
@@ -265,8 +316,99 @@ std::vector<Node*> *KRoutingTable::closestNodeVector( unsigned short maxCnt , No
 
 unsigned char* KRoutingTable::nodeID()
 {
-	return _kAddr->nodeID();
+	return _selfKAddr->nodeID();
 }
+
+
+
+
+
+int KRoutingTable::nodeCount()
+{
+	std::map< unsigned short , KBucket *> *activeKBucketList;
+	if( (activeKBucketList = ActiveKBucketList()) == nullptr || activeKBucketList->size() <= 0 ) return -1; // 空もしくは中身がなければ即リターン
+
+	
+	unsigned int count = 0;
+	for( auto itr : *activeKBucketList )
+	{
+		count += itr.second->nodeList()->count();
+	}
+
+	return count;
+}
+
+
+
+
+std::vector<Node*> *KRoutingTable::selectNodeBatch( unsigned int maxCount, std::vector< Node*> *ignoreNodeVector )
+{
+				
+	std::map< unsigned short , KBucket* > *activeKBucketVector = nullptr;
+	activeKBucketVector = ActiveKBucketList();
+	std::vector< KBucket* > shuffledKBucketVector;
+
+	for( auto itr : *activeKBucketVector ) shuffledKBucketVector.push_back( itr.second ); // 各バケットの取り出し
+
+	// seedの作成
+	unsigned int 	seed = std::chrono::system_clock::now()
+														.time_since_epoch()
+														.count();
+	shuffle( shuffledKBucketVector.begin() , shuffledKBucketVector.end(), std::default_random_engine(seed) );
+	// シャッフルベクトルの作成
+
+	std::map< unsigned int , KBucket* > selectiveElemPairMap; // 累積和とKBucket ペアの作成
+	unsigned int currentCumulativeSum = 0;
+	int idx = 0;
+	for( auto itr : shuffledKBucketVector ){
+		currentCumulativeSum += itr->nodeList()->count();
+		selectiveElemPairMap[ currentCumulativeSum ] = itr;
+	}
+
+ 	//　要素数は動的な取得だが大丈夫か？	
+	unsigned int cumulativeSum = selectiveElemPairMap.rbegin()->first; // == currentCumulativeSum
+	// ランダムに取り出すためのrandomVectorを用意	
+	std::vector< unsigned int > randomVector( cumulativeSum );
+	for( int i=0; i< cumulativeSum; i++ ){
+		randomVector[i] = i;
+	} shuffle( randomVector.begin(), randomVector.end(), std::default_random_engine(seed) ); // ランダムベクタの作成
+
+
+	std::vector<Node*> *retNodeVector = new std::vector<Node*>; // 結果ベクタ
+	// 取り出しシーケンス	
+	unsigned int i = 0;
+	Node* candidateNode = nullptr;   KBucket *candidateKBucket = nullptr;
+	auto itr = randomVector.cbegin();
+	std::map< unsigned int , KBucket* >::iterator selectiveElemPairMapItr;
+
+	while( retNodeVector->size() <= maxCount || itr != randomVector.end() )
+	{
+		selectiveElemPairMapItr = selectiveElemPairMap.lower_bound( *itr ); // 一旦イテレータで受け取る
+		candidateKBucket = selectiveElemPairMapItr->second;
+		candidateNode = (*candidateKBucket)[ (*itr) % selectiveElemPairMapItr->first ];
+
+		// ignoreNodeだったら無視する
+		if( std::count( ignoreNodeVector->cbegin(), ignoreNodeVector->cend(), candidateNode ) != 0 ){
+			itr++; continue;
+		}
+
+		retNodeVector->push_back( candidateNode );
+
+		itr++;
+	}
+	
+	return retNodeVector;		
+}
+
+
+
+
+
+
+
+
+
+
 
 
 

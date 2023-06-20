@@ -44,11 +44,12 @@ void EKP2P::init()
 		std::cout << "正常なノードIDを取得できません TableWrapperの起動に失敗しました" << "\n";
 		exit(1);
 	}
-
-
+	
 	/*
 	  FIND_NODE する
 	*/
+
+	/* InbandNetworkManager を起動する */
 	std::cout << "ルーティングテーブルの初期化中... 初期ノードを集めています..." << "\n";
 
 		

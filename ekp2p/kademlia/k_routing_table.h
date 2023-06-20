@@ -7,6 +7,9 @@
 #include <map>
 #include <vector>
 #include <cmath>
+#include <algorithm>
+#include <chrono>
+#include <random>
 
 #include <stdlib.h>
 #include <arpa/inet.h>
@@ -34,9 +37,30 @@ struct KTag;
 class KBucket;
 class TableWrapper;
 struct KAddr;
+class EKP2PMSG;
 
 
 using	ActiveKBucketMap = std::map< unsigned short , KBucket* >;
+
+
+
+
+
+
+
+
+class NodeBatch
+{
+
+private:
+	std::vector< Node* > _nodesVector;
+
+public:
+	~NodeBatch();
+
+	void sendBulk( EKP2PMSG *msg );
+	void sendBulk( unsigned char* msg , unsigned int msgSize );
+};
 
 
 
@@ -58,7 +82,7 @@ private:
 
 	
 	//unsigned char* _nodeID = nullptr;
-	KAddr *_selfAddr;
+	KAddr *_selfKAddr;
 
 protected:
 	//void setupRoutingTable( sockaddr_in *globalAddr ); // 可変長引数でbootstrapNodeをもらう
@@ -71,9 +95,10 @@ public:
 	~KRoutingTable();
 	/* ekp2p( FILE );  セーブファイルからの復帰 */ 
 	// KRoutingTable( /* backup file */ ); セーブファイルから復元する場合
-
-	bool init( sockaddr_in *globalAddr ); // tablesetup + startWrapper
-	//void setupRoutingTable( unsigned char *globalAddr ); 
+	
+	// initの中にsetupを含むか？
+	bool init( sockaddr_in *globalAddr , SocketManager *baseSocketManager = nullptr ); // tablesetup + startWrapper
+	bool collectStartUpNodes( SocketManager *baseSocketManager );
 
 
 	bool update( Node* targetNode );
@@ -93,6 +118,11 @@ public:
 
 	unsigned char* nodeID(); // getter
 
+
+	int nodeCount();
+	// 処理コストが高すぎる
+	std::vector<Node*> *selectNodeBatch( unsigned int maxCount , std::vector< Node*> *ignoreNodeVector = nullptr ); // 確率で取り出す？
+	// NodeBatch *diffSelectNodeBatch( std::vector< Node* > *diffNodes ); // Tableが保有するノードの差分取り出し // 需要ある？
 };
 
 

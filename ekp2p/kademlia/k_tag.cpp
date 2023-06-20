@@ -138,7 +138,7 @@ void KTag::addKAddr( Node *node )
 
 void KTag::addKAddrBatch( std::vector< Node*> *nodeVector )
 {
-	for( auto itr : nodeVector )
+	for( auto itr : *nodeVector )
 	{
 		addKAddr( itr );
 	}
@@ -149,7 +149,7 @@ void KTag::addKAddrBatch( std::vector< Node*> *nodeVector )
 
 std::vector< KAddr* > *KTag::kAddrVector()
 {
-	return _kAddrList;
+	return &_kAddrList;
 }
 
 

@@ -86,5 +86,14 @@ void SocketManager::toNonBlockingSocket()
 }
 
 
+int SocketManager::sockType()
+
+	getsockopt( _sock , SOL_SOCKET , SO_TYPE , &opt , &optLen );
+	if( opt == -1 ) return -1;
+
+	return opt;
+}
+
+
 
 } // close ekp2p namespace 

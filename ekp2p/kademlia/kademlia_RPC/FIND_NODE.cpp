@@ -20,8 +20,8 @@
 namespace ekp2p{
 
 
-EKP2PMSG *GenerateRawRPCMSG_FIND_NODE( KAddr *kAddr );
-void RequestRPC_FIND_NODE( Node *bootstrapNode, KAddr *selfKAddr );
+EKP2PMSG *GenerateRPCMSG_FIND_NODE( KAddr *kAddr );
+bool RequestRPC_FIND_NODE( Node *bootstrapNode, KAddr *selfKAddr );
 
 
 
@@ -64,7 +64,7 @@ void RequestFIND_NODE( unsigned char *nodeID , sockaddr_in *bootstrapNodeAddr  )
 
 
 
-EKP2PMSG* GenerateRawRPCMSG_FIND_NODE( KAddr *selfKAddr )
+EKP2PMSG* GenerateRPCMSG_FIND_NODE( KAddr *selfKAddr )
 {
 	
 	KTag *retKTag = new KTag( selfKAddr ); // 自身のKアドレスをセットしたKAddrの作成
@@ -82,15 +82,17 @@ EKP2PMSG* GenerateRawRPCMSG_FIND_NODE( KAddr *selfKAddr )
 
 
 
-void RequestRPC_FIND_NODE( Node *bootstrapNode, KAddr *selfKAddr )
+bool RequestRPC_FIND_NODE( Node *bootstrapNode, KAddr *selfKAddr )
 {
 	EKP2PMSG *msg;
-	msg = GenerateRawRPCMSG_FIND_NODE( selfKAddr );
+	msg = GenerateRPCMSG_FIND_NODE( selfKAddr );
 
 	unsigned char* rawMSG; unsigned int rawMSGSize;
 	rawMSGSize = msg->exportRaw( &rawMSG );
 
-	bootstrapNode->send( rawMSG , rawMSGSize );
+	if( bootstrapNode->send( rawMSG , rawMSGSize ) > 0 ) return false;
+
+	return true;
 }
 
 
