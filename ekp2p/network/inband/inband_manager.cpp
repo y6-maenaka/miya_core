@@ -92,11 +92,9 @@ void *BaseInbandManager::handlerArg()
 
 
 // socketManagerがノンブロッキングに設定されていると結果を即座に返す
+// selectを使ったtimeout機構
 bool UDPInbandManager::standAlone( void *ioArg , bool allowEmpty )
 {
-
-	// タイムアウトの設定
-
 	_handlerArg = ioArg;
 	
 	int messageHandlerFlag;
@@ -147,10 +145,11 @@ bool UDPInbandManager::standAlone( void *ioArg , bool allowEmpty )
 
 
 // tableの更新処理もここに書く？
-bool InbandNetworkManager::start( unsigned short targetPort , int type , SocketManager *setupedSocketManager )
+bool InbandNetworkManager::start( SocketManager *setupedSocketManager )
 {
+	if( setupedSocketManager == nullptr ) return false;
 
-	if( type == 0 )
+	if( setupedSocketManager->sockType() == IPPROTO_UDP )
 	{
 		UDPInbandManager *udpInbandManager = new UDPInbandManager( setupedSocketManager );
 
@@ -209,7 +208,7 @@ bool InbandNetworkManager::start( unsigned short targetPort , int type , SocketM
 
 
 
-	else if( type == 1 )
+	else if( setupedSocketManager->sockType() == IPPROTO_TCP )
 	{
 		std::cout << "tcp thread handler start" << "\n";
 	}

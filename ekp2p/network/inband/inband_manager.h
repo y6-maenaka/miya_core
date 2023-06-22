@@ -117,7 +117,7 @@ private:
 public:
 	//friend void TCPPreHandler();
 
-	bool start( unsigned short targetPort , int type , SocketManager *setupedSocketManager = nullptr );
+	bool start( SocketManager *setupedSocketManager = nullptr );
 
 	
 };

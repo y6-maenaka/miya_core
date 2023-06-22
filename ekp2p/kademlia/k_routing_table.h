@@ -49,20 +49,6 @@ using	ActiveKBucketMap = std::map< unsigned short , KBucket* >;
 
 
 
-class NodeBulkSender
-{
-private:
-	std::vector< Node* > *_nodeVector;
-
-public:
-	NodeBulkSender( std::vector< Node* > *target ){ _nodeVector = target; };
-
-	std::vector< Node* > *nodeVector(){ return _nodeVector; }; // getter
-
-	void sendBulk( EKP2PMSG *msg );
-	void sendBulk( unsigned char* msg , unsigned int msgSize );
-};
-
 
 
 
@@ -91,6 +77,8 @@ protected:
 
 public:
 	TableWrapper *wrapper(); // getter
+	
+	KAddr* selfKAddr(); // getter
 
 	KRoutingTable( unsigned short maxNodeCnt = K_SIZE );
 	~KRoutingTable();
@@ -98,9 +86,7 @@ public:
 	// KRoutingTable( /* backup file */ ); セーブファイルから復元する場合
 	
 	// initの中にsetupを含むか？
-	bool init( sockaddr_in *globalAddr , SocketManager *baseSocketManager = nullptr ); // tablesetup + startWrapper
-	bool collectStartUpNodes( SocketManager *baseSocketManager );
-
+	bool init( sockaddr_in *globalAddr );
 
 	bool update( Node* targetNode );
 	Node* inquire( Node *targetNode ); // Nodeを与えて存在するかを確認している
@@ -122,7 +108,7 @@ public:
 
 	int nodeCount();
 	// 処理コストが高すぎる
-	std::vector<Node*> *selectNodeBatch( unsigned int maxCount , std::vector< Node*> *ignoreNodeVector = nullptr ); // 確率で取り出す？
+	std::vector<Node*> *selectNodeBatch( int maxCount , std::vector< Node*> *ignoreNodeVector = nullptr ); // 確率で取り出す？
 	// NodeBatch *diffSelectNodeBatch( std::vector< Node* > *diffNodes ); // Tableが保有するノードの差分取り出し // 需要ある？
 };
 

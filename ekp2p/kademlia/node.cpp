@@ -193,6 +193,18 @@ KAddr* Node::kAddr() // getter
 
 
 
+int Node::send( EKP2PMSG *msg )
+{
+	unsigned char* rawMSG; unsigned int rawMSGSize;
+	rawMSGSize = msg->exportRaw( &rawMSG );
+
+	unsigned int sendSize;
+	sendSize = _leastSocketManager->send( rawMSG, rawMSGSize );
+
+	delete rawMSG;
+	return sendSize;
+}
+
 
 
 int Node::send( unsigned char *payload , unsigned int payloadSize , KTag *kTag )
@@ -210,13 +222,16 @@ int Node::send( unsigned char *payload , unsigned int payloadSize , KTag *kTag )
 	msg.payload( payload , payloadSize ); // payloadがnullptrでもうまくやってくれる
 	msg.kTag( kTag ); // kTagがnullptrでもうまくやってくれる
 
+	return send( &msg );
+
+	/*	
 	unsigned char *rawMSG; unsigned int rawMSGSize;
 	rawMSGSize = msg.exportRaw( &rawMSG );
 
 	sendSize = socketManager->send( rawMSG , rawMSGSize );
 
 	return sendSize;
-
+	*/
 }
 
 

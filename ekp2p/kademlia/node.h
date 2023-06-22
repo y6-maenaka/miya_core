@@ -27,6 +27,7 @@ namespace ekp2p{
 struct KAddr;
 struct KTag;
 class SocketManager;
+class EKP2PMSG;
 // class EKP2P;
 
 // constexpr int NODE_ID_LENGTH = 20;
@@ -73,10 +74,12 @@ public:
 
 
 	/* KADEMLIA HANDLER */
-	bool SendPING();
+	bool SendPING(); // 後の統合する
 	bool SendPONG();
 	bool SendFIND_NODE();
+	bool SendKademliaRPC();
 
+	int send( EKP2PMSG *msg );
 	int send( unsigned char *payload , unsigned int payloadSize , KTag *kTag );
 	int send( unsigned char *msg , unsigned int msgSize );
 

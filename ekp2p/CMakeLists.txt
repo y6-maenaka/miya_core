@@ -35,6 +35,7 @@ add_library( EKP2P STATIC
 						 
 
 						 #network/outband/node_outband.cpp
+						 network/outband/node_broadcaster.cpp
 
 						 network/socket_manager/socket_manager.cpp
 

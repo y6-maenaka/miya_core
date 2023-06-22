@@ -9,6 +9,7 @@
 
 
 constexpr unsigned short DEFAULT_BIND_PORT = 8080;
+constexpr int DEFAULT_FIND_NODE_ROUTINE_TIMEOUT = 10;
 
 
 
@@ -16,6 +17,7 @@ namespace ekp2p{
 
 class InbandNetworkManager;
 class KRoutingTable;
+class SocketManager;
 
 
 class EKP2P // 基本的にNAT超え後はそのSocketManagerを使い回し続ける必要がありそう
@@ -32,6 +34,7 @@ public:
 	EKP2P( KRoutingTable *baseKRoutingTable = nullptr );
 	 
 	void init(); // KRoutingTableを使うのであれば必須 自身のグローバルアドレスを取得する
+	bool collectStartUpNodes( SocketManager *baseSocketManager );
 
 	/* 複数portoを監視することも可能だが,NodeIDが変わる 初回監視ポートのみ相手に通知される -> 複数起動できるメリットはない　*/
 	void start( unsigned short port , int type ); // 通常とちらか一つのポート&一つのプロトコル

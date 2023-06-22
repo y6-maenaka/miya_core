@@ -11,12 +11,10 @@
 #include "./table_wrapper/table_wrapper.h"
 #include "./common.h"
 
-#include "./kademlia_RPC/FIND_NODE.cpp"
 
 namespace ekp2p{
 
 
-constexpr int DEFAULT_FIND_NODE_ROUTINE_TIMEOUT = 10;
 
 
 /* ======================================================================= */
@@ -33,7 +31,7 @@ KRoutingTable::KRoutingTable( unsigned short maxNodeCnt ){
 
 
 
-bool KRoutingTable::init( sockaddr_in *globalAddr, SocketManager *baseSocketManager ) 
+bool KRoutingTable::init( sockaddr_in *globalAddr )
 {
 	/*
 		1, ルーティングテーブルのセットアップ ファイルから復帰 of FIND_NODEによるノードの集計
@@ -64,72 +62,6 @@ bool KRoutingTable::init( sockaddr_in *globalAddr, SocketManager *baseSocketMana
 
 
 
-bool KRoutingTable::collectStartUpNodes( SocketManager *baseSocketManager )
-{
-	// この時点でTableWrapperは起動している
-
-	BaseInbandManager *inbandManager;
-				
-	/* FIND_NODEクエリ送信に先駆け,inbandManagerを起動する */
-	switch( baseSocketManager->sockType() )
-	{
-		case IPPROTO_TCP:
-			std::cout << "collect startup nodes with tcp" << "\n";
-			break;
-
-		case IPPROTO_UDP:
-			inbandManager = static_cast<UDPInbandManager*>(new UDPInbandManager( baseSocketManager ));
-			break;	
-	}
-
-
-
-	Node* bootstrapNode;
-	RequestRPC_FIND_NODE( bootstrapNode , _selfKAddr ); // ブートストラップノードにFIND_NODEを送信
-
-
-	EKP2PMSG *msg;
-	msg = GenerateRPCMSG_FIND_NODE( _selfKAddr );
-
-	std::vector< Node* > *queryTargetNodeVector;
-	std::vector < Node* > _queriedNodeVector;
-
-	std::chrono::system_clock::time_point startTimeStamp = std::chrono::system_clock::now(); //
-	// std::chrono::system_clock::time_point currentTimeStamp;
-
-
-	while( _queriedNodeVector.size() >= 5 || (std::chrono::system_clock::now() - startTimeStamp).count() >= DEFAULT_FIND_NODE_ROUTINE_TIMEOUT  )
-	{
-		inbandManager->standAlone(); // ここでブロッキングしてしまう可能性がある
-		
-		queryTargetNodeVector = selectNodeBatch( nodeCount() , &_queriedNodeVector );
-		NodeBulkSender bulkSender( queryTargetNodeVector );
-		bulkSender.sendBulk( msg );
-
-		_queriedNodeVector.insert( _queriedNodeVector.cend() , bulkSender.nodeVector()->cbegin(), bulkSender.nodeVector()->cend() );
-
-	}
-	
-
-	delete inbandManager;
-
-	// [ok] bootstrapnodeに送信
-	// closestNodeの受信
-	// closestNodeにLookUPuする
-	// ここまででK個に達さなかったら
-	// さらに既存のノードにFIND_NODEを送信する
-	// 受信したノードに対してFIND_NODEする
-	// ※　差分のノード取得機構が必要
-	// ※　テーブル内のノード数の把握も必要
-
-
-	return true;
-
-	
-}
-
-
-
 /*
 void KRoutingTable::setupRoutingTable( sockaddr_in *globalAddr ) // Nat超えしてグローバルIPを取得する
 {
@@ -149,6 +81,10 @@ TableWrapper *KRoutingTable::wrapper(){
 
 
 
+KAddr* KRoutingTable::selfKAddr()
+{
+	return _selfKAddr;
+}
 
 
 KRoutingTable::~KRoutingTable()
@@ -359,7 +295,7 @@ int KRoutingTable::nodeCount()
 
 
 
-std::vector<Node*> *KRoutingTable::selectNodeBatch( unsigned int maxCount, std::vector< Node*> *ignoreNodeVector )
+std::vector<Node*> *KRoutingTable::selectNodeBatch( int maxCount, std::vector< Node*> *ignoreNodeVector )
 {
 				
 	std::map< unsigned short , KBucket* > *activeKBucketVector = nullptr; // アクティブなKBucketのリストを用意
@@ -398,6 +334,7 @@ std::vector<Node*> *KRoutingTable::selectNodeBatch( unsigned int maxCount, std::
 	std::map< unsigned int , KBucket* >::iterator selectiveElemPairMapItr;
 	auto itr = randomVector.cbegin();
 
+	if( maxCount < 0 ) maxCount = nodeCount();
 	while( retNodeVector->size() <= maxCount || itr != randomVector.end() ) // 指定の個数に到達するか,テーブルにそれ以上ノードがなくなったら終了
 	{
 		selectiveElemPairMapItr = selectiveElemPairMap.lower_bound( *itr ); // 一旦イテレータで受け取る
