@@ -16,8 +16,7 @@
 namespace ekp2p{
 
 
-
-
+constexpr int DEFAULT_FIND_NODE_ROUTINE_TIMEOUT = 10;
 
 
 /* ======================================================================= */
@@ -69,6 +68,8 @@ bool KRoutingTable::collectStartUpNodes( SocketManager *baseSocketManager )
 {
 	// この時点でTableWrapperは起動している
 
+	BaseInbandManager *inbandManager;
+				
 	/* FIND_NODEクエリ送信に先駆け,inbandManagerを起動する */
 	switch( baseSocketManager->sockType() )
 	{
@@ -77,13 +78,9 @@ bool KRoutingTable::collectStartUpNodes( SocketManager *baseSocketManager )
 			break;
 
 		case IPPROTO_UDP:
-			UDPInbandManager inbandManager( baseSocketManager );
-			break;
-		
-		}
-
-
-
+			inbandManager = static_cast<UDPInbandManager*>(new UDPInbandManager( baseSocketManager ));
+			break;	
+	}
 
 
 
@@ -91,9 +88,30 @@ bool KRoutingTable::collectStartUpNodes( SocketManager *baseSocketManager )
 	RequestRPC_FIND_NODE( bootstrapNode , _selfKAddr ); // ブートストラップノードにFIND_NODEを送信
 
 
+	EKP2PMSG *msg;
+	msg = GenerateRPCMSG_FIND_NODE( _selfKAddr );
 
+	std::vector< Node* > *queryTargetNodeVector;
+	std::vector < Node* > _queriedNodeVector;
+
+	std::chrono::system_clock::time_point startTimeStamp = std::chrono::system_clock::now(); //
+	// std::chrono::system_clock::time_point currentTimeStamp;
+
+
+	while( _queriedNodeVector.size() >= 5 || (std::chrono::system_clock::now() - startTimeStamp).count() >= DEFAULT_FIND_NODE_ROUTINE_TIMEOUT  )
+	{
+		inbandManager->standAlone(); // ここでブロッキングしてしまう可能性がある
+		
+		queryTargetNodeVector = selectNodeBatch( nodeCount() , &_queriedNodeVector );
+		NodeBulkSender bulkSender( queryTargetNodeVector );
+		bulkSender.sendBulk( msg );
+
+		_queriedNodeVector.insert( _queriedNodeVector.cend() , bulkSender.nodeVector()->cbegin(), bulkSender.nodeVector()->cend() );
+
+	}
 	
 
+	delete inbandManager;
 
 	// [ok] bootstrapnodeに送信
 	// closestNodeの受信
@@ -344,48 +362,47 @@ int KRoutingTable::nodeCount()
 std::vector<Node*> *KRoutingTable::selectNodeBatch( unsigned int maxCount, std::vector< Node*> *ignoreNodeVector )
 {
 				
-	std::map< unsigned short , KBucket* > *activeKBucketVector = nullptr;
+	std::map< unsigned short , KBucket* > *activeKBucketVector = nullptr; // アクティブなKBucketのリストを用意
 	activeKBucketVector = ActiveKBucketList();
-	std::vector< KBucket* > shuffledKBucketVector;
 
+	std::vector< KBucket* > shuffledKBucketVector; 
 	for( auto itr : *activeKBucketVector ) shuffledKBucketVector.push_back( itr.second ); // 各バケットの取り出し
+	// アクティブなKBucketのリストをシャッフルする
 
-	// seedの作成
 	unsigned int 	seed = std::chrono::system_clock::now()
 														.time_since_epoch()
-														.count();
-	shuffle( shuffledKBucketVector.begin() , shuffledKBucketVector.end(), std::default_random_engine(seed) );
-	// シャッフルベクトルの作成
+														.count(); // ランダムシードの作成
+	shuffle( shuffledKBucketVector.begin() , shuffledKBucketVector.end(), std::default_random_engine(seed) ); // シャッフルベクとの作成
 
 	std::map< unsigned int , KBucket* > selectiveElemPairMap; // 累積和とKBucket ペアの作成
-	unsigned int currentCumulativeSum = 0;
-	int idx = 0;
-	for( auto itr : shuffledKBucketVector ){
+	unsigned int currentCumulativeSum = 0; // 累積和
+																				 
+	for( auto itr : shuffledKBucketVector ){ // 各累積和の計算
 		currentCumulativeSum += itr->nodeList()->count();
 		selectiveElemPairMap[ currentCumulativeSum ] = itr;
 	}
 
- 	//　要素数は動的な取得だが大丈夫か？	
+ 	
 	unsigned int cumulativeSum = selectiveElemPairMap.rbegin()->first; // == currentCumulativeSum
 	// ランダムに取り出すためのrandomVectorを用意	
-	std::vector< unsigned int > randomVector( cumulativeSum );
+	std::vector< unsigned int > randomVector( cumulativeSum ); // ランダム取り出し用に,累積和分のランダム配列を用意する
 	for( int i=0; i< cumulativeSum; i++ ){
-		randomVector[i] = i;
+		randomVector[i] = i; // 累積和分の配列を用意
 	} shuffle( randomVector.begin(), randomVector.end(), std::default_random_engine(seed) ); // ランダムベクタの作成
 
 
-	std::vector<Node*> *retNodeVector = new std::vector<Node*>; // 結果ベクタ
+	std::vector<Node*> *retNodeVector = new std::vector<Node*>; // 結果格納用ベクタ
 	// 取り出しシーケンス	
 	unsigned int i = 0;
-	Node* candidateNode = nullptr;   KBucket *candidateKBucket = nullptr;
-	auto itr = randomVector.cbegin();
+	Node* candidateNode = nullptr;   KBucket *candidateKBucket = nullptr; // 一時格納用
 	std::map< unsigned int , KBucket* >::iterator selectiveElemPairMapItr;
+	auto itr = randomVector.cbegin();
 
-	while( retNodeVector->size() <= maxCount || itr != randomVector.end() )
+	while( retNodeVector->size() <= maxCount || itr != randomVector.end() ) // 指定の個数に到達するか,テーブルにそれ以上ノードがなくなったら終了
 	{
 		selectiveElemPairMapItr = selectiveElemPairMap.lower_bound( *itr ); // 一旦イテレータで受け取る
 		candidateKBucket = selectiveElemPairMapItr->second;
-		candidateNode = (*candidateKBucket)[ (*itr) % selectiveElemPairMapItr->first ];
+		candidateNode = (*candidateKBucket)[ selectiveElemPairMapItr->first - *itr ]; // 累積和 - ランダム値
 
 		// ignoreNodeだったら無視する
 		if( std::count( ignoreNodeVector->cbegin(), ignoreNodeVector->cend(), candidateNode ) != 0 ){

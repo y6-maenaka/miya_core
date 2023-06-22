@@ -64,6 +64,7 @@ public:
 
   // マイナスの値だと正規のデータセグメントではない	
 	virtual MSGHeader *GetOutMSGHeader( int sock ) = 0;
+	virtual bool standAlone( void *ioArg, bool allowEmpty = true ) = 0;
 
 	void handlerArg( void* arg ); // setter
 	void* handlerArg(); // getter
@@ -82,7 +83,7 @@ public:
 
 	MSGHeader *GetOutMSGHeader( int sock );
 
-	bool standAlone( void *ioArg ,bool allowEmpty =true ); // スレッドで起動する？
+	bool standAlone( void *ioArg ,bool allowEmpty = true ); // スレッドで起動する？
 
 };
 

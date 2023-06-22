@@ -49,14 +49,15 @@ using	ActiveKBucketMap = std::map< unsigned short , KBucket* >;
 
 
 
-class NodeBatch
+class NodeBulkSender
 {
-
 private:
-	std::vector< Node* > _nodesVector;
+	std::vector< Node* > *_nodeVector;
 
 public:
-	~NodeBatch();
+	NodeBulkSender( std::vector< Node* > *target ){ _nodeVector = target; };
+
+	std::vector< Node* > *nodeVector(){ return _nodeVector; }; // getter
 
 	void sendBulk( EKP2PMSG *msg );
 	void sendBulk( unsigned char* msg , unsigned int msgSize );

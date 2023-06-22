@@ -94,6 +94,9 @@ void *BaseInbandManager::handlerArg()
 // socketManagerがノンブロッキングに設定されていると結果を即座に返す
 bool UDPInbandManager::standAlone( void *ioArg , bool allowEmpty )
 {
+
+	// タイムアウトの設定
+
 	_handlerArg = ioArg;
 	
 	int messageHandlerFlag;

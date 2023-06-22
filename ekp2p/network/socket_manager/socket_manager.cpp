@@ -87,6 +87,8 @@ void SocketManager::toNonBlockingSocket()
 
 
 int SocketManager::sockType()
+{
+	int opt; socklen_t optLen = sizeof( opt );
 
 	getsockopt( _sock , SOL_SOCKET , SO_TYPE , &opt , &optLen );
 	if( opt == -1 ) return -1;
