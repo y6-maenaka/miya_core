@@ -10,6 +10,7 @@ namespace ekp2p
 
 
 enum class KADEMLIA_RPC : int {
+	STANDARD = 0,
 	PING = 1,
 	PONG,
 	FIND_NODE,

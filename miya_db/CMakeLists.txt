@@ -12,7 +12,7 @@ add_library( MIYA_DB STATIC
 				strage_manager/MMyISAM/components/page_table/virtual_addr.cpp
 
 				strage_manager/MMyISAM/components/page_table/cache_manager/cache_table.cpp
-				strage_manager/MMyISAM/components/page_table/mapper/mapper.cpp
+				strage_manager/MMyISAM/components/page_table/cache_manager/mapper/mapper.cpp
 
 )
 

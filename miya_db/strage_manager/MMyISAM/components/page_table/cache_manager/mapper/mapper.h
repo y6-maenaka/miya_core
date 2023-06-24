@@ -6,9 +6,15 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
+#include <cmath>
+#include <math.h>
 
 
 namespace miya_db{
+
+
+const unsigned int DEFAULT_1FRAME_CACHE_SIZE = std::pow( 2, 2*8 );
 
 
 class Mapper
@@ -17,17 +23,18 @@ class Mapper
 
 private:
 	int _fd;
-	off_t _currentFileSize;
+	//off_t _currentFileSize;
 	long _systemPageSize;
-
+	off_t _currentOffset;
+	struct stat _fileStat;
 
 public:
 	Mapper( int fd  );
 
 
-	void* map( unsigned short pageIdx ); 
-	void *unmap( void *targetAddr );
-	void sync( void* addr , unsigned int lenght ); // 同期
+	void* map( unsigned int offsetIdx ); 
+	int unmap( void *targetMappedPtr );
+	int sync( void* targetMappedPtr ); // 同期
 																								 
 	void *expandRegion( unsigned int fileSize );
 

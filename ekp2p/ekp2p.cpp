@@ -79,10 +79,11 @@ bool EKP2P::collectStartUpNodes( SocketManager *baseSocketManager )
 {
 	// このルーチンに入る前に,tableWrapperは起動している事が前提
 
-	Node* bootstrapNode;
+	Node* bootstrapNode; // 複数のブートストラップノードを登録しておく
 	RequestRPC_FIND_NODE( bootstrapNode , _kRoutingTable->selfKAddr() ); // ブートストラップノードにFIND_NODEを送信
 
 	NodeBroadcaster broadcaster;
+	EKP2PMSG *findNodeMSG = GenerateRPCMSG_FIND_NODE( _kRoutingTable->selfKAddr() );
 	
 	std::vector< Node* > queriedNodeVector;
 	std::vector< Node* > *arraivedNodeVector;
@@ -96,26 +97,12 @@ bool EKP2P::collectStartUpNodes( SocketManager *baseSocketManager )
 		arraivedNodeVector = _kRoutingTable->selectNodeBatch( -1 , &queriedNodeVector ); // 新規の全てのノードを回収
 			
 		broadcaster.nodeVector( arraivedNodeVector );
-		broadcaster.broadcastKademliaRPC( 0 /* FIND_NODE */); // Look UP
+		broadcaster.broadcast( findNodeMSG );
 
 		queriedNodeVector.insert( queriedNodeVector.cend() , arraivedNodeVector->cbegin() , arraivedNodeVector->cend() );
 	}
 
-
-	// [ok] bootstrapnodeに送信
-	// closestNodeの受信
-	// closestNodeにLookUPuする
-	// ここまででK個に達さなかったら
-	// さらに既存のノードにFIND_NODEを送信する
-	// 受信したノードに対してFIND_NODEする
-	// ※　差分のノード取得機構が必要
-	// ※　テーブル内のノード数の把握も必要
-
-
-
-	
-	
-	return false;
+	return true;
 }
 
 

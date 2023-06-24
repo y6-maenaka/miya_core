@@ -2,6 +2,11 @@ cmake_minimum_required( VERSION 3.2 )
 
 include_directories( ${OPENSSL_INCLUDE_DIRS} )
 
+
+#add_subdirectory( kademlia )
+#add_subdirectory( network )
+
+
 add_library( EKP2P STATIC 
 
 						 ekp2p.cpp
@@ -34,13 +39,12 @@ add_library( EKP2P STATIC
 						 network/nat/stun_message_handler.cpp
 						 
 
-						 #network/outband/node_outband.cpp
+						 network/outband/node_outband.cpp
 						 network/outband/node_broadcaster.cpp
 
 						 network/socket_manager/socket_manager.cpp
 
 )
-
 
 
 add_definitions( -std=c++14 )

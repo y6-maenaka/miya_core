@@ -53,6 +53,10 @@ void Entry::referencedBit( bool status )
 
 
 
+
+
+
+
 /* ------------------------------------------------------ */
 /* ==================== PAGE TABLE ====================== */
 /* ------------------------------------------------------ */
@@ -62,9 +66,15 @@ void Entry::referencedBit( bool status )
 
 PageTable::PageTable( const char *filePath )
 {
-	_filePath = filePath;
-
+	
+	if( filePath != nullptr )
+	{
+		_filePath = filePath;
+		//_fd = open( filePath , O_RDWR );
+	}
+	
 	_entryList = new Entry[ pow( 2, 8*2 ) ]; // ページテーブルのセットアップ
+
 }
 
 
@@ -92,13 +102,13 @@ bool PageTable::init()
 
 
 
-void* PageTable::inquire( unsigned char *logicAddr ){
+void* PageTable::inquire( unsigned char *virtualAddr ){
 
 	unsigned char frame[3]; unsigned int Uframe = 0;
 	unsigned char offset[2];  unsigned short Uoffset = 0;
 
-	memcpy( &frame , logicAddr, sizeof(frame) );
-	memcpy( &offset , logicAddr + sizeof(frame) , sizeof(offset) );
+	memcpy( &frame , virtualAddr, sizeof(frame) );
+	memcpy( &offset , virtualAddr + sizeof(frame) , sizeof(offset) );
 
 	Uframe = frame[0]; Uframe <<= 8;
 	Uframe = frame[1]; Uframe <<= 8;
@@ -108,29 +118,29 @@ void* PageTable::inquire( unsigned char *logicAddr ){
 	Uoffset = offset[1]; 
 
 	Entry *entry;
-	entry = &_entryList[ Uframe ];
+	entry = &_entryList[ Uframe ]; // 該当するページエントリの取得
 
 
 	unsigned short cachedIdx;
 
 	if( !(entry->invalidBit()) ){ // pageFault
 
-		unsigned short outIdx = _referenceControl.leastRecentlyUsedPage();
+		unsigned short outIdx = _referenceControl.leastRecentlyUsedPage(); // ページアウト対象のキャッシュエントリ
 
-		cachedIdx = _cacheManager->pageFault( outIdx , Uframe );
-		return (*_cacheManager)[ cachedIdx ];
+		cachedIdx = _cacheManager->pageFault( outIdx , Uframe ); // CacheManagerでpageOutとPageInが実行される
+		//return (*_cacheManager)[ cachedIdx ];
 	}
 
 	else{ 
 		_referenceControl.incrementPtr();
 		cachedIdx = entry->cachedIdx();
 
-		return (*_cacheManager)[ cachedIdx ];
+		//return (*_cacheManager)[ cachedIdx ];
 	}
 
-	/* この後,Converterにかける？ */
+	// UoffSet分進めたポインタを返却する
+	return (*_cacheManager)[cachedIdx] + Uoffset;
 
-	return nullptr;
 }
 
 

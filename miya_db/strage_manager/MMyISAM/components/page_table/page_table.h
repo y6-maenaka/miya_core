@@ -26,7 +26,8 @@ class CacheTable;
 
 
 
-#define ENTRY_CNT = pow(2, 8*3);
+#define ENTRY_CNT = pow(2, 8*3); //  [ bytes ]
+#define ENTRY_SIZE = pow(2 , 8*2); // [ bytes ] 
 
 
 
@@ -57,14 +58,12 @@ struct Entry{
 class PageTable{
 	
 private:
-
 	const char *_filePath = nullptr;
-	int _fd;
+	int _fd; // マッピングされるファイルディスクリプタ
 	 
 	CacheTable *_cacheManager; // オブジェクト名を変更する
 
 	Entry	*_entryList; // exist(num), noexist(-1)
-
 
 	struct referenceControl // LRUの近似
 	{
@@ -79,14 +78,13 @@ private:
 
 
 public:
-
 	PageTable( const char* targetFilePath );
 	~PageTable();
 
+	// 初期化でキャッシュマネージャーが起動される
 	bool init(); // 使い始めるにはinit必須
 							 
-	void* inquire( unsigned char* logicAddr ); // localAddr -> 5 bit // 実際には
-
+	void* inquire( unsigned char* virtualAddr ); // localAddr -> 5 bit // 実際には
 };
 
 

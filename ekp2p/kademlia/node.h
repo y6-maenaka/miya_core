@@ -77,6 +77,7 @@ public:
 	bool SendPING(); // 後の統合する
 	bool SendPONG();
 	bool SendFIND_NODE();
+
 	bool SendKademliaRPC();
 
 	int send( EKP2PMSG *msg );

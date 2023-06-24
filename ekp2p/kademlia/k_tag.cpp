@@ -37,6 +37,7 @@ KTag::KTagMeta::KTagMeta() : KAddrCnt(0)
 
 
 KTag::KTag(){
+	_KTagMeta.Protocol = htons(0);
 	return;
 }
 

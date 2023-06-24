@@ -26,7 +26,7 @@ private:
 
 	Mapper *_mapper;
 
-	std::array< void* , 10 > _cacheTable; // arraySizeはどう最適化するか
+	std::array< unsigned char* , 10 > _cacheTable; // arraySizeはどう最適化するか
 
 public:
 
@@ -38,7 +38,8 @@ public:
 
 	bool init();
 
-	void* operator []( unsigned short idx ){
+	unsigned char* operator []( unsigned short idx )
+	{
 		return _cacheTable[idx];
 	}
 
