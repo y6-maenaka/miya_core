@@ -8,13 +8,16 @@
 #include <array>
 
 
-#define CACHE_BLOCK_COUNT 10;
+constexpr unsigned short CACHE_BLOCK_COUNT = 10;
 
 
 namespace miya_db{
 
-
 class Mapper;
+
+
+
+
 
 
 
@@ -26,28 +29,53 @@ private:
 
 	Mapper *_mapper;
 
-	std::array< unsigned char* , 10 > _cacheTable; // arraySizeはどう最適化するか
+	struct CacheList
+	{
+		private:
+			unsigned short _cacheList[ CACHE_BLOCK_COUNT ] = {-1};
+			unsigned char* _mappingList[ CACHE_BLOCK_COUNT ] = {nullptr};
+
+		public:
+			short cacheFind( unsigned short frame );
+
+	} _cacheList;
+
+
+	struct LRU
+	{
+		private:
+			bool _invalidCacheList[ CACHE_BLOCK_COUNT ] = {true}; // LRU
+			unsigned short _referencePtr = 0;
+			// bool _invalidCacheList = {true};
+		public:
+			void operator++();
+			void reference( unsigned short idx );
+			unsigned short outPage();
+
+	} _LRU;
+
+	unsigned short pageFault( unsigned int frame ); // pageOutとpageInを組み合わせる																								
+	void pageOut( unsigned short idx );
+	void pageIn( unsigned short idx , unsigned int frame ); 
+
+	bool init();
+
+	unsigned short cacheFind( unsigned short frame );
 
 public:
 
 	CacheTable( int fd );
 
-	//void* map( /* ページアウトするキャッシュブロックインデックス*/ , /* ページインするオフセット*/ );
-	//void sync( /* 同期するキャッシュブロックインデックス */);
 
 
-	bool init();
+	unsigned char* operator []( unsigned short frame );
+	
 
-	unsigned char* operator []( unsigned short idx )
-	{
-		return _cacheTable[idx];
-	}
 
-	unsigned short pageFault( unsigned short idx , unsigned int frame ); // pageOutとpageInを組み合わせる
 
-	void pageOut( unsigned short idx );
-	void pageIn( unsigned int frame ); 
 
+	// どのフレームがキャッシュされているか
+	// LRUの実装
 };
 
 

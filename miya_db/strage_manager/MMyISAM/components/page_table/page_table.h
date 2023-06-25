@@ -54,7 +54,7 @@ struct Entry{
 
 
 
-
+/*
 class PageTable{
 	
 private:
@@ -86,7 +86,14 @@ public:
 							 
 	void* inquire( unsigned char* virtualAddr ); // localAddr -> 5 bit // 実際には
 };
+*/
 
+
+
+class PageTable
+{
+
+};
 
 
 
