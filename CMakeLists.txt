@@ -19,7 +19,7 @@ add_executable( core_ver_0 ./release/core/ver_0.cpp )
 target_link_libraries( core_ver_0 PRIVATE
 												EKP2P
 												MIYA_CORE
-												SHARED_COMPONENTS						
+												SHARED_COMPONENTS
 )
 #target_include_directories( core_ver_0 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include )
 target_compile_options( core_ver_0 PUBLIC -Wall )
@@ -41,5 +41,3 @@ endif()
 
 
 add_definitions( -std=c++14 )
-
-

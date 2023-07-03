@@ -63,7 +63,7 @@ void Entry::referencedBit( bool status )
 
 
 
-
+/*
 PageTable::PageTable( const char *filePath )
 {
 	
@@ -140,8 +140,8 @@ void* PageTable::inquire( unsigned char *virtualAddr ){
 
 	// UoffSet分進めたポインタを返却する
 	return (*_cacheManager)[cachedIdx] + Uoffset;
-
 }
+*/
 
 
 

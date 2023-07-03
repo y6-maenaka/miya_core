@@ -1,41 +1,16 @@
 #include "overlay_memory_manager.h"
 
-#include "./overlay_ptr.h"
+#include "overlay_ptr.h"
+
+namespace miya_db{
 
 
 
-namespace miya_db
+
+OverlayMemoryManager::optr *lastOptr()
 {
-
-
-
-
-
-
-
-
-void *OverlayMemoryManager::convert( optr *src )
-{
-	unsigned char* ret;
-
-	ret = (*_cacheTable)[src->frame()];
-
-	ret += src->offset();
-
-	return (void *)ret;
+	return nullptr;
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-};
+}; // close miya_db namespace

@@ -1,36 +1,28 @@
-#ifndef BA85B734_1B31_49C4_96CD_C1ACC7293375
-#define BA85B734_1B31_49C4_96CD_C1ACC7293375
+#ifndef B2BCCAA9_4237_45CF_8F1A_B7E2E523CD40
+#define B2BCCAA9_4237_45CF_8F1A_B7E2E523CD40
 
 
+namespace miya_db{
 
-namespace miya_db
-{
 
-class CacheTable;
+class CacheManager;
 class optr;
 
 
-
-
-
-
-class OverlayMemoryManager // OMM
+class OverlayMemoryManager
 {
 private:
-	CacheTable *_cacheTable;
-
+	CacheManager *_cacheManager;
 
 public:
-	void* convert( optr *src );
-
+	optr *lastOptr();
 };
 
 
+}; // close miya_db namespace
 
 
+#endif // B2BCCAA9_4237_45CF_8F1A_B7E2E523CD40
 
-};
 
-
-#endif // BA85B734_1B31_49C4_96CD_C1ACC7293375
 

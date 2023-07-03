@@ -4,7 +4,13 @@
 
 #include <string.h>
 
+
+
+
 namespace miya_db{
+
+class OverlayPtrResolver;
+
 
 
 
@@ -13,23 +19,29 @@ typedef class OverlayPtr
 {
 private:
 	unsigned char _optr;
+	OverlayPtrResolver *_optResolver;
+	//OverlayMemoryManager *_memoryManager;
 
 public:
+	OverlayPtr(){};
+	OverlayPtr( unsigned char otpr );
+	const unsigned char optr(); // getter
 	unsigned short frame();
 	unsigned short offset();
+
+	unsigned char value(); // getter
+	void value( unsigned char target ); // setter
+
+	//OverlayPtr* operator []( size_t n ); 
+	OverlayPtr* operator =( OverlayPtr *_from );
+	
+	// void operator =( unsigned char target );
+
+	// void operator =(void *ptr);
 
 } optr;
 
 
-
-
-
-
-void *omemcpy( void* dest , const void *src , size_t n )
-{
-
-	return nullptr;
-}
 
 
 

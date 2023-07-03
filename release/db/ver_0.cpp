@@ -3,9 +3,18 @@
 
 
 
+#include "../../miya_db/strage_manager/MMyISAM/components/page_table/overlay_ptr.h"
+#include "../../miya_db/strage_manager/MMyISAM/components/page_table/cache_manager/cache_table.h"
+#include "../../miya_db/strage_manager/MMyISAM/components/page_table/cache_manager/mapper/mapper.h"
+
+#include <unistd.h>
+#include <fcntl.h>
+#include <filesystem>
+#include <unistd.h>
+
 int main(){
 
-
+	/*
 
 	MiddleBuffer buffer(100);
 
@@ -143,5 +152,21 @@ int main(){
 
 	//std::cout << tree->_root->_itemSet->childCnt( true ) << "\n";
 
+	*/
+
+
+
+	//int indexOswapFD = open("../../miya_db/table_files/test_table/test.oswap", O_RDWR );
+	int indexOswapFD = open("../miya_db/table_files/test_table/test.oswap", O_RDWR );
+	miya_db::CacheTable _cacheTable( indexOswapFD );
+	miya_db::Mapper *_mapper = _cacheTable.mapper();
+	// std::cout << _mapper->fd() << "\n";
+	
+
+	unsigned char initAddr = 0x00;
+	miya_db::optr _optr(initAddr);
+
+	unsigned char target = 0xAA;
+	_optr.value( target );
 
 }

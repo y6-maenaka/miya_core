@@ -27,10 +27,10 @@ namespace miya_db{
 
 
 
-short CacheTable::CacheList::cacheFind( unsigned short frame )
+short CacheTable::cacheFind( unsigned short frame )
 {
 	for( unsigned int i=0; i<CACHE_BLOCK_COUNT; i++) // とりあえず線形探索で
-		if( _cacheList[i] == frame ) return i;
+		if( _cacheList._cacheList[i] == frame ) return i;
 
 	return -1;		
 }
@@ -42,11 +42,14 @@ short CacheTable::CacheList::cacheFind( unsigned short frame )
 
 
 
-void CacheTable::LRU::operator++()
+void CacheTable::LRU::incrementReferencePtr()
 {
-	_referencePtr[_referencePtr] = false;
-	_referencePtr = ( (_referencePtr++) % CACHE_BLOCK_COUNT );
+	_invalidCacheList[_referencePtr] = false;
+	_referencePtr = ( (_referencePtr+1) % CACHE_BLOCK_COUNT );
+	_referencePtr = (_referencePtr+1) % CACHE_BLOCK_COUNT;
+
 }
+
 
 
 void CacheTable::LRU::reference( unsigned short idx )
@@ -80,7 +83,8 @@ unsigned short CacheTable::LRU::outPage()
 CacheTable::CacheTable( int fd )
 {
 	_mapper = new Mapper( fd );
-	
+
+	memset( &_cacheList, 0x00 , sizeof(_cacheList) );
 	return;
 	
 };
@@ -88,17 +92,18 @@ CacheTable::CacheTable( int fd )
 
 
 
-unsigned char* CacheTable::operator []( unsigned short frame )
+void* CacheTable::convert( unsigned short frame )
 {
 	unsigned char* ret; short idx;
 	if( (idx = cacheFind( frame )) < 0 ) idx = pageFault( frame );
-	ret = _cacheList._mappingList[idx]
+	ret = static_cast<unsigned char*>(_cacheList._mappingList[idx]);
 
 	// if page not existed -> pagefault
 	_LRU._invalidCacheList[idx] = false;
-	_LRU++;
+	_LRU.incrementReferencePtr();
 	
-	return ret;
+	return (void *)ret;
+
 }
 
 
@@ -109,19 +114,21 @@ unsigned short CacheTable::pageFault( unsigned int frame )
 	unsigned int outPageIdx = _LRU.outPage();
 	pageOut(  outPageIdx );
 	pageIn( outPageIdx , frame );
+	
+	return outPageIdx; // 要修正
 }
 
 
 
 void CacheTable::pageOut( unsigned short idx ) 
 {
-	_mapper->unmap( _cacheList[idx] );
+	_mapper->unmap( _cacheList._mappingList[idx] );
 }
 
 
 void CacheTable::pageIn( unsigned short idx  ,unsigned int frame ) // 入れ替えるキャッシュブロックインデックス, 入れるフレーム番号
 {
-	_cacheList[idx] = _mapper->map( frame );
+	_cacheList._mappingList[idx] = _mapper->map( frame );
 }
 /* =================================================================== */
 

@@ -30,6 +30,7 @@ private:
 
 public:
 	Mapper( int fd  );
+	int fd(){ return _fd;};
 
 
 	void* map( unsigned int offsetIdx ); 

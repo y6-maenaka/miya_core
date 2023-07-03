@@ -31,24 +31,24 @@ private:
 
 	struct CacheList
 	{
-		private:
-			unsigned short _cacheList[ CACHE_BLOCK_COUNT ] = {-1};
-			unsigned char* _mappingList[ CACHE_BLOCK_COUNT ] = {nullptr};
-
 		public:
-			short cacheFind( unsigned short frame );
+		unsigned short _cacheList[ CACHE_BLOCK_COUNT ]; // キャッシュしているフレームのリスト
+		void* _mappingList[ CACHE_BLOCK_COUNT ]; // 実際のポインタとオーバレイポインタの対応表
+
+		//short cacheFind( unsigned short frame );
 
 	} _cacheList;
 
 
 	struct LRU
 	{
-		private:
+		public:
 			bool _invalidCacheList[ CACHE_BLOCK_COUNT ] = {true}; // LRU
 			unsigned short _referencePtr = 0;
 			// bool _invalidCacheList = {true};
-		public:
-			void operator++();
+			
+			void operator++(); 
+			void incrementReferencePtr();
 			void reference( unsigned short idx );
 			unsigned short outPage();
 
@@ -58,24 +58,18 @@ private:
 	void pageOut( unsigned short idx );
 	void pageIn( unsigned short idx , unsigned int frame ); 
 
-	bool init();
 
-	unsigned short cacheFind( unsigned short frame );
+	short cacheFind( unsigned short frame );
 
 public:
 
+	Mapper *mapper(){ return _mapper; }; // getter
+
+	bool init();
 	CacheTable( int fd );
 
-
-
-	unsigned char* operator []( unsigned short frame );
-	
-
-
-
-
-	// どのフレームがキャッシュされているか
-	// LRUの実装
+	// unsigned char* operator []( unsigned short frame );	
+	void* convert( unsigned short frame );
 };
 
 
