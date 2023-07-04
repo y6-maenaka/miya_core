@@ -9,16 +9,6 @@ namespace miya_db
 
 
 
-void* OverlayPtrResolver::resolve( optr *src )
-{
-	unsigned char* ret;
-
-	ret = static_cast<unsigned char*>(_cacheTable->convert(src->frame()));
-	ret += src->offset();
-
-	return (void*)ret;
-	
-};
 
 
 };

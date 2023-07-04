@@ -14,7 +14,7 @@
 namespace miya_db{
 
 
-const unsigned int DEFAULT_1FRAME_CACHE_SIZE = std::pow( 2, 2*8 );
+const unsigned int DEFAULT_FRAME_CACHE_SIZE = std::pow( 2, 2*8 );
 
 
 class Mapper
@@ -31,7 +31,6 @@ private:
 public:
 	Mapper( int fd  );
 	int fd(){ return _fd;};
-
 
 	void* map( unsigned int offsetIdx ); 
 	int unmap( void *targetMappedPtr );

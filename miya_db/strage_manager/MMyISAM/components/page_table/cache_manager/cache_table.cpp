@@ -26,11 +26,11 @@ namespace miya_db{
 
 
 
-
-short CacheTable::cacheFind( unsigned short frame )
+short CacheTable::cacheFind( unsigned short frame ) 
 {
-	for( unsigned int i=0; i<CACHE_BLOCK_COUNT; i++) // とりあえず線形探索で
-		if( _cacheList._cacheList[i] == frame ) return i;
+	for( unsigned int i=0; i<CACHE_BLOCK_COUNT; i++){ // とりあえず線形探索で
+		if( _cacheList._cacheingList[i] == frame ) return i;
+	}
 
 	return -1;		
 }
@@ -40,67 +40,34 @@ short CacheTable::cacheFind( unsigned short frame )
 
 
 
-
-
-void CacheTable::LRU::incrementReferencePtr()
-{
-	_invalidCacheList[_referencePtr] = false;
-	_referencePtr = ( (_referencePtr+1) % CACHE_BLOCK_COUNT );
-	_referencePtr = (_referencePtr+1) % CACHE_BLOCK_COUNT;
-
-}
-
-
-
-void CacheTable::LRU::reference( unsigned short idx )
-{
-	_invalidCacheList[idx] = true;
-}
-
-
-unsigned short CacheTable::LRU::outPage()
-{
-	unsigned int candidateIdx;
-
-	int i =_referencePtr + 1;
-	while( i != _referencePtr )
-	{
-		if( _invalidCacheList[ (i%CACHE_BLOCK_COUNT) ] == false ) return (i%CACHE_BLOCK_COUNT);
-		i++;
-	}
-
-	return ( _referencePtr + 1 ) % CACHE_BLOCK_COUNT;
-}
-
-
-
-
-	
-
-
-
-
 CacheTable::CacheTable( int fd )
 {
 	_mapper = new Mapper( fd );
 
 	memset( &_cacheList, 0x00 , sizeof(_cacheList) );
-	return;
-	
+	std::fill( _cacheList._cacheingList, _cacheList._cacheingList + CACHE_BLOCK_COUNT, -1);
+	return; 
 };
 
 
 
 
-void* CacheTable::convert( unsigned short frame )
+void* CacheTable::convert( optr *src )
 {
-	unsigned char* ret; short idx;
-	if( (idx = cacheFind( frame )) < 0 ) idx = pageFault( frame );
-	ret = static_cast<unsigned char*>(_cacheList._mappingList[idx]);
+	std::cout << "Process in CacheTable::convert()" << "\n";
+	unsigned short frame = src->frame();
 
-	// if page not existed -> pagefault
-	_LRU._invalidCacheList[idx] = false;
-	_LRU.incrementReferencePtr();
+	unsigned char* ret; short idx;
+	std::cout << "cacheFind -> " << cacheFind(frame) << "\n";
+	if( (idx = cacheFind( frame )) < 0 ){
+		idx = pageFault( frame ); // キャッシュテーブルに対象フレームのキャッシュブロックが存在しなかったら -> Page Fault
+	} 
+	ret = static_cast<unsigned char*>(_cacheList._mappingList[idx]);
+	ret += src->offset();
+
+	// LRUの更新
+	_cacheList._LRU.reference( idx );
+	_cacheList._LRU.incrementReferencePtr();
 	
 	return (void *)ret;
 
@@ -111,27 +78,65 @@ void* CacheTable::convert( unsigned short frame )
 
 unsigned short CacheTable::pageFault( unsigned int frame )
 {
-	unsigned int outPageIdx = _LRU.outPage();
-	pageOut(  outPageIdx );
-	pageIn( outPageIdx , frame );
+	std::cout << "[ PAGE FAULT ]" << "\n";
+	unsigned int outPageIdx = _cacheList._LRU.targetOutPage();
+	std::cout << "target out page -> " << outPageIdx << "\n";
+
+	pageOut(  outPageIdx ); std::cout << "[ Page Out ] :: " << outPageIdx << "\n";
+	pageIn( outPageIdx , frame ); std::cout << "[ Page In ] :: " << outPageIdx << "\n";
 	
 	return outPageIdx; // 要修正
 }
 
 
 
-void CacheTable::pageOut( unsigned short idx ) 
+int CacheTable::pageOut( unsigned short outIdx ) 
 {
-	_mapper->unmap( _cacheList._mappingList[idx] );
+	_mapper->unmap( _cacheList._mappingList[outIdx] );
+	_cacheList._mappingList[outIdx] = nullptr;
+
+	_cacheList._cacheingList[outIdx] = -1;
+	_cacheList._LRU._invalidCacheList[outIdx] = false;
+
+	return static_cast<int>(outIdx);
 }
 
 
-void CacheTable::pageIn( unsigned short idx  ,unsigned int frame ) // 入れ替えるキャッシュブロックインデックス, 入れるフレーム番号
+int CacheTable::pageIn( unsigned short outIdx ,unsigned int inFrame ) // 入れ替えるキャッシュブロックインデックス, 入れるフレーム番号
 {
-	_cacheList._mappingList[idx] = _mapper->map( frame );
+	_cacheList._mappingList[outIdx] = _mapper->map( inFrame );
+	_cacheList._cacheingList[outIdx] = inFrame; // キャッシュしているフレームの更新
+	_cacheList._LRU._invalidCacheList[outIdx] = true;
+
+	return static_cast<int>(outIdx);
 }
 /* =================================================================== */
 
+
+
+void CacheTable::cacheingList()
+{
+	std::cout << "==== [ CACHING STATUS ] ====" << "\n";
+	for( int i=0; i<CACHE_BLOCK_COUNT; i++)
+	{
+		std::cout << _cacheList._cacheingList[i] << " |";
+	} std::cout << "\n";
+	std::cout << "==== ==== ==== ==== ====" << "\n";
+}
+
+
+
+void CacheTable::invalidList()
+{
+	std::cout << "==== [ INVALID STATUS ] ====" << "\n";
+	std::cout << "referencePtr -> " << _cacheList._LRU._referencePtr << "\n";
+	for( int i=0; i<CACHE_BLOCK_COUNT; i++)
+	{
+		std::cout <<  _cacheList._LRU._invalidCacheList[i] << " |";
+	} std::cout << "\n";
+	std::cout << "==== ==== ==== ==== ====" << "\n";
+
+}
 
 }; // close miya_db namespace
 

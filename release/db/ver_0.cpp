@@ -6,6 +6,7 @@
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/overlay_ptr.h"
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/cache_manager/cache_table.h"
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/cache_manager/mapper/mapper.h"
+#include "../../miya_db/strage_manager/MMyISAM/components/page_table/overlay_memory_manager.h"
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -157,16 +158,91 @@ int main(){
 
 
 	//int indexOswapFD = open("../../miya_db/table_files/test_table/test.oswap", O_RDWR );
-	int indexOswapFD = open("../miya_db/table_files/test_table/test.oswap", O_RDWR );
+	int indexOswapFD = open("../miya_db/table_files/test_table/test.oswap", O_RDWR , (mode_t)0600 );
 	miya_db::CacheTable _cacheTable( indexOswapFD );
 	miya_db::Mapper *_mapper = _cacheTable.mapper();
 	// std::cout << _mapper->fd() << "\n";
 	
 
-	unsigned char initAddr = 0x00;
-	miya_db::optr _optr(initAddr);
+	std::cout << "====================================" << "\n";
+	unsigned char initAddr[5] = {0x00 , 0x00 , 0x02, 0x00, 0x05};
+	miya_db::optr _optr( initAddr );
+	_optr.cacheTable( &_cacheTable );
+	std::cout << "Frame -> " << _optr.frame() << "\n";
+	std::cout << _optr.offset() << "\n";
+	_optr.value('B'); // ファイル上の1バイト格納空間のオーバレイポインタ
+	
+	_cacheTable.cacheingList();
+	_cacheTable.invalidList();
+	std::cout << "====================================" << "\n\n";
 
-	unsigned char target = 0xAA;
-	_optr.value( target );
+
+
+
+	std::cout << "====================================" << "\n";
+	unsigned char initAddr2[5] = {0x00 , 0x00 , 0x02, 0x00 , 0x00};
+	miya_db::optr _optr2( initAddr2 );
+	_optr2.cacheTable( &_cacheTable );
+	std::cout << "Frame -> " << _optr2.frame() << "\n";
+	std::cout << _optr2.offset() << "\n";
+	_optr2.value('C'); // ファイル上の1バイト格納空間のオーバレイポインタ
+	
+	_cacheTable.cacheingList();
+	_cacheTable.invalidList();
+	std::cout << "====================================" << "\n\n";
+
+
+
+	std::cout << "====================================" << "\n";
+	unsigned char initAddr3[5] = {0x00 , 0x00 , 0x00, 0x00 , 0x02};
+	miya_db::optr _optr3( initAddr3 );
+	_optr3.cacheTable( &_cacheTable );
+	std::cout << "Frame -> "<< _optr3.frame() << "\n";
+	std::cout << _optr3.offset() << "\n";
+	_optr3.value('X'); // ファイル上の1バイト格納空間のオーバレイポインタ
+	
+	_cacheTable.cacheingList();
+	_cacheTable.invalidList();
+	std::cout << "====================================" << "\n\n";
+
+
+	std::cout << "====================================" << "\n";
+	unsigned char initAddr4[5] = {0x00 , 0x00 , 0x01, 0x00 , 0x02};
+	miya_db::optr _optr4( initAddr4 );
+	_optr4.cacheTable( &_cacheTable );
+	std::cout << "Frame -> "<< _optr4.frame() << "\n";
+	std::cout << _optr4.offset() << "\n";
+	_optr4.value('X'); // ファイル上の1バイト格納空間のオーバレイポインタ
+	
+	_cacheTable.cacheingList();
+	_cacheTable.invalidList();
+	std::cout << "====================================" << "\n\n";
+
+
+
+	std::cout << "====================================" << "\n";
+	unsigned char initAddr5[5] = {0x00 , 0x00 , 0x03, 0x00 , 0x02};
+	miya_db::optr _optr5( initAddr5 );
+	_optr5.cacheTable( &_cacheTable );
+	std::cout << "Frame -> "<< _optr5.frame() << "\n";
+	std::cout << _optr5.offset() << "\n";
+	_optr5.value('X'); // ファイル上の1バイト格納空間のオーバレイポインタ
+	
+	_cacheTable.cacheingList();
+	_cacheTable.invalidList();
+	std::cout << "====================================" << "\n\n";
+
+
+	std::cout << "====================================" << "\n";
+	unsigned char initAddr6[5] = {0x00 , 0x00 , 0x03, 0x00 , 0x03};
+	miya_db::optr _optr6( initAddr6 );
+	_optr6.cacheTable( &_cacheTable );
+	std::cout << "Frame -> "<< _optr6.frame() << "\n";
+	std::cout << _optr6.offset() << "\n";
+	_optr6.value('X'); // ファイル上の1バイト格納空間のオーバレイポインタ
+	
+	_cacheTable.cacheingList();
+	_cacheTable.invalidList();
+	std::cout << "====================================" << "\n\n";
 
 }

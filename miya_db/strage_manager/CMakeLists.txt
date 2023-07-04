@@ -8,7 +8,7 @@ add_library( STRAGE_MANAGER STATIC
 
 				MMyISAM/components/page_table/overlay_memory_manager.cpp
 				MMyISAM/components/page_table/overlay_ptr.cpp
-				MMyISAM/components/page_table/overlay_ptr_resolver.cpp
+				#MMyISAM/components/page_table/overlay_ptr_resolver.cpp
 				
 				
 )

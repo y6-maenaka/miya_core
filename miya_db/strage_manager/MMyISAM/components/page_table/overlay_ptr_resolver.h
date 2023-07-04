@@ -8,22 +8,6 @@
 namespace miya_db
 {
 
-class CacheTable;
-
-
-
-class OverlayPtrResolver
-{
-
-private:
-	CacheTable *_cacheTable;
-
-public:
-	void* resolve( optr *src ); // 対応するポインタが得られる
-	
-
-};
-
 
 }; // close miya_db namespace
 

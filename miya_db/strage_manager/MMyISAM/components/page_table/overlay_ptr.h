@@ -9,23 +9,27 @@
 
 namespace miya_db{
 
-class OverlayPtrResolver;
+class CacheTable;
 
 
 
-
-
+// オーバレイ元のポインタは秘匿する
 typedef class OverlayPtr
 {
 private:
-	unsigned char _optr;
-	OverlayPtrResolver *_optResolver;
-	//OverlayMemoryManager *_memoryManager;
+	// unsigned char _optr;
+	unsigned char _optr[5];
+	CacheTable *_cacheTable;
+	//OverlayPtrResolver *_optResolver;
 
 public:
 	OverlayPtr(){};
-	OverlayPtr( unsigned char otpr );
-	const unsigned char optr(); // getter
+	OverlayPtr( unsigned char *optr );
+
+	void cacheTable( CacheTable *cacheTable );
+
+	unsigned char *optr(); // getter
+
 	unsigned short frame();
 	unsigned short offset();
 

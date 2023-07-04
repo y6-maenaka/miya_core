@@ -1,6 +1,7 @@
 #include "overlay_ptr.h"
 
 #include "./overlay_ptr_resolver.h"
+#include "./cache_manager/cache_table.h"
 
 
 
@@ -8,14 +9,22 @@ namespace miya_db{
 
 
 
-OverlayPtr::OverlayPtr( unsigned char otpr )
+OverlayPtr::OverlayPtr( unsigned char *optr )
 {
-	_optr	 = otpr;
+	memcpy( _optr, optr , sizeof( _optr ));
 }
 
 
 
-const unsigned char OverlayPtr::optr()
+
+
+void OverlayPtr::cacheTable( CacheTable *cacheTable )
+{
+	_cacheTable = cacheTable;
+}
+
+
+unsigned char *OverlayPtr::optr()
 {
 	return _optr;
 };
@@ -24,8 +33,14 @@ const unsigned char OverlayPtr::optr()
 unsigned short OverlayPtr::frame()
 {
 	unsigned short ret = 0;
-	ret = static_cast<unsigned short>(_optr & 0x18);
-	return ret;
+	
+	ret += static_cast<unsigned short>(_optr[0]);
+	ret += static_cast<unsigned short>(_optr[1]);
+	ret += static_cast<unsigned short>(_optr[2]);
+
+	return ret;	
+	//ret = static_cast<unsigned short>(_optr & 0x18);
+	//return ret;
 };
 
 
@@ -34,7 +49,10 @@ unsigned short OverlayPtr::frame()
 unsigned short OverlayPtr::offset()
 {
 	unsigned short ret = 0;
-	ret = static_cast<unsigned short>(_optr & 0x03);
+
+	ret += static_cast<unsigned short>(_optr[3]);
+	ret += static_cast<unsigned short>(_optr[4]);
+
 	return ret;
 };
 
@@ -42,14 +60,19 @@ unsigned short OverlayPtr::offset()
 
 unsigned char OverlayPtr::value()
 {
-	return *(static_cast<unsigned char *>(_optResolver->resolve(this)));
+	return *(static_cast<unsigned char *>(_cacheTable->convert(this)));
 }
 
 
 
 void OverlayPtr::value( unsigned char target )
 {
-	*(static_cast<unsigned char *>(_optResolver->resolve(this))) = target;
+	unsigned char *tmp;
+	//*(static_cast<unsigned char *>(_cacheTable->convert(this))) = target;
+	*(static_cast<unsigned char *>(_cacheTable->convert(this))) = target;
+
+	
+	// メモリマップされたファイルのポインタ位置に値を格納
 }
 
 /*
@@ -65,8 +88,8 @@ unsigned char* OverlayPtr::operator []( size_t n )
 
 OverlayPtr* OverlayPtr::operator =( OverlayPtr *_from )
 {
-	_optr = _from->optr();
-	return this;
+	 // _optr = _from->optr();
+	// return this;
 }
 
 

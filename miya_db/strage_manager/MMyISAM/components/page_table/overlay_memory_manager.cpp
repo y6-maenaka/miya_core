@@ -1,13 +1,12 @@
 #include "overlay_memory_manager.h"
 
-#include "overlay_ptr.h"
 
 namespace miya_db{
 
 
 
 
-OverlayMemoryManager::optr *lastOptr()
+OverlayMemoryManager::optr *generateOptr()
 {
 	return nullptr;
 }
