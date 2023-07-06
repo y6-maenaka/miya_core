@@ -7,6 +7,7 @@
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/cache_manager/cache_table.h"
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/cache_manager/mapper/mapper.h"
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/overlay_memory_manager.h"
+#include "../../miya_db/strage_manager/MMyISAM/components/page_table/optr_utils.h"
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -244,5 +245,18 @@ int main(){
 	_cacheTable.cacheingList();
 	_cacheTable.invalidList();
 	std::cout << "====================================" << "\n\n";
+
+
+	char *testStrings = "Hello World";
+	omemcpy( &_optr3 , testStrings , 11 );
+
+	printf("%p\n", &(_optr));
+	//(_optr + 1)->value('H');
+	//(_optr + 2)->value('E');
+	//(_optr + 3)->value('L');
+	//(_optr + 4)->value('L');
+	//(_optr + 5)->value('O');
+	//(_optr + 6)->value('!');
+
 
 }

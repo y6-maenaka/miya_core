@@ -1,6 +1,5 @@
 #include "overlay_ptr.h"
 
-#include "./overlay_ptr_resolver.h"
 #include "./cache_manager/cache_table.h"
 
 
@@ -28,6 +27,17 @@ unsigned char *OverlayPtr::optr()
 {
 	return _optr;
 };
+
+
+void OverlayPtr::optr( unsigned long ulongOptr )
+{
+	_optr[0] = (ulongOptr >> 32) & 0xFF;
+	_optr[1] = (ulongOptr >> 24) & 0xFF;
+	_optr[2] = (ulongOptr >> 16) & 0xFF;
+	_optr[3] = (ulongOptr >> 8) & 0xFF;
+	_optr[4] = (ulongOptr >> 0) & 0xFF;
+}
+
 
 
 unsigned short OverlayPtr::frame()
@@ -86,10 +96,32 @@ unsigned char* OverlayPtr::operator []( size_t n )
 
 
 
-OverlayPtr* OverlayPtr::operator =( OverlayPtr *_from )
+
+std::unique_ptr<OverlayPtr> OverlayPtr::operator +( unsigned long addend )
 {
-	 // _optr = _from->optr();
-	// return this;
+	uint64_t ulongOptr = 0;
+
+	unsigned short exponentialList[5] = {64, 32, 16, 8, 0};
+	
+	ulongOptr += static_cast<unsigned long>(_optr[0]) * pow(2, exponentialList[0]) ;
+	ulongOptr += static_cast<unsigned long>(_optr[1]) * pow(2, exponentialList[1]) ;
+	ulongOptr += static_cast<unsigned long>(_optr[2]) * pow(2, exponentialList[2]) ;
+	ulongOptr += static_cast<unsigned long>(_optr[3]) * pow(2, exponentialList[3]) ;
+	ulongOptr += static_cast<unsigned long>(_optr[4]) * pow(2, exponentialList[4]) ;
+
+	ulongOptr += addend;
+	std::cout << ulongOptr << "\n";
+	
+	std::unique_ptr<OverlayPtr> newOptr( new OverlayPtr );
+	newOptr->cacheTable( _cacheTable );
+	newOptr->optr( ulongOptr );
+
+	for( int i=0; i<5; i++){
+		printf("%02X- ", (newOptr->optr())[i]);
+	}std::cout << "\n";
+
+
+	return newOptr;
 }
 
 

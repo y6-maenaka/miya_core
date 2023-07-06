@@ -3,6 +3,7 @@
 
 
 #include <string.h>
+#include <memory>
 
 
 
@@ -29,6 +30,7 @@ public:
 	void cacheTable( CacheTable *cacheTable );
 
 	unsigned char *optr(); // getter
+	void optr( unsigned long ulongOptr );
 
 	unsigned short frame();
 	unsigned short offset();
@@ -37,11 +39,8 @@ public:
 	void value( unsigned char target ); // setter
 
 	//OverlayPtr* operator []( size_t n ); 
-	OverlayPtr* operator =( OverlayPtr *_from );
-	
-	// void operator =( unsigned char target );
+	std::unique_ptr<OverlayPtr> operator +( unsigned long addend );
 
-	// void operator =(void *ptr);
 
 } optr;
 
