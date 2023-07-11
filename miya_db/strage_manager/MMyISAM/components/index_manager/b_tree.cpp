@@ -20,7 +20,6 @@ template struct NodeItemSet<unsigned char>;
 
 
 
-
 template <typename T>
 int NodeItemSet<T>::keyCnt( bool debugPrint )
 {

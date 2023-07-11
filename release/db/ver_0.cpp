@@ -1,5 +1,5 @@
 #include "ver_0.h"
-#include "../../miya_db/strage_manager/MMyISAM/components/index_manager/b_tree.cpp"
+#include "../../miya_db/strage_manager/MMyISAM/components/index_manager/btree.h"
 
 
 
@@ -9,6 +9,8 @@
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/overlay_memory_manager.h"
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/optr_utils.h"
 
+
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <filesystem>
@@ -16,17 +18,19 @@
 
 int main(){
 
-	/*
+	
 
 	MiddleBuffer buffer(100);
 
 	unsigned char* target = (unsigned char *)"helloworld";
 	unsigned int targetSize = 10;
 
+	miya_db::OBtree btree;
+	std::cout << btree.rootNode() << "\n";
+
 	//buffer.bufferControl( target , targetSize );
 
-
-
+	/*
 	miya_db::BTree<unsigned char> *tree = new miya_db::BTree<unsigned char>(4);
 
 
@@ -153,12 +157,13 @@ int main(){
 	tree->printTree(tree->_root);
 
 	//std::cout << tree->_root->_itemSet->childCnt( true ) << "\n";
-
 	*/
+	
 
 
 
 	//int indexOswapFD = open("../../miya_db/table_files/test_table/test.oswap", O_RDWR );
+	/*
 	int indexOswapFD = open("../miya_db/table_files/test_table/test.oswap", O_RDWR , (mode_t)0600 );
 	miya_db::CacheTable _cacheTable( indexOswapFD );
 	miya_db::Mapper *_mapper = _cacheTable.mapper();
@@ -251,12 +256,34 @@ int main(){
 	omemcpy( &_optr3 , testStrings , 11 );
 
 	printf("%p\n", &(_optr));
-	//(_optr + 1)->value('H');
-	//(_optr + 2)->value('E');
-	//(_optr + 3)->value('L');
-	//(_optr + 4)->value('L');
-	//(_optr + 5)->value('O');
-	//(_optr + 6)->value('!');
+	*/
 
+
+	
+	int indexOswapFD = open("../miya_db/table_files/test_table/test.oswap", O_RDWR , (mode_t)0600 );
+	miya_db::CacheTable _cacheTable( indexOswapFD );
+	miya_db::Mapper *_mapper = _cacheTable.mapper();
+	// std::cout << _mapper->fd() << "\n";
+
+	unsigned char initAddr[5] = {0x00 , 0x00 , 0x00, 0x00, 0x00};
+	miya_db::optr _optr( initAddr );
+	_optr.cacheTable( &_cacheTable );
+
+	unsigned char initAddr2[5] = {0x00 , 0x00 , 0x00, 0x00, 0x10};
+	miya_db::optr _optr2( initAddr2 );
+	_optr2.cacheTable( &_cacheTable );
+
+
+
+	_cacheTable.cacheingList();
+	_cacheTable.invalidList();
+			
+	char *greet = "Hello World!";
+	char *hello = "HzZZZ"; // こっちの方が大きい
+												 
+	omemcpy( &_optr , greet , 5);
+	omemcpy( &_optr2 , hello , 5 );
+	int flag = ocmp( &_optr , &_optr2 , 5 );
+	std::cout << "flag -> " << flag << "\n";
 
 }

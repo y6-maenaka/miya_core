@@ -57,7 +57,6 @@ struct NodeItemSet{
 	};
 
 
-
 	int _threshold; // 閾値 子ノードの最大個数 
 									// ( 閾値 - 1 ) キーバリューの最大個数
 
@@ -70,6 +69,8 @@ struct NodeItemSet{
 	void pullRight( int index ); // indexに空きがくるように右シフトするj
 
 };
+
+
 
 
 

@@ -45,6 +45,45 @@ void *omemcpy( void* dest , optr *src , unsigned long n )
 
 
 
+int ocmp( void* p1, optr* o2 , unsigned long size )
+{
+	int i=0;
+	for( i; i<size; i++ ){
+		if(  (static_cast<unsigned char*>(p1))[i] != ((*o2)+i)->value() ) break;
+	}
+
+	if( i == size ) return 0;
+	return ( (static_cast<unsigned char*>(p1))[i] <= ((*o2)+i)->value()  ) ? -1 : 1;
+	//return (( *(static_cast<unsigned char*>(p1))[i]) >= ((*o2)+i)->value() ) ? 1 : -1;	
+}
+
+
+
+int ocmp( optr* o1 , void* p2, unsigned long size )
+{
+	int i=0;
+	for( i; i<size; i++ ){
+		if( (((*o1)+i)->value()) != ((static_cast<unsigned char*>(p2))[i]) )   break;
+	}
+
+	if( i == size ) return 0;
+	return ( ((*o1)+i)->value() <= ((static_cast<unsigned char*>(p2))[i]) ) ? -1 : 1;
+	
+}
+
+
+
+int ocmp( optr* o1 , optr* o2, unsigned long size )
+{
+	int i=0;
+	for( i; i<size; i++ ){
+		if( (((*o1)+i)->value()) !=  (((*o2)+i)->value()) )   break;
+	}
+
+	if( i == size ) return 0;
+	return ( ((*o1)+i)->value() <=  ((*o2)+i)->value() ) ? -1 : 1;	
+}
+
 
 
 };
