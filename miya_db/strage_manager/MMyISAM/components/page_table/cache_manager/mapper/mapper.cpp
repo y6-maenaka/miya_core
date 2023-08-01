@@ -54,7 +54,8 @@ void* Mapper::map( unsigned int frameIdx ) // mapping file point
 	
 	void *mappedPtr = nullptr;
 	mappedPtr = mmap( NULL , DEFAULT_FRAME_CACHE_SIZE  , PROT_WRITE | PROT_READ , MAP_SHARED , _fd , ( frameIdx * DEFAULT_FRAME_CACHE_SIZE ) );	
-
+	memset( mappedPtr , 0x00 , DEFAULT_FRAME_CACHE_SIZE );
+	
 	std::cout << "Memory mapped with index -> " << mappedPtr << "\n";
 	std::cout << "Mapped length -> " << DEFAULT_FRAME_CACHE_SIZE << "\n";
 

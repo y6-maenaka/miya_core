@@ -56,6 +56,11 @@ private:
 	*/
 
 public:
+
+	unsigned short keyCount();
+	unsigned short childCount();
+	unsigned short dataPtrCount();
+
 	std::unique_ptr<optr> key( unsigned short index );
 	OBtreeNode* child( unsigned short index );
 	std::unique_ptr<optr> dataPtr( unsigned short index );
@@ -75,7 +80,7 @@ private:
 public:
 	/* 肝となるメソッド2つ */
 	void registIndex( unsigned char* key , optr *dataPtr , optr* leftChildNode = nullptr, optr* rightChildNode = nullptr );
-	OBtreeNode* find( unsigned char *key );
+	OBtreeNode* subtreeKeySearch( unsigned char *key );
 
 };
 

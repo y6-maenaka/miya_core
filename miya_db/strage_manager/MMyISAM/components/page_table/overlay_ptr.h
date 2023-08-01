@@ -24,12 +24,12 @@ private:
 	//OverlayPtrResolver *_optResolver;
 
 public:
-	OverlayPtr(){};
-	OverlayPtr( unsigned char *optr );
+	OverlayPtr(){}; 
+	OverlayPtr( unsigned char *optr ); // フリーメモリ管理領域にはアクセスしないようにする
 
 	void cacheTable( CacheTable *cacheTable );
 
-	unsigned char *optr(); // getter
+	unsigned char *optr(); // getter with unsigned char[5]
 	void optr( unsigned long ulongOptr );
 
 	unsigned short frame();

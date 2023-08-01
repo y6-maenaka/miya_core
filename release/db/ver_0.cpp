@@ -14,7 +14,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <filesystem>
-#include <unistd.h>
 
 int main(){
 
@@ -26,7 +25,7 @@ int main(){
 	unsigned int targetSize = 10;
 
 	miya_db::OBtree btree;
-	std::cout << btree.rootNode() << "\n";
+	// std::cout << btree.rootNode() << "\n";
 
 	//buffer.bufferControl( target , targetSize );
 
@@ -262,7 +261,7 @@ int main(){
 	
 	int indexOswapFD = open("../miya_db/table_files/test_table/test.oswap", O_RDWR , (mode_t)0600 );
 	miya_db::CacheTable _cacheTable( indexOswapFD );
-	miya_db::Mapper *_mapper = _cacheTable.mapper();
+	// miya_db::Mapper *_mapper = _cacheTable.mapper();
 	// std::cout << _mapper->fd() << "\n";
 
 	unsigned char initAddr[5] = {0x00 , 0x00 , 0x00, 0x00, 0x00};
@@ -273,17 +272,5 @@ int main(){
 	miya_db::optr _optr2( initAddr2 );
 	_optr2.cacheTable( &_cacheTable );
 
-
-
-	_cacheTable.cacheingList();
-	_cacheTable.invalidList();
-			
-	char *greet = "Hello World!";
-	char *hello = "HzZZZ"; // こっちの方が大きい
-												 
-	omemcpy( &_optr , greet , 5);
-	omemcpy( &_optr2 , hello , 5 );
-	int flag = ocmp( &_optr , &_optr2 , 5 );
-	std::cout << "flag -> " << flag << "\n";
 
 }

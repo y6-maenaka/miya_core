@@ -31,6 +31,12 @@ std::unique_ptr<optr> ONodeItemSet::dataPtr( unsigned short index )
 
 
 
+
+
+
+
+
+
 void OBtreeNode::registIndex( unsigned char* key , optr *dataPtr , optr* leftChildNode , optr* rightChildNode )
 {
 
@@ -38,13 +44,8 @@ void OBtreeNode::registIndex( unsigned char* key , optr *dataPtr , optr* leftChi
 
 
 
-OBtreeNode* OBtreeNode::find( unsigned char *key )
+OBtreeNode* OBtreeNode::subtreeKeySearch( unsigned char *key )
 {
-	for(int i=0; i<DEFAULT_THRESHOLD; i++)
-	{
-		_oNodeItemSet->child(i);
-	}
-
 }
 
 

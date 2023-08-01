@@ -59,6 +59,7 @@ public:
 
 	// unsigned char* operator []( unsigned short frame );	
 	void* convert( optr *src );
+	void* convert( unsigned char* src );
 };
 
 

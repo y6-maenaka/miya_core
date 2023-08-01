@@ -29,6 +29,7 @@ unsigned char *OverlayPtr::optr()
 };
 
 
+
 void OverlayPtr::optr( unsigned long ulongOptr )
 {
 	_optr[0] = (ulongOptr >> 32) & 0xFF;
@@ -79,9 +80,7 @@ void OverlayPtr::value( unsigned char target )
 {
 	unsigned char *tmp;
 	//*(static_cast<unsigned char *>(_cacheTable->convert(this))) = target;
-	*(static_cast<unsigned char *>(_cacheTable->convert(this))) = target;
-
-	
+	*(static_cast<unsigned char *>(_cacheTable->convert(this))) = target;	
 	// メモリマップされたファイルのポインタ位置に値を格納
 }
 
@@ -115,11 +114,6 @@ std::unique_ptr<OverlayPtr> OverlayPtr::operator +( unsigned long addend )
 	std::unique_ptr<OverlayPtr> newOptr( new OverlayPtr );
 	newOptr->cacheTable( _cacheTable );
 	newOptr->optr( ulongOptr );
-
-	for( int i=0; i<5; i++){
-		printf("%02X- ", (newOptr->optr())[i]);
-	}std::cout << "\n";
-
 
 	return newOptr;
 }
