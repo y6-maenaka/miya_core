@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <filesystem>
+#include <memory>
 
 int main(){
 
@@ -272,5 +273,10 @@ int main(){
 	miya_db::optr _optr2( initAddr2 );
 	_optr2.cacheTable( &_cacheTable );
 
+	std::unique_ptr<miya_db::optr> tmp = std::make_unique<miya_db::optr>( _optr2 );
+
+	char *hello = "Hello World";
+	//omemcpy( tmp , (void*)hello ,12 );
+	omemcpy( tmp.get() , (void*)hello , 12 );
 
 }

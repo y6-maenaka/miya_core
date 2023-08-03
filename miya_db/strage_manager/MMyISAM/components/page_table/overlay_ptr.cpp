@@ -8,46 +8,46 @@ namespace miya_db{
 
 
 
-OverlayPtr::OverlayPtr( unsigned char *optr )
+optr::optr( unsigned char *optr )
 {
-	memcpy( _optr, optr , sizeof( _optr ));
+	memcpy( _addr, optr , sizeof( _addr ));
 }
 
 
 
 
 
-void OverlayPtr::cacheTable( CacheTable *cacheTable )
+void optr::cacheTable( CacheTable *cacheTable )
 {
 	_cacheTable = cacheTable;
 }
 
 
-unsigned char *OverlayPtr::optr()
+unsigned char *optr::addr()
 {
-	return _optr;
+	return _addr;
 };
 
 
 
-void OverlayPtr::optr( unsigned long ulongOptr )
+void optr::addr( unsigned long ulongOptr )
 {
-	_optr[0] = (ulongOptr >> 32) & 0xFF;
-	_optr[1] = (ulongOptr >> 24) & 0xFF;
-	_optr[2] = (ulongOptr >> 16) & 0xFF;
-	_optr[3] = (ulongOptr >> 8) & 0xFF;
-	_optr[4] = (ulongOptr >> 0) & 0xFF;
+	_addr[0] = (ulongOptr >> 32) & 0xFF;
+	_addr[1] = (ulongOptr >> 24) & 0xFF;
+	_addr[2] = (ulongOptr >> 16) & 0xFF;
+	_addr[3] = (ulongOptr >> 8) & 0xFF;
+	_addr[4] = (ulongOptr >> 0) & 0xFF;
 }
 
 
 
-unsigned short OverlayPtr::frame()
+unsigned short optr::frame()
 {
 	unsigned short ret = 0;
 	
-	ret += static_cast<unsigned short>(_optr[0]);
-	ret += static_cast<unsigned short>(_optr[1]);
-	ret += static_cast<unsigned short>(_optr[2]);
+	ret += static_cast<unsigned short>(_addr[0]);
+	ret += static_cast<unsigned short>(_addr[1]);
+	ret += static_cast<unsigned short>(_addr[2]);
 
 	return ret;	
 	//ret = static_cast<unsigned short>(_optr & 0x18);
@@ -57,26 +57,26 @@ unsigned short OverlayPtr::frame()
 
 
 
-unsigned short OverlayPtr::offset()
+unsigned short optr::offset()
 {
 	unsigned short ret = 0;
 
-	ret += static_cast<unsigned short>(_optr[3]);
-	ret += static_cast<unsigned short>(_optr[4]);
+	ret += static_cast<unsigned short>(_addr[3]);
+	ret += static_cast<unsigned short>(_addr[4]);
 
 	return ret;
 };
 
 
 
-unsigned char OverlayPtr::value()
+unsigned char optr::value()
 {
 	return *(static_cast<unsigned char *>(_cacheTable->convert(this)));
 }
 
 
 
-void OverlayPtr::value( unsigned char target )
+void optr::value( unsigned char target )
 {
 	unsigned char *tmp;
 	//*(static_cast<unsigned char *>(_cacheTable->convert(this))) = target;
@@ -96,24 +96,24 @@ unsigned char* OverlayPtr::operator []( size_t n )
 
 
 
-std::unique_ptr<OverlayPtr> OverlayPtr::operator +( unsigned long addend )
+std::unique_ptr<optr> optr::operator +( unsigned long addend )
 {
 	uint64_t ulongOptr = 0;
 
 	unsigned short exponentialList[5] = {64, 32, 16, 8, 0};
 	
-	ulongOptr += static_cast<unsigned long>(_optr[0]) * pow(2, exponentialList[0]) ;
-	ulongOptr += static_cast<unsigned long>(_optr[1]) * pow(2, exponentialList[1]) ;
-	ulongOptr += static_cast<unsigned long>(_optr[2]) * pow(2, exponentialList[2]) ;
-	ulongOptr += static_cast<unsigned long>(_optr[3]) * pow(2, exponentialList[3]) ;
-	ulongOptr += static_cast<unsigned long>(_optr[4]) * pow(2, exponentialList[4]) ;
+	ulongOptr += static_cast<unsigned long>(_addr[0]) * pow(2, exponentialList[0]) ;
+	ulongOptr += static_cast<unsigned long>(_addr[1]) * pow(2, exponentialList[1]) ;
+	ulongOptr += static_cast<unsigned long>(_addr[2]) * pow(2, exponentialList[2]) ;
+	ulongOptr += static_cast<unsigned long>(_addr[3]) * pow(2, exponentialList[3]) ;
+	ulongOptr += static_cast<unsigned long>(_addr[4]) * pow(2, exponentialList[4]) ;
 
 	ulongOptr += addend;
 	std::cout << ulongOptr << "\n";
 	
-	std::unique_ptr<OverlayPtr> newOptr( new OverlayPtr );
+	std::unique_ptr<optr> newOptr( new optr );
 	newOptr->cacheTable( _cacheTable );
-	newOptr->optr( ulongOptr );
+	newOptr->addr( ulongOptr );
 
 	return newOptr;
 }

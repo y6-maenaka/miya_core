@@ -15,22 +15,22 @@ class CacheTable;
 
 
 // オーバレイ元のポインタは秘匿する
-typedef class OverlayPtr
+class optr
 {
 private:
 	// unsigned char _optr;
-	unsigned char _optr[5];
+	unsigned char _addr[5];
 	CacheTable *_cacheTable;
 	//OverlayPtrResolver *_optResolver;
 
 public:
-	OverlayPtr(){}; 
-	OverlayPtr( unsigned char *optr ); // フリーメモリ管理領域にはアクセスしないようにする
+	optr(){}; 
+	optr( unsigned char *optr ); // フリーメモリ管理領域にはアクセスしないようにする
 
 	void cacheTable( CacheTable *cacheTable );
 
-	unsigned char *optr(); // getter with unsigned char[5]
-	void optr( unsigned long ulongOptr );
+	unsigned char *addr(); // getter // get with unsigned char[5]
+	void addr( unsigned long ulongOptr );
 
 	unsigned short frame();
 	unsigned short offset();
@@ -39,10 +39,9 @@ public:
 	void value( unsigned char target ); // setter
 
 	//OverlayPtr* operator []( size_t n ); 
-	std::unique_ptr<OverlayPtr> operator +( unsigned long addend );
+	std::unique_ptr<optr> operator +( unsigned long addend );
 
-
-} optr;
+};
 
 
 
