@@ -1,5 +1,5 @@
 #include "overlay_memory_allocator.h"
-#include "./optr_utils.h"
+#include "./optr_utils.h" 
 #include "./overlay_ptr.h"
 #include "./cache_manager/cache_table.h"
 
@@ -24,6 +24,17 @@ namespace miya_db
 	管理領域 | 先頭フリーブロック | フリーブロック管理ブロック
  -----------------------------------------------------------
 */
+
+/*
+-------------------------------------------------------------------------------------------
+先頭のフリーブロックへのポインタ(controlBlockZero) | 先頭フリーブロック(controlBlockHead) | 
+-------------------------------------------------------------------------------------------
+*/
+
+/*
+	先頭フリーブロックのネクストとプレブが自身を指すことがある
+*/
+
 
 
 
@@ -70,6 +81,7 @@ std::unique_ptr<FreeBlockControlBlock> FreeBlockControlBlock::nextControlBlock()
 {
 	if( _optr == nullptr )  return nullptr;
 
+	//return std::make_unique<FreeBlockControlBlock>(FreeBlockControlBlock( _optr + 5 ));
 	return std::unique_ptr<FreeBlockControlBlock>( new FreeBlockControlBlock(_optr + 5 ) );
 }
 
@@ -135,6 +147,19 @@ std::unique_ptr<FreeBlockControlBlock> findFreeBlock( FreeBlockControlBlock *tar
 
 	return std::make_unique<FreeBlockControlBlock>(*targetControlBlock);
 }
+
+
+std::unique_ptr<FreeBlockControlBlock> getPrevControlBlock( FreeBlockControlBlock* targetControlBlock ,optr* target )
+{
+	if( ocmp( targetControlBlock->nextControlBlock()->Optr().get(), target , 5  ) < 0 && ocmp( targetControlBlock->prevControlBlock()->Optr().get(), target , 5 ) < 0 ) return std::unique_ptr<FreeBlockControlBlock>(targetControlBlock);
+
+	if( ocmp( targetControlBlock->nextControlBlock()->Optr().get() ,target , 5  ) > 0 && ocmp( targetControlBlock->Optr().get() , target , 5 ) < 0 ) return std::unique_ptr<FreeBlockControlBlock>(targetControlBlock);
+
+	return getPrevControlBlock( targetControlBlock->nextControlBlock().get() , target );
+}
+
+
+
 
 
 
@@ -214,18 +239,29 @@ std::unique_ptr<optr> OverlayMemoryAllocator::allocate( unsigned int allocateSiz
 void OverlayMemoryAllocator::unallocate( optr* target , unsigned int size  )
 {
 	// フリーメモリ管理ブロックの追加
-	FreeBlockControlBlock targetControlBlock( target );
+	FreeBlockControlBlock targetControlBlock( target ); // 解放する領域の初めにフリーブロック管理ブロックを配置する
+	std::unique_ptr<FreeBlockControlBlock> insertTargetControlBlock = getInsertPrevCOntrolBlock( getHeadControlBlock().get() , target );
+
+	
+	auto placeControlBlock = [&]() // 解放した領域に新たなコントロールブロックを配置する
+	{
+		targetControlBlock.prevControlBlock( insertTargetControlBlock->Optr().get() );
+		targetControlBlock.nextControlBlock( insertTargetControlBlock->nextControlBlock()->Optr().get() );
+		targetControlBlock.freeBlockEnd( (*target + size).get() );
+
+		insertTargetControlBlock->nextControlBlock( targetControlBlock.Optr().get() );
+		insertTargetControlBlock->nextControlBlock()->prevControlBlock( targetControlBlock.Optr().get() );
+
+	};
+
+	// 解放した領域にフリーブロックを配置する領域が存在すれば
+	if( size > PREV_FREE_BLOCK_OPTR_LENGTH + NEXT_FREE_BLOCK_OPTR_LENGTH + FREE_BLOCK_CONTROL_BLOCK_LENGTH ) 
+		placeControlBlock();
 
 	return;
 }
 
 
-std::unique_ptr<FreeBlockControlBlock> getPrevControlBlock( FreeBlockControlBlock* targetControlBlock ,optr* target )
-{
-	if( ocmp( (targetControlBlock->nextControlBlock()->Optr()).get() , target, 5 ) <= 0 ) return std::make_unique<FreeBlockControlBlock>(*targetControlBlock);
-
-	return getPrevControlBlock( (targetControlBlock->nextControlBlock()).get(), target  );
-}
 
 
 
@@ -238,10 +274,10 @@ std::unique_ptr<FreeBlockControlBlock> OverlayMemoryAllocator::getHeadControlBlo
 	optrZero.cacheTable( _cacheTable );
 
 	FreeBlockControlBlock controlBlockZero( &optrZero );
-
 	
 	return controlBlockZero.nextControlBlock();
 }
+
 
 
 

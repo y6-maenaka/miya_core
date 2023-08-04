@@ -7,27 +7,63 @@ namespace miya_db
 
 
 
-
-
-std::unique_ptr<optr> ONodeItemSet::key( unsigned short index )
+/*
+  ---------------- キー操作関係 -------------------------------------
+*/
+unsigned short ONodeItemSet::keyCount()
 {
-	return ( (*_optr) + (index * INDEX_KEY_SIZE));
+	return static_cast<unsigned short>( _optr->value() ); // itemSet先頭1バイトがそのままkeyCountになる
 }
 
-
-
-
-OBtreeNode* ONodeItemSet::child( unsigned short index )
+std::unique_ptr<optr> ONodeItemSet::key( unsigned short index ) // index : start with 0
 {
-	return nullptr;
+	if( index+1  > (keyCount()) ) return nullptr;
+
+	return *_optr + (ELEMENT_COUNT_SIZE + (index * KEY_SIZE));
+}
+/* -------------------------------------------------------------- */
+
+
+
+
+/*
+	---------------- 子ノード操作関係 -------------------------------------
+*/
+unsigned short ONodeItemSet::childCount()
+{
+	return static_cast<unsigned short>( (*_optr + ( ELEMENT_COUNT_SIZE/*keycountのサイズ*/ + (DEFAULT_THRESHOLD*KEY_SIZE)))->value() );
 }
 
-
-std::unique_ptr<optr> ONodeItemSet::dataPtr( unsigned short index )
+std::unique_ptr<ONodeItemSet> ONodeItemSet::child( unsigned short index )
 {
-	return ( (*_optr) + ((index * 5) + (INDEX_KEY_SIZE * DEFAULT_THRESHOLD) + (5 * DEFAULT_THRESHOLD + 1)) );	
+	// 指定インデックスのoptrを取得する
+	if( index+1 > (childCount()) ) return nullptr;
+				
+	std::unique_ptr<optr> childHead = *_optr + ( ELEMENT_COUNT_SIZE + (DEFAULT_THRESHOLD*KEY_SIZE) + ELEMENT_COUNT_SIZE + (index*CHILD_OPTR_SIZE));
+
+	return std::make_unique<ONodeItemSet>( ONodeItemSet(childHead.get()) );
+}
+/* -------------------------------------------------------------- */
+
+
+
+
+/*
+	---------------- データオーバレイポインタ操作関係 -------------------------------------
+*/
+unsigned short ONodeItemSet::dataOptrCount()
+{
+	return static_cast<unsigned short>( (*_optr + (( ELEMENT_COUNT_SIZE/*keycountのサイズ*/ + (DEFAULT_THRESHOLD*KEY_SIZE)) + ELEMENT_COUNT_SIZE + (DEFAULT_THRESHOLD*CHILD_OPTR_SIZE)))->value() );
 }
 
+std::unique_ptr<optr> ONodeItemSet::dataOptr( unsigned short index )
+{
+	if( index+1 > (dataOptrCount()) ) return nullptr;
+	
+	return *_optr + ( ELEMENT_COUNT_SIZE + (DEFAULT_THRESHOLD*KEY_SIZE) +ELEMENT_COUNT_SIZE + (DEFAULT_THRESHOLD*CHILD_OPTR_SIZE) + ELEMENT_COUNT_SIZE + (index*DATA_OPTR_SIZE));
+}
+
+/* -------------------------------------------------------------- */
 
 
 
@@ -46,6 +82,7 @@ void OBtreeNode::registIndex( unsigned char* key , optr *dataPtr , optr* leftChi
 
 OBtreeNode* OBtreeNode::subtreeKeySearch( unsigned char *key )
 {
+	return nullptr;
 }
 
 
@@ -63,5 +100,4 @@ const OBtreeNode *OBtree::rootNode()
 }
 
 
-
-}; // close miya_db namespace
+} // close miya_db namespace

@@ -13,8 +13,6 @@ namespace miya_db
 
 
 
-
-
 /*
 template <class T>
 T &omemcpy( T &dest , T &src , unsigned long n )
@@ -91,8 +89,7 @@ void *omemcpy( void* dest , optr* src , unsigned long n );
 
 /* キャッシュされていない場所は0が返却される */
 
-template <class T>
-int ocmp( T* o1 , T* o2, unsigned long size )
+int ocmp( optr* o1 , optr* o2, unsigned long size )
 {
 	int i=0;
 	for( i=0; i<size; i++ ){
@@ -107,8 +104,7 @@ int ocmp( T* o1 , T* o2, unsigned long size )
 
 
 
-template <class T>
-int ocmp( T* o1 , void* p2, unsigned long size )
+int ocmp( optr* o1 , void* p2, unsigned long size )
 {
 	int i=0;
 	for( i=0; i<size; i++ ){
@@ -123,8 +119,7 @@ int ocmp( T* o1 , void* p2, unsigned long size )
 
 
 
-template <class T>
-int ocmp( void* p1, T* o2 , unsigned long size )
+int ocmp( void* p1, optr* o2 , unsigned long size )
 {
 	int i=0;
 	for( i=0; i<size; i++ ){

@@ -24,13 +24,13 @@ constexpr unsigned int FREE_BLOCK_CONTROL_BLOCK_LENGTH = PREV_FREE_BLOCK_OPTR_LE
 	- prev_free_block_ptr
 	- next_free_block_ptr
 	- free_block_end_ptr
-
 */
 
 class optr;
 class CacheTable;
 
 
+// 先頭ポインタをラップして取り扱いが簡単になるようにしている
 struct FreeBlockControlBlock
 {
 private:
@@ -53,14 +53,20 @@ public:
 	unsigned long freeBlockSize();
 
 
-
 	static void placeControlBlock( optr* targetPlaceOptr , optr* prevControlBlockOptr, optr* nextControlBlockOptr, optr* endFreeBlockOptr );
 };
 
 
 
-std::unique_ptr<FreeBlockControlBlock> findFreeBlock( FreeBlockControlBlock *targetControlBlock, unsigned int allocateSize );
-std::unique_ptr<FreeBlockControlBlock> getHeadControlBlock( FreeBlockControlBlock* targetControlBlock ,optr* target );
+
+
+
+
+std::unique_ptr<FreeBlockControlBlock> findFreeBlock( FreeBlockControlBlock *targetControlBlock, unsigned int allocateSize ); 
+//std::unique_ptr<FreeBlockControlBlock> getHeadControlBlock( FreeBlockControlBlock* targetControlBlock ,optr* target );
+std::unique_ptr<FreeBlockControlBlock> getInsertPrevCOntrolBlock( FreeBlockControlBlock* targetControlBlock, optr* target );
+
+
 
 
 

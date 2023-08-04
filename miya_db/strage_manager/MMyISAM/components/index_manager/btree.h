@@ -20,14 +20,13 @@ namespace miya_db
 
 
 
-
-
-
-
 constexpr unsigned int DEFAULT_THRESHOLD = 5;
-constexpr unsigned int INDEX_KEY_SIZE = (128/8);
+constexpr unsigned int KEY_SIZE = (128/8);
 
+constexpr unsigned int DATA_OPTR_SIZE = 5;
+constexpr unsigned int CHILD_OPTR_SIZE = 5;
 
+constexpr unsigned int ELEMENT_COUNT_SIZE = 1;
 
 
 class OBtreeNode;
@@ -36,36 +35,31 @@ class OBtreeNode;
 
 
 
-// メモリ上へのインデックス情報配置は _key_key_key_key_key _dataPtr_dataPtr_dataPtr_dataPtr_dataPtr _child_child_child_child_child
+// メモリ上へのインデックス情報配置は (個数)_key_key_key_key_key(個数)_dataPtr_dataPtr_dataPtr_dataPtr_dataPtr(個数)_child_child_child_child_child
+// 個数はどうする？
 
+
+// optrをラップして扱いやすくするための
 struct ONodeItemSet
 {
 private:
 	optr *_optr;
 
-	/* いっそのこと配列でoptrを持つ必要はない？
-	struct ItemSet{
-		struct 
-			{
-				std::array< unsigned char*, DEFAULT_THRESHOLD > _key;	 // size -> (16 * 5)
-				std::array< unsigned char*, DEFAULT_THRESHOLD > _dataOptr; //  size -> (5*5)
-			} _keyPair;
-
-			std::array< unsigned char* , DEFAULT_THRESHOLD + 1 > _child; // 子ノードへのポインタ size -> (5*6)
-	} _itemSet;
-	*/
 
 public:
+	ONodeItemSet( optr *__optr  ){ _optr = __optr; };
+	~ONodeItemSet(){ delete _optr; };
 
 	unsigned short keyCount();
 	unsigned short childCount();
-	unsigned short dataPtrCount();
+	unsigned short dataOptrCount();
 
 	std::unique_ptr<optr> key( unsigned short index );
-	OBtreeNode* child( unsigned short index );
-	std::unique_ptr<optr> dataPtr( unsigned short index );
-
+	std::unique_ptr<ONodeItemSet> child( unsigned short index );
+	std::unique_ptr<optr> dataOptr( unsigned short index );
 };
+
+
 
 
 
