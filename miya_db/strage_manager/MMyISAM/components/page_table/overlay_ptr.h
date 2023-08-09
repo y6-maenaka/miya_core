@@ -7,7 +7,6 @@
 
 
 
-
 namespace miya_db{
 
 class CacheTable;
@@ -41,6 +40,7 @@ public:
 	//OverlayPtr* operator []( size_t n ); 
 	std::unique_ptr<optr> operator +( unsigned long addend );
 
+	std::unique_ptr<unsigned char> mapToMemory( unsigned int size );
 };
 
 

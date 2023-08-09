@@ -1,6 +1,7 @@
 #include "overlay_ptr.h"
 
 #include "./cache_manager/cache_table.h"
+#include "./optr_utils.h"
 
 
 
@@ -120,7 +121,18 @@ std::unique_ptr<optr> optr::operator +( unsigned long addend )
 
 
 
+std::unique_ptr<unsigned char> optr::mapToMemory( unsigned int size )
+{
+	unsigned char* ret = new unsigned char[size];
 
+	omemcpy( ret , this ,static_cast<unsigned long>(size) );
+	
+	return std::unique_ptr<unsigned char>( ret );
+
+
+	// exportarrayの実装
+	// importの実装
+}
 };
 
 

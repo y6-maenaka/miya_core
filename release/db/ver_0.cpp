@@ -25,7 +25,7 @@ int main(){
 	unsigned char* target = (unsigned char *)"helloworld";
 	unsigned int targetSize = 10;
 
-	miya_db::OBtree btree;
+	//miya_db::OBtree btree;
 	// std::cout << btree.rootNode() << "\n";
 
 	//buffer.bufferControl( target , targetSize );
