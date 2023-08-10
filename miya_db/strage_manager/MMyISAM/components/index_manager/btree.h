@@ -91,6 +91,7 @@ public:
 	std::unique_ptr<optr> key( unsigned short index );
 	void key( unsigned short index , unsigned char* targetKey ); // setter
 	std::unique_ptr<ONode> child( unsigned short index );
+	void child( unsigned short index , ONode* targetONode );
 	std::unique_ptr<optr> dataOptr( unsigned short index );
 
 

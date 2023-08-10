@@ -34,7 +34,6 @@ void ViewItemSet::importItemSet( ONodeItemSet *itemSet )
 
 
 
-
 /*
   ---------------- キー操作関係 -------------------------------------
 */
@@ -89,6 +88,14 @@ std::unique_ptr<ONode> ONodeItemSet::child( unsigned short index )
 	std::unique_ptr<ONodeItemSet> itemSet = std::make_unique<ONodeItemSet>( ONodeItemSet(childHead.get()) );
 
 	return std::make_unique<ONode>( ONode(itemSet.get() ));	
+}
+
+
+void ONodeItemSet::child( unsigned short index , ONode* targetONode )
+{
+	std::unique_ptr<optr> childHead = *_optr + ( NODE_OPTR_SIZE/*親ノードへのポインタサイズ*/ + ELEMENT_COUNT_SIZE + (DEFAULT_THRESHOLD*KEY_SIZE) + ELEMENT_COUNT_SIZE + (index*NODE_OPTR_SIZE));
+
+	omemcpy( (*childHead + (index*NODE_OPTR_SIZE)).get() , targetONode->itemSet()->Optr() , NODE_OPTR_SIZE );
 }
 /* -------------------------------------------------------------- */
 
@@ -193,6 +200,12 @@ std::unique_ptr<ONode> ONode::parent()
 
 void ONode::parent( ONode* targetONode )
 {
+	if( targetONode == nullptr )
+	{
+		unsigned char *tmp = new unsigned char[NODE_OPTR_SIZE]; memset( tmp , 0x0000000000, sizeof(NODE_OPTR_SIZE) );
+		omemcpy( _itemSet->Optr() , tmp , NODE_OPTR_SIZE );
+	}
+
 	omemcpy( _itemSet->Optr() , targetONode->itemSet()->Optr() , NODE_OPTR_SIZE );
 	return;
 }
@@ -251,16 +264,25 @@ void ONode::add( unsigned char* targetKey, ONode* targetONode )
 		std::unique_ptr<ONode> parentONode = parent();
 		if(( parentONode.get() , 0x0000000000 , NODE_OPTR_SIZE ) == 0)  // 分裂先がルートノード場合
 		{
-			ONode* newRootNode = new ONode;
-			return ;
-		}
+			ONode* newRootNode = new ONode; // 新たなルートノードの作成
+	
+			newRootNode->itemSet()->key( 0 ,targetKey );
+			newRootNode->itemSet()->child( 0 ,this );
+			newRootNode->itemSet()->child( 1 ,targetONode );
 
+			this->parent( newRootNode );
+			targetONode->parent( newRootNode );
+
+			newRootNode->parent( nullptr ); // 新たなルートノードの親ノードは0x00(無設定)になる
+			return;  // 必ずリターンする
+		}
 
 		return parentONode->add( targetKey, targetONode );
 	}
 
 	else{ // 単純追加
 		_itemSet->key( _itemSet->keyCount() , targetKey );
+		return; // 一応
 	}
 
 	// ノードが分割されることはないので単純に追加する
