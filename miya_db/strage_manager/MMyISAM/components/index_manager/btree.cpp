@@ -75,6 +75,11 @@ unsigned short ONodeItemSet::childCount()
 	return static_cast<unsigned short>( (*_optr + ( NODE_OPTR_SIZE + ELEMENT_COUNT_SIZE/*keycountのサイズ*/ + (DEFAULT_THRESHOLD*KEY_SIZE)))->value() );
 }
 
+void ONodeItemSet::childCount( unsigned short num )
+{	
+	(*_optr + ( NODE_OPTR_SIZE + ELEMENT_COUNT_SIZE/*keycountのサイズ*/ + (DEFAULT_THRESHOLD*KEY_SIZE)))->value( static_cast<unsigned char>(num)) ;
+}
+
 std::unique_ptr<ONode> ONodeItemSet::child( unsigned short index )
 {
 	// 指定インデックスのoptrを取得する
@@ -109,47 +114,6 @@ std::unique_ptr<optr> ONodeItemSet::dataOptr( unsigned short index )
 
 
 
-
-
-
-/*
-unsigned char* ONodeItemSet::splitONode( unsigned char* targetKey )
-{
-	// ViewItemSetの生成( 分割をサポートする仮想的なアイテムセット )
-	ViewItemSet	viewItemSet;
-	viewItemSet.importItemSet( this ); 
-
-	viewItemSet._key->at(DEFAULT_KEY_COUNT) = targetKey; // 最後尾 (通常のキー数プラス1番目に対象のキーを追加)
-
-	// 中央,分割後ルートになるキーを探す
-	// ソートする
-	
-	
-	// 一旦ソートする
-	std::sort( viewItemSet._key->begin() , viewItemSet._key->end() , [](unsigned char* a, unsigned char *b){
-		return memcmp( a , b , KEY_SIZE );
-	});	
-
-	unsigned short splittingKeyIndex = ((DEFAULT_KEY_COUNT+1)%2 == 0) ? ((DEFAULT_KEY_COUNT+1)/2)-1 : (DEFAULT_KEY_COUNT+1)/2 ; // 分割中央のキーインデックス
-	unsigned char* splittingKey = viewItemSet._key->at( splittingKeyIndex );
-
-
-	for( int i=0; i<splittingKeyIndex; i++ )
-		this->key( i ,viewItemSet._key->at(i) );
-	this->keyCount( splittingKeyIndex ); // 前半ノードの個数
-
-
-	ONodeItemSet* splitONode;   // 分割中央キーより右の要素が格納される
-	for( int i=splittingKeyIndex+1; i<this->keyCount(); i++)
-		splitONode->key( i  ,viewItemSet._key->at(i) );
-	splitONode->keyCount( DEFAULT_KEY_COUNT+1-1-splittingKeyIndex-1 ); // 右ノードのキーの個数
-
-	return splittingKey; // 返された溢れた(分割後中央キー)はparentNodeにaddする必要がある
-											 
-		| splittingKey |
-
-	| key key | | key key key |
-											 } */
 
 
 
@@ -227,6 +191,11 @@ std::unique_ptr<ONode> ONode::parent()
 }
 
 
+void ONode::parent( ONode* targetONode )
+{
+	omemcpy( _itemSet->Optr() , targetONode->itemSet()->Optr() , NODE_OPTR_SIZE );
+	return;
+}
 
 
 void ONode::add( unsigned char* targetKey, ONode* targetONode )
@@ -263,6 +232,7 @@ void ONode::add( unsigned char* targetKey, ONode* targetONode )
 			for( int i=0; i<(DEFAULT_KEY_COUNT+1)-separatorKeyIndex-1;i++)	
 				splitONode->itemSet()->key( i , viewItemSet._key->at(i+separatorKeyIndex) );
 			splitONode->itemSet()->keyCount( (DEFAULT_KEY_COUNT+1)-separatorKeyIndex-1 );
+			splitONode->parent( this->parent().get() );
 
 
 			// このアイテムセットは左子ノードとなる 分割対象の中央左のキーを格納する
@@ -273,8 +243,20 @@ void ONode::add( unsigned char* targetKey, ONode* targetONode )
 			_targetKey = separatorKey;
 			_targetONode = splitONode;
 
-			return parent()->add( targetKey , targetONode );
+			//return parent()->add( targetKey , targetONode );
 		};
+
+		splitONode( targetKey , targetONode );
+
+		std::unique_ptr<ONode> parentONode = parent();
+		if(( parentONode.get() , 0x0000000000 , NODE_OPTR_SIZE ) == 0)  // 分裂先がルートノード場合
+		{
+			ONode* newRootNode = new ONode;
+			return ;
+		}
+
+
+		return parentONode->add( targetKey, targetONode );
 	}
 
 	else{ // 単純追加

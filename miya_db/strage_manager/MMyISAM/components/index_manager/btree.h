@@ -85,6 +85,7 @@ public:
 	void keyCount( unsigned short num );
 
 	unsigned short childCount();
+	void childCount( unsigned short num );
 	unsigned short dataOptrCount();
 
 	std::unique_ptr<optr> key( unsigned short index );
@@ -118,19 +119,17 @@ public:
 	~ONode(){ delete _itemSet; }; // 未定義エラー起こす可能性あり
 
 	std::unique_ptr<ONode> parent(); // getter
+	void parent( ONode* targetONode );
 	ONodeItemSet* itemSet(){ return _itemSet; }; // getter
 
 	void add( unsigned char *targetKey , ONode* targetONode = nullptr );
 	unsigned char* splitONode( unsigned char* targetKey );
 
 	
-
-
 	ONodeItemSet* oNodeItemSet(){ return _itemSet; }; // getter
 	bool isLeaf(){ return _isLeaf; }; // getter
 
 	void splitONode(); // キー数が閾値を超えるとスプリットする
-
 
 
 	/* 肝となるメソッド2つ */
