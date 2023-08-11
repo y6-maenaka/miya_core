@@ -54,12 +54,9 @@ CacheTable::CacheTable( int fd )
 
 void* CacheTable::convert( optr *src )
 {
-	std::cout << "Process in CacheTable::convert()" << "\n";
 	unsigned short frame = src->frame();
 
-
 	unsigned char* ret; short idx;
-	std::cout << "cacheFind -> " << cacheFind(frame) << "\n";
 
 	if( (idx = cacheFind( frame )) < 0 ){
 		idx = pageFault( frame ); // キャッシュテーブルに対象フレームのキャッシュブロックが存在しなかったら -> Page Fault
@@ -98,12 +95,10 @@ void* convert( unsigned char* src )
 
 unsigned short CacheTable::pageFault( unsigned int frame )
 {
-	std::cout << "[ PAGE FAULT ]" << "\n";
 	unsigned int outPageIdx = _cacheList._LRU.targetOutPage();
-	std::cout << "target out page -> " << outPageIdx << "\n";
 
-	pageOut(  outPageIdx ); std::cout << "[ Page Out ] :: " << outPageIdx << "\n";
-	pageIn( outPageIdx , frame ); std::cout << "[ Page In ] :: " << outPageIdx << "\n";
+	pageOut(  outPageIdx );
+	pageIn( outPageIdx , frame );
 	
 	return outPageIdx; // 要修正
 }

@@ -17,10 +17,9 @@ class CacheTable;
 class optr
 {
 private:
-	// unsigned char _optr;
+
 	unsigned char _addr[5];
 	CacheTable *_cacheTable;
-	//OverlayPtrResolver *_optResolver;
 
 public:
 	optr(){}; 

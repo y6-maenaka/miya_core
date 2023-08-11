@@ -104,7 +104,7 @@ std::unique_ptr<optr> FreeBlockControlBlock::freeBlockEnd()
 
 void FreeBlockControlBlock::freeBlockEnd( optr* target )
 {
-	omemcpy( _optr + (PREV_FREE_BLOCK_OPTR_LENGTH + NEXT_FREE_BLOCK_OPTR_LENGTH) , target , END_FREE_BLOCK_OPTR_LENGTH ); // コントロールブロックの戦闘位置がPREV
+	omemcpy( _optr + (PREV_FREE_BLOCK_OPTR_LENGTH + NEXT_FREE_BLOCK_OPTR_LENGTH) , target , FREE_BLOCK_END_OPTR_LENGTH ); // コントロールブロックの戦闘位置がPREV
 }
 
 
@@ -215,7 +215,7 @@ std::unique_ptr<optr> OverlayMemoryAllocator::allocate( unsigned int allocateSiz
 	{
 		omemcpy( (*ret->Optr() + allocateSize).get() , ret->prevControlBlock().get() , PREV_FREE_BLOCK_OPTR_LENGTH );
 		omemcpy( (*ret->Optr() + (allocateSize + PREV_FREE_BLOCK_OPTR_LENGTH) ).get() , ret->nextControlBlock().get() , NEXT_FREE_BLOCK_OPTR_LENGTH );
-		omemcpy( (*ret->Optr() + (allocateSize + PREV_FREE_BLOCK_OPTR_LENGTH + NEXT_FREE_BLOCK_OPTR_LENGTH) ).get() , ret->freeBlockEnd().get() , END_FREE_BLOCK_OPTR_LENGTH );
+		omemcpy( (*ret->Optr() + (allocateSize + PREV_FREE_BLOCK_OPTR_LENGTH + NEXT_FREE_BLOCK_OPTR_LENGTH) ).get() , ret->freeBlockEnd().get() , FREE_BLOCK_END_OPTR_LENGTH );
 
 		// 前のコントロールブロックのネクストポインタを新規のコントロールブロックに
 		(ret->prevControlBlock())->nextControlBlock( ret->Optr().get() );
@@ -267,15 +267,16 @@ void OverlayMemoryAllocator::unallocate( optr* target , unsigned int size  )
 
 std::unique_ptr<FreeBlockControlBlock> OverlayMemoryAllocator::getHeadControlBlock()
 {
-	if( _cacheTable == nullptr ) return nullptr;
+	if( _primaryOptr == nullptr ) return nullptr;
 
 	// ポインタ一が0のoptrを作成する
-	optr optrZero;
-	optrZero.cacheTable( _cacheTable );
+	//optr optrZero;
+	//optrZero.cacheTable( _cacheTable );
 
-	FreeBlockControlBlock controlBlockZero( &optrZero );
+	//FreeBlockControlBlock controlBlockZero( &optrZero );
+	FreeBlockControlBlock primaryControlBlock( const_cast<optr*>(_primaryOptr) ); // あまりよくない気がする
 	
-	return controlBlockZero.nextControlBlock();
+	return primaryControlBlock.nextControlBlock();
 }
 
 

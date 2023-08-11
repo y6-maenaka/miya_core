@@ -27,12 +27,15 @@ private:
 	CacheTable *_cacheTable;
 	OverlayMemoryAllocator *_memoryAllocator;
 
+	int init( int targetFD );
+
 public:
+	OverlayMemoryManager( int targetFD );
 	OverlayMemoryManager( const char* oswapFilePath );
 	~OverlayMemoryManager();
 
-	optr* newOptr( unsigned int size );
-	void deleteOptr( optr *target );
+	optr* allocate( unsigned long size );
+	void deallocate( optr *target , unsigned long size );
 
 };
 

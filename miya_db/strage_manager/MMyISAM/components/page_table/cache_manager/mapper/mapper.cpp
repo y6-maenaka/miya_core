@@ -22,7 +22,6 @@ Mapper::Mapper( int fd )
 
 	_systemPageSize = sysconf( _SC_PAGESIZE );
 
-	std::cout << "" << "\n";
 }
 
 
@@ -31,7 +30,6 @@ Mapper::Mapper( int fd )
 // 読み込むキャッシュインデックス
 void* Mapper::map( unsigned int frameIdx ) // mapping file point
 {	
-	std::cout << "Process In Mapper::map()" << "\n";
 	//ftruncate(  _fd , frameIdx * pow(2, 8*2) ); // ファイルの拡張
 
 	// if target area has not allowcated
@@ -41,8 +39,6 @@ void* Mapper::map( unsigned int frameIdx ) // mapping file point
 
 	long totalByteCount = (frameIdx+1) * pow(2, 2*8); // 最低確保しなければならないファイルサイズ 最適化していないためframeまでのファイルを確保する必要がある
 
-	std::cout << "process here" << "\n";
-	std::cout << _systemPageSize << "\n";
 	
 	if( totalByteCount > currentFileSize )
 		if( ftruncate( _fd , totalByteCount ) != 0 ) return nullptr; // 新たにファイルに領域を確保する
@@ -56,9 +52,6 @@ void* Mapper::map( unsigned int frameIdx ) // mapping file point
 	mappedPtr = mmap( NULL , DEFAULT_FRAME_CACHE_SIZE  , PROT_WRITE | PROT_READ , MAP_SHARED , _fd , ( frameIdx * DEFAULT_FRAME_CACHE_SIZE ) );	
 	memset( mappedPtr , 0x00 , DEFAULT_FRAME_CACHE_SIZE );
 	
-	std::cout << "Memory mapped with index -> " << mappedPtr << "\n";
-	std::cout << "Mapped length -> " << DEFAULT_FRAME_CACHE_SIZE << "\n";
-
 	return mappedPtr;
 	/* mmap がマッピングするサイズは,offset は sysconf(_SC_PAGE_SIZE) が返すページサイズの倍数でなければならない。*/
 }

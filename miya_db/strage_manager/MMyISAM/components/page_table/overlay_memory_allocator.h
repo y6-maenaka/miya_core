@@ -14,10 +14,10 @@ namespace miya_db
 
 constexpr unsigned int PREV_FREE_BLOCK_OPTR_LENGTH = 5; // [bytes]
 constexpr unsigned int NEXT_FREE_BLOCK_OPTR_LENGTH = 5; // [bytes]
-constexpr unsigned int END_FREE_BLOCK_OPTR_LENGTH = 5; // [bytes]
+constexpr unsigned int FREE_BLOCK_END_OPTR_LENGTH = 5; // [bytes]
 
 
-constexpr unsigned int FREE_BLOCK_CONTROL_BLOCK_LENGTH = PREV_FREE_BLOCK_OPTR_LENGTH + NEXT_FREE_BLOCK_OPTR_LENGTH + END_FREE_BLOCK_OPTR_LENGTH;
+constexpr unsigned int FREE_BLOCK_CONTROL_BLOCK_LENGTH = PREV_FREE_BLOCK_OPTR_LENGTH + NEXT_FREE_BLOCK_OPTR_LENGTH + FREE_BLOCK_END_OPTR_LENGTH;
 /*
  structure of free block ptr
 
@@ -39,6 +39,7 @@ private:
 public:
 	FreeBlockControlBlock(){};
 	FreeBlockControlBlock( optr *optr );
+
 	std::unique_ptr<optr> Optr(); // getter
 
 	std::unique_ptr<FreeBlockControlBlock> prevControlBlock();
@@ -49,11 +50,8 @@ public:
 
 	std::unique_ptr<optr> freeBlockEnd();
 	void freeBlockEnd( optr* target );
-
 	unsigned long freeBlockSize();
 
-
-	static void placeControlBlock( optr* targetPlaceOptr , optr* prevControlBlockOptr, optr* nextControlBlockOptr, optr* endFreeBlockOptr );
 };
 
 
@@ -73,15 +71,22 @@ std::unique_ptr<FreeBlockControlBlock> getInsertPrevCOntrolBlock( FreeBlockContr
 class OverlayMemoryAllocator
 {
 private:	
-	CacheTable *_cacheTable = nullptr;
+	const optr* _primaryOptr = nullptr;
 
 protected:
 	std::unique_ptr<FreeBlockControlBlock> getHeadControlBlock();
 
+	void init(); // 初めのコントロールブロックを配置する
+
+
 public:
+	OverlayMemoryAllocator( optr *primaryOptr ) : _primaryOptr(primaryOptr) {};
+	~OverlayMemoryAllocator(){ delete _primaryOptr; };
+
 	std::unique_ptr<optr> allocate( unsigned int allocateSize );
 	void unallocate( optr *target , unsigned int size );
-	
+
+	static void placeControlBlock( optr* targetPlaceOptr , optr* prevControlBlockOptr, optr* nextControlBlockOptr, optr* endFreeBlockOptr );	
 };
 
 

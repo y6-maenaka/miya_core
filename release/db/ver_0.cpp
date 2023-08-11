@@ -1,13 +1,15 @@
 #include "ver_0.h"
 #include "../../miya_db/strage_manager/MMyISAM/components/index_manager/btree.h"
 
-
-
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/overlay_ptr.h"
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/cache_manager/cache_table.h"
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/cache_manager/mapper/mapper.h"
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/overlay_memory_manager.h"
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/optr_utils.h"
+
+
+
+#include "../../miya_db/strage_manager/MMyISAM/components/page_table/unit_test.h"
 
 
 
@@ -19,11 +21,12 @@
 int main(){
 
 	
-
+	/*
 	MiddleBuffer buffer(100);
 
 	unsigned char* target = (unsigned char *)"helloworld";
 	unsigned int targetSize = 10;
+	*/
 
 	//miya_db::OBtree btree;
 	// std::cout << btree.rootNode() << "\n";
@@ -259,7 +262,7 @@ int main(){
 	*/
 
 
-	
+	/*	
 	int indexOswapFD = open("../miya_db/table_files/test_table/test.oswap", O_RDWR , (mode_t)0600 );
 	miya_db::CacheTable _cacheTable( indexOswapFD );
 	// miya_db::Mapper *_mapper = _cacheTable.mapper();
@@ -278,5 +281,8 @@ int main(){
 	char *hello = "Hello World";
 	//omemcpy( tmp , (void*)hello ,12 );
 	omemcpy( tmp.get() , (void*)hello , 12 );
+	*/	
+
+	common_test();
 
 }

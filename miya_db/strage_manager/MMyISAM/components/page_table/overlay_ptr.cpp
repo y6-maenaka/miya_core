@@ -51,8 +51,6 @@ unsigned short optr::frame()
 	ret += static_cast<unsigned short>(_addr[2]);
 
 	return ret;	
-	//ret = static_cast<unsigned short>(_optr & 0x18);
-	//return ret;
 };
 
 
