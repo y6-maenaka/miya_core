@@ -108,7 +108,6 @@ std::unique_ptr<optr> optr::operator +( unsigned long addend )
 	ulongOptr += static_cast<unsigned long>(_addr[4]) * pow(2, exponentialList[4]) ;
 
 	ulongOptr += addend;
-	std::cout << ulongOptr << "\n";
 	
 	std::unique_ptr<optr> newOptr( new optr );
 	newOptr->cacheTable( _cacheTable );
