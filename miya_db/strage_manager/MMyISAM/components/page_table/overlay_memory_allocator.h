@@ -120,14 +120,18 @@ public:
 	void unallocate( optr *target , unsigned int size );
 
 
-	static std::unique_ptr<FreeBlockControlBlock> findFreeBlock( FreeBlockControlBlock *targetControlBlock, unsigned int allocateSize ); 
-	//static void placeControlBlock( optr* targetPlaceOptr , optr* prevControlBlockOptr, optr* nextControlBlockOptr, optr* endFreeBlockOptr );	
-	static void placeControlBlock( optr* targetOptr , FreeBlockControlBlock* prevControlBlock, FreeBlockControlBlock *nextControlBlock , optr* freeBlockEnd );
+	std::unique_ptr<FreeBlockControlBlock> findFreeBlock( FreeBlockControlBlock *targetControlBlock, unsigned int allocateSize ); 
+	std::unique_ptr<FreeBlockControlBlock> targetOptrPrevControlBlock( FreeBlockControlBlock *targetControlBlock , optr *targetOptr );
+	std::unique_ptr<FreeBlockControlBlock> placeControlBlock( optr* targetOptr , FreeBlockControlBlock* prevControlBlock, FreeBlockControlBlock *nextControlBlock , optr* freeBlockEnd );
+
+	void mergeControlBlock( FreeBlockControlBlock *targetControlBlock );
 };
 
 
 
 
+
+void showFreeBlockControlBlockList();
 
 
 }; // close miya_db

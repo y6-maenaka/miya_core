@@ -36,11 +36,12 @@ int OverlayMemoryManager::init( int targetFD )
 		primaryOptr->cacheTable( _cacheTable );
 
 		_memoryAllocator = new OverlayMemoryAllocator( primaryOptr );
+
+		return 0;
 	}
 
 	
-	else
-		return -1;
+	return -1;
 };
 
 
@@ -58,7 +59,7 @@ OverlayMemoryManager::~OverlayMemoryManager()
 optr* OverlayMemoryManager::allocate( unsigned long size )
 {
 	/* フリーメモリリンクリストの先頭にアクセス -> 通常0x000000 */
-		
+	return nullptr;
 }
 
 

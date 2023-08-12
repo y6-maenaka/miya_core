@@ -12,6 +12,8 @@ namespace miya_db{
 class CacheTable;
 
 
+constexpr unsigned int OPTR_ADDR_LENGTH = 5;
+
 
 // オーバレイ元のポインタは秘匿する
 class optr
@@ -40,6 +42,7 @@ public:
 	std::unique_ptr<optr> operator +( unsigned long addend );
 
 	std::unique_ptr<unsigned char> mapToMemory( unsigned int size );
+
 };
 
 
