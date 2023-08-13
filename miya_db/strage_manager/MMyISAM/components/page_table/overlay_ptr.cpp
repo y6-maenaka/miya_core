@@ -9,9 +9,13 @@ namespace miya_db{
 
 
 
-optr::optr( unsigned char *optr )
+optr::optr( unsigned char *addr )
 {
-	memcpy( _addr, optr , sizeof( _addr ));
+	for( int i=0; i<5; i++)
+	{
+		printf("%02x", addr[i]);
+	} std::cout << "\n";
+	memcpy( _addr, addr , sizeof( _addr ));
 }
 
 
@@ -42,7 +46,7 @@ void optr::addr( unsigned long ulongOptr )
 
 
 
-unsigned short optr::frame()
+unsigned short optr::frame() const
 {
 	unsigned short ret = 0;
 	
@@ -56,7 +60,7 @@ unsigned short optr::frame()
 
 
 
-unsigned short optr::offset()
+unsigned short optr::offset() const
 {
 	unsigned short ret = 0;
 
@@ -95,7 +99,7 @@ unsigned char* OverlayPtr::operator []( size_t n )
 
 
 
-std::unique_ptr<optr> optr::operator +( unsigned long addend )
+std::unique_ptr<optr> optr::operator +( unsigned long addend ) const
 {
 	uint64_t ulongOptr = 0;
 

@@ -39,7 +39,17 @@ namespace miya_db
 
 
 
+/*
+	 return std::uniqeu_ptr<optr> //
+	 return std::make_unique<optr> // 新たなunique_ptrで割り当てる
+*/
 
+
+
+void MetaBlock::controlBlockHead( FreeBlockControlBlock *targetControlBlock )
+{
+	omemcpy( (*_blockOptr + CONTROL_BLOCK_HEAD_OFFSET).get() , targetControlBlock->blockOptr()->addr() , NEXT_FREE_BLOCK_OPTR_LENGTH );
+}
 
 
 std::unique_ptr<FreeBlockControlBlock> MetaBlock::controlBlockHead()
@@ -52,6 +62,26 @@ std::unique_ptr<FreeBlockControlBlock> MetaBlock::controlBlockHead()
 
 
 
+bool MetaBlock::isFileFormatted() // ファイル先頭のフォーマットIDが一致したら初期化されている
+{
+
+
+	for( int i=0; i<15; i++ )
+	{
+		std::cout << (*_blockOptr + i)->offset() << " : " << (*_blockOptr + i )->frame() << "   ";
+		printf(" -> %c\n", (*_blockOptr + i)->value() );
+	} std::cout << "\n";
+
+	if( ocmp( _blockOptr , (unsigned char *)(FORMAT_ID) , 15 ) == 0 )  {
+		puts("ATTENTION!");
+		std::cout << "このファイルはフォーマットされて[ います ]" << "\n";
+		return true;
+	}
+
+	puts("ATTENTION!");
+	std::cout << "このファイルはフォーマットされて[ いません ]" << "\n";
+	return false;
+}
 
 
 
@@ -59,11 +89,8 @@ std::unique_ptr<FreeBlockControlBlock> MetaBlock::controlBlockHead()
 
 
 
-
-
-
-
-FreeBlockControlBlock::FreeBlockControlBlock( optr *optr ) // コンストラクタ
+/* テストOK　動作確認済み */
+FreeBlockControlBlock::FreeBlockControlBlock( optr *optr ) 
 {
 	_blockOptr = optr;
 }
@@ -71,10 +98,10 @@ FreeBlockControlBlock::FreeBlockControlBlock( optr *optr ) // コンストラク
 
 
 
-
 std::unique_ptr<optr> FreeBlockControlBlock::blockOptr()
 {
-	return std::unique_ptr<optr>(_blockOptr);
+	//return std::unique_ptr<optr>(_blockOptr);
+	return std::make_unique<optr>( *_blockOptr );
 }
 
 
@@ -91,7 +118,7 @@ std::unique_ptr<FreeBlockControlBlock> FreeBlockControlBlock::prevControlBlock()
 
 void FreeBlockControlBlock::prevControlBlock( FreeBlockControlBlock* target )
 {
-	omemcpy( _blockOptr , target->blockOptr().get() ,PREV_FREE_BLOCK_OPTR_LENGTH );
+		omemcpy( _blockOptr , target->blockOptr().get()->addr() , PREV_FREE_BLOCK_OPTR_LENGTH );
 }
 
 
@@ -141,7 +168,11 @@ std::unique_ptr<optr> FreeBlockControlBlock::freeBlockEnd()
 
 void FreeBlockControlBlock::freeBlockEnd( optr* target )
 {
-	omemcpy( (*_blockOptr + (PREV_FREE_BLOCK_OPTR_LENGTH + NEXT_FREE_BLOCK_OPTR_LENGTH)).get() , target , FREE_BLOCK_END_OPTR_LENGTH ); // コントロールブロックの戦闘位置がPREV
+	if( target == nullptr )
+		omemcpy( (*_blockOptr + (PREV_FREE_BLOCK_OPTR_LENGTH + NEXT_FREE_BLOCK_OPTR_LENGTH)).get() , (unsigned char*)"000000" , FREE_BLOCK_END_OPTR_LENGTH ); 
+																																																																				
+	else
+		omemcpy( (*_blockOptr + (PREV_FREE_BLOCK_OPTR_LENGTH + NEXT_FREE_BLOCK_OPTR_LENGTH)).get() , target , FREE_BLOCK_END_OPTR_LENGTH ); // コントロールブロックの戦闘位置がPREV
 }
 
 
@@ -176,6 +207,8 @@ unsigned long FreeBlockControlBlock::freeBlockSize()
 	ulFreeBlockEndOptr += static_cast<uint64_t>( freeBlockEndOAddr[3]) * pow(2, exponentialList[3]) ;
 	ulFreeBlockEndOptr += static_cast<uint64_t>( freeBlockEndOAddr[4]) * pow(2, exponentialList[4]) ;
 
+	if( ulFreeBlockEndOptr == 0 ) return 0;
+
 	delete[] currentOAddr; delete[] freeBlockEndOAddr;
 	return static_cast<unsigned long>(ulFreeBlockEndOptr - (ulControlBlockOptr - FREE_BLOCK_CONTROL_BLOCK_LENGTH)); // コントロールブロック分のサイズを加算する
 }
@@ -185,6 +218,9 @@ unsigned long FreeBlockControlBlock::freeBlockSize()
 
 std::unique_ptr<FreeBlockControlBlock> OverlayMemoryAllocator::findFreeBlock( FreeBlockControlBlock *targetControlBlock, unsigned int allocateSize )
 {
+	if( targetControlBlock->freeBlockSize() == 0 ) 
+		return std::unique_ptr<FreeBlockControlBlock>( targetControlBlock );
+
 	if( targetControlBlock->freeBlockSize() < allocateSize )
 		return findFreeBlock( (targetControlBlock->nextControlBlock()).get() , allocateSize );
 
@@ -220,11 +256,17 @@ std::unique_ptr<FreeBlockControlBlock> OverlayMemoryAllocator::targetOptrPrevCon
 
 std::unique_ptr<FreeBlockControlBlock> OverlayMemoryAllocator::placeControlBlock( optr* targetOptr , FreeBlockControlBlock* prevControlBlock, FreeBlockControlBlock *nextControlBlock, optr* freeBlockEnd )
 {
-	// 一旦optrの位置にControlBlockを配置する
-	FreeBlockControlBlock targetControlBlock( targetOptr );
+
+	FreeBlockControlBlock targetControlBlock( targetOptr ); // 対象のコントロールブロック
+
 	targetControlBlock.prevControlBlock( prevControlBlock );
 	targetControlBlock.nextControlBlock( nextControlBlock );
-	targetControlBlock.freeBlockEnd( freeBlockEnd );
+
+	if( freeBlockEnd == nullptr )
+		targetControlBlock.freeBlockEnd( nullptr );
+	else
+		targetControlBlock.freeBlockEnd( freeBlockEnd );
+
 
 	prevControlBlock->nextControlBlock( &targetControlBlock );
 	nextControlBlock->prevControlBlock( &targetControlBlock );
@@ -254,7 +296,21 @@ std::unique_ptr<FreeBlockControlBlock> getPrevControlBlock( FreeBlockControlBloc
 
 OverlayMemoryAllocator::OverlayMemoryAllocator( optr *primaryOptr ) : _primaryOptr(primaryOptr)
 {	
+	std::cout << __PRETTY_FUNCTION__ << "\n";
+
+	//std::cout << primaryOptr->offset()	 << "\n";
+
+	//printf("%c\n", (*primaryOptr + 1)->value() );
+
+
 	_metaBlock = new MetaBlock( const_cast<optr*>(_primaryOptr) );
+
+	std::cout << _metaBlock->blockOptr()->value() << "\n";
+
+
+	if( !(_metaBlock->isFileFormatted() )) // ファイルのフォーマットを行う
+		init();
+
 }
 
 
@@ -273,6 +329,23 @@ void OverlayMemoryAllocator::init()
 	//　ファイルの検証
 	//　管理領域の配置
 	//　初めのフリーブロック管理領域を配置
+	std::cout << __PRETTY_FUNCTION__  << " STARTED!" << "\n";
+
+	// =========== 感領域を作成する前に,最初のコントロールブロックを作成する =====================
+	FreeBlockControlBlock firstControlBlock(  ( *_primaryOptr + META_BLOCK_SIZE  ).get() );
+
+	placeControlBlock( (*_primaryOptr + META_BLOCK_SIZE).get(), &firstControlBlock , &firstControlBlock , nullptr );
+
+
+	_metaBlock->controlBlockHead( &firstControlBlock );
+
+
+	//std::cout << _metaBlock->isFileFormatted() << "\n";
+	
+	omemcpy( const_cast<optr *>(_primaryOptr) , (unsigned char*)(FORMAT_ID) , 15 ); // フォーマットIDのセット
+	
+	std::cout << __PRETTY_FUNCTION__ << " DONE!" << "\n";
+
 }
 
 

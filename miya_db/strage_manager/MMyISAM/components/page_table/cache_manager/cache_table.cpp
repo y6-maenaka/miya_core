@@ -62,7 +62,12 @@ void* CacheTable::convert( optr *src )
 		idx = pageFault( frame ); // キャッシュテーブルに対象フレームのキャッシュブロックが存在しなかったら -> Page Fault
 	} 
 	ret = static_cast<unsigned char*>(_cacheList._mappingList[idx]);
+
+	// この時点では,リフレッシュされている
+	//std::cout << ret[0] << "\n";
+
 	ret += src->offset();
+
 
 	// LRUの更新
 	_cacheList._LRU.reference( idx );
@@ -72,7 +77,7 @@ void* CacheTable::convert( optr *src )
 }
 
 
-
+/*
 void* convert( unsigned char* src )
 {
 	unsigned short frame = 0;
@@ -89,6 +94,7 @@ void* convert( unsigned char* src )
 	offset += static_cast<unsigned long>( src[4]) * pow(2, exponentialList[1] );
 
 }
+*/
 
 
 /* この辺りは無闇に触らない */
@@ -96,8 +102,13 @@ void* convert( unsigned char* src )
 unsigned short CacheTable::pageFault( unsigned int frame )
 {
 	unsigned int outPageIdx = _cacheList._LRU.targetOutPage();
+	std::cout << "targetOutPage ->  " << outPageIdx << "\n";
 
+	
 	pageOut(  outPageIdx );
+	// ここまではOK
+	
+	std::cout << "OutPage ->  " << outPageIdx << "\n";
 	pageIn( outPageIdx , frame );
 	
 	return outPageIdx; // 要修正
@@ -120,6 +131,9 @@ int CacheTable::pageOut( unsigned short outIdx )
 int CacheTable::pageIn( unsigned short outIdx ,unsigned int inFrame ) // 入れ替えるキャッシュブロックインデックス, 入れるフレーム番号
 {
 	_cacheList._mappingList[outIdx] = _mapper->map( inFrame );
+	// mapした時にリフレッシュされている
+
+	/* LRU関係 */
 	_cacheList._cacheingList[outIdx] = inFrame; // キャッシュしているフレームの更新
 	_cacheList._LRU._invalidCacheList[outIdx] = true;
 

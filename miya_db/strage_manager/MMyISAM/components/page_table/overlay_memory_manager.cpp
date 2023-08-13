@@ -31,11 +31,23 @@ int OverlayMemoryManager::init( int targetFD )
 	if( targetFD >= 0 )
 	{
 		_cacheTable = new CacheTable( targetFD );
+
+
+		const char str[5] = { 0 , 0 , 0 , 0 ,1 };
+		optr _tmp(  const_cast<unsigned char *>(reinterpret_cast<const unsigned char*>(str)) );
+		_tmp.cacheTable( _cacheTable );
+		printf("%c\n", _tmp.value() );
+		return 0;
+	
+
 		// primaryOptrを作成する
+		
 		optr *primaryOptr = new optr;
 		primaryOptr->cacheTable( _cacheTable );
+		primaryOptr->addr(0);
 
 		_memoryAllocator = new OverlayMemoryAllocator( primaryOptr );
+		
 
 		return 0;
 	}

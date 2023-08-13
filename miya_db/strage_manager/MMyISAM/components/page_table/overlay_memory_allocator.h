@@ -12,6 +12,9 @@ namespace miya_db
 {
 
 
+#define FORMAT_ID "HELLOMIYACOIN!!"
+
+
 /* フリーブロック管理ブロック*/
 constexpr unsigned int PREV_FREE_BLOCK_OPTR_LENGTH = 5; // [bytes]
 constexpr unsigned int NEXT_FREE_BLOCK_OPTR_LENGTH = 5; // [bytes]	
@@ -51,7 +54,13 @@ private:
 
 public:
 	MetaBlock( optr *primaryOptr ) : _blockOptr( primaryOptr ) {};
-	std::unique_ptr<FreeBlockControlBlock> controlBlockHead(); 
+	optr* blockOptr(){ return _blockOptr; };
+
+	void controlBlockHead( FreeBlockControlBlock *targetControlBlock );
+	std::unique_ptr<FreeBlockControlBlock> controlBlockHead();
+	bool isFormatted();
+	
+	bool isFileFormatted();
 };
 
 
@@ -88,13 +97,6 @@ public:
 };
 
 
-
-
-
-
-
-//std::unique_ptr<FreeBlockControlBlock> getHeadControlBlock( FreeBlockControlBlock* targetControlBlock ,optr* target );
-//std::unique_ptr<FreeBlockControlBlock> getInsertPrevControlBlock( FreeBlockControlBlock* targetControlBlock, optr* target );
 
 
 
