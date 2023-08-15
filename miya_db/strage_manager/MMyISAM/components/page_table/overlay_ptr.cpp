@@ -11,10 +11,6 @@ namespace miya_db{
 
 optr::optr( unsigned char *addr )
 {
-	for( int i=0; i<5; i++)
-	{
-		printf("%02x", addr[i]);
-	} std::cout << "\n";
 	memcpy( _addr, addr , sizeof( _addr ));
 }
 
@@ -46,13 +42,24 @@ void optr::addr( unsigned long ulongOptr )
 
 
 
+void optr::addr( optr* from )
+{
+	omemcpy( _addr , from , sizeof(_addr) );
+}
+
+
+
+
 unsigned short optr::frame() const
 {
 	unsigned short ret = 0;
 	
-	ret += static_cast<unsigned short>(_addr[0]);
-	ret += static_cast<unsigned short>(_addr[1]);
-	ret += static_cast<unsigned short>(_addr[2]);
+	unsigned short exponentialList[5] = {64, 32, 16, 8, 0}; // 変換用の累乗リスト																												//
+
+
+	ret += static_cast<unsigned short>(_addr[0]) * pow( 2, exponentialList[2]);
+	ret += static_cast<unsigned short>(_addr[1]) * pow( 2, exponentialList[3]);
+	ret += static_cast<unsigned short>(_addr[2]) * pow( 2, exponentialList[4]);
 
 	return ret;	
 };
@@ -64,8 +71,11 @@ unsigned short optr::offset() const
 {
 	unsigned short ret = 0;
 
-	ret += static_cast<unsigned short>(_addr[3]);
-	ret += static_cast<unsigned short>(_addr[4]);
+
+	unsigned short exponentialList[5] = {64, 32, 16, 8, 0}; // 変換用の累乗リスト																												//
+
+	ret += static_cast<unsigned short>(_addr[3]) * pow(2,exponentialList[3]);
+	ret += static_cast<unsigned short>(_addr[4]) * pow(2,exponentialList[4]);
 
 	return ret;
 };
@@ -81,7 +91,6 @@ unsigned char optr::value()
 
 void optr::value( unsigned char target )
 {
-	unsigned char *tmp;
 	//*(static_cast<unsigned char *>(_cacheTable->convert(this))) = target;
 	*(static_cast<unsigned char *>(_cacheTable->convert(this))) = target;	
 	// メモリマップされたファイルのポインタ位置に値を格納
@@ -135,6 +144,26 @@ std::unique_ptr<unsigned char> optr::mapToMemory( unsigned int size )
 	// exportarrayの実装
 	// importの実装
 }
+
+
+
+void optr::printAddr()
+{
+	for( int i=0; i<OPTR_ADDR_LENGTH; i++ )
+		printf("%02X", _addr[i] );
+}
+
+
+
+void optr::printValueContinuously( unsigned int length )
+{
+	for( int i=0; i<length; i++ )
+	{
+		printf("%02X", (*this + i)->value() );
+	}
+}
+
+
 };
 
 

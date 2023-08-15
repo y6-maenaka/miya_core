@@ -34,9 +34,12 @@ public:
 	OverlayMemoryManager( const char* oswapFilePath );
 	~OverlayMemoryManager();
 
-	optr* allocate( unsigned long size );
+	OverlayMemoryAllocator* memoryAllocator(){ return _memoryAllocator; };
+
+	std::unique_ptr<optr> allocate( unsigned long size );
 	void deallocate( optr *target , unsigned long size );
 
+	CacheTable* cacheTable(){ return _cacheTable; };
 };
 
 

@@ -32,22 +32,12 @@ int OverlayMemoryManager::init( int targetFD )
 	{
 		_cacheTable = new CacheTable( targetFD );
 
-
-		const char str[5] = { 0 , 0 , 0 , 0 ,1 };
-		optr _tmp(  const_cast<unsigned char *>(reinterpret_cast<const unsigned char*>(str)) );
-		_tmp.cacheTable( _cacheTable );
-		printf("%c\n", _tmp.value() );
-		return 0;
-	
-
 		// primaryOptrを作成する
 		
 		optr *primaryOptr = new optr;
 		primaryOptr->cacheTable( _cacheTable );
-		primaryOptr->addr(0);
 
 		_memoryAllocator = new OverlayMemoryAllocator( primaryOptr );
-		
 
 		return 0;
 	}
@@ -68,10 +58,11 @@ OverlayMemoryManager::~OverlayMemoryManager()
 
 
 
-optr* OverlayMemoryManager::allocate( unsigned long size )
+std::unique_ptr<optr> OverlayMemoryManager::allocate( unsigned long size )
 {
 	/* フリーメモリリンクリストの先頭にアクセス -> 通常0x000000 */
-	return nullptr;
+	
+	return _memoryAllocator->allocate( size );
 }
 
 

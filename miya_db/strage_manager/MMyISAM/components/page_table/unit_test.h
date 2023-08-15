@@ -14,7 +14,7 @@
 
 
 int common_test();
-
+int optr_test();
 
 
 

@@ -28,6 +28,16 @@ namespace miya_db{
 
 short CacheTable::cacheFind( unsigned short frame ) 
 {
+
+	/*
+	std::cout << "==[ キャッシュ一覧 ] ===============" << "\n";
+	for( int i = 0; i<CACHE_BLOCK_COUNT;i++)
+	{
+		std::cout << _cacheList._cacheingList[i] << "\n";
+	}
+	std::cout << "=================" << "\n";
+	*/
+				
 	for( unsigned int i=0; i<CACHE_BLOCK_COUNT; i++){ // とりあえず線形探索で
 		if( _cacheList._cacheingList[i] == frame ) return i;
 	}
@@ -58,6 +68,7 @@ void* CacheTable::convert( optr *src )
 
 	unsigned char* ret; short idx;
 
+	//std::cout << "( " << frame << " ) "<< "[インデックス] " << idx << " || [キャッシュ] " << cacheFind(frame) << "\n";
 	if( (idx = cacheFind( frame )) < 0 ){
 		idx = pageFault( frame ); // キャッシュテーブルに対象フレームのキャッシュブロックが存在しなかったら -> Page Fault
 	} 
@@ -68,11 +79,10 @@ void* CacheTable::convert( optr *src )
 
 	ret += src->offset();
 
-
 	// LRUの更新
 	_cacheList._LRU.reference( idx );
 	_cacheList._LRU.incrementReferencePtr();
-	
+
 	return (void *)ret;
 }
 
@@ -82,8 +92,7 @@ void* convert( unsigned char* src )
 {
 	unsigned short frame = 0;
 	unsigned short offset = 0;
-
-	unsigned short exponentialList[5] = {64, 32, 16, 8, 0};
+unsigned short exponentialList[5] = {64, 32, 16, 8, 0};
 
 
 	frame += static_cast<unsigned long>( src[0]) * pow(2, exponentialList[0] );
@@ -101,15 +110,15 @@ void* convert( unsigned char* src )
 
 unsigned short CacheTable::pageFault( unsigned int frame )
 {
-	unsigned int outPageIdx = _cacheList._LRU.targetOutPage();
-	std::cout << "targetOutPage ->  " << outPageIdx << "\n";
 
-	
+	std::cout << "\x1B[31m" << "(####) PAGE FAULT CALLED"  << "\x1B[0m" << "\n";
+
+	unsigned int outPageIdx = _cacheList._LRU.targetOutPage();
+
 	pageOut(  outPageIdx );
-	// ここまではOK
-	
-	std::cout << "OutPage ->  " << outPageIdx << "\n";
+	std::cout << "\x1B[34m" << "(##) PAGE OUT CALLED ( " << outPageIdx << " )" << "\x1B[0m" << "\n";
 	pageIn( outPageIdx , frame );
+	std::cout << "\x1B[32m" << "(#) PAGE IN CALLED( " << outPageIdx << " )" << "\x1B[0m" << "\n";
 	
 	return outPageIdx; // 要修正
 }
@@ -118,6 +127,7 @@ unsigned short CacheTable::pageFault( unsigned int frame )
 
 int CacheTable::pageOut( unsigned short outIdx ) 
 {
+
 	_mapper->unmap( _cacheList._mappingList[outIdx] );
 	_cacheList._mappingList[outIdx] = nullptr;
 
@@ -166,6 +176,17 @@ void CacheTable::invalidList()
 	std::cout << "==== ==== ==== ==== ====" << "\n";
 
 }
+
+
+void CacheTable::syncForce( unsigned short targetMappedIndex )
+{
+	void* targetMappedPtr = _cacheList._mappingList[targetMappedIndex];
+	int ret = _mapper->sync( targetMappedPtr );
+	std::cout << "ret -> " << ret << "\n";
+}
+
+
+
 
 }; // close miya_db namespace
 

@@ -52,6 +52,8 @@ void* Mapper::map( unsigned int frameIdx ) // mapping file point
 	mappedPtr = mmap( NULL , DEFAULT_FRAME_CACHE_SIZE  , PROT_WRITE | PROT_READ , MAP_SHARED , _fd , ( frameIdx * DEFAULT_FRAME_CACHE_SIZE ) );	
 	// memset( mappedPtr , 0x00 , DEFAULT_FRAME_CACHE_SIZE ); // ?! リフレッシュの原因
 
+	std::cout << "\x1B[33m" << "(###) FileMapped ( " << mappedPtr << " )"<< "\x1B[0m" << "\n";
+
 	return mappedPtr;
 	/* mmap がマッピングするサイズは,offset は sysconf(_SC_PAGE_SIZE) が返すページサイズの倍数でなければならない。*/
 }

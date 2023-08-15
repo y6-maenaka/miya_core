@@ -31,6 +31,7 @@ public:
 
 	unsigned char *addr(); // getter // get with unsigned char[5]
 	void addr( unsigned long ulongOptr );
+	void addr( optr* from );
 
 	unsigned short frame() const;
 	unsigned short offset() const;
@@ -43,6 +44,8 @@ public:
 
 	std::unique_ptr<unsigned char> mapToMemory( unsigned int size );
 
+	void printAddr();
+	void printValueContinuously( unsigned int length );
 };
 
 

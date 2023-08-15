@@ -24,7 +24,7 @@ constexpr unsigned int FREE_BLOCK_END_OPTR_LENGTH = 5; // [bytes]
 /* メタブロック */
 constexpr unsigned int META_BLOCK_SIZE = 100; // メタブロック(管理領域)のサイズ
 constexpr unsigned int META_BLOCK_OFFSET = 0;
-constexpr unsigned int CONTROL_BLOCK_HEAD_OFFSET = 5;
+constexpr unsigned int CONTROL_BLOCK_HEAD_OFFSET = sizeof(FORMAT_ID) - 1;
 
 
 
@@ -109,7 +109,6 @@ private:
 	MetaBlock *_metaBlock;
 
 protected:
-	std::unique_ptr<FreeBlockControlBlock> controlBlockHead();
 
 	void init(); // 初めのコントロールブロックを配置する
 
@@ -118,15 +117,18 @@ public:
 	OverlayMemoryAllocator( optr *primaryOptr );
 	~OverlayMemoryAllocator(){ delete _primaryOptr; };
 
-	std::unique_ptr<optr> allocate( unsigned int allocateSize );
-	void unallocate( optr *target , unsigned int size );
+	std::unique_ptr<optr> allocate( unsigned long allocateSize );
+	void unallocate( optr *target , unsigned long size );
 
+	std::unique_ptr<FreeBlockControlBlock> controlBlockHead();
 
 	std::unique_ptr<FreeBlockControlBlock> findFreeBlock( FreeBlockControlBlock *targetControlBlock, unsigned int allocateSize ); 
 	std::unique_ptr<FreeBlockControlBlock> targetOptrPrevControlBlock( FreeBlockControlBlock *targetControlBlock , optr *targetOptr );
 	std::unique_ptr<FreeBlockControlBlock> placeControlBlock( optr* targetOptr , FreeBlockControlBlock* prevControlBlock, FreeBlockControlBlock *nextControlBlock , optr* freeBlockEnd );
 
 	void mergeControlBlock( FreeBlockControlBlock *targetControlBlock );
+
+	void printControlChain( FreeBlockControlBlock* targetControlBlock );
 };
 
 

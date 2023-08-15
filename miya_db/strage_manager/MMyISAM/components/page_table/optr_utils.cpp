@@ -22,7 +22,10 @@ optr *omemcpy( optr *dest , optr *src , unsigned long n )
 optr *omemcpy( optr *dest , void *src , unsigned long n )
 {
 	for( unsigned long i = 0; i<n; i++)
+	{
+		//printf(" [%02X]\n", (*dest + i)->value() );
 		(*dest + i)->value( static_cast<unsigned char*>(src)[i] );	
+	}
 
 	return dest;
 };
