@@ -284,5 +284,6 @@ int main(){
 	*/	
 
 	common_test();
+	//optr_test();
 
 }

@@ -34,11 +34,11 @@ int common_test()
 
 	std::cout << " 割り当てられた位置は　- > "; allocatedOptr->printAddr(); std::cout << "\n";
 
+
+	manager->deallocate( allocatedOptr.get() , 100 );
+
+
 	manager->memoryAllocator()->printControlChain( manager->memoryAllocator()->controlBlockHead().get() );
-	
-
-
-
 }
 
 
@@ -52,7 +52,7 @@ int optr_test()
 
 	miya_db::OverlayMemoryManager *manager = new miya_db::OverlayMemoryManager(fd);
 
-
+	/*
 	std::cout << "-------------"	 << "\n";
 	std::cout << "( 2 )" << "\n";
 	miya_db::optr tmp;
@@ -112,12 +112,28 @@ int optr_test()
 	std::cout << ____tmp.offset() << "\n";
 	____tmp.value('@');
 	std::cout << "-------------"	 << "\n";
+	*/
+
+
+	std::cout << "-------------"	 << "\n";
+	std::cout << "( 110 . 6E  )" << "\n";
+	miya_db::optr tmp;
+	tmp.addr( 110 );
+	tmp.cacheTable( manager->cacheTable() );
+	tmp.printAddr(); std::cout << "\n";
+	std::cout << tmp.frame() << "\n";
+	std::cout << tmp.offset() << "\n";
+	tmp.value();
+	std::cout << "-------------"	 << "\n";
+
+
 
 
 
 	std::cout << "\n\n\n\n";
-	unsigned char addrZero[5] = {'@','@','@','@','@'};
-	omemcpy( &__tmp , addrZero , 5);
+	unsigned char addrZero[5] = {0x00,0x00,0x00,0x00,0x96};
+	omemcpy( &tmp , addrZero , 5);
+	tmp.printValueContinuously( 5 );
 
 	manager->cacheTable()->syncForce( 0);
 	//(__tmp + 0)->value('@');

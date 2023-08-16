@@ -118,7 +118,7 @@ public:
 	~OverlayMemoryAllocator(){ delete _primaryOptr; };
 
 	std::unique_ptr<optr> allocate( unsigned long allocateSize );
-	void unallocate( optr *target , unsigned long size );
+	void deallocate( optr *target , unsigned long size );
 
 	std::unique_ptr<FreeBlockControlBlock> controlBlockHead();
 
