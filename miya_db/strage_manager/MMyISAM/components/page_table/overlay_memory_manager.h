@@ -24,22 +24,20 @@ class OverlayMemoryAllocator;
 class OverlayMemoryManager
 {
 private:
-	CacheTable *_cacheTable;
 	OverlayMemoryAllocator *_memoryAllocator;
 
-	int init( int targetFD );
+	int init( int dataFileFD , int freeListFileFD );
 
 public:
-	OverlayMemoryManager( int targetFD );
-	OverlayMemoryManager( const char* oswapFilePath );
-	~OverlayMemoryManager();
+	OverlayMemoryManager( int dataFileFD , int freeListFileFD );
+	OverlayMemoryManager( const char* targetFilePath );
 
 	OverlayMemoryAllocator* memoryAllocator(){ return _memoryAllocator; };
 
 	std::unique_ptr<optr> allocate( unsigned long size );
 	void deallocate( optr *target , unsigned long size );
 
-	CacheTable* cacheTable(){ return _cacheTable; };
+	//CacheTable* cacheTable(){ return _cacheTable; };
 };
 
 

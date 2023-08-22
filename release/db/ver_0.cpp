@@ -283,7 +283,8 @@ int main(){
 	omemcpy( tmp.get() , (void*)hello , 12 );
 	*/	
 
-	common_test();
+	deallocate_test_pattern_1();
+	//common_test();
 	//optr_test();
 
 }

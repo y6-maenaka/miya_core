@@ -10,24 +10,29 @@ namespace miya_db{
 
 
 
-OverlayMemoryManager::OverlayMemoryManager( const char* oswapFilePath )
+OverlayMemoryManager::OverlayMemoryManager( const char* targetFilePath )
 {
-	int fd = open( oswapFilePath , O_RDWR, (mode_t)0600 );
+
+
+	// ファイル名から２つのパスを生成する
+
+	//int fd = open( oswapFilePath , O_RDWR, (mode_t)0600 );
 	
-	init( fd );
+	//init( fd );
 }
 
 
-OverlayMemoryManager::OverlayMemoryManager( int targetFD )
+OverlayMemoryManager::OverlayMemoryManager( int dataFileFD , int freeListFileFD )
 {
-	init( targetFD );
+	init( dataFileFD , freeListFileFD );
 }
 
 
 
 
-int OverlayMemoryManager::init( int targetFD )
+int OverlayMemoryManager::init( int dataFileFD , int freeListFileFD )
 {
+	/*
 	if( targetFD >= 0 )
 	{
 		_cacheTable = new CacheTable( targetFD );
@@ -41,6 +46,8 @@ int OverlayMemoryManager::init( int targetFD )
 
 		return 0;
 	}
+	*/
+	_memoryAllocator = new OverlayMemoryAllocator( dataFileFD , freeListFileFD );
 
 	
 	return -1;
@@ -48,12 +55,6 @@ int OverlayMemoryManager::init( int targetFD )
 
 
 
-
-
-OverlayMemoryManager::~OverlayMemoryManager()
-{
-	delete _cacheTable;
-}
 
 
 
@@ -66,9 +67,10 @@ std::unique_ptr<optr> OverlayMemoryManager::allocate( unsigned long size )
 }
 
 
+
 void OverlayMemoryManager::deallocate( optr* targetOptr , unsigned long size )
 {
-	return _memoryAllocator->deallocate( targetOptr , size );
+	return _memoryAllocator->deallocate( targetOptr );
 }
 
 

@@ -44,10 +44,15 @@ void optr::addr( unsigned long ulongOptr )
 
 void optr::addr( optr* from )
 {
-	omemcpy( _addr , from , sizeof(_addr) );
+	//omemcpy( _addr , from , sizeof(_addr) );
+	memcpy( _addr , from->addr() , sizeof(_addr) );
 }
 
 
+void optr::addr( unsigned char* from )
+{
+	memcpy( _addr , from, 5 );
+}
 
 
 unsigned short optr::frame() const

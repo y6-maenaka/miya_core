@@ -5,6 +5,7 @@
 #include <iostream>
 #include <memory>
 #include <limits>
+#include <unistd.h>
 
 #include "./overlay_ptr.h"
 
@@ -15,78 +16,142 @@ namespace miya_db
 #define FORMAT_ID "HELLOMIYACOIN!!"
 
 
+
 /* フリーブロック管理ブロック*/
 constexpr unsigned int PREV_FREE_BLOCK_OPTR_LENGTH = 5; // [bytes]
-constexpr unsigned int NEXT_FREE_BLOCK_OPTR_LENGTH = 5; // [bytes]	
+constexpr unsigned int PREV_FREE_BLOCK_OPTR_OFFSET = 0;
+
+constexpr unsigned int NEXT_FREE_BLOCK_OPTR_LENGTH = 5; // [bytes]
+constexpr unsigned int NEXT_FREE_BLOCK_OPRT_OFFSET = PREV_FREE_BLOCK_OPTR_OFFSET + PREV_FREE_BLOCK_OPTR_LENGTH;
+
+constexpr unsigned int MAPPING_OPTR_LENGTH = 5; // [bytes]
+constexpr unsigned int MAPPING_OPTR_OFFSET = NEXT_FREE_BLOCK_OPRT_OFFSET + NEXT_FREE_BLOCK_OPTR_LENGTH;
+
 constexpr unsigned int FREE_BLOCK_END_OPTR_LENGTH = 5; // [bytes]
+constexpr unsigned int FREE_BLOCK_END_OPTR_OFFSET = MAPPING_OPTR_OFFSET + MAPPING_OPTR_LENGTH;
+
+constexpr unsigned int CONTROL_BLOCK_TYPE_LENGTH = 5;
+constexpr unsigned int CONTROL_BLOCK_TYPE_OFFSET = FREE_BLOCK_END_OPTR_OFFSET + FREE_BLOCK_END_OPTR_LENGTH;
+
+constexpr unsigned int FREE_BLOCK_CONTROL_BLOCK_LENGTH = PREV_FREE_BLOCK_OPTR_LENGTH + NEXT_FREE_BLOCK_OPTR_LENGTH + MAPPING_OPTR_LENGTH + FREE_BLOCK_END_OPTR_LENGTH;
+
+
+
+constexpr unsigned int CONTROL_BLOCK_LENGTH = 5;
 
 
 /* メタブロック */
 constexpr unsigned int META_BLOCK_SIZE = 100; // メタブロック(管理領域)のサイズ
 constexpr unsigned int META_BLOCK_OFFSET = 0;
-constexpr unsigned int CONTROL_BLOCK_HEAD_OFFSET = sizeof(FORMAT_ID) - 1;
+constexpr unsigned int CONTROL_BLOCK_HEAD_OFFSET = sizeof(FORMAT_ID) - 1; // 15
+constexpr unsigned int ALLOCATED_BLOCK_HEAD_OFFSET = CONTROL_BLOCK_HEAD_OFFSET + 5; // 20
+constexpr unsigned int UNUSED_BLOCK_HEAD_OFFSET = ALLOCATED_BLOCK_HEAD_OFFSET + 5; // 25
+constexpr unsigned int CONTROL_BLOCK_TAIL_OFFSET = UNUSED_BLOCK_HEAD_OFFSET + 5; // 30
 
 
 
-constexpr unsigned int FREE_BLOCK_CONTROL_BLOCK_LENGTH = PREV_FREE_BLOCK_OPTR_LENGTH + NEXT_FREE_BLOCK_OPTR_LENGTH + FREE_BLOCK_END_OPTR_LENGTH;
+
+
+
 /*
- structure of free block ptr
-
-	- prev_free_block_ptr
-	- next_free_block_ptr
-	- free_block_end_ptr
+ [ フリーブロック管理ブロックの構造 ] 
+ 	- Prev Control Block
+	- Next Control Block
+	- Mapping Optr
+	- Free Block End Optr
 */
+
 
 class optr;
 class CacheTable;
-struct FreeBlockControlBlock;
+struct ControlBlock;
 
 
 
 
+/*
+ -------------------------------------------------------------------------------------------
+  | FORMAT_ID | CONTROL_BLOCK_HEAD | ALLOCATED_BLOCK_HEAD | UNUSED_BLOCK_HEAD | CONTROL_BLOCK_TAIL 
+ --------------------------------------------------------------------------------------------
+*/
 
 
 struct MetaBlock // 管理領域
 {
 private:
-	optr *_blockOptr = nullptr;
 
 
 public:
-	MetaBlock( optr *primaryOptr ) : _blockOptr( primaryOptr ) {};
-	optr* blockOptr(){ return _blockOptr; };
+	optr* _primaryOptr = nullptr;
+	MetaBlock( optr *_primaryOptr );
 
-	void controlBlockHead( FreeBlockControlBlock *targetControlBlock );
-	std::unique_ptr<FreeBlockControlBlock> controlBlockHead();
+	optr* primaryOptr();
+
+	void freeBlockHead( ControlBlock *targetControlBlock ); // 先頭にセットする機能も備える
+	std::unique_ptr<ControlBlock> freeBlockHead(); 
+
+	void allocatedBlockHead( ControlBlock *targetAllodatedBlock , ControlBlock *test  ); // 先頭にセットする機能も兼ねる
+	//void allocatedBlockHead( ControlBlock *targetAllodatedBlock ); // 先頭にセットする機能も兼ねる
+	std::unique_ptr<ControlBlock> allocatedBlockHead();	
+
+	void unUsedControlBlockHead( ControlBlock* targetUnUsedControlBlock ); // 先頭にセットする機能も備える
+	std::unique_ptr<ControlBlock> unUsedControlBlockHead();
+
+	void controlBlockTail( ControlBlock* targetControlBlock );
+	std::unique_ptr<ControlBlock> controlBlockTail();
+
 	bool isFormatted();
-	
+
 	bool isFileFormatted();
 };
 
 
 
 
+
+
+
+
+
+
+
+
+
+/*
+ -----------------------------------------------------------------------------------
+  | PrevControlBlock(5) | NextControlBlock(5) | MappingOptr(5) | MappingEndOptr(5) | 
+ -----------------------------------------------------------------------------------
+*/
+
+
 // 先頭ポインタをラップして取り扱いが簡単になるようにしている
-struct FreeBlockControlBlock
+struct ControlBlock
 {
 private:
-	optr *_blockOptr = nullptr;
+	optr *_blockOptr;
 
 public:
-	FreeBlockControlBlock(){};
-	FreeBlockControlBlock( optr *optr );
+	ControlBlock(){};
+	ControlBlock( optr *optr );
 
-	std::unique_ptr<optr> blockOptr(); // getter
+	optr* blockOptr(); // getter
+	unsigned char* blockAddr();
+
+
+  //  ----- このメソッドでリターンされるoptrには,cacheTableがセットされていないから要注意 ---------------
+	std::unique_ptr<optr> mappingOptr();
+	void mappingOptr( optr *target ); // 対象のoptrを投げる
+	// ----------------------------------------------------------------------------------------------------
 
 	// PrevControlBlock
-	std::unique_ptr<FreeBlockControlBlock> prevControlBlock();
-	void prevControlBlock( FreeBlockControlBlock* target );
-	void prevControlBlock( optr* target );
+	std::unique_ptr<ControlBlock> prevControlBlock();
+	void prevControlBlock( ControlBlock* target );
+	//void prevControlBlock( optr* target );
 
 	// NextControlBlock
-	std::unique_ptr<FreeBlockControlBlock> nextControlBlock();
-	void nextControlBlock( FreeBlockControlBlock* target );
-	void nextControlBlock( optr* target );
+	std::unique_ptr<ControlBlock> nextControlBlock();
+	void nextControlBlock( ControlBlock* target );
+	//void nextControlBlock( optr* target );
 
 	// ControlBlockEnd
 	std::unique_ptr<optr> freeBlockEnd();
@@ -104,38 +169,44 @@ public:
 
 class OverlayMemoryAllocator
 {
-private:	
-	const optr* _primaryOptr = nullptr;
+private:
 	MetaBlock *_metaBlock;
+
+	const CacheTable *_dataCacheTable = nullptr;
+	const CacheTable *_freeListCacheTable = nullptr;
 
 protected:
 
 	void init(); // 初めのコントロールブロックを配置する
 
-
 public:
-	OverlayMemoryAllocator( optr *primaryOptr );
-	~OverlayMemoryAllocator(){ delete _primaryOptr; };
+	OverlayMemoryAllocator( int dataFileFD  = -1 , int freeListFileFD = -1 );
 
 	std::unique_ptr<optr> allocate( unsigned long allocateSize );
-	void deallocate( optr *target , unsigned long size );
+	void deallocate( optr *target );
 
-	std::unique_ptr<FreeBlockControlBlock> controlBlockHead();
+	std::unique_ptr<ControlBlock> freeBlockHead();
+	std::unique_ptr<ControlBlock> allocatedBlockHead();
+	std::unique_ptr<ControlBlock> unUsedControlBlockHead();
+	
+	std::unique_ptr<ControlBlock> findFreeBlock( ControlBlock *targetControlBlock, unsigned int allocateSize );
+	std::unique_ptr<ControlBlock> targetOptrPrevControlBlock( ControlBlock *targetControlBlock , optr *targetOptr ); 
 
-	std::unique_ptr<FreeBlockControlBlock> findFreeBlock( FreeBlockControlBlock *targetControlBlock, unsigned int allocateSize ); 
-	std::unique_ptr<FreeBlockControlBlock> targetOptrPrevControlBlock( FreeBlockControlBlock *targetControlBlock , optr *targetOptr );
-	std::unique_ptr<FreeBlockControlBlock> placeControlBlock( optr* targetOptr , FreeBlockControlBlock* prevControlBlock, FreeBlockControlBlock *nextControlBlock , optr* freeBlockEnd );
+	std::unique_ptr<ControlBlock> placeControlBlock( optr* targetOptr , ControlBlock* prevControlBlock, ControlBlock *nextControlBlock , optr* freeBlockEnd , bool isReplace = false );
+	std::unique_ptr<ControlBlock> rePlaceControlBlock( optr *destOptr , ControlBlock* fromControlBlock , optr* freeBlockEnd );
 
-	void mergeControlBlock( FreeBlockControlBlock *targetControlBlock );
+	// リストの繋げ直しも行う
+	void useUnUsedControlBlock();
+	std::unique_ptr<ControlBlock> newControlBlock();
 
-	void printControlChain( FreeBlockControlBlock* targetControlBlock );
+	void toUnUsedControlBlock( ControlBlock* targetControlBlock );
+
+	void mergeControlBlock( ControlBlock *targetControlBlock );
+
+	void printControlChain( ControlBlock* targetControlBlock );
 };
 
 
-
-
-
-void showFreeBlockControlBlockList();
 
 
 }; // close miya_db

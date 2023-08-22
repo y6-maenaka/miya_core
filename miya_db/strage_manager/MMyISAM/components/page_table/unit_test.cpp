@@ -14,33 +14,69 @@
 
 
 
-int common_test()
+int deallocate_test_pattern_1()
 {
 
-	int fd = open("../miya_db/table_files/test_table/test.oswap", O_RDWR , (mode_t)0600 );
+	int dataFd = open("../miya_db/table_files/test_table/test.oswap", O_RDWR , (mode_t)0600 );
+	int freeListFd = open("../miya_db/table_files/test_table/test.ofl", O_RDWR , (mode_t)0600 );
 
-	miya_db::OverlayMemoryManager *manager = new miya_db::OverlayMemoryManager(fd);
+	miya_db::OverlayMemoryManager *manager = new miya_db::OverlayMemoryManager(dataFd , freeListFd );
 
 
 
 	
-	std::unique_ptr<miya_db::optr> allocatedOptr = manager->allocate( 100 );
-
 	unsigned char* ret = new unsigned char[100];
 	memset( ret, 0x2D , 100 );
 	//omemcpy( allocatedOptr.get() ,  ret , 100 );
 
 	std::cout << "\n !!== MemoryAllocator Successfully Done ==! \n" << "\n";
 
-	std::cout << " 割り当てられた位置は　- > "; allocatedOptr->printAddr(); std::cout << "\n";
+	
+	
+	std::unique_ptr<miya_db::optr> allocatedOptr_1 = manager->allocate( 200 );
+	std::cout << "------------------------" << "\n";
+	std::cout << "[ NEW ALLOCATE ] : "; allocatedOptr_1->printAddr(); std::cout << "\n";
+	std::cout << "------------------------" << "\n";
+	miya_db::omemcpy( allocatedOptr_1.get() , (unsigned char*)"HelloWorld",  10 );
 
 
-	manager->deallocate( allocatedOptr.get() , 100 );
 
+	
+	std::unique_ptr<miya_db::optr> allocatedOptr_2 = manager->allocate( 100 );
+	std::cout << "------------------------" << "\n";
+	std::cout << "[ NEW ALLOCATE ] : "; allocatedOptr_2->printAddr(); std::cout << "\n";
+	std::cout << "------------------------" << "\n";
+	
+
+	
+	std::unique_ptr<miya_db::optr> allocatedOptr_3 = manager->allocate( 100 );
+	std::cout << "------------------------" << "\n";
+	std::cout << "[ NEW ALLOCATE ] : "; allocatedOptr_3->printAddr(); std::cout << "\n";
+	std::cout << "------------------------" << "\n";
+
+	/*
+	manager->deallocate( allocatedOptr_2.get() , 100 );
+	manager->deallocate( allocatedOptr_3.get() , 50 );
+	std::cout << "解放処理が正常に終了しました" << "\n";
+
+
+	std::cout << "Control Block Head :: "	;
+	manager->memoryAllocator()->controlBlockHead()->blockOptr()->printAddr(); std::cout << "\n";
 
 	manager->memoryAllocator()->printControlChain( manager->memoryAllocator()->controlBlockHead().get() );
+	*/
+
+
+
+
+	return 0;
 }
 
+
+int common_test()
+{
+	return 0;
+}
 
 
 
@@ -48,9 +84,12 @@ int common_test()
 
 int optr_test()
 {
-	int fd = open("../miya_db/table_files/test_table/test.oswap", O_RDWR , (mode_t)0600 );
 
-	miya_db::OverlayMemoryManager *manager = new miya_db::OverlayMemoryManager(fd);
+	int dataFd = open("../miya_db/table_files/test_table/test.oswap", O_RDWR , (mode_t)0600 );
+	int freeListFd = open("../miya_db/table_files/test_table/test.ofl", O_RDWR , (mode_t)0600 );
+
+
+	miya_db::OverlayMemoryManager *manager = new miya_db::OverlayMemoryManager( dataFd , freeListFd );
 
 	/*
 	std::cout << "-------------"	 << "\n";
@@ -115,6 +154,7 @@ int optr_test()
 	*/
 
 
+	/*
 	std::cout << "-------------"	 << "\n";
 	std::cout << "( 110 . 6E  )" << "\n";
 	miya_db::optr tmp;
@@ -125,17 +165,18 @@ int optr_test()
 	std::cout << tmp.offset() << "\n";
 	tmp.value();
 	std::cout << "-------------"	 << "\n";
+	*/
+	
 
 
-
-
-
+	/*
 	std::cout << "\n\n\n\n";
 	unsigned char addrZero[5] = {0x00,0x00,0x00,0x00,0x96};
 	omemcpy( &tmp , addrZero , 5);
 	tmp.printValueContinuously( 5 );
+	*/
 
-	manager->cacheTable()->syncForce( 0);
+	//manager->cacheTable()->syncForce( 0);
 	//(__tmp + 0)->value('@');
 	//(__tmp + 1)->value('@');
 	//(__tmp + 2)->value('@');

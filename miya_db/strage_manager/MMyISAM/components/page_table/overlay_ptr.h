@@ -7,6 +7,15 @@
 
 
 
+/*
+ 問題点
+
+ ・addr() で取り出される値はマッピングされたポインタを直接取りに行くので暗黙的にPageFaultが発生する可能性がある
+*/
+
+
+
+
 namespace miya_db{
 
 class CacheTable;
@@ -32,6 +41,7 @@ public:
 	unsigned char *addr(); // getter // get with unsigned char[5]
 	void addr( unsigned long ulongOptr );
 	void addr( optr* from );
+	void addr( unsigned char* from );
 
 	unsigned short frame() const;
 	unsigned short offset() const;

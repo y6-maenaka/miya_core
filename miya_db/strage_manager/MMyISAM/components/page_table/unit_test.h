@@ -11,8 +11,7 @@
 
 
 
-
-
+int deallocate_test_pattern_1();
 int common_test();
 int optr_test();
 

@@ -12,6 +12,8 @@ add_library( MIYA_DB STATIC
 				strage_manager/MMyISAM/components/page_table/optr_utils.cpp
 				strage_manager/MMyISAM/components/page_table/overlay_memory_manager.cpp
 				strage_manager/MMyISAM/components/page_table/overlay_memory_allocator.cpp
+				strage_manager/MMyISAM/components/page_table/control_block.cpp
+				strage_manager/MMyISAM/components/page_table/meta_block.cpp
 
 				strage_manager/MMyISAM/components/page_table/unit_test.cpp
 
