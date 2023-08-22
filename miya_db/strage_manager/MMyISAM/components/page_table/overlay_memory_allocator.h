@@ -6,6 +6,7 @@
 #include <memory>
 #include <limits>
 #include <unistd.h>
+#include <stdexcept>
 
 #include "./overlay_ptr.h"
 
@@ -90,7 +91,7 @@ public:
 	void freeBlockHead( ControlBlock *targetControlBlock ); // 先頭にセットする機能も備える
 	std::unique_ptr<ControlBlock> freeBlockHead(); 
 
-	void allocatedBlockHead( ControlBlock *targetAllodatedBlock , ControlBlock *test  ); // 先頭にセットする機能も兼ねる
+	void allocatedBlockHead( ControlBlock *targetAllodatedBlock  ); // 先頭にセットする機能も兼ねる
 	//void allocatedBlockHead( ControlBlock *targetAllodatedBlock ); // 先頭にセットする機能も兼ねる
 	std::unique_ptr<ControlBlock> allocatedBlockHead();	
 
@@ -188,8 +189,10 @@ public:
 	std::unique_ptr<ControlBlock> freeBlockHead();
 	std::unique_ptr<ControlBlock> allocatedBlockHead();
 	std::unique_ptr<ControlBlock> unUsedControlBlockHead();
-	
-	std::unique_ptr<ControlBlock> findFreeBlock( ControlBlock *targetControlBlock, unsigned int allocateSize );
+
+	std::unique_ptr<ControlBlock> findFreeBlock( optr* targetOptr ); // 指定のアドレスのマッピング情報を持つフリーブロックを検索する
+	std::unique_ptr<ControlBlock> findFreeBlock( ControlBlock *targetControlBlock, unsigned int allocateSize ); // 指定のサイズ以上のマッピング領域を持つフリーブロックを検索する
+	std::unique_ptr<ControlBlock> findAllocatedBlock( optr *targetOptr );
 	std::unique_ptr<ControlBlock> targetOptrPrevControlBlock( ControlBlock *targetControlBlock , optr *targetOptr ); 
 
 	std::unique_ptr<ControlBlock> placeControlBlock( optr* targetOptr , ControlBlock* prevControlBlock, ControlBlock *nextControlBlock , optr* freeBlockEnd , bool isReplace = false );

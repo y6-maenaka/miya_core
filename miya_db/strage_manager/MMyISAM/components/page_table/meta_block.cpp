@@ -97,7 +97,7 @@ std::unique_ptr<ControlBlock> MetaBlock::freeBlockHead() // 要修正
 
 
 
-void MetaBlock::allocatedBlockHead( ControlBlock *targetAllodatedBlock , ControlBlock *test  )
+void MetaBlock::allocatedBlockHead( ControlBlock *targetAllodatedBlock )
 {
 	if( _primaryOptr == nullptr ) return;
 
@@ -113,21 +113,10 @@ void MetaBlock::allocatedBlockHead( ControlBlock *targetAllodatedBlock , Control
 		if( allocatedBlockHead() == nullptr )
 		{
 			std::cout << "パターン1" << "\n";
-			targetAllodatedBlock->blockOptr()->printAddr(); std::cout << "\n";
-			test->blockOptr()->printAddr(); std::cout << "\n";
-			test->prevControlBlock()->blockOptr()->printAddr(); std::cout << "\n";
-			test->nextControlBlock()->blockOptr()->printAddr(); std::cout << "\n";
-
-			targetAllodatedBlock->prevControlBlock( targetAllodatedBlock );
-			targetAllodatedBlock->nextControlBlock( targetAllodatedBlock );
-
-			std::cout << "  ----------" << "\n";
-			test->prevControlBlock()->blockOptr()->printAddr(); std::cout << "\n";
-			test->nextControlBlock()->blockOptr()->printAddr(); std::cout << "\n";
-			std::cout << "  ----------" << "\n";
-
 
 			omemcpy( (*_primaryOptr + ALLOCATED_BLOCK_HEAD_OFFSET).get(), targetAllodatedBlock->blockAddr() , CONTROL_BLOCK_LENGTH );
+			allocatedBlockHead()->prevControlBlock( allocatedBlockHead().get() );
+			allocatedBlockHead()->nextControlBlock( allocatedBlockHead().get() );
 			return;
 		}
 
@@ -176,6 +165,8 @@ void MetaBlock::unUsedControlBlockHead( ControlBlock* targetUnUsedControlBlock )
 		if( unUsedControlBlockHead() == nullptr )
 		{
 			omemcpy( (*_primaryOptr + UNUSED_BLOCK_HEAD_OFFSET ).get() , targetUnUsedControlBlock->blockOptr()->addr() , CONTROL_BLOCK_LENGTH );
+			unUsedControlBlockHead()->prevControlBlock( unUsedControlBlockHead().get() );
+			unUsedControlBlockHead()->nextControlBlock( unUsedControlBlockHead().get() );
 			return;
 		}
 		targetUnUsedControlBlock->nextControlBlock( unUsedControlBlockHead().get() );

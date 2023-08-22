@@ -39,20 +39,21 @@ int deallocate_test_pattern_1()
 	std::cout << "------------------------" << "\n";
 	miya_db::omemcpy( allocatedOptr_1.get() , (unsigned char*)"HelloWorld",  10 );
 
+	manager->deallocate( allocatedOptr_1.get() );
 
-
-	
+	/*	
 	std::unique_ptr<miya_db::optr> allocatedOptr_2 = manager->allocate( 100 );
 	std::cout << "------------------------" << "\n";
 	std::cout << "[ NEW ALLOCATE ] : "; allocatedOptr_2->printAddr(); std::cout << "\n";
 	std::cout << "------------------------" << "\n";
+	*/	
 	
-
-	
+	/*	
 	std::unique_ptr<miya_db::optr> allocatedOptr_3 = manager->allocate( 100 );
 	std::cout << "------------------------" << "\n";
 	std::cout << "[ NEW ALLOCATE ] : "; allocatedOptr_3->printAddr(); std::cout << "\n";
 	std::cout << "------------------------" << "\n";
+	*/
 
 	/*
 	manager->deallocate( allocatedOptr_2.get() , 100 );

@@ -68,7 +68,7 @@ std::unique_ptr<optr> OverlayMemoryManager::allocate( unsigned long size )
 
 
 
-void OverlayMemoryManager::deallocate( optr* targetOptr , unsigned long size )
+void OverlayMemoryManager::deallocate( optr* targetOptr )
 {
 	return _memoryAllocator->deallocate( targetOptr );
 }

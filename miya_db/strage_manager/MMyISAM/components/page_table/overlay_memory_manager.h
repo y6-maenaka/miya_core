@@ -35,7 +35,7 @@ public:
 	OverlayMemoryAllocator* memoryAllocator(){ return _memoryAllocator; };
 
 	std::unique_ptr<optr> allocate( unsigned long size );
-	void deallocate( optr *target , unsigned long size );
+	void deallocate( optr *target );
 
 	//CacheTable* cacheTable(){ return _cacheTable; };
 };

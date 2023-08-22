@@ -55,6 +55,20 @@ namespace miya_db
 
 
 
+std::unique_ptr<ControlBlock> OverlayMemoryAllocator::findFreeBlock( optr* targetOptr )
+{
+	std::unique_ptr<ControlBlock> currentFreeBlock = _metaBlock->freeBlockHead();
+	if( currentFreeBlock == nullptr ) return nullptr;
+
+	do
+	{
+		if( memcmp( targetOptr->addr() , currentFreeBlock->mappingOptr()->addr() , CONTROL_BLOCK_LENGTH ) == 0 ) return currentFreeBlock;
+		currentFreeBlock = currentFreeBlock->nextControlBlock();
+	}
+	while( memcmp( currentFreeBlock->blockAddr() , _metaBlock->freeBlockHead()->blockAddr() , CONTROL_BLOCK_LENGTH  ) == 0 );
+
+	return nullptr;
+}
 
 
 
@@ -71,6 +85,30 @@ std::unique_ptr<ControlBlock> OverlayMemoryAllocator::findFreeBlock( ControlBloc
 
 	// このコントローブルロックを返却する
 	return std::make_unique<ControlBlock>(*targetControlBlock);
+}
+
+
+
+std::unique_ptr<ControlBlock> OverlayMemoryAllocator::findAllocatedBlock( optr *targetOptr )
+{
+
+	std::cout << "findAllocatedBlock Called" << "\n";
+	std::unique_ptr<ControlBlock> currentAllocatedBlock = allocatedBlockHead();
+	if( currentAllocatedBlock.get() == nullptr ) return nullptr;
+
+	targetOptr->printAddr(); std::cout << "\n";
+	_metaBlock->allocatedBlockHead()->mappingOptr()->printAddr(); std::cout << "\n";
+
+	do
+	{
+		std::cout << "るーぷ" << "\n";
+		if( memcmp( currentAllocatedBlock->mappingOptr()->addr() , targetOptr->addr() , CONTROL_BLOCK_LENGTH ) == 0 ) return currentAllocatedBlock;
+		currentAllocatedBlock = currentAllocatedBlock->nextControlBlock();
+	}
+	while( memcmp( currentAllocatedBlock->blockAddr() , _metaBlock->allocatedBlockHead()->blockAddr() , CONTROL_BLOCK_LENGTH ) != 0 );
+
+	return nullptr;
+
 }
 
 
@@ -328,7 +366,7 @@ std::unique_ptr<optr> OverlayMemoryAllocator::allocate( unsigned long allocateSi
 
 	newAllocatedBlock->mappingOptr( targetControlBlock->mappingOptr().get() );
 	newAllocatedBlock->freeBlockEnd( targetControlBlock->freeBlockEnd().get() );	
-	_metaBlock->allocatedBlockHead( newAllocatedBlock.get() , targetControlBlock.get() ); // テスト
+	_metaBlock->allocatedBlockHead( newAllocatedBlock.get() );
 
 
 
@@ -406,10 +444,6 @@ std::unique_ptr<optr> OverlayMemoryAllocator::allocate( unsigned long allocateSi
 
 
 
-	std::cout << "Error Done" << "\n";
-
-	
-	std::cout << "!!!!!!!!!!!!!" << "\n";
 	newAllocatedBlock->mappingOptr()->printAddr(); std::cout << "\n";
 	optr *ret = new optr( newAllocatedBlock->mappingOptr()->addr() );
 	ret->cacheTable( const_cast<CacheTable*>(_dataCacheTable) );
@@ -436,32 +470,31 @@ void OverlayMemoryAllocator::deallocate( optr* target )
 {
 	std::cout << "Deallocate Called" << "\n";
 
-	/* 割り当て解除されるOptrの直前のコントロールブロックを得る */
-	//std::unique_ptr<FreeBlockControlBlock> __freeBlockHead = freeBlockHead();
+	std::unique_ptr<ControlBlock> allocatedBlock = findAllocatedBlock( target );
 
-	/*
-	std::unique_ptr<FreeBlockControlBlock> insertTargetPrevControlBlock = targetOptrPrevControlBlock( freeBlockHead().release() ,target );
-
-	if( insertTargetPrevControlBlock == nullptr )
- 	{
-		if( size >= FREE_BLOCK_CONTROL_BLOCK_LENGTH ) // コントロールブロックを配置する
-		{
-			std::unique_ptr<FreeBlockControlBlock> ret = placeControlBlock(  target , freeBlockHead()->prevControlBlock().get() , freeBlockHead().get() , (*target + size).release() );
-			_metaBlock->freeBlockHead( ret.get() );
-			mergeControlBlock( ret.get() );
-		}
+	if( allocatedBlock == nullptr )
+	{
+		std::cout << "findAllocatedBlock passed point 1" << "\n";
+		throw std::runtime_error("Trying to deallocate an unallocated optr.");
 		return;
 	}
 
+	std::cout << "findAllocatedBlock passed point 2" << "\n";
+
+	// 解放する領域の分のフリーブロックを作成する
+	std::unique_ptr<ControlBlock> newFreeBlock = unUsedControlBlockHead();
+	if( newFreeBlock == nullptr ) newFreeBlock = newControlBlock();
 
 
-	// prevが存在する場合は,一旦controlBlockを作成して，必要であればmergeで削除する
-	std::cout << "新たなコントロールブロックが配置される前のコントロールブロック ->->-> ";  insertTargetPrevControlBlock->blockOptr()->printAddr(); std::cout << "\n";
-	placeControlBlock( target , insertTargetPrevControlBlock.get() , insertTargetPrevControlBlock->nextControlBlock().get() , (*target + size).release() );
-	mergeControlBlock( insertTargetPrevControlBlock.get() );
-	*/
+	newFreeBlock->mappingOptr( target );
+	newFreeBlock->freeBlockEnd( allocatedBlock->freeBlockEnd().get() );
+	_metaBlock->freeBlockHead( newFreeBlock.get() );
 
-	return;
+
+	mergeControlBlock( newFreeBlock.get() ); // マージ処理を行う
+	toUnUsedControlBlock( allocatedBlock.get()  ); // 割り当てブロックを解放する
+
+	std::cout << "解放完了" << "\n";
 }
 
 
@@ -478,24 +511,16 @@ void OverlayMemoryAllocator::mergeControlBlock( ControlBlock *targetControlBlock
 	//FreeBlockControlBlock freeBlockEnd( targetControlBlock->freeBlockEnd().get() );
 
 	// エラーが発生する可能性あり
-	if( memcmp( targetControlBlock->freeBlockEnd()->addr(), targetControlBlock->nextControlBlock()->blockOptr()->addr() , NEXT_FREE_BLOCK_OPTR_LENGTH ) == 0 )
-	{
-		std::cout << "マージされます" << "\n";
-		targetControlBlock->freeBlockEnd( targetControlBlock->nextControlBlock()->freeBlockEnd().get() );
-		targetControlBlock->nextControlBlock()->nextControlBlock()->prevControlBlock( targetControlBlock );
-		targetControlBlock->nextControlBlock( targetControlBlock->nextControlBlock()->nextControlBlock().get() );
 
-		targetControlBlock->nextControlBlock()->blockOptr()->printAddr(); std::cout << "\n";
-		targetControlBlock->prevControlBlock()->blockOptr()->printAddr(); std::cout << "\n";
+	std::unique_ptr<ControlBlock>  mergedControlBlock = findFreeBlock( targetControlBlock->freeBlockEnd().get() );
 
-		return mergeControlBlock( targetControlBlock->nextControlBlock().get() );
-	}
-	else
-	{
-		std::cout << "マージされませんでした" << "\n";
-	}
+	if( mergedControlBlock == nullptr ) return;
 
-	return;
+
+	targetControlBlock->freeBlockEnd( mergedControlBlock->freeBlockEnd().get() ); // マッピング領域の終端を伸ばす
+	toUnUsedControlBlock( mergedControlBlock.get() ); // マージされるコントロールブロックを破棄する
+
+	return mergeControlBlock( targetControlBlock ); 
 }
 
 
@@ -629,7 +654,7 @@ void OverlayMemoryAllocator::toUnUsedControlBlock( ControlBlock *targetControlBl
 			else if ( memcmp( _metaBlock->allocatedBlockHead()->blockOptr()->addr(), targetControlBlock->blockOptr()->addr(), CONTROL_BLOCK_LENGTH ) == 0 )
 			{
 				std::cout << "branch 2" << "\n";
-				_metaBlock->allocatedBlockHead( nullptr , nullptr );
+				_metaBlock->allocatedBlockHead( nullptr );
 			}
 			else if ( memcmp( _metaBlock->unUsedControlBlockHead()->blockOptr()->addr(), targetControlBlock->blockOptr()->addr(), CONTROL_BLOCK_LENGTH ) == 0 )
 			{
