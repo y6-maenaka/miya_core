@@ -40,34 +40,20 @@ void MetaBlock::freeBlockHead( ControlBlock *targetControlBlock )
 	{
 		if( freeBlockHead() == nullptr ) // フリーブロックが一つも登録されていなければ
 		{
-			std::cout << "既存のフリーブロックは何も登録されていません" << "\n";
 			omemcpy( (*_primaryOptr + CONTROL_BLOCK_HEAD_OFFSET).get() , targetControlBlock->blockOptr()->addr() , NEXT_FREE_BLOCK_OPTR_LENGTH );
 			freeBlockHead()->prevControlBlock( freeBlockHead().get() );
 			freeBlockHead()->nextControlBlock( freeBlockHead().get() );
 			return;	
 		}
 
-		targetControlBlock->nextControlBlock( freeBlockHead().get() );
+		targetControlBlock->nextControlBlock( freeBlockHead().get() ); // 新たなフリーブロック
 		targetControlBlock->prevControlBlock( freeBlockHead()->prevControlBlock().get() );
-		freeBlockHead()->prevControlBlock( targetControlBlock );
-
-		std::cout << "debug marker 3" << "\n";
-		printf("%p\n", freeBlockHead()->nextControlBlock().get() );
-		printf("%p\n", targetControlBlock );
-		printf("%p\n", targetControlBlock->blockOptr()->cacheTable() );
-
-		std::cout << "-----------------" << "\n";
-		freeBlockHead()->blockOptr()->printAddr(); std::cout << "\n";
-		freeBlockHead()->prevControlBlock()->blockOptr()->printAddr(); std::cout << "\n";
-		freeBlockHead()->nextControlBlock()->blockOptr()->printAddr(); std::cout << "\n";
-		std::cout << "-----------------" << "\n";
-		printf("%p\n", freeBlockHead()->prevControlBlock()->blockOptr()->cacheTable() );
-		printf("%p\n", freeBlockHead()->nextControlBlock()->blockOptr()->cacheTable() );
 
 		freeBlockHead()->prevControlBlock()->nextControlBlock( targetControlBlock );
-		std::cout << "debug marker 4" << "\n";
+		freeBlockHead()->prevControlBlock( targetControlBlock );
 
 		omemcpy( (*_primaryOptr + CONTROL_BLOCK_HEAD_OFFSET).get() , targetControlBlock->blockOptr()->addr() , NEXT_FREE_BLOCK_OPTR_LENGTH );
+		
 	}
 	return;
 }
@@ -105,14 +91,11 @@ void MetaBlock::allocatedBlockHead( ControlBlock *targetAllodatedBlock )
 	{
 		unsigned char addrZero[5] = {0,0,0,0,0};
 		omemcpy( (*_primaryOptr + ALLOCATED_BLOCK_HEAD_OFFSET).get(), addrZero , CONTROL_BLOCK_LENGTH );
-		std::cout << "target allocated block is same allocated block head" << "\n";
 	}
 	else
 	{
-		std::cout << "ここに入ります" << "\n";
 		if( allocatedBlockHead() == nullptr )
 		{
-			std::cout << "パターン1" << "\n";
 
 			omemcpy( (*_primaryOptr + ALLOCATED_BLOCK_HEAD_OFFSET).get(), targetAllodatedBlock->blockAddr() , CONTROL_BLOCK_LENGTH );
 			allocatedBlockHead()->prevControlBlock( allocatedBlockHead().get() );
@@ -120,11 +103,12 @@ void MetaBlock::allocatedBlockHead( ControlBlock *targetAllodatedBlock )
 			return;
 		}
 
-		std::cout << "パターン2" << "\n";
 		targetAllodatedBlock->nextControlBlock( allocatedBlockHead().get() );
 		targetAllodatedBlock->prevControlBlock( allocatedBlockHead()->prevControlBlock().get() );
-		allocatedBlockHead()->prevControlBlock( targetAllodatedBlock );
+
 		allocatedBlockHead()->prevControlBlock()->nextControlBlock( targetAllodatedBlock );
+		allocatedBlockHead()->prevControlBlock( targetAllodatedBlock );
+
 		omemcpy( (*_primaryOptr + ALLOCATED_BLOCK_HEAD_OFFSET).get(), targetAllodatedBlock->blockOptr()->addr() , CONTROL_BLOCK_LENGTH );
 	}
 	return;
@@ -153,7 +137,16 @@ std::unique_ptr<ControlBlock> MetaBlock::allocatedBlockHead()
 
 void MetaBlock::unUsedControlBlockHead( ControlBlock* targetUnUsedControlBlock )
 {
-	if( _primaryOptr == nullptr ) return;
+	std::cout << " ----- unUsedControlBlockHead func Called ---- " << "\n";
+	if( targetUnUsedControlBlock == nullptr ) std::cout << "nullptr" << "\n";
+	else targetUnUsedControlBlock->blockOptr()->printAddr(); std::cout << "\n";
+	std::cout << "-----------------" << "\n";
+
+
+
+	if( _primaryOptr == nullptr ){
+ 		return;
+	}
 
 	if( targetUnUsedControlBlock == nullptr )
 	{
@@ -162,17 +155,26 @@ void MetaBlock::unUsedControlBlockHead( ControlBlock* targetUnUsedControlBlock )
 	}
 	else
 	{
+		std::cout << "check point 1" << "\n";
 		if( unUsedControlBlockHead() == nullptr )
 		{
-			omemcpy( (*_primaryOptr + UNUSED_BLOCK_HEAD_OFFSET ).get() , targetUnUsedControlBlock->blockOptr()->addr() , CONTROL_BLOCK_LENGTH );
+			std::cout << "chek point 2" << "\n";
+			omemcpy( ((*_primaryOptr) + UNUSED_BLOCK_HEAD_OFFSET ).get() , targetUnUsedControlBlock->blockAddr() , CONTROL_BLOCK_LENGTH ); // 先頭未使用ブロックが置き換えられる
+			((*_primaryOptr) + UNUSED_BLOCK_HEAD_OFFSET	)->printValueContinuously( 5 ); std::cout << "\n";
+			unUsedControlBlockHead()->blockOptr()->printAddr(); std::cout << "\n";
+
 			unUsedControlBlockHead()->prevControlBlock( unUsedControlBlockHead().get() );
 			unUsedControlBlockHead()->nextControlBlock( unUsedControlBlockHead().get() );
+
 			return;
 		}
+
+		std::cout << "check point 3" << "\n";
 		targetUnUsedControlBlock->nextControlBlock( unUsedControlBlockHead().get() );
 		targetUnUsedControlBlock->prevControlBlock( unUsedControlBlockHead()->prevControlBlock().get() );
-		unUsedControlBlockHead()->prevControlBlock( targetUnUsedControlBlock );
+
 		unUsedControlBlockHead()->prevControlBlock()->nextControlBlock( targetUnUsedControlBlock );
+		unUsedControlBlockHead()->prevControlBlock( targetUnUsedControlBlock );
 
 		omemcpy( (*_primaryOptr + UNUSED_BLOCK_HEAD_OFFSET ).get() , targetUnUsedControlBlock->blockOptr()->addr() , CONTROL_BLOCK_LENGTH );	
 	}
@@ -182,39 +184,46 @@ void MetaBlock::unUsedControlBlockHead( ControlBlock* targetUnUsedControlBlock )
 
 
 
-// 使用と同時に使用済みになる
+
 std::unique_ptr<ControlBlock> MetaBlock::unUsedControlBlockHead()
 {
+	if( _primaryOptr == nullptr ) return nullptr;
 
-	std::cout << "unUsedControlBlockHead() called" << "\n";
-
-	unsigned char unUsedControlBlockOptrAddr[5] = {0,0,0,0,0};
-	omemcpy( unUsedControlBlockOptrAddr , (*_primaryOptr + UNUSED_BLOCK_HEAD_OFFSET).get() , CONTROL_BLOCK_LENGTH  );
-
-
-	optr* unUsedControlBlockOptr = new optr( unUsedControlBlockOptrAddr );
-	ControlBlock unUsedControlBlock( unUsedControlBlockOptr );
-
-
-	std::cout << "unUsedCOntrolBlockOptrAddr -> " << "\n";  (*_primaryOptr + UNUSED_BLOCK_HEAD_OFFSET)->printValueContinuously(5); std::cout << "\n";
-	unUsedControlBlock.blockOptr()->printAddr(); std::cout << "\n";
-
-	unsigned char addrZero[5] = {0,0,0,0,0};
-	if( memcmp( unUsedControlBlock.blockAddr() , addrZero , 5 ) == 0 ){
-		std::cout << "unUsedControlBlockOptr retuend nullptr" << "\n";
+	unsigned char addrZero[5] = {0, 0, 0, 0, 0};
+	if( ocmp( (*_primaryOptr + (UNUSED_BLOCK_HEAD_OFFSET)).get() , addrZero , CONTROL_BLOCK_LENGTH ) == 0 )
 		return nullptr;
-	}
+
+	unsigned char* retAddr = new unsigned char[5];
+ 	omemcpy( retAddr , (*_primaryOptr + UNUSED_BLOCK_HEAD_OFFSET).get() , CONTROL_BLOCK_LENGTH );
+
+	optr *retOptr = new optr( retAddr ); retOptr->cacheTable( _primaryOptr->cacheTable() ); 
+	ControlBlock retControlBlock( retOptr );
+
+	return std::make_unique<ControlBlock>( retControlBlock );
+}
 
 
 
-	unsigned char* unUsedfreeBlockHeadAddr = new unsigned char[5];
-	omemcpy( unUsedfreeBlockHeadAddr , (*_primaryOptr + UNUSED_BLOCK_HEAD_OFFSET).get() , CONTROL_BLOCK_LENGTH );
 
-	optr *unUsedfreeBlockHeadOptr = new optr( unUsedfreeBlockHeadAddr );
-	unUsedfreeBlockHeadOptr->cacheTable( _primaryOptr->cacheTable() );
+// 使用と同時に使用済みになる
+std::unique_ptr<ControlBlock> MetaBlock::useUnUsedControlBlockHead()
+{
 
-	ControlBlock retControlBlock( unUsedfreeBlockHeadOptr );
+	std::cout << "useUnUsedControlBlockHead() called" << "\n";
 
+	if( _primaryOptr == nullptr ) return nullptr;
+
+	unsigned char addrZero[5] = {0, 0, 0, 0, 0};
+	if( ocmp( (*_primaryOptr + (UNUSED_BLOCK_HEAD_OFFSET)).get() , addrZero , CONTROL_BLOCK_LENGTH ) == 0 )
+		return nullptr;
+
+	unsigned char* retAddr = new unsigned char[5];
+ 	omemcpy( retAddr , (*_primaryOptr + UNUSED_BLOCK_HEAD_OFFSET).get() , CONTROL_BLOCK_LENGTH );
+
+	optr *retOptr = new optr( retAddr ); retOptr->cacheTable( _primaryOptr->cacheTable() ); 
+	ControlBlock retControlBlock( retOptr );
+
+	/* 以降は未使用ブロックを使用済みにするシーケンス*/
 	if( memcmp( retControlBlock.blockAddr() , retControlBlock.nextControlBlock()->blockAddr() , CONTROL_BLOCK_LENGTH ) == 0 ) // 未使用ブロックが今回の使用でになる場合
 		unUsedControlBlockHead( nullptr );
 	else {
@@ -227,9 +236,11 @@ std::unique_ptr<ControlBlock> MetaBlock::unUsedControlBlockHead()
 	retControlBlock.nextControlBlock( nullptr );
 	retControlBlock.prevControlBlock( nullptr );
 	*/
-
 	return std::make_unique<ControlBlock>( retControlBlock );
 }
+
+
+
 
 
 

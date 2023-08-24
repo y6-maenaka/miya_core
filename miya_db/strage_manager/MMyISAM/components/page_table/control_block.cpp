@@ -92,7 +92,6 @@ std::unique_ptr<optr> ControlBlock::mappingOptr()
 {
 	if( _blockOptr == nullptr )
 	{
-		std::cout << "_blockOptr is NULL" << "\n";
 		return nullptr;
 	}
 
@@ -127,7 +126,6 @@ std::unique_ptr<optr> ControlBlock::freeBlockEnd()
 	unsigned char addrZero[5] = {0, 0, 0, 0, 0};
 	if( ocmp( (*_blockOptr + (FREE_BLOCK_END_OPTR_OFFSET)).get() , addrZero , FREE_BLOCK_END_OPTR_LENGTH ) == 0 )
 	{
-		std::cout << "freeBlockEnd seted nullptr" << "\n";
 		return nullptr;
 	}
 
@@ -186,7 +184,6 @@ unsigned long ControlBlock::freeBlockSize()
 
 	if( freeBlockEnd() == nullptr  )
 	{
-		std::cout << "FreeBlockSize Called retuend nullptr" << "\n";
 		return 0;
 	}
 

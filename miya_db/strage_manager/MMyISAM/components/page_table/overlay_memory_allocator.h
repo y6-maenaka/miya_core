@@ -31,9 +31,6 @@ constexpr unsigned int MAPPING_OPTR_OFFSET = NEXT_FREE_BLOCK_OPRT_OFFSET + NEXT_
 constexpr unsigned int FREE_BLOCK_END_OPTR_LENGTH = 5; // [bytes]
 constexpr unsigned int FREE_BLOCK_END_OPTR_OFFSET = MAPPING_OPTR_OFFSET + MAPPING_OPTR_LENGTH;
 
-constexpr unsigned int CONTROL_BLOCK_TYPE_LENGTH = 5;
-constexpr unsigned int CONTROL_BLOCK_TYPE_OFFSET = FREE_BLOCK_END_OPTR_OFFSET + FREE_BLOCK_END_OPTR_LENGTH;
-
 constexpr unsigned int FREE_BLOCK_CONTROL_BLOCK_LENGTH = PREV_FREE_BLOCK_OPTR_LENGTH + NEXT_FREE_BLOCK_OPTR_LENGTH + MAPPING_OPTR_LENGTH + FREE_BLOCK_END_OPTR_LENGTH;
 
 
@@ -95,6 +92,8 @@ public:
 	//void allocatedBlockHead( ControlBlock *targetAllodatedBlock ); // 先頭にセットする機能も兼ねる
 	std::unique_ptr<ControlBlock> allocatedBlockHead();	
 
+
+	std::unique_ptr<ControlBlock> useUnUsedControlBlockHead();
 	void unUsedControlBlockHead( ControlBlock* targetUnUsedControlBlock ); // 先頭にセットする機能も備える
 	std::unique_ptr<ControlBlock> unUsedControlBlockHead();
 
@@ -206,8 +205,8 @@ public:
 
 	void mergeControlBlock( ControlBlock *targetControlBlock );
 
-	void printControlChain( ControlBlock* targetControlBlock );
-};
+	void printControlFile();
+	void printFreeBlockChain();
 
 
 
@@ -217,4 +216,4 @@ public:
 #endif // B6103BCF_DE57_4E00_96CB_194A3C316C52
 
 
-;
+};
