@@ -40,8 +40,16 @@ unsigned char* SHAHash( unsigned char* HashMessage, size_t HashMessageSize , cha
 	return Ret;
 }
 
-}; // close hash namesapce
 
+
+
+void FreeDigest( void* target )
+{
+	free( target );
+}
+
+
+}; // close hash namesapce
 
 int main(){
 	unsigned char Message[] = "Hello";

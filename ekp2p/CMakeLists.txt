@@ -18,6 +18,13 @@ add_library( EKP2P STATIC
 						 kademlia/k_tag.cpp
 						 kademlia/node.cpp
 
+						 kademlia/k_node.cpp
+						 kademlia/message_receiver.cpp
+						 kademlia/connection_controller.cpp
+						 network/header/header.cpp
+						 
+
+
 						 kademlia/kademlia_RPC/FIND_NODE.cpp
 						 kademlia/kademlia_RPC/PING.cpp
 						 kademlia/kademlia_RPC/PONG.cpp

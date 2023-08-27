@@ -28,6 +28,7 @@ struct KAddr;
 struct KTag;
 class SocketManager;
 class EKP2PMSG;
+class NodeOutband;
 // class EKP2P;
 
 // constexpr int NODE_ID_LENGTH = 20;
@@ -37,6 +38,21 @@ constexpr int BIT_PER_BYTES = 8;
 
 
 // typedef std::bitset<NODE_ID_LENGTH> BitSet_160; // prepare 20 bytes std::bitset
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

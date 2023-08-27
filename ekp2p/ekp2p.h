@@ -18,6 +18,20 @@ namespace ekp2p{
 class InbandNetworkManager;
 class KRoutingTable;
 class SocketManager;
+class SmartMiddleBuffer;
+
+class KNodeAddr;
+class KHostNode;
+class KClientNode;
+
+
+
+
+
+constexpr unsigned short _PROTOCOL_NAT_ = 3;
+
+
+
 
 
 class EKP2P // 基本的にNAT超え後はそのSocketManagerを使い回し続ける必要がありそう
@@ -29,8 +43,12 @@ private:
 	
 	KRoutingTable *_kRoutingTable = nullptr;
 
-public:
+	SocketManager *_mainSocketManager;
+	KHostNode* _mainNode;
 
+
+
+public:
 	EKP2P( KRoutingTable *baseKRoutingTable = nullptr );
 	 
 	void init(); // KRoutingTableを使うのであれば必須 自身のグローバルアドレスを取得する
@@ -39,6 +57,8 @@ public:
 	/* 複数portoを監視することも可能だが,NodeIDが変わる 初回監視ポートのみ相手に通知される -> 複数起動できるメリットはない　*/
 	void start( unsigned short port , int type ); // 通常とちらか一つのポート&一つのプロトコル
 
+
+	int send( KClientNode *targetNode , void* payload , unsigned short payloadLength , unsigned short protocol );
 	//bool startMonitor( unsigned short port );
 
 };

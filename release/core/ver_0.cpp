@@ -23,6 +23,11 @@ int main(){
 
 
 
+	ekp2p::KRoutingTable *kRoutingTable = new ekp2p::KRoutingTable();
+	ekp2p::EKP2P _ekp2p( kRoutingTable );
+	_ekp2p.init(); // ルーティングテーブルを使用するのであればinitは必須 
+
+
 
 
 	/*
@@ -181,11 +186,6 @@ int main(){
 	std::cout << table_manager.find( new_p2pkh->txID() ) << "\n";
 	*/
 
-
-
-	ekp2p::KRoutingTable *kRoutingTable = new ekp2p::KRoutingTable();
-	ekp2p::EKP2P _ekp2p( kRoutingTable );
-	_ekp2p.init(); // ルーティングテーブルを使用するのであればinitは必須 
 
 
 

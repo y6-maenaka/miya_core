@@ -12,6 +12,7 @@
 namespace hash{
 
 unsigned char* SHAHash( unsigned char* HashMessage , size_t HashMessageSize, char* SHAtype );
+void FreeDigest( void *target );
 
 }
 #endif // ECEC754B_A279_4E21_839C_A23580D6E2FA

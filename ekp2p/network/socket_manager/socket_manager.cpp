@@ -6,7 +6,7 @@ namespace ekp2p{
 
 
 
-int SocketManager::create()
+int SocketManager::create() 
 {
 
 	if ( (this->_sock = socket( PF_INET, SOCK_DGRAM, IPPROTO_UDP )) < 0 )  return -1;
@@ -24,7 +24,7 @@ int SocketManager::bind( int port )
 
 	struct sockaddr_in servAddr;
 
-	memset( &servAddr, 0x0 , sizeof(servAddr) );
+	memset( &servAddr, 0x00 , sizeof(servAddr) );
 	servAddr.sin_family = AF_INET;
 	servAddr.sin_addr.s_addr = htonl( INADDR_ANY ); //　引数で変更可にする
 	servAddr.sin_port = htons( port );

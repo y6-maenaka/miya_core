@@ -16,6 +16,13 @@ namespace ekp2p{
 
 
 
+
+
+
+
+
+
+
 short int Node::calcBranch( unsigned char* myNodeID ){
 
 	// 無駄処理

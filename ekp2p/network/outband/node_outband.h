@@ -18,6 +18,8 @@ public:
 
 	int send( unsigned char* payload, unsigned int payloadSize , KTag* kTag, SocketManager *socketManager );
 	int send( unsigned char* msg , unsigned int msgSize , SocketManager *socketManager );
+
+	int sendRaw();
 };
 
 

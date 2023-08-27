@@ -21,6 +21,15 @@ class SocketManager;
 using KAddrVector = std::vector< KAddr* >;
 
 
+
+
+
+
+
+
+
+
+
 struct KTag{
 
 	struct KTagMeta
