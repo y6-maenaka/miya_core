@@ -121,8 +121,6 @@ void EKP2P::init()
 	/* ここでブートノード(NonNatNode)の情報を取得してくる*/
 
 	return;
-
-
 }
 
 
@@ -158,6 +156,10 @@ int EKP2P::send( KClientNode *targetNode , void *payload , unsigned short payloa
 	delete[] rawHeader; delete[] rawMsg;
 	return 0;
 }
+
+
+
+
 
 
 

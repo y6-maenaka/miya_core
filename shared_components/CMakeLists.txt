@@ -24,7 +24,8 @@ add_library( SHARED_COMPONENTS SHARED
 							hash/sha_hash.cpp
 
 							middle_buffer/middle_buffer.cpp
-							smart_middle_buffer/smart_middle_buffer.cpp
+							stream_buffer/stream_buffer.cpp
+							stream_buffer/stream_buffer_container.cpp
 
 )
 
