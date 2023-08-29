@@ -6,8 +6,9 @@
 #include <vector>
 
 
-class SegmentBuffer;
 
+struct SBSegment;
+class StreamBuffer;
 
 
 
@@ -17,13 +18,15 @@ class StreamBufferContainer
 {
 
 private:
-	std::vector<SegmentBuffer> _sbs;
+	std::vector<StreamBuffer*> _sbs;
 
 
 protected:
-	void upScale();
-	void downScale();
+	void pushOne( std::unique_ptr<SBSegment> target );
+	std::unique_ptr<SBSegment> popOne();
 
+public:
+	StreamBufferContainer();
 };
 
 

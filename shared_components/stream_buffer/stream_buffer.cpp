@@ -8,7 +8,19 @@ void StreamBuffer::pushOne( std::unique_ptr<SBSegment> target )
 	// ロックの獲得
 	std::unique_lock<std::mutex> lock(_mtx);  // 他が使用中だとブロッキングする. 他プロセスが解放するとそこからスタート
 
-	_sb.push_back( std::move(target) ); // 要素の追加
+
+	_pushContributer._pushCV.wait( lock , [&]{
+			return (_sb._queue.size() < _sb._capacity);
+		});
+		// 評価される度に第二引数がtrueであることを確認する
+		// 第２引数がtrueだったらwaitを抜ける
+
+	_sb._queue.push_back( std::move(target) );
+
+	_popContributer._popCV.notify_all();
+
+	return;
+
 }
 
 
@@ -17,10 +29,16 @@ std::unique_ptr<SBSegment> StreamBuffer::popOne()
 {
 	std::unique_lock<std::mutex> lock(_mtx);
 
-	if( _sb.size() <= 0 ) return nullptr;
+	
+	_popContributer._popCV.wait( lock , [&]{
+		return !(_sb._queue.empty()); // emptyでなければ待機状態を解除する
+	});
+	
+	
+	std::unique_ptr<SBSegment> ret = std::move( _sb._queue.front() );
+	_sb._queue.erase( _sb._queue.cbegin() );
 
-	std::unique_ptr<SBSegment> ret = std::move( _sb.front() ); // 要素の参照
-	_sb.erase( _sb.begin() ); // 要素の削除
-
+	_pushContributer._pushCV.notify_all();
+	
 	return std::move( ret );
 }

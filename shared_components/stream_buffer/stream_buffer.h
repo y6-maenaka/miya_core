@@ -6,6 +6,7 @@
 #include <vector>
 #include <mutex>
 #include <condition_variable>
+#include <functional>
 
 
 
@@ -48,22 +49,42 @@ struct SBSegment
 
 
 
+
 class StreamBuffer
 {
 
 private:
 	std::mutex _mtx;
-	std::condition_variable _cv;
+	// std::condition_variable _cv;
 
-	unsigned int _capacity;
-	std::vector< std::unique_ptr<SBSegment> > _sb;
+	struct 
+	{
+		std::condition_variable _popCV;
+		std::vector< std::condition_variable > _contributers;
+	}_popContributer ;
 
+	struct
+	{
+		std::condition_variable _pushCV;
+		std::vector< std::condition_variable > _contributers;
+	} _pushContributer;
+
+
+	std::function<void()> scaleOutRequest();
+	std::function<void()> scaleDownRequest();
+
+	struct 
+	{
+		unsigned int _capacity;
+		std::vector< std::unique_ptr<SBSegment> > _queue;
+	} _sb;
 
 
 public:
 	void pushOne( std::unique_ptr<SBSegment> target );
 	std::unique_ptr<SBSegment> popOne();
 
+	//StreamBuffer();
 };
 
 
