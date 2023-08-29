@@ -2,7 +2,17 @@
 
 
 
-void StreamBuffer::pushOne( std::unique_ptr<SBSegment> target )
+StreamBuffer::StreamBuffer()
+{
+	_sb._capacity = DEFAULT_STREAM_BUFFER_CAPACITY;
+}
+
+
+
+
+
+
+void StreamBuffer::enqueue( std::unique_ptr<SBSegment> target )
 {
 
 	// ロックの獲得
@@ -25,7 +35,7 @@ void StreamBuffer::pushOne( std::unique_ptr<SBSegment> target )
 
 
 
-std::unique_ptr<SBSegment> StreamBuffer::popOne()
+std::unique_ptr<SBSegment> StreamBuffer::dequeue()
 {
 	std::unique_lock<std::mutex> lock(_mtx);
 
@@ -42,3 +52,11 @@ std::unique_ptr<SBSegment> StreamBuffer::popOne()
 	
 	return std::move( ret );
 }
+
+
+
+
+/*
+	- 入出力がネックになったらSBを増やす
+	- 入出力が詰まってきたらコンシューマーを増やす
+*/

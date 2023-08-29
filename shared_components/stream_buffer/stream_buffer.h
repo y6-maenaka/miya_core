@@ -16,6 +16,8 @@ class KNodeAddr;
 
 
 
+constexpr unsigned int DEFAULT_STREAM_BUFFER_CAPACITY = 20;
+
 
 
 
@@ -55,7 +57,6 @@ class StreamBuffer
 
 private:
 	std::mutex _mtx;
-	// std::condition_variable _cv;
 
 	struct 
 	{
@@ -70,9 +71,6 @@ private:
 	} _pushContributer;
 
 
-	std::function<void()> scaleOutRequest();
-	std::function<void()> scaleDownRequest();
-
 	struct 
 	{
 		unsigned int _capacity;
@@ -81,10 +79,10 @@ private:
 
 
 public:
-	void pushOne( std::unique_ptr<SBSegment> target );
-	std::unique_ptr<SBSegment> popOne();
+	StreamBuffer();
 
-	//StreamBuffer();
+	void enqueue( std::unique_ptr<SBSegment> target );
+	std::unique_ptr<SBSegment> dequeue();
 };
 
 
