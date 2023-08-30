@@ -7,6 +7,8 @@
 #include <sys/_types/_int64_t.h>
 #include <sys/socket.h>
 
+#include <memory>
+
 
 constexpr unsigned short DEFAULT_BIND_PORT = 8080;
 constexpr int DEFAULT_FIND_NODE_ROUTINE_TIMEOUT = 10;
@@ -55,7 +57,8 @@ public:
 	bool collectStartUpNodes( SocketManager *baseSocketManager );
 
 	/* 複数portoを監視することも可能だが,NodeIDが変わる 初回監視ポートのみ相手に通知される -> 複数起動できるメリットはない　*/
-	void start( unsigned short port , int type ); // 通常とちらか一つのポート&一つのプロトコル
+	void start(); 
+	void start( unsigned short port , int type ); // 通常とちらか一つのポート&一つのプロトコル)
 
 
 	int send( KClientNode *targetNode , void* payload , unsigned short payloadLength , unsigned short protocol );

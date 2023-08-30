@@ -2,6 +2,33 @@
 
 
 
+
+
+
+
+SBSegment::SBSegment( void* body , unsigned short bodyLength )
+{
+	if( body == nullptr || bodyLength <= 0 ) return;
+
+	memset( this , 0x00 , sizeof(struct SBSegment) );
+
+	_controlBlock._bodySize = static_cast<uint16_t>(bodyLength);
+	_sbBlock._body = body;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 StreamBuffer::StreamBuffer()
 {
 	_sb._capacity = DEFAULT_STREAM_BUFFER_CAPACITY;

@@ -24,9 +24,7 @@ EKP2P::EKP2P( KRoutingTable *baseKRoutingTable )
 {
 	_inbandManager = new InbandNetworkManager;// inbandManagerのオブジェクト化
 
-	
 	if( baseKRoutingTable != nullptr ) _kRoutingTable = baseKRoutingTable;
-
 
 	// Get Global Addr	
 }
@@ -37,7 +35,6 @@ EKP2P::EKP2P( KRoutingTable *baseKRoutingTable )
 
 void EKP2P::init()
 {
-
 
 
 	std::cout << "[ # ] MiyaCoreネットワークに接続します" << "\n";
@@ -111,10 +108,12 @@ void EKP2P::init()
 	}
 
 
+	std::cout << "[ #### ] ブートストラップノードへの問い合わせが完了しました" << "\n";
+
 	_mainNode->kNodeAddr( outsideGlobalAddr );  // ノードIDもセットされる
 
 	// NAT解決アドレス以外を破棄して検証するシーケンス
-	std::cout << "[ #### ] グローバルIPアドレスを取得しました"  << "\n";
+	std::cout << "[ ##### ] グローバルIPアドレスを取得しました"  << "\n";
 	std::cout << "[ IPv4 ] :: " << inet_ntoa( outsideGlobalAddr->sockaddr_in()->sin_addr ) << "\n";
 	std::cout << "[ Port ] :: " << ntohs(outsideGlobalAddr->sockaddr_in()->sin_port) << "\n";
 
@@ -196,6 +195,32 @@ bool EKP2P::collectStartUpNodes( SocketManager *baseSocketManager )
 
 	return true;
 }
+
+
+
+
+
+void EKP2P::start()
+{
+
+	//1. Updaterの起動
+	//2. ConnectionControllerの起動
+	//3. BlockChainControllerの起動
+	
+
+
+
+
+	//4. MessageReceiverの起動
+	//MessageReceiver* messageReceiver = new MessageReceiver( _mainSocketManager );
+	auto messageReceiver = std::make_shared<MessageReceiver>(_mainSocketManager);
+	std::thread messageReceiverTH([messageReceiver](){
+		messageReceiver->start();
+	});
+	messageReceiverTH.detach();
+	
+}
+
 
 
 

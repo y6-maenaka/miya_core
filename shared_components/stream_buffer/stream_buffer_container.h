@@ -28,16 +28,18 @@ private:
 	unsigned short _bufferCount;
 	std::vector<StreamBuffer*> _sbs;
 
-
 	std::function<void()> _scaleOutRequest;
 	std::function<void()> _scaleDownRequest;
 
 
 protected:
+public:
+
+
 	void pushOne( std::unique_ptr<SBSegment> target );
 	std::unique_ptr<SBSegment> popOne();
 
-public:
+
 	StreamBufferContainer( std::function<void()> scaleOutHandler , std::function<void()> scaleDownHandler );
 };
 

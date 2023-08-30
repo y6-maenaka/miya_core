@@ -3,6 +3,17 @@
 
 
 
+#include <map>
+#include <vector>
+#include <array>
+#include <memory>
+
+class StreamBuffer;
+class StreamBufferContainer;
+
+
+
+
 namespace ekp2p{
 
 
@@ -11,6 +22,8 @@ class SmartMiddleBuffer;
 class SocketManager;
 
 
+constexpr unsigned short MAX_PROTOCOL = 20;
+
 
 
 
@@ -18,16 +31,18 @@ class MessageReceiver // 基本的にスレッドで起動されう
 {
 
 private:
-	SmartMiddleBuffer *_middleBuffer;
-	SocketManager *_socketManager;
-	
 
+	SocketManager *_socketManager;
+	std::array< StreamBufferContainer* , MAX_PROTOCOL > _sbHub = {}; // メッセージプロトコルに合致したSBにメッセージを流す
 
 public:
 	void start();
 
+	void setStreamBuffer( StreamBufferContainer* target , unsigned short destination );
+
 	static unsigned int payload( void *rawEKP2PMSG , unsigned char** ret );
 
+	MessageReceiver( SocketManager* target );
 };
 
 

@@ -54,6 +54,36 @@ unsigned int EKP2PMessageHeader::exportRaw( unsigned char** ret )
 
 
 
+
+void EKP2PMessageHeader::importRaw( void *rawHeader , unsigned int rawHeaderSize )
+{
+	memcpy( &_meta, rawHeader , sizeof(_meta) );
+
+	unsigned int kAddrCount = (rawHeaderSize - sizeof(_meta)) / sizeof(struct KNodeAddr); 
+
+	if( kAddrCount >= 1 )
+	{
+		KNodeAddr *sourceNodeAddr = new KNodeAddr;
+		memcpy( sourceNodeAddr , static_cast<unsigned char*>(rawHeader) + sizeof(_meta) , sizeof(struct KNodeAddr) );
+		_sourceNodeAddr = std::make_shared<KNodeAddr>( *sourceNodeAddr );
+	}
+
+	for( int i=0; i<kAddrCount-1; i++ )
+	{
+		KNodeAddr *relayKNodeAddr = new KNodeAddr;
+		memcpy( relayKNodeAddr , static_cast<unsigned char*>(rawHeader) + sizeof(_meta) + sizeof(struct KNodeAddr) + (sizeof(struct KNodeAddr)*i) , sizeof(struct KNodeAddr) );
+		_relayKNodeAddrVector.push_back( std::make_shared<KNodeAddr>(*relayKNodeAddr) );
+	}
+}
+
+
+
+
+
+
+
+
+
 void EKP2PMessageHeader::sourceNodeAddr( std::shared_ptr<KNodeAddr> nodeAddr )
 {
 	if( nodeAddr == nullptr )
@@ -94,6 +124,13 @@ unsigned short EKP2PMessageHeader::headerLength()
 unsigned short EKP2PMessageHeader::payloadLength()
 {
 	return static_cast<unsigned short>(_meta._payloadLength);
+}
+
+
+
+unsigned short EKP2PMessageHeader::protocol()
+{
+	return static_cast<unsigned short>(_meta._protocol);
 }
 
 

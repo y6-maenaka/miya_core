@@ -76,10 +76,12 @@ void sourceNodeAddr( std::shared_ptr<KNodeAddr> nodeAddr );
 /* Getter */
 unsigned short headerLength();
 unsigned short payloadLength();
+unsigned short protocol();
 
 bool validate();
 
 unsigned int exportRaw( unsigned char** ret );
+void importRaw( void *rawHeader , unsigned int rawHeaderSize );
 };
 
 

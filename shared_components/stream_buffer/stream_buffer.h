@@ -41,9 +41,12 @@ struct SBSegment
 
 	struct
 	{
-		void *_bpdy;
+		void *_body;
 	} _sbBlock;
 
+
+	SBSegment(){};
+	SBSegment( void* body , unsigned short bodyLength );
 };
 
 

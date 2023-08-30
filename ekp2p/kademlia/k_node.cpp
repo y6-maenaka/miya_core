@@ -42,7 +42,11 @@ std::shared_ptr<KNodeAddr> KNode::kNodeAddr()
 
 void KNode::kNodeAddr( std::shared_ptr<KNodeAddr> nodeAddr )
 {
-	_nodeAddr = nodeAddr;
+	//this->_nodeAddr = nodeAddr; // なぜかエラーが発生する
+	this->_nodeAddr->_IPv4Addr = nodeAddr->_IPv4Addr;
+	this->_nodeAddr->_Port = nodeAddr->_Port;
+
+
 	_nodeAddr->setNodeID();
 }
 

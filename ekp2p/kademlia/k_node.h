@@ -50,8 +50,8 @@ struct KNodeAddr
 class KNode
 {
 
-protected:
-	std::shared_ptr<KNodeAddr> _nodeAddr = nullptr;
+private:
+	std::shared_ptr<KNodeAddr> _nodeAddr;
 
 public:
 	KNode( std::shared_ptr<KNodeAddr> nodeAddr );
