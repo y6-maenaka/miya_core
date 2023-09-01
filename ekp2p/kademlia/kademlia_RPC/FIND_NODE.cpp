@@ -3,7 +3,7 @@
 #include "./kademlia_rpc_protocol_map.h"
 
 #include "../node.h"
-#include "../k_routing_table.h"
+//#include "../k_routing_table.h"
 #include "../k_tag.h"
 #include "../k_bucket.h"
 #include "../common.h"
@@ -63,7 +63,7 @@ void RequestFIND_NODE( unsigned char *nodeID , sockaddr_in *bootstrapNodeAddr  )
 
 
 
-
+/*
 EKP2PMSG* GenerateRPCMSG_FIND_NODE( KAddr *selfKAddr )
 {
 	
@@ -101,13 +101,6 @@ bool RequestRPC_FIND_NODE( Node *bootstrapNode, KAddr *selfKAddr )
 void TableWrapper::FIND_NODEHandler( KTag *findNodeQueryKTag , Node* querySourceNode )
 {
 
-	/*
-	 1, FIND_NODEの受信
-	 2, BaseNodeの取り出し
-	 3, ClosestNodeの収集
-	 4, ClosestNodeの送信
-	 */
-
 	// 不正なクエリが紛れ込んでいたら
 	if( findNodeQueryKTag->protocol() != static_cast<int>(KADEMLIA_PROTOCOL::FIND_NODE) ) return;
 
@@ -125,7 +118,7 @@ void TableWrapper::FIND_NODEHandler( KTag *findNodeQueryKTag , Node* querySource
 	querySourceNode->send( nullptr, 0 , responseKTag );
 	
 }
-
+*/
 
 
 

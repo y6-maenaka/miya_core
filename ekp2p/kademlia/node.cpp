@@ -3,7 +3,7 @@
 #include "./k_tag.h"
 
 #include "../network/socket_manager/socket_manager.h"
-#include "./k_routing_table.h"
+//#include "./k_routing_table.h"
 #include "../network/message/message.h"
 #include "./common.h"
 #include "../../shared_components/hash/sha_hash.h"

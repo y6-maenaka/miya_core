@@ -66,6 +66,13 @@ std::shared_ptr<struct sockaddr_in> KNodeAddr::sockaddr_in()
 
 
 
+unsigned char* KNodeAddr::ID()
+{
+	return _ID;
+}
+
+
+
 
 
 

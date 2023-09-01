@@ -46,12 +46,13 @@ private:
 	KRoutingTable *_kRoutingTable = nullptr;
 
 	SocketManager *_mainSocketManager;
-	KHostNode* _mainNode;
+	std::shared_ptr<KHostNode> _mainNode;
 
 
 
 public:
-	EKP2P( KRoutingTable *baseKRoutingTable = nullptr );
+	//EKP2P( KRoutingTable *baseKRoutingTable = nullptr );
+	EKP2P();
 	 
 	void init(); // KRoutingTableを使うのであれば必須 自身のグローバルアドレスを取得する
 	bool collectStartUpNodes( SocketManager *baseSocketManager );

@@ -1,6 +1,6 @@
 #include "ekp2p.h"
 
-#include "./kademlia/k_routing_table.h"
+// #include "./kademlia/k_routing_table.h"
 #include "./network/nat/client_nat_manager.h"
 #include "./network/inband/inband_manager.h"
 #include "./network/socket_manager/socket_manager.h"
@@ -11,8 +11,11 @@
 #include "./network/outband/node_broadcaster.h"
 
 #include "./kademlia/k_node.h"
+#include "../shared_components/stream_buffer/stream_buffer.h"
+#include "../shared_components/stream_buffer/stream_buffer_container.h"
 #include "./kademlia/message_receiver.h"
 #include "./kademlia/connection_controller.h"
+#include "./kademlia/k_routing_table/k_routing_table.h"
 
 
 namespace ekp2p{
@@ -20,6 +23,14 @@ namespace ekp2p{
 
 
 
+EKP2P::EKP2P()
+{
+	return;
+}
+
+
+
+/*
 EKP2P::EKP2P( KRoutingTable *baseKRoutingTable )
 {
 	_inbandManager = new InbandNetworkManager;// inbandManagerのオブジェクト化
@@ -28,6 +39,7 @@ EKP2P::EKP2P( KRoutingTable *baseKRoutingTable )
 
 	// Get Global Addr	
 }
+*/
 
 
 
@@ -35,7 +47,6 @@ EKP2P::EKP2P( KRoutingTable *baseKRoutingTable )
 
 void EKP2P::init()
 {
-
 
 	std::cout << "[ # ] MiyaCoreネットワークに接続します" << "\n";
 
@@ -119,6 +130,8 @@ void EKP2P::init()
 
 	/* ここでブートノード(NonNatNode)の情報を取得してくる*/
 
+	// RoutingTableをセットアップする
+	_kRoutingTable = new KRoutingTable( _mainNode );
 	return;
 }
 
@@ -165,7 +178,7 @@ int EKP2P::send( KClientNode *targetNode , void *payload , unsigned short payloa
 
 
 
-
+/*
 bool EKP2P::collectStartUpNodes( SocketManager *baseSocketManager )
 {
 	// このルーチンに入る前に,tableWrapperは起動している事が前提
@@ -195,8 +208,7 @@ bool EKP2P::collectStartUpNodes( SocketManager *baseSocketManager )
 
 	return true;
 }
-
-
+*/
 
 
 
@@ -212,12 +224,24 @@ void EKP2P::start()
 
 
 	//4. MessageReceiverの起動
-	//MessageReceiver* messageReceiver = new MessageReceiver( _mainSocketManager );
 	auto messageReceiver = std::make_shared<MessageReceiver>(_mainSocketManager);
+	auto messageReceiverProducerSB = std::make_shared<StreamBufferContainer>( nullptr, nullptr );
+
+	messageReceiver->setDestinationStreamBuffer( messageReceiverProducerSB , 4 );
 	std::thread messageReceiverTH([messageReceiver](){
 		messageReceiver->start();
 	});
 	messageReceiverTH.detach();
+
+
+
+	// ベーシックハンドラの起動
+
+
+
+
+
+	// サードパーティーハンドラの起動
 	
 }
 
@@ -229,8 +253,6 @@ void EKP2P::start( unsigned short port , int type )
 {
 	//_inbandManager->start( port , type );
 }
-
-
 
 
 

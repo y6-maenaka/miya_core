@@ -10,7 +10,7 @@
 
 // from kademlia
 #include "../../kademlia/k_tag.h"
-#include "../../kademlia/k_routing_table.h"
+// #include "../../kademlia/k_routing_table.h"
 
 
 // from socket manager
@@ -145,6 +145,7 @@ bool UDPInbandManager::standAlone( void *ioArg , bool allowEmpty )
 
 
 // tableの更新処理もここに書く？
+/*
 bool InbandNetworkManager::start( SocketManager *setupedSocketManager )
 {
 	if( setupedSocketManager == nullptr ) return false;
@@ -158,9 +159,8 @@ bool InbandNetworkManager::start( SocketManager *setupedSocketManager )
 		// ここでudnInbandManagerをbind状態に移行する
 		// if( udpInbandManager->monitorSetup() < 0 ) return false;
 
-		/*
-		  ======= UDP THREAD START ============
-		*/
+		  //======= UDP THREAD START ============
+			
 		//std::thread monitor( [udpInbandManager](){
 		std::thread monitor( [&](){
 
@@ -216,6 +216,7 @@ bool InbandNetworkManager::start( SocketManager *setupedSocketManager )
 	return true;
 
 }
+*/
 
 
 /*

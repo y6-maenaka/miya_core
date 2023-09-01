@@ -1,6 +1,6 @@
 #include "table_wrapper.h"
 
-#include "../k_routing_table.h"
+// #include "../k_routing_table.h"
 #include "../../../shared_components/middle_buffer/middle_buffer.h"
 #include "../../network/inband/k_tag_pack.h"
 #include "../k_tag.h"
@@ -12,7 +12,7 @@
 namespace ekp2p{
 
 
-
+/*
 TableWrapper::TableWrapper( unsigned int bufferSize ,KRoutingTable *hostTable ){
 
 	_hostTable = hostTable;
@@ -58,6 +58,7 @@ void TableWrapper::start()
 
 	});
 }
+*/
 
 
 
@@ -99,7 +100,7 @@ bool TableWrapper::autoKTagHandler( void* rawKTag , unsigned int kTagSize , Sock
 
 
 
-
+/*
 bool TableWrapper::autoKTagHandler( KTag* kTag, SocketManager* activeSocketManager )
 {
 	switch( kTag->protocol() ){
@@ -131,7 +132,7 @@ bool TableWrapper::autoKTagHandler( KTag* kTag, SocketManager* activeSocketManag
 
 	return false;
 };
-
+*/
 
 
 

@@ -33,12 +33,12 @@ class MessageReceiver // 基本的にスレッドで起動されう
 private:
 
 	SocketManager *_socketManager;
-	std::array< StreamBufferContainer* , MAX_PROTOCOL > _sbHub = {}; // メッセージプロトコルに合致したSBにメッセージを流す
+	std::array< std::shared_ptr<StreamBufferContainer> , MAX_PROTOCOL > _sbHub = {}; // メッセージプロトコルに合致したSBにメッセージを流す
 
 public:
 	void start();
 
-	void setStreamBuffer( StreamBufferContainer* target , unsigned short destination );
+	void setDestinationStreamBuffer( std::shared_ptr<StreamBufferContainer> target , unsigned short destination );
 
 	static unsigned int payload( void *rawEKP2PMSG , unsigned char** ret );
 

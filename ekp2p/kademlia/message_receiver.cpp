@@ -61,8 +61,9 @@ void MessageReceiver::start()
 
 
 
-void MessageReceiver::setStreamBuffer( StreamBufferContainer* target , unsigned short destination )
+void MessageReceiver::setDestinationStreamBuffer( std::shared_ptr<StreamBufferContainer> target , unsigned short destination )
 {
+	printf("StreamBuffer seted with -> %p\n", target.get() );
 	_sbHub.at(destination) = target;
 }
 

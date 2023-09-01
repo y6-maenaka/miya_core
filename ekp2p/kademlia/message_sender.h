@@ -1,0 +1,24 @@
+#ifndef E74D95F1_D765_4D08_ABD4_ED4B6C50C710
+#define E74D95F1_D765_4D08_ABD4_ED4B6C50C710
+
+
+
+
+
+
+class MessageSender
+{
+
+};
+
+
+
+
+
+
+
+
+#endif // E74D95F1_D765_4D08_ABD4_ED4B6C50C710
+
+
+

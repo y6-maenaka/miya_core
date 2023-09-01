@@ -38,7 +38,10 @@ struct KNodeAddr
 
 	void setNodeID();
 
+
+
 	std::shared_ptr<struct sockaddr_in> sockaddr_in();
+	unsigned char* ID();
 
 } __attribute__((packed));
 

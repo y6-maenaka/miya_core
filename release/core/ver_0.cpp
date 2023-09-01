@@ -14,7 +14,7 @@
 #include "openssl/evp.h"
 
 #include "../../ekp2p/ekp2p.h"
-#include "../../ekp2p/kademlia/k_routing_table.h"
+// #include "../../ekp2p/kademlia/k_routing_table.h"
 
 
 
@@ -23,11 +23,7 @@ int main(){
 
 
 
-	ekp2p::KRoutingTable *kRoutingTable = new ekp2p::KRoutingTable();
-	ekp2p::EKP2P _ekp2p( kRoutingTable );
-	_ekp2p.init(); // ルーティングテーブルを使用するのであればinitは必須 
-	_ekp2p.start();
-
+	ekp2p::EKP2P *p2pManager = new ekp2p::EKP2P;
 
 
 	/*

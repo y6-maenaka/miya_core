@@ -1,6 +1,6 @@
 #include "stream_buffer.h"
 
-
+#include "../../ekp2p/kademlia/k_node.h"
 
 
 
@@ -20,6 +20,10 @@ SBSegment::SBSegment( void* body , unsigned short bodyLength )
 
 
 
+std::shared_ptr<ekp2p::KNodeAddr> SBSegment::sourceKNodeAddr()
+{
+	return _ekp2pBlock._sourceNodeAddr;
+}
 
 
 

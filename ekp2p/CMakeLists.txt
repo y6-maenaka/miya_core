@@ -13,14 +13,18 @@ add_library( EKP2P STATIC
 						 ekp2p.cpp
 
 						 kademlia/common.cpp
-						 kademlia/k_bucket.cpp
-						 kademlia/k_routing_table.cpp
+						 #kademlia/k_bucket.cpp
+						 #kademlia/k_routing_table.cpp
 						 kademlia/k_tag.cpp
 						 kademlia/node.cpp
 
 						 kademlia/k_node.cpp
 						 kademlia/message_receiver.cpp
+						 kademlia/message_sender.cpp
 						 kademlia/connection_controller.cpp
+						 kademlia/k_routing_table/k_routing_table.cpp
+						 kademlia/k_routing_table/k_bucket.cpp
+						 kademlia/k_routing_table/k_routing_table_updator.cpp
 						 network/header/header.cpp
 						 
 

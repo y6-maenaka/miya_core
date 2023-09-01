@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <chrono>
 #include <random>
+#include <array>
 
 #include <stdlib.h>
 #include <arpa/inet.h>
@@ -38,6 +39,7 @@ class KBucket;
 class TableWrapper;
 struct KAddr;
 class EKP2PMSG;
+class KClientNode;
 
 
 using	ActiveKBucketMap = std::map< unsigned short , KBucket* >;
@@ -49,6 +51,13 @@ using	ActiveKBucketMap = std::map< unsigned short , KBucket* >;
 
 
 
+class KRoutingTable
+{
+private:
+	std::array< KBucket* , K_BUCKET_SIZE > _routingTable;
+	
+
+};
 
 
 
@@ -86,8 +95,8 @@ public:
 
 	KRoutingTable( unsigned short maxNodeCnt = K_SIZE );
 	~KRoutingTable();
-	/* ekp2p( FILE );  セーブファイルからの復帰 */ 
-	// KRoutingTable( /* backup file */ ); セーブファイルから復元する場合
+	// ekp2p( FILE );  セーブファイルからの復帰 
+	// KRoutingTable( backup file  ); セーブファイルから復元する場合
 	
 	// initの中にsetupを含むか？
 	bool init( sockaddr_in *globalAddr );
