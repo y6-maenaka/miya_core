@@ -37,7 +37,7 @@ private:
 	std::array< std::shared_ptr<KBucket> , K_BUCKET_SIZE > _routingTable;
 
 public:
-	KRoutingTable( std::shared_ptr<KHostNode> );
+	KRoutingTable( std::shared_ptr<KHostNode> hostNode );
 
 	int autoAdd( KNodeAddr *target );
 

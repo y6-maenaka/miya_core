@@ -30,13 +30,20 @@ void KRoutingTableUpdator::start()
 	std::unique_ptr<SBSegment> popedSB;
 	std::shared_ptr<KNodeAddr> targetNodeAddr;
 	std::shared_ptr<KBucket> targetBucket;
+	int updateFlag;
 	for(;;)
 	{
 
 		popedSB =_sourceSBC->popOne();
 		targetNodeAddr = popedSB->sourceKNodeAddr();
 
-		_routingTable->autoAdd(  targetNodeAddr.get() );
+		updateFlag = _routingTable->autoAdd(  targetNodeAddr.get() );
+		switch( updateFlag )
+		{
+			case 1:
+				break;
+		}
+		
 	// ノードが申告してきたアドレスが正しいものは判断する
 	//_routingTable.find( targetNodeAddr.get() ); // ルーティングテーブル内にノードが存在するか調べる
 	}

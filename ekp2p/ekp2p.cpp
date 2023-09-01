@@ -16,6 +16,7 @@
 #include "./kademlia/message_receiver.h"
 #include "./kademlia/connection_controller.h"
 #include "./kademlia/k_routing_table/k_routing_table.h"
+#include "./kademlia/k_routing_table/k_routing_table_updator.h"
 
 
 namespace ekp2p{
@@ -216,10 +217,24 @@ void EKP2P::start()
 {
 
 	//1. Updaterの起動
+	auto routingTableUpdator = std::make_shared<KRoutingTableUpdator>( _kRoutingTable );
+	auto routingTableUpdatorConsumerSB = std::make_shared<StreamBufferContainer>( nullptr , nullptr );
+	
+	routingTableUpdator->setSourceStreamBuffer( routingTableUpdatorConsumerSB );
+	std::thread routingTableUpdatorTH([routingTableUpdator](){
+		routingTableUpdator->start();
+	});
+	routingTableUpdatorTH.detach();
+
+
+
+	
 	//2. ConnectionControllerの起動
+	// 後回しでOK
+
+
 	//3. BlockChainControllerの起動
 	
-
 
 
 
