@@ -13,7 +13,8 @@ namespace tx{
 
 // 本格的にトランザクションを管理するのはUTXO-SET , TxCBTableManager はキャッシュ的な役割を果たす　
 
-class TxCBTableManager{
+class TxCBTableManager
+{
 
 private:
 	TxCBTable _rootTable;

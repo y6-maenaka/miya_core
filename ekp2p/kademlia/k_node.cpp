@@ -42,10 +42,9 @@ std::shared_ptr<KNodeAddr> KNode::kNodeAddr()
 
 void KNode::kNodeAddr( std::shared_ptr<KNodeAddr> nodeAddr )
 {
-	//this->_nodeAddr = nodeAddr; // なぜかエラーが発生する
-	this->_nodeAddr->_IPv4Addr = nodeAddr->_IPv4Addr;
-	this->_nodeAddr->_Port = nodeAddr->_Port;
-
+	this->_nodeAddr = nodeAddr; // なぜかエラーが発生する
+	//this->_nodeAddr->_IPv4Addr = nodeAddr->_IPv4Addr;
+	//this->_nodeAddr->_Port = nodeAddr->_Port;
 
 	_nodeAddr->setNodeID();
 }
@@ -76,6 +75,9 @@ unsigned char* KNodeAddr::ID()
 
 
 
+
+
+
 void KNodeAddr::setNodeID()
 {
 	unsigned char hashFrom[ sizeof(_IPv4Addr) + sizeof(_Port) ];
@@ -86,6 +88,15 @@ void KNodeAddr::setNodeID()
 }
 
 
+
+
+
+
+KNode::KNode()
+{
+	KNodeAddr *initNodeAddr = new KNodeAddr;
+	_nodeAddr = std::make_shared<KNodeAddr>( *initNodeAddr );
+}
 
 
 KNode::KNode( std::shared_ptr<KNodeAddr> nodeAddr )

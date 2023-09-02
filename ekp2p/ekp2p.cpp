@@ -26,6 +26,7 @@ namespace ekp2p{
 
 EKP2P::EKP2P()
 {
+	_mainNode = std::make_shared<KHostNode>();
 	return;
 }
 

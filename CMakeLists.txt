@@ -2,7 +2,7 @@ cmake_minimum_required( VERSION 3.2 )
 
 project(MIYA_CORE CXX)
 add_subdirectory( ekp2p )
-add_subdirectory( miya_core )
+add_subdirectory( miya_chain )
 add_subdirectory( miya_db )
 add_subdirectory( shared_components )
 
@@ -18,7 +18,7 @@ if( BUILD_CORE )
 add_executable( core_ver_0 ./release/core/ver_0.cpp )
 target_link_libraries( core_ver_0 PRIVATE
 												EKP2P
-												MIYA_CORE
+												MIYA_CHAIN
 												SHARED_COMPONENTS
 )
 #target_include_directories( core_ver_0 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include )

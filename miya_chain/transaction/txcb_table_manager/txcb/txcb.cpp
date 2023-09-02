@@ -8,7 +8,7 @@ namespace tx{
 
 TxCB::TxCB( P2PKH *tx ) : _next(nullptr) , _prev(nullptr) , _leastChain(nullptr)
 {
-	_txID = tx->txID(); 
+	_meta._txID = tx->txID(); 
 	_tx = tx;
 }
 
@@ -49,7 +49,7 @@ P2PKH *TxCB::tx()
 
 unsigned char* TxCB::txID()
 {
-	return _txID;
+	return _meta._txID;
 }
 
 

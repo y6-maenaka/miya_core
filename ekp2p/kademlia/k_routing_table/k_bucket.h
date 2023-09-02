@@ -29,7 +29,7 @@ class KClientNode;
 struct KBucket
 {
 private:
-	//std::mutex mtx_;
+	// std::mutex _mtx; 保留,std::unique_ptrで対応できないか検討する
 
 	std::vector< std::shared_ptr<KClientNode> > _kBucket;
 	std::vector< std::shared_ptr<KClientNode> >::iterator _referenceHead;

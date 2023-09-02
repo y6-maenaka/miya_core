@@ -6,6 +6,7 @@
 
 
 #include <iostream>
+#include <chrono>
 
 
 namespace tx{
@@ -13,22 +14,27 @@ namespace tx{
 class P2PKH;
 
 
-struct TxCB{
-
+struct TxCB
+{
 private:
+	
+	struct {
+		unsigned char *_txID;
+		int _status; // ( blocked , free )
+		//unsigned int timeStump;
+		std::time_t _timestamp;
+	} _meta;
+
+
 	P2PKH *_tx;
-	unsigned char *_txID;
 
 
-	int _status; // ( blocked , free )
-	unsigned int timeStump;
-
-
+	struct{
+		TxCB *_leastChain;
+		TxCB *_next;
+		TxCB *_prev;
+	} _control;
 	/* Table 関係 */
-	TxCB *_leastChain;
-	TxCB *_next;
-	TxCB *_prev;
-
 
 public:
 	TxCB( P2PKH *tx );

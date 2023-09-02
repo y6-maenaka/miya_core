@@ -57,6 +57,7 @@ private:
 	std::shared_ptr<KNodeAddr> _nodeAddr;
 
 public:
+	KNode();
 	KNode( std::shared_ptr<KNodeAddr> nodeAddr );
 
 	std::shared_ptr<KNodeAddr> kNodeAddr();

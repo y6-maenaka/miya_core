@@ -1,0 +1,17 @@
+#ifndef AC9E3B49_B0C8_4A18_949F_A50D12B0AD92
+#define AC9E3B49_B0C8_4A18_949F_A50D12B0AD92
+
+
+
+class BlockValidator
+{
+
+};
+
+
+
+
+#endif // AC9E3B49_B0C8_4A18_949F_A50D12B0AD92
+
+
+

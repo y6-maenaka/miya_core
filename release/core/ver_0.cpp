@@ -3,13 +3,13 @@
 #include "../../shared_components/cipher/ecdsa_manager.h"
 #include "../../shared_components/middle_buffer/middle_buffer.h"
 
-#include "../../miya_core/transaction/tx/tx_in.h"
-#include "../../miya_core/transaction/tx/tx_out.h"
-#include "../../miya_core/transaction/p2pkh/p2pkh.h"
-#include "../../miya_core/transaction/script/signature_script.h"
+#include "../../miya_chain/transaction/tx/tx_in.h"
+#include "../../miya_chain/transaction/tx/tx_out.h"
+#include "../../miya_chain/transaction/p2pkh/p2pkh.h"
+#include "../../miya_chain/transaction/script/signature_script.h"
 
-#include "../../miya_core/transaction/txcb_table_manager/txcb_table_manager.h"
-#include "../../miya_core/transaction/txcb_table_manager/txcb_table/txcb_table.h"
+#include "../../miya_chain/transaction/txcb_table_manager/txcb_table_manager.h"
+#include "../../miya_chain/transaction/txcb_table_manager/txcb_table/txcb_table.h"
 
 #include "openssl/evp.h"
 
@@ -22,8 +22,25 @@ int main(){
 	std::cout << " WELCOME TO MIYA COIN CLIENT [ MIYA_CORE ] " << "\n";
 
 
-
+	/*
 	ekp2p::EKP2P *p2pManager = new ekp2p::EKP2P;
+	p2pManager->init();
+	p2pManager->start();
+	*/
+
+	
+
+	auto p2pManager = std::make_shared<ekp2p::EKP2P>();
+	std::thread p2pManagerTH([p2pManager](){
+		p2pManager->init();
+		p2pManager->start();
+	});
+
+
+	sleep(3);
+
+
+
 
 
 	/*
