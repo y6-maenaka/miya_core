@@ -19,6 +19,8 @@ add_library( MIYA_CHAIN STATIC
 							transaction_pool/txcb_bucket.cpp
 							transaction_pool/txcb_table.cpp
 
+							daemon/transaction_validator/transaction_validator.cpp
+
 
 							#transaction/txcb_table_manager/txcb_table_manager.cpp
 							#transaction/txcb_table_manager/txcb/txcb.cpp

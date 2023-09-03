@@ -6,26 +6,29 @@
 #include <memory>
 
 
+class StreamBufferContainer;
+
+
+
 namespace miya_chain
 {
 
 
 class TransactionPool;
-class StreamBufferContainer;
 
 
 
 class TransactionValidator
 {
 private:
-	TransactionPool *_txPool;
+	std::shared_ptr<TransactionPool> _txPool;
 	std::shared_ptr<StreamBufferContainer> _sourceSBC;
 
 
 public:
 	void start();
 
-	TransactionValidator( TransactionPool *txPool , std::shared_ptr<StreamBufferContainer> sourceSBC );
+	TransactionValidator( std::shared_ptr<TransactionPool> txPool , std::shared_ptr<StreamBufferContainer> sourceSBC );
 };
 
 
