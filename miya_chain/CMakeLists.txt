@@ -14,10 +14,16 @@ add_library( MIYA_CHAIN STATIC
 							transaction/script/pk_script.cpp
 							transaction/script/signature_script.cpp
 
-							transaction/txcb_table_manager/txcb_table_manager.cpp
-							transaction/txcb_table_manager/txcb/txcb.cpp
-							transaction/txcb_table_manager/txcb_bucket/txcb_bucket.cpp
-							transaction/txcb_table_manager/txcb_table/txcb_table.cpp
+							transaction_pool/transaction_pool.cpp
+							transaction_pool/txcb.cpp
+							transaction_pool/txcb_bucket.cpp
+							transaction_pool/txcb_table.cpp
+
+
+							#transaction/txcb_table_manager/txcb_table_manager.cpp
+							#transaction/txcb_table_manager/txcb/txcb.cpp
+							#transaction/txcb_table_manager/txcb_bucket/txcb_bucket.cpp
+							#transaction/txcb_table_manager/txcb_table/txcb_table.cpp
 
 						
 							transaction/p2pkh/p2pkh.cpp

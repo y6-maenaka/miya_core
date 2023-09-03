@@ -49,6 +49,8 @@ struct SBSegment
 	SBSegment( void* body , unsigned short bodyLength );
 
 	std::shared_ptr<ekp2p::KNodeAddr> sourceKNodeAddr();
+	void *body();
+	unsigned short bodyLength()	;
 };
 
 

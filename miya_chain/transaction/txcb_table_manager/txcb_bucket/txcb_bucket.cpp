@@ -13,7 +13,7 @@ namespace tx{
 
 TxCBBucket::TxCBBucket( unsigned char symbol, TxCBTable *parentTable ) : _startCB( nullptr )
 {
-	_symbol = symbol;
+	_symbol = symbol; // bucketSymbok
 	_parentTable = parentTable;
 
 	_scaleSize = DEFAULT_SCALE_SIZE;

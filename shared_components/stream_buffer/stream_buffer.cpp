@@ -27,6 +27,18 @@ std::shared_ptr<ekp2p::KNodeAddr> SBSegment::sourceKNodeAddr()
 
 
 
+void *SBSegment::body()
+{
+	return _sbBlock._body;
+}
+
+
+
+
+unsigned short SBSegment::bodyLength()
+{
+	return static_cast<unsigned short>(_controlBlock._bodySize);
+}
 
 
 
