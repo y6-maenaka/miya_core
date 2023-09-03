@@ -36,13 +36,15 @@ int TxCBTable::add( std::shared_ptr<TxCB> target )
 	unsigned char targetSymbol = (( _layer % 2 ) == 0) ? ( (targetByte >> 4)& 0x0F ) : (targetByte & 0x0F);
 
 
-	return static_cast<TxCBBucket*>((_bucketTableList.at(static_cast<unsigned int>(targetSymbol))).first)->add( target );
+	// 対象リストの要素がバケットの場合単純追加する 
+	if( _bucketTableList.at(static_cast<unsigned int>(targetSymbol)).second == 1  )	
+		return static_cast<TxCBBucket*>((_bucketTableList.at(static_cast<unsigned int>(targetSymbol))).first)->add( target );
 
+	// 対象のリスト要素がテーブルの場合は再起的に追加
+	if( _bucketTableList.at( static_cast<unsigned int>(targetSymbol)).second == 2 )
+		return static_cast<TxCBTable*>((_bucketTableList.at(static_cast<unsigned int>(targetSymbol))).first)->add( target );
 
-	// ( _bucketTableList[static_cast<unsigned int>(targetSymbol)].second ) == 2 : ->対象はバケット -> 単純に検索する
-	return static_cast<TxCBTable*>((_bucketTableList.at(static_cast<unsigned int>(targetSymbol))).first)->add( target );
-
-	
+	return -1	;
 }
 
 
@@ -55,11 +57,15 @@ std::shared_ptr<TxCB> TxCBTable::find( std::shared_ptr<TxCB> target )
 
 	
 	// ( _bucketTableList[static_cast<unsigned int>(targetSymbol)].second ) == 1 ; ->対象はテーブル -> 再帰的に検索する
-	return static_cast<TxCBBucket*>((_bucketTableList.at(static_cast<unsigned int>(targetSymbol))).first)->find( target );
+	if( _bucketTableList.at(static_cast<unsigned int>(targetSymbol)).second == 1  )	
+		return static_cast<TxCBBucket*>((_bucketTableList.at(static_cast<unsigned int>(targetSymbol))).first)->find( target );
 
 
 	// ( _bucketTableList[static_cast<unsigned int>(targetSymbol)].second ) == 2 : ->対象はバケット -> 単純に検索する
-	return static_cast<TxCBTable*>((_bucketTableList.at(static_cast<unsigned int>(targetSymbol))).first)->find( target );
+	if( _bucketTableList.at( static_cast<unsigned int>(targetSymbol)).second == 2 )
+		return static_cast<TxCBTable*>((_bucketTableList.at(static_cast<unsigned int>(targetSymbol))).first)->find( target );
+
+	return nullptr;
 }
 
 
