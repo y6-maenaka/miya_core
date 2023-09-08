@@ -1,0 +1,16 @@
+#ifndef C866EA14_8550_42C9_A4A5_838C199FF98B
+#define C866EA14_8550_42C9_A4A5_838C199FF98B
+
+
+
+
+class RequestResponder
+{
+
+};
+
+
+#endif // C866EA14_8550_42C9_A4A5_838C199FF98B
+
+
+

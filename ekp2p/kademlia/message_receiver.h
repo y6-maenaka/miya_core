@@ -18,7 +18,6 @@ namespace ekp2p{
 
 
 
-class SmartMiddleBuffer;
 class SocketManager;
 
 

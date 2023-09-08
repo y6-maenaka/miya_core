@@ -54,7 +54,7 @@ struct EKP2PMessageHeader
 {
 	struct __attribute__((packed))
  	{
-		unsigned char _token[4];
+		unsigned char _token[4]; // startString
 		uint16_t _headerLength; // 2 [ bytes ]
 		uint16_t _payloadLength; // 2 [ bytes [
 		uint8_t _protocol; // 1 [ bytes ]

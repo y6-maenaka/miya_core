@@ -13,7 +13,7 @@ SBSegment::SBSegment( void* body , unsigned short bodyLength )
 	memset( this , 0x00 , sizeof(struct SBSegment) );
 
 	_controlBlock._bodySize = static_cast<uint16_t>(bodyLength);
-	_sbBlock._body = body;
+	_sbBlock._body = std::make_shared<unsigned char>( *((unsigned char*)(body)) );
 }
 
 
@@ -27,7 +27,7 @@ std::shared_ptr<ekp2p::KNodeAddr> SBSegment::sourceKNodeAddr()
 
 
 
-void *SBSegment::body()
+std::shared_ptr<unsigned char> SBSegment::body()
 {
 	return _sbBlock._body;
 }
@@ -40,6 +40,31 @@ unsigned short SBSegment::bodyLength()
 	return static_cast<unsigned short>(_controlBlock._bodySize);
 }
 
+
+void SBSegment::body( void* body , unsigned short bodyLength )
+{
+	_controlBlock._bodySize = static_cast<uint16_t>(bodyLength);
+	_sbBlock._body = std::make_shared<unsigned char>( *((unsigned char*)(body)) );
+
+}
+void SBSegment::body( std::shared_ptr<unsigned char> body , unsigned short bodyLength )
+{
+	_controlBlock._bodySize = static_cast<uint16_t>(bodyLength);
+	_sbBlock._body = body;
+}
+
+
+std::shared_ptr<ekp2p::KNodeAddr> SBSegment::sourceNodeAddr()
+{
+	return _ekp2pBlock._sourceNodeAddr;
+}
+
+
+
+std::vector< std::shared_ptr<ekp2p::KNodeAddr> > SBSegment::relayKNodeAddrVector()
+{
+	return _ekp2pBlock._relayKNodeAddrVector;
+}
 
 
 

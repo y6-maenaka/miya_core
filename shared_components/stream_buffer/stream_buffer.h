@@ -11,13 +11,13 @@
 
 
 
-namespace ekp2p{
+namespace ekp2p
+{
 	class KNodeAddr;
 };
 
 
 constexpr unsigned int DEFAULT_STREAM_BUFFER_CAPACITY = 20;
-
 
 
 
@@ -32,25 +32,36 @@ struct SBSegment
 	} _controlBlock;
 
 
-	struct
+	struct EKP2PBlock
 	{
-		std::shared_ptr<ekp2p::KNodeAddr> _sourceNodeAddr;
+		std::shared_ptr<ekp2p::KNodeAddr> _sourceNodeAddr; 
 		std::vector< std::shared_ptr<ekp2p::KNodeAddr> > _relayKNodeAddrVector;
 	} _ekp2pBlock;
 
 
 	struct
 	{
-		void *_body;
+		std::shared_ptr<unsigned char> _body;
 	} _sbBlock;
+
+
+	struct options
+	{
+		void *_option1;
+	} _options;
 
 
 	SBSegment(){};
 	SBSegment( void* body , unsigned short bodyLength );
 
 	std::shared_ptr<ekp2p::KNodeAddr> sourceKNodeAddr();
-	void *body();
+	std::shared_ptr<unsigned char> body();
 	unsigned short bodyLength()	;
+	void body( void* body , unsigned short bodyLength );
+	void body( std::shared_ptr<unsigned char> body , unsigned short bodyLength );
+
+	std::shared_ptr<ekp2p::KNodeAddr> sourceNodeAddr();
+	std::vector< std::shared_ptr<ekp2p::KNodeAddr> > relayKNodeAddrVector();
 };
 
 

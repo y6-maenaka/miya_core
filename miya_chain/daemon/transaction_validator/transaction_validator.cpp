@@ -36,17 +36,31 @@ void TransactionValidator::start()
 	std::shared_ptr<tx::P2PKH> targetTx;
 	int updateFlag = -1;
 
-	
+
+	/*
+	 トランザクションの検証と中継
+	 [ 検証する内容 ]
+	 1. トランザクションの内容に不正はないか
+	 2. 支払いに使用される入力は正常か
+	 3. 既に見たトランザクションの中継はしない
+	 */
+
+
+
 	for(;;)	
 	{
 		popedSB = _sourceSBC->popOne(); // ストリームバッファから要素を取り出す
 		
 		if( popedSB->body() == nullptr || popedSB->bodyLength() <= 0 ) continue;
 
-		targetTx = std::make_shared<tx::P2PKH>( static_cast<unsigned char*>(popedSB->body()) , popedSB->bodyLength() ); // ストリームバッファ要素からトランザクションを取り出す -> P2PKHに変換する
+		targetTx = std::make_shared<tx::P2PKH>( popedSB->body().get() , popedSB->bodyLength() ); // ストリームバッファ要素からトランザクションを取り出す -> P2PKHに変換する
 
 		if( targetTx->verify() )
 			_txPool->store( targetTx );
+
+		auto relay = ([&](){
+
+										});
 	}
 	
 

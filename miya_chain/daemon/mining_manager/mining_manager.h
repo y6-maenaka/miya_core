@@ -5,6 +5,33 @@
 
 
 
-#endif // 
+namespace miya_chain
+{
 
+
+
+class MiningManager
+{
+
+public:
+	void start();
+
+};
+
+
+};
+
+
+
+
+/*
+
+	1. coinbaseを作成する
+	2. 含めるトランザクションを作成する
+
+*/
+
+
+
+#endif 
 

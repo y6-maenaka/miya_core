@@ -39,7 +39,7 @@ struct TxIn{
 	/* body */
 	struct PrevOut *_prevOut;
 	uint32_t _script_bytes; // empty時は空
-	SignatureScript *_signatureScript; // emptyは空
+	SignatureScript *_signatureScript; // emptyは空 // coinbaseのときはここが'coinbase'欄になる
 	uint32_t _sequence;
 
 

@@ -20,7 +20,15 @@ add_library( MIYA_CHAIN STATIC
 							transaction_pool/txcb_table.cpp
 
 							daemon/transaction_validator/transaction_validator.cpp
+							daemon/block_validator/block_validator.cpp
+							daemon/message_broker/message_broker.cpp
+							daemon/request_responder/request_responder.cpp
+									
+							block_assemble_agent/block_accemble_agent.cpp
 
+							message/protocol_message/block_data_msg.cpp
+							message/protocol_message/block_header_msg.cpp
+							message/message.cpp
 
 							#transaction/txcb_table_manager/txcb_table_manager.cpp
 							#transaction/txcb_table_manager/txcb/txcb.cpp
