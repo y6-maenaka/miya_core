@@ -3,8 +3,13 @@
 
 
 #include <memory>
+#include <vector>
 
 
+
+namespace tx{
+	class P2PKH;
+}
 
 
 
@@ -37,6 +42,7 @@ struct BlockDataResponseMessage
 
 // methods	
 	unsigned short exportRaw( std::shared_ptr<unsigned char> ret );
+	std::vector< std::shared_ptr<tx::P2PKH> > exportTxVector();
 
 	// メッセージを送信する際はmiya_chainメッセージでラップする必要がある
 } __attribute__((packed)); 

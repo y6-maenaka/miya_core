@@ -3,6 +3,8 @@
 
 
 #include <memory>
+// #include <unordered_map>
+#include <map>
 
 
 
@@ -21,6 +23,8 @@ namespace miya_chain
 struct TxCB;
 class TxCBTable;
 class P2PKH;
+class ProvisionalUTxOCache; // トランザクションプール内にストックされているtxが参照しているutxo(暫定)が管理されているマップ
+
 
 
 
@@ -29,6 +33,7 @@ class TransactionPool
 
 private:
 	TxCBTable *_rootTable;
+	ProvisionalUTxOCache *_pUTxOCache; // utxoと異なり,トランザクションプールに存在する分しか格納しないため,mapで妥協・許容する
 
 public:
 	TransactionPool();

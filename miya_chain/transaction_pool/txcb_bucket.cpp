@@ -74,7 +74,7 @@ std::shared_ptr<TxCB> TxCBBucket::find( std::shared_ptr<TxCB> target )
 
 	do
 	{
-		if( memcmp( _currentTxCB->txID() , target->txID() , 20 ) == 0 ) return _currentTxCB;
+		if( memcmp( _currentTxCB->txID().get() , target->txID().get() , 20 ) == 0 ) return _currentTxCB;
 		_currentTxCB = _currentTxCB->next();
 	}
 	while( _currentTxCB->next() != nullptr );

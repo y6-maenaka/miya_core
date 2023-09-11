@@ -34,11 +34,13 @@ public:
 
 	} _body;
 
+
 	bool isSigned;
 	bool isVerified;
 
 
 
+// methods
 	int TxInCnt(); // getter
 	int TxOutCnt(); // getter
 

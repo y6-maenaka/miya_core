@@ -18,6 +18,7 @@ add_library( MIYA_CHAIN STATIC
 							transaction_pool/txcb.cpp
 							transaction_pool/txcb_bucket.cpp
 							transaction_pool/txcb_table.cpp
+							transaction_pool/provisional_utxo_cache/provisional_utxo_cache.cpp
 
 							daemon/transaction_validator/transaction_validator.cpp
 							daemon/block_validator/block_validator.cpp

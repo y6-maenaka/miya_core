@@ -53,7 +53,7 @@ std::shared_ptr<tx::P2PKH> TxCB::tx()
 
 
 
-unsigned char* TxCB::txID()
+std::shared_ptr<unsigned char> TxCB::txID()
 {
 	return _meta._txID;
 }

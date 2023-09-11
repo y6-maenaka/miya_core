@@ -32,7 +32,7 @@ void TxCBTable::bucketTableList( void* target , int type ,int index )
 
 int TxCBTable::add( std::shared_ptr<TxCB> target )
 {
-	unsigned char targetByte = target->txID()[ (_layer / 2) ];
+	unsigned char targetByte = target->txID().get()[ (_layer / 2) ];
 	unsigned char targetSymbol = (( _layer % 2 ) == 0) ? ( (targetByte >> 4)& 0x0F ) : (targetByte & 0x0F);
 
 
@@ -52,7 +52,7 @@ int TxCBTable::add( std::shared_ptr<TxCB> target )
 
 std::shared_ptr<TxCB> TxCBTable::find( std::shared_ptr<TxCB> target )
 {
-	unsigned char targetByte = target->txID()[ (_layer / 2) ];
+	unsigned char targetByte = target->txID().get()[ (_layer / 2) ];
 	unsigned char targetSymbol = (( _layer % 2 ) == 0) ? ( (targetByte >> 4)& 0x0F ) : (targetByte & 0x0F);
 
 	

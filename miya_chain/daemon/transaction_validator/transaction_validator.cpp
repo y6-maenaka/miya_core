@@ -55,12 +55,17 @@ void TransactionValidator::start()
 
 		targetTx = std::make_shared<tx::P2PKH>( popedSB->body().get() , popedSB->bodyLength() ); // ストリームバッファ要素からトランザクションを取り出す -> P2PKHに変換する
 
-		if( targetTx->verify() )
+		// 第1検証　：　トランザクション本体の検証
+		if( targetTx->verify() ) // トランザクション自体に不整合がないかチェック　正規の秘密鍵で署名されたものか？　等々
 			_txPool->store( targetTx );
 
-		auto relay = ([&](){
+		// 第２検証　：　トランザクション入出力の検証
+		// ViewTxPoolを使用する	
+		// 出力使用フラグの使用 // トランザクションのどの出力が使われているかを把握する必要がある
+		
+		auto relay = ([&](){ // 他ノードに伝搬する
 
-										});
+		});
 	}
 	
 

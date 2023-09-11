@@ -4,6 +4,7 @@
 
 #include "./txcb.h"
 #include "./txcb_table.h"
+#include "./provisional_utxo_cache/provisional_utxo_cache.h"
 
 
 namespace miya_chain
@@ -16,6 +17,7 @@ namespace miya_chain
 TransactionPool::TransactionPool()
 {
 	_rootTable = new TxCBTable( 0 );
+	_pUTxOCache = new ProvisionalUTxOCache;
 	return;
 }
 
@@ -37,7 +39,10 @@ std::shared_ptr<TxCB> TransactionPool::find( std::shared_ptr<tx::P2PKH> target )
 void TransactionPool::store( std::shared_ptr<tx::P2PKH> target )
 {
 	std::shared_ptr<TxCB> storeTargetTxCB = std::make_shared<TxCB>( target );
+	// 書き残し
 
+
+	_pUTxOCache->add( storeTargetTxCB );
 }
 
 

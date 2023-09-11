@@ -24,6 +24,7 @@ struct BlockHeaderMessage
 // methods
 	std::shared_ptr<unsigned char> exportRaw();
 	unsigned char *blockHash();
+	unsigned short txCount();
 };
 
 

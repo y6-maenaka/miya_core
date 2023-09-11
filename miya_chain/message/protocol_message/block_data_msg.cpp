@@ -27,4 +27,15 @@ unsigned short BlockDataRequestMessage::exportRaw( std::shared_ptr<unsigned char
 
 
 
+
+std::vector< std::shared_ptr<tx::P2PKH> > BlockDataResponseMessage::exportTxVector()
+{
+
+}
+
+
+
+
+
+
 };

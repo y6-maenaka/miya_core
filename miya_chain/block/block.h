@@ -25,7 +25,7 @@ namespace block
 struct BlockHeader
 {
 	int32_t _version;
-	unsigned char _previousBlockHeaderHash[20];
+	unsigned char _previousBlockHeaderHash[32];
 	unsigned char _merkleRootHash[32];
 	uint32_t _time; // このブロックが生成された時のタイムスタンプ
 	uint32_t _nBits; // 採掘難易度 目標のnonce値

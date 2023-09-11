@@ -15,4 +15,12 @@ unsigned char* BlockHeaderMessage::blockHash()
 }
 
 
+
+unsigned short BlockHeaderMessage::txCount()
+{
+	return static_cast<unsigned short>(_txCount);
+}
+
+
+
 }

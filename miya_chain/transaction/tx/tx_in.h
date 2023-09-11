@@ -16,10 +16,14 @@ class SignatureScript;
 constexpr unsigned short PREV_OUT_SIZE = /*TX_ID_SIZE*/20 + (32 / 8);
 
 
+
+
+
+
 struct PrevOut{
 
 	unsigned char *_txID;
-	uint32_t _index;
+	uint32_t _index; // 前トランザクションtx_outのどのoutかを特定する
 
 
 	/* methods */

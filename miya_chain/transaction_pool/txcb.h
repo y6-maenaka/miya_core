@@ -37,7 +37,8 @@ private:
 
 	struct 
 	{
-		unsigned char* _txID;
+		//unsigned char* _txID;
+		std::shared_ptr<unsigned char> _txID;
 		int _status;
 		std::time_t _timestamp;
 	} _meta;
@@ -63,7 +64,8 @@ public:
 	void next( std::shared_ptr<TxCB> target );
 
 	std::shared_ptr<tx::P2PKH> tx();
-	unsigned char* txID();
+	//unsigned char* txID();
+	std::shared_ptr<unsigned char> txID();
 };
 
 

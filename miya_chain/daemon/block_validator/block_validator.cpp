@@ -11,6 +11,9 @@
 #include "../../message/protocol_message/block_header_msg.h"
 #include "../../message/protocol_message/block_data_msg.h"
 
+#include "../../block/block.h"
+#include "../../transaction/p2pkh/p2pkh.h"
+
 
 namespace miya_chain
 {
@@ -54,6 +57,14 @@ void BlockValidationControlBlock::networks( std::shared_ptr<ekp2p::KNodeAddr> so
 
 
 
+/* 
+  - ブロックヘッダーの検証
+	- トランザクションの問い合わせ
+	- トランザクションの検証
+
+
+  - ブロックヘッダの受信後にルーチンがスタートする
+ */
 void BlockValidationControlBlock::autoStart()
 {
 
@@ -76,18 +87,47 @@ void BlockValidationControlBlock::autoStart()
 	
 		std::shared_ptr<unsigned char> exportedRawMSG; // メッセージの書き出し
 		unsigned int exportedRawMSGLength = requestMSG.exportRaw( exportedRawMSG ); 
+		pack.body( exportedRawMSG , exportedRawMSGLength );  // senderに送信するストリームの作成
 
-		pack.body( exportedRawMSG , exportedRawMSGLength ); 
-		_networks._toSenderSBC->pushOne( std::move(std::make_unique<SBSegment>(pack)) ); // 送信元にリクエストメッセージを送信する
+		std::vector< std::shared_ptr<ekp2p::KNodeAddr> > activePropagetedNodeVector; // 送信元ノード、中継ノードがアクティブノード候補になる　ここからランダムにピックされリクエストが送信される
+		activePropagetedNodeVector.push_back( _networks._sourceNodeAddr ); // 送信元ノードの追加:w
+		activePropagetedNodeVector.insert( activePropagetedNodeVector.end() , _networks._relayKNodeAddrVector.begin() , _networks._relayKNodeAddrVector.end() ); // 中継ノードの追加
+		std::vector< std::shared_ptr<ekp2p::KNodeAddr> >::reverse_iterator nodeItr = activePropagetedNodeVector.rbegin(); // 中継ノードの最後尾が一番アクティブである確率が高いので最後尾から問い合わせ対象とする
 
-		// 3秒くらい待機する
-		std::unique_lock<std::mutex>	lock(_mtx);
-		//_cv.wait_for( lock , std::chrono::seconds(5),  [this]{ return !(_structedBlock._updateFlag);} );
-		_cv.wait_for( lock , std::chrono::seconds(5) ); // アップデートされていなければ再送する
-		if( _structedBlock._updateFlag == false ) _networks._toSenderSBC->pushOne( std::move(std::make_unique<SBSegment>(pack)) );
+		// 初回問い合わせルーチン	
+		while( !(activePropagetedNodeVector.empty()) )
+		{
+			// 1つノードを指定して送信する
+			pack._ekp2pBlock._sourceNodeAddr = (*nodeItr);
+			pack._ekp2pBlock._relayKNodeAddrVector  = std::vector<std::shared_ptr<ekp2p::KNodeAddr>>(); // 中継ノードは一旦空で
+			_networks._toSenderSBC->pushOne( std::move(std::make_unique<SBSegment>(pack)) ); // 送信元にリクエストメッセージを送信する
+	
+			std::unique_lock<std::mutex> lock(_mtx);
+			_cv.wait_for( lock , std::chrono::seconds(3) ); // 一旦3秒待つ 
+		
+			if( _structedBlock._txCount <= 0 ) activePropagetedNodeVector.erase(nodeItr.base()); // 強制的にイテレータを反転しているがちゃんと動く？
+			else break;
+		}
+
+		// 残ったトランザクション問い合わせルーチン
+		
+		while( !(activePropagetedNodeVector.empty()) && _structedBlock._block->_txVector.size() < _rawBlock._txCount )
+		{
+			pack._ekp2pBlock._sourceNodeAddr = (*nodeItr); 
+			pack._ekp2pBlock._relayKNodeAddrVector  = std::vector<std::shared_ptr<ekp2p::KNodeAddr>>(); // 中継ノードは一旦空で
+			
+			requestMSG.blockHash( _blockHash );
+			requestMSG._txSequenceFrom = _structedBlock._block->_txVector.size(); // 不足したトランザクションを途中から収集するには
+		}
 
 
-		// 初回のトランザクションの収集が完了したら	
+		// 収取したトランザクションに対してバリデーションを実施する
+		/*
+		 1. トランザクション自体に不整合がないか検証
+		 2. 入出力に不整合が生じていないか検証
+		 */
+	
+		
 
 
 	});
@@ -97,12 +137,21 @@ void BlockValidationControlBlock::autoStart()
 
  return;
 }
+/*
+ 自身のメモリプールに同じトランザクションが含まれている場合はどうする？ 
+ -> ブロックに取り込まれたトランザクションはトランザクションプールから外す
+ // ブロックのバリデーションが終了したら全てのトランザクションをトランザクションプールにプールする
+ -> チェーンに取り込まれた時に初めてトランザクションプールからトランザクションを削除する
+*/
 
 
 
 void BlockValidationControlBlock::txArrive( std::shared_ptr<BlockDataResponseMessage> msg )
 {
 	// 受信したメッセージを解析して_structedBlockにセットする
+
+	//_structedBlock._block
+
 
 	_structedBlock._updateFlag = true;
 	_cv.notify_all(); // 要求したtxが到着したら検証用スレッドを起こす
@@ -226,18 +275,20 @@ void BlockValidator::start()
 					bvcb->importStrucretHeader( blockHeaderMSG ); // ブロックハッシュとブロックヘッダをセット
 					bvcb->networks( popedSB->sourceKNodeAddr() , popedSB->relayKNodeAddrVector() );
 					_pendingQueue.enqueue( bvcb ); // キューに追加する
+					bvcb->_structedBlock._block->_txVector.resize( blockHeaderMSG->txCount() ); // blockのトランザクション個数を増やす
 					bvcb->autoStart(); // 検証ルーチンをスタートする
 				}
 				break;
 
-			case 1:
+			case 1: 
+				blockDataResponseMSG = miyaChainMSG.blockDataResponseMSG(); // メッセージの取り出し
+				std::shared_ptr<BlockValidationControlBlock> targetBVCB = _pendingQueue.find( blockHeaderMSG->_blockHash );
+				if( targetBVCB == nullptr ) break;
+				else
+					targetBVCB->txArrive( blockDataResponseMSG );
 				break;
 
-			default:
-				break;
 		}
-	
-	
 	}
 
 }

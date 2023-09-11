@@ -18,7 +18,7 @@ class TransactionPool;
 
 
 
-class TransactionValidator
+class TransactionValidator // ブロックデータ以外の単純なトランザクション伝搬の際のハンドラ
 {
 private:
 	std::shared_ptr<TransactionPool> _txPool;
