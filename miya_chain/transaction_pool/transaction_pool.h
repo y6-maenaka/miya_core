@@ -5,6 +5,7 @@
 #include <memory>
 // #include <unordered_map>
 #include <map>
+#include <vector>
 
 
 
@@ -41,6 +42,10 @@ public:
 	//std::shared_ptr<tx::P2PKH> find( std::shared_ptr<tx::P2PKH>  );
 	std::shared_ptr<TxCB> find( std::shared_ptr<tx::P2PKH> target );
 	void store( std::shared_ptr<tx::P2PKH> target );
+
+
+	void remove( std::shared_ptr<TxCB> target ); // イテレータのeraseのようなメソッドにする
+	void batchRemove( std::vector<std::shared_ptr<TxCB>> targetVector );
 };
 
 

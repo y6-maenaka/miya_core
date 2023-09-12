@@ -36,7 +36,7 @@ int TxCBBucket::add( std::shared_ptr<TxCB> target )
 	}
 
 
-	// 最後尾までポインタを送る
+	// 最後尾までポインタを送る ※ headにprevがあるならそれを参照しても大丈夫そう
 	while( currentTxCB->next() != nullptr && currentTxCB != target ) // リストネクストが存在して，対象のTxCBでない場合
 	{ //　要素を重複して挿入することは許可しない
 		currentTxCB = currentTxCB->next();
@@ -46,22 +46,38 @@ int TxCBBucket::add( std::shared_ptr<TxCB> target )
 	currentTxCB->next( target ); // 挿入前最後尾要素のnextを対象ブロックに
 	target->prev( currentTxCB ); // 対象ブロックの前ブロックを挿入前最後尾ブロックに　
 	_txcbHead->prev( target ); // バケット先頭のprevを対象ブロックに　
-
-	goto AutoScaleRoutine; // autoScale判定へ
-
-
-	return -1; // 挿入できなかった場合 // 基本的にない
-
-	AutoScaleRoutine:
+	
+	
 	if( count >= _scaleSize )
 	{
-		autoScale( _txcbHead );
+		autoScaleUp( _txcbHead );
 		delete this;
 	}
 
 	return count;
 }
 
+
+
+
+
+void TxCBBucket::remove( std::shared_ptr<TxCB> target )
+{
+	if( find( target ) == nullptr ) return; // 必要ないかも
+
+	if( _txcbHead == target	)
+	{
+		_txcbHead = nullptr;
+	}
+	else
+	{
+		target->prev()->next( target->next() );
+		target->next()->prev( target->prev() );
+	}
+
+	// target.reset(); // ここで消してしまうと,暫定UTXOで削除できなくなる
+	return;
+}
 
 
 
@@ -88,7 +104,7 @@ std::shared_ptr<TxCB> TxCBBucket::find( std::shared_ptr<TxCB> target )
 
 
 
-void TxCBBucket::autoScale( std::shared_ptr<TxCB> txcbHead )
+void TxCBBucket::autoScaleUp( std::shared_ptr<TxCB> txcbHead )
 {
 	TxCBTable *newTable = new TxCBTable( _parentTable->layer() + 1 );
 

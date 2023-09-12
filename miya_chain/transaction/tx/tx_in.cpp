@@ -257,8 +257,16 @@ unsigned int TxIn::exportRawSize()
 
 
 
+std::shared_ptr<unsigned char> TxIn::inTxID()
+{
+	return std::make_shared<unsigned char>( *(_prevOut->_txID) );
+}
 
 
+unsigned short TxIn::inIndex()
+{
+	return static_cast<unsigned short>(_prevOut->_index);
+}
 
 
 

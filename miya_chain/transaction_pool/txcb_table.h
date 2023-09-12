@@ -35,6 +35,7 @@ public:
 	int add( std::shared_ptr<TxCB> target );
 	std::shared_ptr<TxCBBucket> deepestBucket( std::shared_ptr<TxCB> target );
 	std::shared_ptr<TxCB> find( std::shared_ptr<TxCB> target );
+	std::shared_ptr<TxCBBucket> findBucket( std::shared_ptr<TxCB> target );
 
 	void bucketTableList( void* target , int type ,int index );
 };

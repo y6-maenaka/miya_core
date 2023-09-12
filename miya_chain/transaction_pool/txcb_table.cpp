@@ -71,5 +71,23 @@ std::shared_ptr<TxCB> TxCBTable::find( std::shared_ptr<TxCB> target )
 
 
 
+std::shared_ptr<TxCBBucket> TxCBTable::findBucket( std::shared_ptr<TxCB> target )
+{
+	unsigned char targetByte = target->txID().get()[ (_layer / 2) ];
+	unsigned char targetSymbol = (( _layer % 2 ) == 0) ? ( (targetByte >> 4)& 0x0F ) : (targetByte & 0x0F);
+
+	// ( _bucketTableList[static_cast<unsigned int>(targetSymbol)].second ) == 1 ; ->対象はテーブル -> 再帰的に検索する
+	if( _bucketTableList.at(static_cast<unsigned int>(targetSymbol)).second == 1  )	
+		return std::make_shared<TxCBBucket>( *(static_cast<TxCBBucket*>((_bucketTableList.at(static_cast<unsigned int>(targetSymbol))).first)) );
+
+
+	// ( _bucketTableList[static_cast<unsigned int>(targetSymbol)].second ) == 2 : ->対象はバケット -> 単純に検索する
+	if( _bucketTableList.at( static_cast<unsigned int>(targetSymbol)).second == 2 ) // 対象がテーブルだった場合
+		return static_cast<TxCBTable*>((_bucketTableList.at(static_cast<unsigned int>(targetSymbol))).first)->findBucket( target );
+
+	return nullptr;
+}
+
+
 };
 

@@ -2,6 +2,8 @@
 
 #include "../txcb.h"
 #include "../../transaction/p2pkh/p2pkh.h"
+#include "../../transaction/tx/tx_in.h"
+#include "../../transaction/tx/tx_out.h"
 
 
 namespace miya_chain
@@ -22,6 +24,20 @@ std::shared_ptr<TxCB> ProvisionalUTxOCache::find( std::shared_ptr<unsigned char>
 };
 
 
+
+std::vector< std::shared_ptr<TxCB>> ProvisionalUTxOCache::find( std::shared_ptr<tx::P2PKH> target )
+{
+	std::vector<std::shared_ptr<TxCB>> retVector;
+	std::shared_ptr<TxCB> hitedTxCB;
+
+	for( auto itr : target->_body._ins )
+	{
+		if( ( hitedTxCB = this->find( itr->inTxID(), itr->inIndex())) != nullptr )
+			retVector.push_back( hitedTxCB ); // 検索対象のtxにトランザクションプール内のtxと同じutxoを参照している場合
+	}
+
+	return retVector;
+}
 
 
 

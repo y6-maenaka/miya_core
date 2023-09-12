@@ -30,6 +30,13 @@
 
 
 
+namespace tx
+{
+	class P2PKH;
+}
+
+
+
 namespace miya_chain
 {
 
@@ -70,6 +77,9 @@ private:
 
 public:
 	std::shared_ptr<TxCB> find( std::shared_ptr<unsigned char> txID , unsigned short index );
+	//!!! std::shared_ptr<TxCB> find(  std::shared_ptr<tx::P2PKH> target );
+	std::vector< std::shared_ptr<TxCB> > find( std::shared_ptr<tx::P2PKH> target );
+
 
 	void remove( std::shared_ptr<unsigned char> txID , unsigned short index ); 
 	void remove( std::shared_ptr<OutPointPair> targetPair  );

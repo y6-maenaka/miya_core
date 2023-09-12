@@ -23,7 +23,7 @@ constexpr unsigned short DEFAULT_SCALE_SIZE = 100;
 
 class TxCBBucket
 {
-private:
+public: // 将来的にprivateにする
 	std::shared_ptr<TxCBTable> _parentTable; // スケール用に自身のバケットが属するテーブルを記録しておく
 	std::shared_ptr<TxCB> _txcbHead; // 先頭TxCBポインタ
 
@@ -32,13 +32,16 @@ private:
 	unsigned short _scaleSize;
 
 
-public:
+//public:
 	TxCBBucket( unsigned char symbol , std::shared_ptr<TxCBTable> parentTable );
 
 	int add( std::shared_ptr<TxCB> target );
+	void remove( std::shared_ptr<TxCB> target );
 	std::shared_ptr<TxCB> find( std::shared_ptr<TxCB> target );
 	
-	void autoScale( std::shared_ptr<TxCB>txcbHead );
+	void autoScaleUp( std::shared_ptr<TxCB>txcbHead );
+	void autoScaleDown(); // 最悪なくても大丈夫
+
 };
 
 

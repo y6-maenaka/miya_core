@@ -4,6 +4,7 @@
 
 
 #include <stdlib.h>
+#include <memory>
 #include <string.h>
 #include "openssl/evp.h"
 
@@ -30,6 +31,7 @@ struct PrevOut{
 	PrevOut();
 	unsigned int exportRaw( unsigned char **ret );
 	unsigned int exportRawSize();
+
 
 } __attribute__((__packed__));
 
@@ -83,7 +85,8 @@ struct TxIn{
 	unsigned int exportRaw( unsigned char **ret );
 	unsigned int exportRawSize();
 
-
+	std::shared_ptr<unsigned char> inTxID();
+	unsigned short inIndex();
 };
 
 

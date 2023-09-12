@@ -48,9 +48,10 @@ private:
 
 	struct 
 	{
-		std::shared_ptr<TxCB> _leastChain;
-		std::shared_ptr<TxCB> _prevCB;
-		std::shared_ptr<TxCB> _nextCB;
+		std::shared_ptr<TxCB> _leastChain = nullptr;
+		std::shared_ptr<TxCB> _prevCB = nullptr;
+		std::shared_ptr<TxCB> _nextCB = nullptr;
+		
 	} _control;
 
 

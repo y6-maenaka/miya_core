@@ -6,6 +6,11 @@ namespace miya_chain
 {
 
 
+TxCB::TxCB( std::shared_ptr<tx::P2PKH> target )
+{
+	_tx = target;
+}
+
 
 
 
