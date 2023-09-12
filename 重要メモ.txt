@@ -2,3 +2,5 @@ k_bucketのmutex管理の未実装
 トランザクションプールがあまりにもメモリを圧迫する場合,optrを使ってファイルマッピングする
 
 Senderに送信先を伝える際にSBSegmentのsourceAddrを使っている
+
+トランザクションの種類不足による,txのreturnがワンパターン

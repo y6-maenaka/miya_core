@@ -53,10 +53,9 @@ using OutPointPair = std::pair<
 
 
 struct CustomCompare
-{
+{ // カスタム比較関数
 	bool operator ()( std::shared_ptr<OutPointPair> left, std::shared_ptr<OutPointPair> right ) const  // 第1引数が小さい場合にtrueが帰るように
 	{
-			
 			int ret;
 			if( (ret = memcmp( left->first.get() , right->first.get() , 32 ))  == 0 )
 				return (left->second < right->second);
@@ -77,15 +76,17 @@ private:
 
 public:
 	std::shared_ptr<TxCB> find( std::shared_ptr<unsigned char> txID , unsigned short index );
-	//!!! std::shared_ptr<TxCB> find(  std::shared_ptr<tx::P2PKH> target );
 	std::vector< std::shared_ptr<TxCB> > find( std::shared_ptr<tx::P2PKH> target );
 
-
+	// 該当するトランザクションを全て削除する必要がある
+	/* 単体削除 */
 	void remove( std::shared_ptr<unsigned char> txID , unsigned short index ); 
-	void remove( std::shared_ptr<OutPointPair> targetPair  );
+	void remove( std::shared_ptr<OutPointPair> targetPair  ); 
+	/* バッチ削除 */
 	void remove( std::shared_ptr<TxCB> target ); // トランザクション分をまとめて削除する
 
 
+	// 基本的にトランザクションプールにtxが追加された際にprovisionalUTxOCacheも追加される
 	void add( std::shared_ptr<TxCB> target ); // txに含まれているtx_outを全て追加する
 };
 

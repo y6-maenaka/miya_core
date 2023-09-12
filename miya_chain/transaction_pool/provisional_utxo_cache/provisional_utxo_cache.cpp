@@ -41,6 +41,9 @@ std::vector< std::shared_ptr<TxCB>> ProvisionalUTxOCache::find( std::shared_ptr<
 
 
 
+
+
+
 void ProvisionalUTxOCache::remove( std::shared_ptr<unsigned char> txID , unsigned short index )
 {
 	std::shared_ptr<OutPointPair> targetPair = std::make_shared<OutPointPair>(std::make_pair(txID, index));
@@ -51,22 +54,24 @@ void ProvisionalUTxOCache::remove( std::shared_ptr<unsigned char> txID , unsigne
 
 
 
-
+// これがremove核
 void ProvisionalUTxOCache::remove( std::shared_ptr<OutPointPair> targetPair )
 {
-	auto retItr = _pUTxOMap.find( targetPair );
-	_pUTxOMap.erase( targetPair );
+	auto retItr = _pUTxOMap.find( targetPair ); // 該当する暫定utxoイテレータを取得する
+	_pUTxOMap.erase( targetPair ); // この実装では該当する暫定utxoを一つ消すだけで,トランザクション全てを削除することは不可能
+																		
 }
 
 
 
-void ProvisionalUTxOCache::remove( std::shared_ptr<TxCB> target )
+// 削除対象のトランザクションを指定する -> トランザクションプールマネージャから呼び出す必要がある
+void ProvisionalUTxOCache::remove( std::shared_ptr<TxCB> target ) // トランザクションに含まれる暫定utxoを全て削除する
 {
 	std::shared_ptr<OutPointPair> targetPair;
 
 	for( int i=0; i<target->tx()->TxOutCnt(); i++ )
 	{
-		targetPair = std::make_shared<OutPointPair>(std::make_pair(target->txID(), i ));
+		targetPair = std::make_shared<OutPointPair>( std::make_pair(target->txID(), i ) );
 		remove( targetPair );
 	}
 }
@@ -74,16 +79,22 @@ void ProvisionalUTxOCache::remove( std::shared_ptr<TxCB> target )
 
 
 
+
+
+
+
+
 void ProvisionalUTxOCache::add( std::shared_ptr<TxCB> target )
 {
-
 	std::shared_ptr<OutPointPair> targetPair;
 
-	for( int i=0; i<target->tx()->TxOutCnt(); i++ ) // 
+	
+	for( int i=0; i<target->tx()->TxOutCnt(); i++ ) 
 	{
-		targetPair = std::make_shared<OutPointPair>(std::make_pair(target->txID(), i ));
+		targetPair = std::make_shared<OutPointPair>(std::make_pair(target->txID(), i )); // coinbaseも含む
 		_pUTxOMap.insert( std::make_pair(targetPair, target) );
 	}
+
 	// トランザクションが含んでいるtx_out分を追加する必要がある
 }
 

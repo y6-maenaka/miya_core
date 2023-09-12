@@ -40,9 +40,11 @@ std::shared_ptr<TxCB> TransactionPool::find( std::shared_ptr<tx::P2PKH> target )
 void TransactionPool::store( std::shared_ptr<tx::P2PKH> target )
 {
 	std::shared_ptr<TxCB> storeTargetTxCB = std::make_shared<TxCB>( target );
-	_rootTable->add( storeTargetTxCB ); // 再帰的に追加
-	// 書き残し
 
+	// トランザクションプールへの追加
+	_rootTable->add( storeTargetTxCB ); // 再帰的に追加
+
+	// 暫定utxoの追加 -> ※　必要なの基本的にTxCB内部のトランザクション本体のみ
 	_pUTxOCache->add( storeTargetTxCB ); //　保存したトランザクション内のtx_outを暫定utxoに追加
 }
 
@@ -55,15 +57,27 @@ void TransactionPool::remove( std::shared_ptr<TxCB> target )
 	std::shared_ptr<TxCBBucket> targetBucket = _rootTable->findBucket( target );
 	if( targetBucket == nullptr ) return;
 
-	targetBucket->remove( target );
-	_pUTxOCache->remove( target );
-
-	// target.reset(); // 消さないほうがいいかもしれない
+	targetBucket->remove( target ); // トランザクションプールからの削除
+	_pUTxOCache->remove( target ); // 暫定utxoからの削除
+	// target.reset(); // 要素を消さないほうがいいかもしれない
 }
 
 
 
 
+
+
+// 呼び出しはブロック検証時のみ ブロック検証トランザクションの場合は二重支払いがあった場合はプール内のトランザクションを削除する
+// その他、単純トランザクション受信時は自身のプール内のトランザクションを優先する
+// 該当するトランザクションをプールから完全に削除するので
+std::vector<TxCB> autoResolveDoubleSpends( std::shared_ptr<tx::P2PKH> target ) 
+{
+	/*
+	 < 二重支払いチェックフロー >
+	 1. 二重支払いが発生するトランザクションを検出する
+	 2. 対象のトランザクションをトランザクションプールから削除する
+	 */
+}
 
 
 };

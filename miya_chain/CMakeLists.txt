@@ -13,6 +13,7 @@ add_library( MIYA_CHAIN STATIC
 							transaction/script/script.cpp
 							transaction/script/pk_script.cpp
 							transaction/script/signature_script.cpp
+							transaction/tx/tx.cpp
 
 							transaction_pool/transaction_pool.cpp
 							transaction_pool/txcb.cpp
