@@ -1,6 +1,8 @@
-k_bucketのmutex管理の未実装
-トランザクションプールがあまりにもメモリを圧迫する場合,optrを使ってファイルマッピングする
+- k_bucketのmutex管理の未実装
+- トランザクションプールがあまりにもメモリを圧迫する場合,optrを使ってファイルマッピングする
 
-Senderに送信先を伝える際にSBSegmentのsourceAddrを使っている
+- Senderに送信先を伝える際にSBSegmentのsourceAddrを使っている
 
-トランザクションの種類不足による,txのreturnがワンパターン
+- トランザクションの種類不足による,txのreturnがワンパターン
+
+- opensslで実装しているshaHash,ecdsa関係の関数のメモリリークが怪しい

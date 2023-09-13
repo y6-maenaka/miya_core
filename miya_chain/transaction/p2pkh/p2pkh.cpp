@@ -57,20 +57,20 @@ bool P2PKH::sign()
 	//
 	// 多分coinbaseInputは全てそのまま(値をセットしている状態)で書き出して大丈夫
 
-
-	for( auto PubKeyHashItr : _body._ins )
-	{
-		for( auto EmptyItr : _body._ins )
-		{
-
-		}
-	}
-
+	
 
 
 }
 
 
+
+
+
+unsigned int P2PKH::exportRaw( std::shared_ptr<unsigned char> retRaw )
+{
+	// 全てのtx_inの署名が住んでいることを確認する
+
+}
 
 
 

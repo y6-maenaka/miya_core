@@ -42,9 +42,6 @@ private:
 	} _body;
 
 
-	bool _isSigned = false;
-	bool _isVerified = false;
-
 
 public:
 
@@ -58,6 +55,9 @@ public:
 	
 
 	bool sign(); // 全てのtxに対して署名を行う
+
+	
+	unsigned int exportRaw( std::shared_ptr<unsigned char> retRaw );
 
 /*
  必要な機能とデータ

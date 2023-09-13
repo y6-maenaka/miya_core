@@ -86,41 +86,84 @@ unsigned int TxIn::exportRawWithEmpty( std::shared_ptr<unsigned char> retRaw )
 
 
 
-unsigned int TxIn::exportRawWithPubKey( std::shared_ptr<unsigned char> retRaw )
+unsigned int TxIn::exportRawWithPubKeyHash( std::shared_ptr<unsigned char> retRaw )
 {
 	if( _pkey == nullptr ) return 0;
 
 	// 生の公開鍵を取得する
-	_body._signatureScript->toPubKeyHash( _pkey ); // 署名スクリプトのタイプを変更
+	_body._signatureScript->pkey( _pkey ); // 署名スクリプトに公開鍵をセット
 
-	// retRaw = std::shared_ptr<unsigned char>( sizeof( struct PrevOut) );
 	unsigned int formatPtr = 0;
+
+	// PrevOutの書き出し
 	std::shared_ptr<unsigned char> rawPrevOut; unsigned int rawPrevOutSize;
 	rawPrevOutSize = _body._prevOut->exportRaw( rawPrevOut );
+
+	/* 公開鍵ハッシュの書き出し */
+	std::shared_ptr<unsigned char> exportedPubKeyHash; unsigned int exportedPubKeyHashLength = 0;
+	exportedPubKeyHashLength = _body._signatureScript->exportRawWithPubKeyHash( exportedPubKeyHash );
+	_body._script_bytes = exportedPubKeyHashLength; // スクリプト長のセット
+
 
 
 	retRaw = std::make_shared<unsigned char>( sizeof(struct PrevOut) + sizeof(_body._sequence) + sizeof(_body._script_bytes) + _body._script_bytes );
 	memcpy( retRaw.get() , rawPrevOut.get() , rawPrevOutSize ); formatPtr+= rawPrevOutSize;
 	memcpy( retRaw.get() + formatPtr , &(_body._script_bytes) , sizeof(_body._script_bytes) ); formatPtr+= sizeof(_body._script_bytes);
-
-	/* 公開鍵ハッシュの書き出し */
-	std::shared_ptr<unsigned char> exportedPubKeyHash; unsigned int exportedPubKeyHashLength = 0;
-	exportedPubKeyHashLength = _body._signatureScript->exportRawWithPubKeyHash( exportedPubKeyHash );
 	memcpy( retRaw.get() + formatPtr , exportedPubKeyHash.get() , exportedPubKeyHashLength ); formatPtr+= exportedPubKeyHashLength;
-	exportedPubKeyHash.reset(); // 念の為解放しておく
-
 	memcpy( retRaw.get() + formatPtr , &(_body._sequence) , sizeof(_body._sequence) );  formatPtr += sizeof(_body._sequence);
 
+	rawPrevOut.reset();
+	exportedPubKeyHash.reset(); // 念の為解放しておく
+	
 	return formatPtr;
-	// _body._script_bytes = _body._signatureScript->
-
 }
 
 
 
 
+unsigned int TxIn::exportRawWithSignatureScript( std::shared_ptr<unsigned char> retRaw )
+{
+	if( !(isSigned()) ) return 0; // 正式な署名が行われていなければリターン
+
+	unsigned int formatPtr = 0;
+
+	// PrevOutの書き出し
+	std::shared_ptr<unsigned char> rawPrevOut; unsigned int rawPrevOutSize;
+	rawPrevOutSize = _body._prevOut->exportRaw( rawPrevOut );
+
+	/* 署名スクリプトの書き出し */
+	std::shared_ptr<unsigned char> exportedSignatureScript; unsigned int exportedSignatureScriptLength = 0;
+	exportedSignatureScriptLength = _body._signatureScript->exportRaw( exportedSignatureScript );
+	_body._script_bytes = exportedSignatureScriptLength; // スクリプト長のセット
 
 
+	retRaw = std::make_shared<unsigned char>( sizeof(struct PrevOut) + sizeof(_body._sequence) + sizeof(_body._script_bytes) + _body._script_bytes );
+	memcpy( retRaw.get() , rawPrevOut.get() , rawPrevOutSize ); formatPtr+= rawPrevOutSize;
+	memcpy( retRaw.get() + formatPtr , &(_body._script_bytes) , sizeof(_body._script_bytes) ); formatPtr+= sizeof(_body._script_bytes);
+	memcpy( retRaw.get() + formatPtr , exportedSignatureScript.get() , exportedSignatureScriptLength ); formatPtr+= exportedSignatureScriptLength;
+	memcpy( retRaw.get() + formatPtr , &(_body._sequence) , sizeof(_body._sequence) );  formatPtr += sizeof(_body._sequence);
+
+	rawPrevOut.reset();
+	exportedSignatureScript.reset(); // 念の為解放しておく
+	
+	return formatPtr;
+}
+
+
+
+void TxIn::sign( std::shared_ptr<unsigned char> sign , unsigned int signLength , bool isSigned )
+{
+	_tempSign._sign = sign;
+	_tempSign._signLength = signLength;
+	_tempSign._isSigned = isSigned;
+}
+
+
+
+bool TxIn::isSigned()
+{
+	return _tempSign._isSigned;
+}
 
 
 

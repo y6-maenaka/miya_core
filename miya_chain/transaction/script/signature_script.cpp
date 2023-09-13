@@ -1,6 +1,7 @@
 #include "signature_script.h"
 
 #include "../../../shared_components/cipher/ecdsa_manager.h"
+#include "../../../shared_components/hash/sha_hash.h"
 #include "openssl/asn1.h"
 
 namespace tx{
@@ -8,6 +9,52 @@ namespace tx{
 
 
 
+
+void SignatureScript::pkey( EVP_PKEY *pkey )
+{
+	_pkey = pkey;
+}
+
+
+
+
+unsigned short SignatureScript::exportRawWithPubKeyHash( std::shared_ptr<unsigned char> ret )
+{
+	if( _pkey == nullptr ) return 0;
+
+	unsigned int rawPubKeyLength; std::shared_ptr<unsigned char> rawPueKey;
+	rawPubKeyLength = cipher::ECDSAManager::toRawPubKey( _pkey , rawPueKey ); // 生の公開鍵を書き出す
+	
+	unsigned int rawPubKeyHashLength; std::shared_ptr<unsigned char> rawPubKeyHash;
+	rawPubKeyHashLength = hash::SHAHash( rawPueKey, rawPubKeyLength , rawPubKeyHash , "sha1" ); // 160bitsでダイジェスト変換
+
+	memcpy( ret.get() , rawPubKeyHash.get() , rawPubKeyLength );
+
+	rawPueKey.reset();
+	rawPubKeyHash.reset();
+
+	return rawPubKeyHashLength;
+}
+
+
+
+unsigned short SignatureScript::exportRaw( std::shared_ptr<unsigned char> sign, unsigned int signLength ,std::shared_ptr<unsigned char> ret )
+{
+	// 書き出す署名スクリプトは sign + 公開鍵
+
+	if( _pkey == nullptr ) return 0;
+
+	unsigned int rawPubKeyLength; std::shared_ptr<unsigned char> rawPueKey;
+	rawPubKeyLength = cipher::ECDSAManager::toRawPubKey( _pkey , rawPueKey ); // 生の公開鍵を書き出す
+	
+	ret = std::make_shared<unsigned char>( signLength + rawPubKeyLength );  
+
+	unsigned int formatPtr = 0;
+	memcpy( ret.get(), sign.get() , signLength ); formatPtr += signLength;
+	memcpy( ret.get() + formatPtr , rawPueKey.get() , rawPubKeyLength ); formatPtr += rawPubKeyLength;
+
+	return formatPtr;
+}
 
 
 
@@ -97,23 +144,6 @@ SignatureScript *SignatureScript::createHashedPubKeyScript( EVP_PKEY *pkey )
 
 
 
-void SignatureScript::toPubKeyHash( EVP_PKEY *pkey )
-{
-	if( pkey == nullptr ) _pkey = nullptr;
-	_pkey = pkey;
-}
-
-
-
-unsigned short SignatureScript::exportRawWithPubKeyHash( std::shared_ptr<unsigned char> ret )
-{
-	if( _pkey == nullptr ) return 0;
-
-	unsigned int rawPubKeyLength;
-	rawPubKeyLength = cipher::ECDSAManager::toRawPubKey( _pkey , ret );
-
-	return rawPubKeyLength;
-}
 
 
 

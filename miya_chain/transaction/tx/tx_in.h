@@ -64,17 +64,27 @@ private:
 	} _body;
 
 
+
+	struct 
+	{
+		std::shared_ptr<unsigned char> _sign;
+		unsigned int _signLength;
+		bool _isSigned = false;
+
+	}	_tempSign;
+	
+
 	EVP_PKEY *_pkey; // 署名と公開鍵セットに使われる
-									 // 適宜signature_scriptに鍵をセットしながら処理を行う
-									 // デフォルトは自身Nodeのものになるようにする
-
-
 
 public:
 	std::shared_ptr<PrevOut> prevOut(); // getter
 
 	unsigned int exportRawWithEmpty( std::shared_ptr<unsigned char> retRaw );
-	unsigned int exportRawWithPubKey( std::shared_ptr<unsigned char> retRaw );
+	unsigned int exportRawWithPubKeyHash( std::shared_ptr<unsigned char> retRaw );
+	unsigned int exportRawWithSignatureScript( std::shared_ptr<unsigned char> retRaw ); // 署名値が格納されたTxInの書き出し
+
+	void sign( std::shared_ptr<unsigned char> sign , unsigned int signLength , bool isSigned = false ); // 上位ラッパによって署名値が算出された後に格納する 
+	bool isSigned();
 };
 
 

@@ -45,19 +45,24 @@ public:
 
 
 
-class SignatureScript
+class SignatureScript // unLockingScript // 秘密鍵を持っていることの証明
 {
 private:
 	int _scriptType; // pubkeyHash , signature
 	unsigned int _scriptLength; // 実用上は必要ない, 確認用
 
-	EVP_PKEY *_pkey; // pubKeyHash用
+	EVP_PKEY *_pkey = nullptr; // with公開鍵書き出し,署名書き出しで必要 (必須)
+
 
 public:
-	void toPubKeyHash( EVP_PKEY *pkey );
-	void toP2PKHSignatureScript();
+	void pkey( EVP_PKEY *pkey );
 
-	unsigned short exportRawWithPubKeyHash( std::shared_ptr<unsigned char> ret );
+	// void toPubKeyHash( EVP_PKEY *pkey );
+	// void toP2PKHSignatureScript( std::shared_ptr<unsigned char> sign );
+
+
+	unsigned short exportRawWithPubKeyHash( std::shared_ptr<unsigned char> ret ); // 署名用に公開鍵ハッシュをセットして書き出す
+	unsigned short exportRaw( std::shared_ptr<unsigned char> sign, unsigned int signLength ,std::shared_ptr<unsigned char> ret ); //  署名が格納されたものを書き出す(本命)
 	// unsigned short exportRaw( std::shared_ptr<unsigned char> ret );
 };
 
