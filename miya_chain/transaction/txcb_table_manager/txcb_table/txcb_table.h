@@ -13,7 +13,7 @@ namespace tx{
 
 class TxCBBucket;
 class TxCB;
-class P2PKH;
+struct P2PKH;
 
 
 

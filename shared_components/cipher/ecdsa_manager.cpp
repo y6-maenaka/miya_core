@@ -317,6 +317,21 @@ int ECDSAManager::toRawPubKey( unsigned char **ret , EVP_PKEY* pkey )
 }
 
 
+
+unsigned int ECDSAManager::toRawPubKey( EVP_PKEY *pkey , std::shared_ptr<unsigned char> ret )
+{
+	unsigned char *output; unsigned int outputLength;
+	outputLength = i2d_PUBKEY( pkey , &output );
+
+	ret = std::make_shared<unsigned char>( *output );
+
+	return outputLength;
+}
+
+
+
+
+
 EVP_PKEY* ECDSAManager::toPkey( unsigned char* rawPubKey , unsigned int rawPubKeySize )
 {
 	EVP_PKEY* pkey = nullptr; 

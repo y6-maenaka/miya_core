@@ -7,6 +7,124 @@
 
 namespace tx{
 
+
+
+
+
+
+
+std::shared_ptr<unsigned char> PrevOut::txID()
+{
+	return _body._txID;
+}
+
+unsigned short PrevOut::index()
+{
+	return static_cast<unsigned short>(_body._index);
+}
+
+
+unsigned int PrevOut::exportRaw( std::shared_ptr<unsigned char> retRaw )
+{
+	retRaw = std::make_shared<unsigned char>( sizeof(_body) );
+	memcpy( retRaw.get() , &_body , sizeof(_body) );
+
+	return sizeof(_body);
+}
+
+
+
+
+
+
+
+
+TxIn::Body::Body()
+{
+	_prevOut = nullptr;
+	_script_bytes = 0;
+	_signatureScript = nullptr;
+	//_sequence = 0;
+	memset( &_sequence, 0xff , sizeof(_sequence) );
+}
+
+
+
+
+
+std::shared_ptr<PrevOut> TxIn::prevOut()
+{
+	return _body._prevOut;
+}
+
+
+// トランザクション全体署名用に空で書き出すメソッド
+unsigned int TxIn::exportRawWithEmpty( std::shared_ptr<unsigned char> retRaw )
+{
+
+				
+	retRaw = std::make_shared<unsigned char>( sizeof( struct PrevOut ) + sizeof( _body._sequence) );
+	/*
+	  空で書き出す際に必要な要素は⭐️のみ
+		⭐️std::shared_ptr<PrevOut> _prevOut;
+		uint32_t _script_bytes; // unLockingScriptのバイト長
+		std::shared_ptr<SignatureScript> _signatureScript; // unlockingScriptの本体
+		⭐️uint32_t _sequence;
+	 */
+	unsigned int formatPtr = 0;
+	std::shared_ptr<unsigned char> rawPrevOut; unsigned int rawPrevOutSize;
+	rawPrevOutSize = _body._prevOut->exportRaw( rawPrevOut );
+
+	memcpy( retRaw.get() , rawPrevOut.get() , rawPrevOutSize ); formatPtr+= rawPrevOutSize;
+	memcpy( retRaw.get() + formatPtr , &(_body._sequence) , sizeof(_body._sequence) );  formatPtr += sizeof(_body._sequence);
+
+	rawPrevOut.reset(); // 一応削除しておく
+	return formatPtr;
+}
+
+
+
+
+
+unsigned int TxIn::exportRawWithPubKey( std::shared_ptr<unsigned char> retRaw )
+{
+	if( _pkey == nullptr ) return 0;
+
+	// 生の公開鍵を取得する
+	_body._signatureScript->toPubKeyHash( _pkey ); // 署名スクリプトのタイプを変更
+
+	// retRaw = std::shared_ptr<unsigned char>( sizeof( struct PrevOut) );
+	unsigned int formatPtr = 0;
+	std::shared_ptr<unsigned char> rawPrevOut; unsigned int rawPrevOutSize;
+	rawPrevOutSize = _body._prevOut->exportRaw( rawPrevOut );
+
+
+	retRaw = std::make_shared<unsigned char>( sizeof(struct PrevOut) + sizeof(_body._sequence) + sizeof(_body._script_bytes) + _body._script_bytes );
+	memcpy( retRaw.get() , rawPrevOut.get() , rawPrevOutSize ); formatPtr+= rawPrevOutSize;
+	memcpy( retRaw.get() + formatPtr , &(_body._script_bytes) , sizeof(_body._script_bytes) ); formatPtr+= sizeof(_body._script_bytes);
+
+	/* 公開鍵ハッシュの書き出し */
+	std::shared_ptr<unsigned char> exportedPubKeyHash; unsigned int exportedPubKeyHashLength = 0;
+	exportedPubKeyHashLength = _body._signatureScript->exportRawWithPubKeyHash( exportedPubKeyHash );
+	memcpy( retRaw.get() + formatPtr , exportedPubKeyHash.get() , exportedPubKeyHashLength ); formatPtr+= exportedPubKeyHashLength;
+	exportedPubKeyHash.reset(); // 念の為解放しておく
+
+	memcpy( retRaw.get() + formatPtr , &(_body._sequence) , sizeof(_body._sequence) );  formatPtr += sizeof(_body._sequence);
+
+	return formatPtr;
+	// _body._script_bytes = _body._signatureScript->
+
+}
+
+
+
+
+
+
+
+
+
+/*
 PrevOut::PrevOut(){
 
 
@@ -119,9 +237,8 @@ unsigned int TxIn::autoTakeInSignatureScript( unsigned char* from )
 
 	pos += sizeof(_sequence); // あとでちゃんと書き直す
 
-	/*
-	 ここで取り出す？
-	 */
+	
+	 //ここで取り出す？
 
 	_pkey = _signatureScript->pubKey();
 	//_pkey = cipher::ECDSAManager::_myPkey;
@@ -219,21 +336,21 @@ unsigned int TxIn::exportRaw( unsigned char **ret )
 	*ret = new unsigned char[ exportRawSize() ];
 
 
-	/* = PrevOut の書き出し ================================================== */
+	 //= PrevOut の書き出し ================================================== 
 	unsigned char* prevOutBuff = NULL; unsigned int prevOutBuffSize = 0;
 
 	// dummyで仮置き	
 	_prevOut = new PrevOut; 
 														
 	prevOutBuffSize = _prevOut->exportRaw( &prevOutBuff );
-	/* =====================================================================  */
+	// =====================================================================  
 
 
-	/* = SignatureScript の書き出し ================================================== */
+	 = SignatureScript の書き出し ================================================== 
 	unsigned char *signatureScriptBuff = NULL; unsigned int signatureScriptBuffSize = 0;
 	signatureScriptBuffSize =  _signatureScript->exportRaw( &signatureScriptBuff );
 	_script_bytes = htonl( signatureScriptBuffSize ); // スクリプトサイズのセット
-	/* =====================================================================  */
+	 =====================================================================  
 	
 
 	unsigned int pos = 0;
@@ -268,6 +385,7 @@ unsigned short TxIn::inIndex()
 	return static_cast<unsigned short>(_prevOut->_index);
 }
 
+*/
 
 
 

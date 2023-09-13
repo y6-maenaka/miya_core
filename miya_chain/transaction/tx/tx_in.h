@@ -2,9 +2,9 @@
 #define B5784F44_269B_471F_88DF_C2B666D4949D
 
 
-
 #include <stdlib.h>
 #include <memory>
+#include <variant>
 #include <string.h>
 #include "openssl/evp.h"
 
@@ -21,13 +21,79 @@ constexpr unsigned short PREV_OUT_SIZE = /*TX_ID_SIZE*/20 + (32 / 8);
 
 
 
+
+
+
+struct PrevOut
+{
+private:
+	struct __attribute__((packed))
+	{
+		std::shared_ptr<unsigned char> _txID; // 参照するトランザクションID
+		uint32_t _index; // 参照するtx_outのインデックス
+	} _body;
+
+public:
+	std::shared_ptr<unsigned char> txID();
+	unsigned short index();
+
+	unsigned int exportRaw( std::shared_ptr<unsigned char> retRaw );
+};
+
+
+
+
+
+
+
+
+// 作成時の署名には基本的に自身のPrivateKeyだけで良い // アドレスを複数持つ場合も
+struct TxIn
+{
+private:
+			
+	struct Body// __attribute__((packed))
+	{
+		std::shared_ptr<PrevOut> _prevOut;
+		uint32_t _script_bytes; // unLockingScriptのバイト長
+		std::shared_ptr<SignatureScript> _signatureScript; // unlockingScriptの本体
+		uint32_t _sequence;
+
+		// コンストラクタ
+		Body();
+	} _body;
+
+
+	EVP_PKEY *_pkey; // 署名と公開鍵セットに使われる
+									 // 適宜signature_scriptに鍵をセットしながら処理を行う
+									 // デフォルトは自身Nodeのものになるようにする
+
+
+
+public:
+	std::shared_ptr<PrevOut> prevOut(); // getter
+
+	unsigned int exportRawWithEmpty( std::shared_ptr<unsigned char> retRaw );
+	unsigned int exportRawWithPubKey( std::shared_ptr<unsigned char> retRaw );
+};
+
+
+
+
+
+
+
+
+
+/*
 struct PrevOut{
 
 	unsigned char *_txID;
+	//std::shared_ptr<unsigned char> _txID;
 	uint32_t _index; // 前トランザクションtx_outのどのoutかを特定する
 
 
-	/* methods */
+	// methods 
 	PrevOut();
 	unsigned int exportRaw( unsigned char **ret );
 	unsigned int exportRawSize();
@@ -42,7 +108,7 @@ struct PrevOut{
 
 struct TxIn{
 
-	/* body */
+	// body 
 	struct PrevOut *_prevOut;
 	uint32_t _script_bytes; // empty時は空
 	SignatureScript *_signatureScript; // emptyは空 // coinbaseのときはここが'coinbase'欄になる
@@ -50,9 +116,9 @@ struct TxIn{
 
 
 	EVP_PKEY *_pkey; // 署名と公開鍵セットに使われる
-									 /* 適宜signature_scriptに鍵をセットしながら処理を行う　*/
+									 // 適宜signature_scriptに鍵をセットしながら処理を行う
 
-	/* 部分署名によってそれぞれセットされる　最終的にexportされる時に格納 */
+	// 部分署名によってそれぞれセットされる　最終的にexportされる時に格納 
 	unsigned char* _sig;
 	unsigned int _sigSize;
 
@@ -78,7 +144,7 @@ struct TxIn{
 	SignatureScript *signatureScript(); // getter
 	void signatureScript( SignatureScript *signatureScript );
 
-	/* methods */
+	// methods 
 	unsigned int exportEmptyRaw( unsigned char **ret );
 	unsigned int exportEmptyRawSize();
 
@@ -88,6 +154,8 @@ struct TxIn{
 	std::shared_ptr<unsigned char> inTxID();
 	unsigned short inIndex();
 };
+*/
+
 
 
 

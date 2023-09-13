@@ -2,6 +2,7 @@
 #define BF4F4979_7F92_4792_BAFB_EED69FEFA96C
 
 #include <iostream>
+#include <memory>
 
 #include "openssl/evp.h"
 #include "openssl/ecdsa.h"
@@ -56,6 +57,8 @@ public:
 
 	static void printPkey( EVP_PKEY *pkey );
 	static int toRawPubKey( unsigned char **ret , EVP_PKEY* pkey );
+	static unsigned int toRawPubKey( EVP_PKEY *pkey , std::shared_ptr<unsigned char> ret );
+
 	static EVP_PKEY* toPkey( unsigned char* rawPubKey , unsigned int rawPubKeySize );
 
 

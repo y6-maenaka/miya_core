@@ -6,6 +6,22 @@ namespace tx{
 
 
 
+
+unsigned short TxOut::exportRaw( std::shared_ptr<unsigned char> retRaw )
+{
+	retRaw = std::make_shared<unsigned char>( sizeof(_body._value) + sizeof(_body._pkScriptBytes) + _body._pkScriptBytes );
+
+	unsigned int formatPtr = 0;
+	memcpy( retRaw.get() , &(_body._value), sizeof(_body._value) ); formatPtr+= sizeof(_body._value);
+	memcpy( retRaw.get() , &(_body._pkScriptBytes) , sizeof(_body._pkScriptBytes) ); formatPtr+= sizeof(_body._pkScriptBytes);
+
+	
+	std::shared_ptr<unsigned char> exportedPkScript; unsigned int exportedPkScriptLength = 0;
+
+}
+
+
+/*
 unsigned int TxOut::exportRaw( unsigned char **ret )
 {
 	if( _pkScript == NULL ) return 0;
@@ -68,6 +84,6 @@ TxOut::TxOut( unsigned int value ){
 	PkScript *pkScript = new PkScript;
 	_pkScript = pkScript;
 }
-
+*/
 
 }; // close tx namespace 

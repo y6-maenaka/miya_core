@@ -11,7 +11,7 @@ namespace tx{
 
 
 
-
+/*
 EVP_PKEY* SignatureScript::pubKey()
 {
 
@@ -91,11 +91,29 @@ SignatureScript *SignatureScript::createHashedPubKeyScript( EVP_PKEY *pkey )
 
 
 	return this;
+}																																	
+*/
+
+
+
+
+void SignatureScript::toPubKeyHash( EVP_PKEY *pkey )
+{
+	if( pkey == nullptr ) _pkey = nullptr;
+	_pkey = pkey;
 }
-																																	
 
 
 
+unsigned short SignatureScript::exportRawWithPubKeyHash( std::shared_ptr<unsigned char> ret )
+{
+	if( _pkey == nullptr ) return 0;
+
+	unsigned int rawPubKeyLength;
+	rawPubKeyLength = cipher::ECDSAManager::toRawPubKey( _pkey , ret );
+
+	return rawPubKeyLength;
+}
 
 
 

@@ -16,7 +16,7 @@ class PkScript;
 
 
 
-
+/*
 struct TxOut{
 
 	int64_t _value;
@@ -35,6 +35,32 @@ struct TxOut{
 	unsigned int pkScriptBytes();
 
 } __attribute__((__packed__));
+*/
+
+
+
+
+
+
+
+struct TxOut
+{
+private:
+
+	struct 
+	{
+		int64_t _value;
+		uint64_t _pkScriptBytes; // lockingScriptのバイト長
+		std::shared_ptr<PkScript> _pkScript; 
+		
+	} _body;
+
+public:
+	unsigned short exportRaw( std::shared_ptr<unsigned char> retRaw );
+};
+
+
+
 
 
 

@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <vector>
+#include <memory>
 
 //#include "../tx/tx_in.h"
 //#include "../tx/tx_out.h"
@@ -19,6 +20,58 @@ struct TxIn;
 struct TxOut;
 
 
+
+
+
+
+
+
+
+
+
+struct P2PKH
+{
+
+private:
+
+	struct
+	{
+		int32_t _version;
+		std::vector< std::shared_ptr<TxIn> > _ins;
+		std::vector< std::shared_ptr<TxOut> > _outs;
+	} _body;
+
+
+	bool _isSigned = false;
+	bool _isVerified = false;
+
+
+public:
+
+	std::shared_ptr<unsigned char> txID(); // このトランザクションのtxIDを計算する
+
+	unsigned short inCount();
+	unsigned short outCount();
+
+	std::vector< std::shared_ptr<TxIn> > ins();
+	std::vector< std::shared_ptr<TxOut> > outs();
+	
+
+	bool sign(); // 全てのtxに対して署名を行う
+
+/*
+ 必要な機能とデータ
+ -> txID(); 
+ -> 各tx_inに対しての署名作成
+*/
+
+};
+
+
+
+
+// 不要
+/*
 class P2PKH{
 
 //private:
@@ -44,7 +97,7 @@ public:
 	int TxInCnt(); // getter
 	int TxOutCnt(); // getter
 
-	/* methods */
+	// methods 
 	P2PKH(){;};
 	P2PKH( unsigned char* rawP2PKHBuff , unsigned int rawP2PKHBuffSize );
 	//unsigned char* sig;
@@ -79,6 +132,15 @@ public:
 
 	unsigned char* txID();
 };
+*/
+
+
+
+
+
+
+
+
 
 
 

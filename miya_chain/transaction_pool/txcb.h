@@ -9,7 +9,7 @@
 namespace tx
 {
 
-class P2PKH;
+struct P2PKH;
 
 };
 

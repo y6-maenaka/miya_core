@@ -44,5 +44,5 @@ add_library( MIYA_CHAIN STATIC
 )
 
 
-add_definitions( -std=c++14 )
+add_definitions( -std=c++17 )
 

@@ -7,13 +7,74 @@
 #include "../../../shared_components/cipher/ecdsa_manager.h"
 
 
-#include "openssl/bio.h"
+#include "openssl/bio.h" 
 #include "openssl/evp.h"
 
 
 namespace tx{
 
 
+
+
+
+
+unsigned short P2PKH::inCount()
+{
+	return _body._ins.size();
+}
+
+
+
+unsigned short P2PKH::outCount()
+{
+	return _body._outs.size();
+}
+
+
+
+
+
+std::vector< std::shared_ptr<TxIn> > P2PKH::ins()
+{
+	return _body._ins;
+}
+
+
+
+
+std::vector< std::shared_ptr<TxOut> > P2PKH::outs()
+{
+	return _body._outs;
+}
+
+
+
+
+bool P2PKH::sign()
+{
+				
+	// このトランザクションが含んでいる全てのtx_inに対して署名を行う
+	//
+	// 多分coinbaseInputは全てそのまま(値をセットしている状態)で書き出して大丈夫
+
+
+	for( auto PubKeyHashItr : _body._ins )
+	{
+		for( auto EmptyItr : _body._ins )
+		{
+
+		}
+	}
+
+
+
+}
+
+
+
+
+
+/*
 int P2PKH::TxInCnt()
 {
 	return _body._ins.size(); }
@@ -36,7 +97,7 @@ P2PKH::P2PKH( unsigned char* rawP2PKHBuff , unsigned int rawP2PKHBuffSize )
 
 	uint16_t InOutCnt;
 	
-	/* = Ins の取り込み ================================================================= */
+	// = Ins の取り込み ================================================================= 
 	// ins count 
 	memcpy( &InOutCnt  ,rawP2PKHBuff  + pos , sizeof(InOutCnt) );  pos += sizeof(InOutCnt); 
 
@@ -50,8 +111,8 @@ P2PKH::P2PKH( unsigned char* rawP2PKHBuff , unsigned int rawP2PKHBuffSize )
 	{							
 		newTxIn = new TxIn;
 
-		/* なぜかこれを追加すると　TxIn->signatureScript が書き換えられる　*/  // ヒープ領域のメモリ不足で勝手に解放しちゃってる？
-		/* memcpy( rawPrevOutBuff, rawP2PKHBuff + pos  , PREV_OUT_SIZE );*/  pos += PREV_OUT_SIZE;
+		// なぜかこれを追加すると　TxIn->signatureScript が書き換えられる　  // ヒープ領域のメモリ不足で勝手に解放しちゃってる？
+		 // memcpy( rawPrevOutBuff, rawP2PKHBuff + pos  , PREV_OUT_SIZE );  pos += PREV_OUT_SIZE;
 		//newTxIn->prevOut( rawPrevOutBuff, PREV_OUT_SIZE );
 		//delete rawPrevOutBuff; rawPrevOutBuff = nullptr;
 	
@@ -63,7 +124,7 @@ P2PKH::P2PKH( unsigned char* rawP2PKHBuff , unsigned int rawP2PKHBuffSize )
 	std::cout << "Take In TxIn from RawP2PKH DONE" << "\n";
 
 
-	/* = Outs の取り込み ================================================================= */
+	// = Outs の取り込み ================================================================= 
 	// outs count 
 	memcpy( &InOutCnt  , rawP2PKHBuff + pos , sizeof(InOutCnt) );  pos += sizeof(InOutCnt);  //　4bytesの差
 
@@ -229,12 +290,12 @@ unsigned int P2PKH::exportPartialRaw( unsigned char **ret , int partialTxInIndex
 	memcpy( *ret  , &(_body._version) , sizeof(_body._version) ); pos += sizeof(_body._version); // versionの書き出し
 
 
-	/* = TxIn関連の書き出し =======================================================*/
+	// = TxIn関連の書き出し =======================================================
 
 	// カウントの書き出し
  	InOutCnt = htons( _body._ins.size() );
 	memcpy(  *ret + pos , &InOutCnt ,  sizeof(InOutCnt) ); pos += sizeof(InOutCnt);
-	/* TxIns の書き出し */
+	// TxIns の書き出し 
 	unsigned char* exportPartialTxInRawBuff; unsigned int exportPartialTxInRawBuffSize = 0;
 	exportPartialTxInRawBuffSize = exportPartialTxIn( &exportPartialTxInRawBuff , partialTxInIndex );
 	memcpy( *ret + pos , exportPartialTxInRawBuff , exportPartialTxInRawBuffSize );  pos += exportPartialTxInRawBuffSize;
@@ -242,12 +303,12 @@ unsigned int P2PKH::exportPartialRaw( unsigned char **ret , int partialTxInIndex
 
 
 
-	/* = TxOut関連の書き出し =======================================================*/
+	// = TxOut関連の書き出し =======================================================
 
 	// カウントの書き出し
 	InOutCnt = htons( _body._outs.size() );
 	memcpy( *ret + pos , &InOutCnt , sizeof(InOutCnt) ); pos += sizeof(InOutCnt);
-	/* TxOuts の書き出し */
+	// TxOuts の書き出し 
 	unsigned char* exportTxOutRawBuff = NULL; unsigned int exportTxOutRawBuffSize = 0;
 	exportTxOutRawBuffSize = exportTxOutRaw( &exportTxOutRawBuff ); 
 	memcpy( *ret + pos , exportTxOutRawBuff , exportTxOutRawBuffSize ); pos += exportTxOutRawBuffSize;
@@ -371,21 +432,21 @@ unsigned int P2PKH::exportTxOutRawSize()
 
 unsigned int P2PKH::exportRaw( unsigned char **ret )
 {
-	/*
-	std::cout << "$ $# $ # # # # # # # # # #  #   $ $  $ $ $ $ $ $ "	 << "\n";
+	
+	//std::cout << "$ $# $ # # # # # # # # # #  #   $ $  $ $ $ $ $ $ "	 << "\n";
 
-	std::cout << "0 : sigSize -> " << _body._ins.at(0)->_sigSize  << "\n";
-	for( int i=0; i<_body._ins.at(0)->_sigSize ; i++){
-		printf("%02X" , _body._ins.at(0)->_sig[i]);
-	} std::cout << "\n";
+	//std::cout << "0 : sigSize -> " << _body._ins.at(0)->_sigSize  << "\n";
+	//for( int i=0; i<_body._ins.at(0)->_sigSize ; i++){
+		//printf("%02X" , _body._ins.at(0)->_sig[i]);
+	//} std::cout << "\n";
 
-	std::cout << "1 : sigSize -> " << _body._ins.at(1)->_sigSize  << "\n";
-	for( int i=0; i<_body._ins.at(1)->_sigSize ; i++){
-		printf("%02X" , _body._ins.at(1)->_sig[i]);
-	} std::cout << "\n";
+	//std::cout << "1 : sigSize -> " << _body._ins.at(1)->_sigSize  << "\n";
+	//for( int i=0; i<_body._ins.at(1)->_sigSize ; i++){
+		//printf("%02X" , _body._ins.at(1)->_sig[i]);
+	//} std::cout << "\n";
 
-	std::cout << "$ $# $ # # # # # # # # # #  #   $ $  $ $ $ $ $ $ "	 << "\n";
-	*/
+	//std::cout << "$ $# $ # # # # # # # # # #  #   $ $  $ $ $ $ $ $ "	 << "\n";
+	
 
 
 
@@ -400,7 +461,7 @@ unsigned int P2PKH::exportRaw( unsigned char **ret )
 	//memset( *ret , 0xff, sizeof(_body._version) );
 
 
-	/* = TxIn関連の書き出し =======================================================*/
+	//= TxIn関連の書き出し =======================================================
 
 	InOutCnt = htons( _body._ins.size() );
 	memcpy(  *ret + pos , &InOutCnt ,  sizeof(InOutCnt) );      pos += sizeof(InOutCnt);
@@ -411,7 +472,7 @@ unsigned int P2PKH::exportRaw( unsigned char **ret )
 	delete exportTxInRawBuff; exportTxInRawBuff = nullptr;
 
 
-	/* = TxOut関連の書き出し =======================================================*/
+	//= TxOut関連の書き出し =======================================================
 
 	InOutCnt = htons( _body._outs.size() );
 	memcpy( *ret + pos , &InOutCnt , sizeof(InOutCnt) );       pos += sizeof(InOutCnt);
@@ -460,6 +521,25 @@ unsigned char* P2PKH::txID()
 
 	return txID;
 }
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

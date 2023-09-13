@@ -30,9 +30,9 @@ std::vector< std::shared_ptr<TxCB>> ProvisionalUTxOCache::find( std::shared_ptr<
 	std::vector<std::shared_ptr<TxCB>> retVector;
 	std::shared_ptr<TxCB> hitedTxCB;
 
-	for( auto itr : target->_body._ins )
+	for( auto itr : target->ins() )
 	{
-		if( ( hitedTxCB = this->find( itr->inTxID(), itr->inIndex())) != nullptr )
+		if( ( hitedTxCB = this->find( itr->prevOut()->txID(), itr->prevOut()->index() )) != nullptr )
 			retVector.push_back( hitedTxCB ); // 検索対象のtxにトランザクションプール内のtxと同じutxoを参照している場合
 	}
 
@@ -69,7 +69,7 @@ void ProvisionalUTxOCache::remove( std::shared_ptr<TxCB> target ) // トラン�
 {
 	std::shared_ptr<OutPointPair> targetPair;
 
-	for( int i=0; i<target->tx()->TxOutCnt(); i++ )
+	for( int i=0; i<target->tx()->outCount(); i++ )
 	{
 		targetPair = std::make_shared<OutPointPair>( std::make_pair(target->txID(), i ) );
 		remove( targetPair );
@@ -89,7 +89,7 @@ void ProvisionalUTxOCache::add( std::shared_ptr<TxCB> target )
 	std::shared_ptr<OutPointPair> targetPair;
 
 	
-	for( int i=0; i<target->tx()->TxOutCnt(); i++ ) 
+	for( int i=0; i<target->tx()->outCount(); i++ ) 
 	{
 		targetPair = std::make_shared<OutPointPair>(std::make_pair(target->txID(), i )); // coinbaseも含む
 		_pUTxOMap.insert( std::make_pair(targetPair, target) );

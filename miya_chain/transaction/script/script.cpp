@@ -5,6 +5,61 @@ namespace tx{
 
 
 
+
+void Script::pushBack( OP_CODES opcode , std::shared_ptr<unsigned char> data )
+{
+	_script.push_back( std::make_pair( opcode, data ) );
+}
+
+
+
+
+
+unsigned short Script::exportScriptContentSize( OP_CODES opcode )
+{
+	if( opcode.index() == static_cast<int>(OP_CODES_ID::OP_DATA) ) // opcodeがOP_DATAだった場合は格納しているデータのバイト長を返却する
+		return static_cast<unsigned short>(std::get<static_cast<int>(OP_CODES_ID::OP_DATA)>(opcode)) + 1;
+
+	return 1;
+}
+
+
+
+
+
+
+
+unsigned int Script::exportRawSize()
+{
+	unsigned ret = 0;
+
+	for( auto itr : _script )
+		ret += exportScriptContentSize(itr.first);
+
+	return ret;
+}
+
+
+unsigned int Script::exportRaw( std::shared_ptr<unsigned char> retRaw )
+{
+	if( _script.size() <= 0 ) // OP_CODEが挿入されていない場合はリターン
+	{
+		retRaw = nullptr; return 0;
+	}
+
+	unsigned int retRawLength = exportRawSize(); // 全体書き出しサイズの取得
+	retRaw = std::make_shared<unsigned char>( retRawLength );
+
+	unsigned int formatPtr = 0;
+	for( auto itr : _script )
+	{
+		memcpy( retRaw.get() + formatPtr , (itr.second).get() , exportScriptContentSize(itr.first) ); formatPtr+= exportScriptContentSize(itr.first);
+	}
+	
+	return formatPtr;
+}
+
+/*
 int Script::scriptCnt()
 {
 	return _script.size();
@@ -102,6 +157,9 @@ int Script::takeInScript( unsigned char* from , unsigned int fromSize )
 	return pos;
 
 };
+*/
+
+
 
 
 

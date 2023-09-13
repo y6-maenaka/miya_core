@@ -40,4 +40,4 @@ endif()
 
 
 
-add_definitions( -std=c++14 )
+add_definitions( -std=c++17 )
