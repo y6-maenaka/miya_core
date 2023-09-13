@@ -9,16 +9,36 @@ namespace tx{
 
 unsigned short TxOut::exportRaw( std::shared_ptr<unsigned char> retRaw )
 {
+	if( _pubKeyHash == nullptr )
+	{
+		retRaw = nullptr; return 0;
+	}
+
+	// 先ず,pkScriptを書き出す バイト長などを格納しなければならない為
+	std::shared_ptr<unsigned char> exportedRawPkScript; unsigned int exportedRawPkScriptLength = 0;
+	exportedRawPkScriptLength = _body._pkScript->exportRawWithP2PKHPkScript( exportedRawPkScript , _pubKeyHash );
+	_body._pkScriptBytes = exportedRawPkScriptLength; // 書き出しと同時に代入は怖いので
+
+
 	retRaw = std::make_shared<unsigned char>( sizeof(_body._value) + sizeof(_body._pkScriptBytes) + _body._pkScriptBytes );
 
 	unsigned int formatPtr = 0;
-	memcpy( retRaw.get() , &(_body._value), sizeof(_body._value) ); formatPtr+= sizeof(_body._value);
-	memcpy( retRaw.get() , &(_body._pkScriptBytes) , sizeof(_body._pkScriptBytes) ); formatPtr+= sizeof(_body._pkScriptBytes);
+	memcpy( retRaw.get() , &(_body._value), sizeof(_body._value) ); formatPtr+= sizeof(_body._value); // valueの書き出し
+	memcpy( retRaw.get() , &(_body._pkScriptBytes) , sizeof(_body._pkScriptBytes) ); formatPtr+= sizeof(_body._pkScriptBytes); // _pkScriptBytesの書き出し
+	memcpy( retRaw.get() , exportedRawPkScript.get() , _body._pkScriptBytes ); formatPtr+= _body._pkScriptBytes;
 
-	
-	std::shared_ptr<unsigned char> exportedPkScript; unsigned int exportedPkScriptLength = 0;
-
+	exportedRawPkScript.reset(); // 一応解放しておく
+	return formatPtr;
 }
+
+
+
+void TxOut::pubKeyHash( std::shared_ptr<unsigned char> pubKeyHash )
+{
+	_pubKeyHash = pubKeyHash;
+}
+
+
 
 
 /*

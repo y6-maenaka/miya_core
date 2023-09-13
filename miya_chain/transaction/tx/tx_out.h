@@ -55,8 +55,11 @@ private:
 		
 	} _body;
 
+	std::shared_ptr<unsigned char> _pubKeyHash = nullptr;
+
 public:
 	unsigned short exportRaw( std::shared_ptr<unsigned char> retRaw );
+	void pubKeyHash( std::shared_ptr<unsigned char> pubKeyHash );
 };
 
 
