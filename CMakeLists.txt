@@ -8,9 +8,9 @@ add_subdirectory( shared_components )
 
 
 
-
 include_directories( ${OPENSSL_INCLUDE_DIRS} )
 #include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
+
 
 
 

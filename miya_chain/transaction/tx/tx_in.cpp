@@ -133,7 +133,7 @@ unsigned int TxIn::exportRawWithSignatureScript( std::shared_ptr<unsigned char> 
 
 	/* 署名スクリプトの書き出し */
 	std::shared_ptr<unsigned char> exportedSignatureScript; unsigned int exportedSignatureScriptLength = 0;
-	exportedSignatureScriptLength = _body._signatureScript->exportRaw( exportedSignatureScript );
+	exportedSignatureScriptLength = _body._signatureScript->exportRawWithSignatureScript( _tempSign._sign, _tempSign._signLength ,exportedSignatureScript );
 	_body._script_bytes = exportedSignatureScriptLength; // スクリプト長のセット
 
 
@@ -145,7 +145,8 @@ unsigned int TxIn::exportRawWithSignatureScript( std::shared_ptr<unsigned char> 
 
 	rawPrevOut.reset();
 	exportedSignatureScript.reset(); // 念の為解放しておく
-	
+
+
 	return formatPtr;
 }
 
@@ -164,6 +165,21 @@ bool TxIn::isSigned()
 {
 	return _tempSign._isSigned;
 }
+
+
+
+void TxIn::pkey( EVP_PKEY *pkey )
+{
+	_pkey = pkey;
+}
+
+
+
+EVP_PKEY *TxIn::pkey()
+{
+	return _pkey;
+}
+
 
 
 

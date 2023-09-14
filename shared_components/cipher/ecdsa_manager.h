@@ -68,7 +68,7 @@ public:
 	static bool Verify( unsigned char *sig, size_t sigLen , unsigned char *target, size_t targetLen, EVP_PKEY* pub_key = ECDSAManager::_myPkey );
 
 
-	
+	static unsigned int sign( std::shared_ptr<unsigned char> target , unsigned int targetLength, EVP_PKEY *pkey , std::shared_ptr<unsigned char> retSign );
 
 };
 

@@ -62,7 +62,7 @@ public:
 
 
 	unsigned short exportRawWithPubKeyHash( std::shared_ptr<unsigned char> ret ); // 署名用に公開鍵ハッシュをセットして書き出す
-	unsigned short exportRaw( std::shared_ptr<unsigned char> sign, unsigned int signLength ,std::shared_ptr<unsigned char> ret ); //  署名が格納されたものを書き出す(本命)
+	unsigned short exportRawWithSignatureScript( std::shared_ptr<unsigned char> sign, unsigned int signLength ,std::shared_ptr<unsigned char> ret ); //  署名が格納されたものを書き出す(本命)
 	// unsigned short exportRaw( std::shared_ptr<unsigned char> ret );
 };
 

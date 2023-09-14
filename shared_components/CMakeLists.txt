@@ -1,8 +1,10 @@
 cmake_minimum_required( VERSION 3.2 )
 
 
+
 find_package(PkgConfig REQUIRED)
 pkg_search_module(OPENSSL REQUIRED openssl)
+
 
 
 
@@ -12,7 +14,6 @@ if( OPENSSL_FOUND )
 else()
 	# Error; with REQUIRED, pkg_search_module() will throw an error by it's own
 endif()
-
 
 
 

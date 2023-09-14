@@ -38,7 +38,7 @@ unsigned short SignatureScript::exportRawWithPubKeyHash( std::shared_ptr<unsigne
 
 
 
-unsigned short SignatureScript::exportRaw( std::shared_ptr<unsigned char> sign, unsigned int signLength ,std::shared_ptr<unsigned char> ret )
+unsigned short SignatureScript::exportRawWithSignatureScript( std::shared_ptr<unsigned char> sign, unsigned int signLength ,std::shared_ptr<unsigned char> ret )
 {
 	// 書き出す署名スクリプトは sign + 公開鍵
 

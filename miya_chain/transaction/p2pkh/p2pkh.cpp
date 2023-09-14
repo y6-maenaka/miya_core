@@ -5,6 +5,7 @@
 #include "../script/signature_script.h"
 #include "../script/pk_script.h"
 #include "../../../shared_components/cipher/ecdsa_manager.h"
+#include "../../../shared_components/hash/sha_hash.h"
 
 
 #include "openssl/bio.h" 
@@ -52,15 +53,78 @@ std::vector< std::shared_ptr<TxOut> > P2PKH::outs()
 
 bool P2PKH::sign()
 {
-				
 	// このトランザクションが含んでいる全てのtx_inに対して署名を行う
 	//
 	// 多分coinbaseInputは全てそのまま(値をセットしている状態)で書き出して大丈夫
 
-	
+	std::vector< std::pair<std::shared_ptr<unsigned char>,unsigned int> > exportedRawTxInVector;
+	std::vector< std::pair<std::shared_ptr<unsigned char>,unsigned int> > exportedRawTxOutVector;
+	std::shared_ptr<unsigned char> exportexRawTx; unsigned int exportedRawTxLength;
+	std::shared_ptr<unsigned char> rawSign; unsigned int rawSignLength = 0;
+	std::shared_ptr<unsigned char> sign; unsigned int signLength = 0;
+	unsigned int formatPtr = 0;
+
+
+	for( int i=0; i<_body._ins.size(); i++ )
+	{
+
+		for( int j=0; j<_body._ins.size(); j++ )
+		{
+			if( i == j ) // 公開鍵ハッシュを格納する
+				rawSignLength = _body._ins.at(j)->exportRawWithSignatureScript( exportexRawTx );
+			else
+				rawSignLength = _body._ins.at(j)->exportRawWithEmpty( exportexRawTx );
+
+			exportedRawTxInVector.push_back( std::make_pair(exportexRawTx,exportedRawTxLength) );
+		}
+		
+		for( auto itr : _body._outs )
+		{
+			exportedRawTxLength = itr->exportRaw( exportexRawTx );
+			exportedRawTxOutVector.push_back( std::make_pair(exportexRawTx, exportedRawTxLength ) );
+		}
+
+
+
+		formatPtr = 0;
+		unsigned int exportedRawTxInsLength = 0; std::shared_ptr<unsigned char> exportedRawTxIns; 
+		for( auto itr : exportedRawTxInVector )
+		{
+			memcpy( exportedRawTxIns.get() + formatPtr , itr.first.get(), itr.second ); formatPtr += itr.second;
+			exportedRawTxInsLength += itr.second;
+		} 
+
+
+		formatPtr = 0;
+		unsigned int exportedRawTxOutsLength = 0; std::shared_ptr<unsigned char> exportedRawTxOuts;
+		for( auto itr : exportedRawTxOutVector ) 
+		{
+			memcpy( exportedRawTxOuts.get() + formatPtr , itr.first.get(), itr.second ); formatPtr += itr.second;
+			exportedRawTxOutsLength += itr.second;
+		} 
+
+
+		formatPtr = 0;
+		unsigned int exportedRawLength; std::shared_ptr<unsigned char> exportedRaw;
+		exportedRawLength =  sizeof(_body._version) + exportedRawTxInsLength + exportedRawTxOutsLength;
+		memcpy( exportedRaw.get() , &(_body._version) , sizeof(_body._version) );
+		memcpy( exportedRaw.get() + formatPtr , exportedRawTxIns.get() , exportedRawTxInsLength ); formatPtr += exportedRawTxInsLength;
+		memcpy( exportedRaw.get() + formatPtr , exportedRawTxOuts.get(), exportedRawTxOutsLength ); formatPtr += exportedRawTxOutsLength;
+
+		// 書き出したデータをハッシュして,秘密鍵でエンクリプトする
+		std::shared_ptr<unsigned char> hashedExportedRaw; unsigned int hashedExportedRawLength = 0;
+		std::shared_ptr<unsigned char> encryptedExportedRaw; unsigned int encryptedExportedRawLength;
+		hashedExportedRawLength = hash::SHAHash( exportedRaw , exportedRawLength , hashedExportedRaw , "sha1" );
+
+		// 署名値を生成する
+		signLength = cipher::ECDSAManager::sign( exportedRaw, exportedRawLength, _body._ins.at(i)->pkey(), sign );
+		_body._ins.at(i)->sign( sign, signLength , true );
+	}
 
 
 }
+
+
 
 
 

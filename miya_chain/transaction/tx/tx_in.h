@@ -83,8 +83,11 @@ public:
 	unsigned int exportRawWithPubKeyHash( std::shared_ptr<unsigned char> retRaw );
 	unsigned int exportRawWithSignatureScript( std::shared_ptr<unsigned char> retRaw ); // 署名値が格納されたTxInの書き出し
 
-	void sign( std::shared_ptr<unsigned char> sign , unsigned int signLength , bool isSigned = false ); // 上位ラッパによって署名値が算出された後に格納する 
+	void sign( std::shared_ptr<unsigned char> sign , unsigned int signLength , bool isSigned = false ); // 上位ラッパによって署名値が算出された後に格納する ただのsetter このクラスが自身で署名を行うことはできない
 	bool isSigned();
+
+	void pkey( EVP_PKEY *pkey );
+	EVP_PKEY *pkey();
 };
 
 
