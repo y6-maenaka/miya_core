@@ -1,15 +1,20 @@
 #include "txcb.h"
 
 
+#include "../transaction/tx/tx.h"
 
 namespace miya_chain
 {
 
 
-TxCB::TxCB( std::shared_ptr<tx::P2PKH> target )
+
+/*
+TxCB::TxCB( std::shared_ptr<tx::Tx> target )
 {
 	_tx = target;
 }
+*/
+
 
 
 
@@ -50,11 +55,11 @@ void TxCB::next( std::shared_ptr<TxCB> target )
 
 
 
+
 std::shared_ptr<tx::P2PKH> TxCB::tx()
 {
 	return _tx;
 }
-
 
 
 

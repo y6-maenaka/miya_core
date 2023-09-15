@@ -14,6 +14,16 @@ void Script::pushBack( OP_CODES opcode , std::shared_ptr<unsigned char> data )
 
 
 
+unsigned int OP_DATALength( OP_CODES opcode )
+{
+	unsigned int ret = 0;
+	ret = static_cast<unsigned short>(std::get<static_cast<int>(OP_CODES_ID::COMMON)>(opcode));
+
+	if( ret >= 1 && ret <= 95 ) return ret;
+	return 0;
+}
+
+
 
 unsigned short Script::exportScriptContentSize( OP_CODES opcode )
 {
@@ -57,6 +67,28 @@ unsigned int Script::exportRaw( std::shared_ptr<unsigned char> retRaw )
 	}
 	
 	return formatPtr;
+}
+
+
+
+int Script::importRaw( unsigned char *fromRaw , unsigned int fromRawLength )
+{
+	OP_CODES opcode;
+
+	for( int i=0; i<fromRawLength; )
+	{
+		unsigned char rawOpcode;
+		memcpy( &rawOpcode , fromRaw + i, 1);  i+=1; // OPCODEの取得
+		opcode.emplace<static_cast<int>(OP_CODES_ID::COMMON)>(rawOpcode);
+	
+		if( OP_DATALength(opcode) > 0 ){
+			pushBack( opcode , std::make_shared<unsigned char>(*(fromRaw+i)) ); i+=OP_DATALength(opcode);
+		}
+		else
+			pushBack( opcode, std::make_shared<unsigned char>(rawOpcode) ); // ポインタは進めない
+	}
+
+	return _script.size();
 }
 
 /*

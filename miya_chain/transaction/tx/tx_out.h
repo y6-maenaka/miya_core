@@ -60,6 +60,8 @@ private:
 public:
 	unsigned short exportRaw( std::shared_ptr<unsigned char> retRaw );
 	void pubKeyHash( std::shared_ptr<unsigned char> pubKeyHash );
+
+	int importRaw( unsigned char *fromRaw );
 };
 
 

@@ -1,0 +1,21 @@
+#ifndef CD3D3C5E_6902_4CE2_A46C_9142BF794829
+#define CD3D3C5E_6902_4CE2_A46C_9142BF794829
+
+
+
+
+
+
+class ControlInterface
+{
+public:
+	
+};
+
+
+
+
+#endif // CD3D3C5E_6902_4CE2_A46C_9142BF794829
+
+
+

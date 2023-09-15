@@ -5,6 +5,7 @@ add_subdirectory( ekp2p )
 add_subdirectory( miya_chain )
 add_subdirectory( miya_db )
 add_subdirectory( shared_components )
+add_subdirectory( control_interface )
 
 
 
@@ -20,6 +21,7 @@ target_link_libraries( core_ver_0 PRIVATE
 												EKP2P
 												MIYA_CHAIN
 												SHARED_COMPONENTS
+												CONTROL_INTERFACE
 )
 #target_include_directories( core_ver_0 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include )
 target_compile_options( core_ver_0 PUBLIC -Wall )

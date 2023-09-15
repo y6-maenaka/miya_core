@@ -4,5 +4,7 @@
 - Senderに送信先を伝える際にSBSegmentのsourceAddrを使っている
 
 - トランザクションの種類不足による,txのreturnがワンパターン
+- 一旦トランザクションの種類はP2PKHだけに絞って実装する
 
 - opensslで実装しているshaHash,ecdsa関係の関数のメモリリークが怪しい
+

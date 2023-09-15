@@ -4,12 +4,14 @@
 
 #include <iostream>
 #include <chrono>
+#include <variant>
 
 
 namespace tx
 {
 
 struct P2PKH;
+//class Tx;
 
 };
 
@@ -26,7 +28,7 @@ namespace miya_chain
 
 
 constexpr unsigned int TX_ID_LENGTH = (160 / 8);
-
+using Tx = std::variant< std::shared_ptr<tx::P2PKH> >;
 
 
 
@@ -44,7 +46,6 @@ private:
 	} _meta;
 
 	std::shared_ptr<tx::P2PKH> _tx;
-
 
 	struct 
 	{

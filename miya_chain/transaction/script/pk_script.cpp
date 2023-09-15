@@ -44,7 +44,7 @@ unsigned int PkScript::exportRawWithP2PKHScript( std::shared_ptr<unsigned char> 
 */
 
 
-using OP_CODES = std::variant<_OP_DUP, _OP_HASH_160, _OP_EQUALVERIFY, _OP_CHECKSIG, _OP_DATA>;
+//using OP_CODES = std::variant<_OP_DUP, _OP_HASH_160, _OP_EQUALVERIFY, _OP_CHECKSIG, _OP_DATA>;
 
 
 
@@ -82,6 +82,11 @@ unsigned int PkScript::exportRawWithP2PKHPkScript( std::shared_ptr<unsigned char
 
 
 
+unsigned int PkScript::importRaw( unsigned char *fromRaw, unsigned int fromRawLength )
+{
+	_script->importRaw( fromRaw , fromRawLength );
+
+}
 
 
 

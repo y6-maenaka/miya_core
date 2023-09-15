@@ -7,7 +7,7 @@ namespace tx
 {
 
 
-
+/*
 template< typename T>
 void Tx<T>::set( T *target )
 {
@@ -27,6 +27,7 @@ T* Tx<T>::get()
 
 	return _ptr;
 }
+*/
 
 
 

@@ -42,6 +42,8 @@ private:
 	} _body;
 
 
+	unsigned int formatExportedRawTxVector( std::vector< std::pair<std::shared_ptr<unsigned char>,unsigned int> > exportedRawTxVector, std::shared_ptr<unsigned char> retRaw ); 
+
 
 public:
 
@@ -49,15 +51,17 @@ public:
 
 	unsigned short inCount();
 	unsigned short outCount();
+	
+	int add( std::shared_ptr<TxIn> target );
+	int add( std::shared_ptr<TxOut> target );
 
 	std::vector< std::shared_ptr<TxIn> > ins();
 	std::vector< std::shared_ptr<TxOut> > outs();
 	
-
 	bool sign(); // 全てのtxに対して署名を行う
-
 	
-	unsigned int exportRaw( std::shared_ptr<unsigned char> retRaw );
+	unsigned int exportRaw( std::shared_ptr<unsigned char> retRaw ); // 書き出しに先駆けて必ず署名を完了させる必要がある
+	unsigned int importRaw( std::shared_ptr<unsigned char> fromRaw , unsigned int fromRawLength );
 
 /*
  必要な機能とデータ

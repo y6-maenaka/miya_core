@@ -34,10 +34,16 @@ private:
 	} _body;
 
 public:
+	PrevOut();
+	PrevOut( std::shared_ptr<unsigned char> fromRaw );
+
 	std::shared_ptr<unsigned char> txID();
 	unsigned short index();
 
 	unsigned int exportRaw( std::shared_ptr<unsigned char> retRaw );
+	int importRaw( std::shared_ptr<unsigned char> fromRaw );
+	int importRaw( unsigned char* fromRaw );
+	
 };
 
 
@@ -64,7 +70,7 @@ private:
 	} _body;
 
 
-
+	/*
 	struct 
 	{
 		std::shared_ptr<unsigned char> _sign;
@@ -72,6 +78,7 @@ private:
 		bool _isSigned = false;
 
 	}	_tempSign;
+	*/
 	
 
 	EVP_PKEY *_pkey; // 署名と公開鍵セットに使われる
@@ -88,6 +95,9 @@ public:
 
 	void pkey( EVP_PKEY *pkey );
 	EVP_PKEY *pkey();
+
+	int importRaw( std::shared_ptr<unsigned char> fromRaw );
+	int importRaw( unsigned char *fromRaw );
 };
 
 

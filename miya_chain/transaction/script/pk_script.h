@@ -58,7 +58,7 @@ private:
 public:
 	unsigned int exportRawWithP2PKHPkScript( std::shared_ptr<unsigned char> retRaw , std::shared_ptr<unsigned char> pubKeyHash );
 
-
+	unsigned int importRaw( unsigned char *fromRaw, unsigned int fromRawLength );
 };
 
 

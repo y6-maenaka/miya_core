@@ -10,6 +10,18 @@ namespace tx{
 
 
 
+PrevOut::PrevOut()
+{
+	_body._txID = std::make_shared<unsigned char>(256/8);
+}
+
+
+PrevOut::PrevOut( std::shared_ptr<unsigned char> fromRaw )
+{
+	_body._txID = std::make_shared<unsigned char>(256/8);
+	this->importRaw( fromRaw );
+}
+
 
 
 
@@ -30,8 +42,33 @@ unsigned int PrevOut::exportRaw( std::shared_ptr<unsigned char> retRaw )
 	memcpy( retRaw.get() , &_body , sizeof(_body) );
 
 	return sizeof(_body);
+	
 }
 
+
+
+
+int PrevOut::importRaw( std::shared_ptr<unsigned char> fromRaw )
+{
+	if( fromRaw == nullptr ) return -1;
+
+	memcpy( _body._txID.get() , fromRaw.get() , 256/8 ); // あとでマジックナンバーは修正する
+	memcpy( &(_body._index) , fromRaw.get() + (256/8) , sizeof(_body._index) );
+
+	return ( (256/8) + sizeof(_body._index) ); // 流石に雑すぎる?
+}
+
+
+
+
+int PrevOut::importRaw( unsigned char* fromRaw )
+{
+	if( _body._txID == nullptr ) return -1;
+	_body._txID = std::make_shared<unsigned char>(*fromRaw);
+	memcpy( &_body._index, fromRaw + (256/8) , sizeof(_body._index) );
+
+	return ( (256/8) + sizeof(_body._index) ); // 流石に雑すぎる?
+}
 
 
 
@@ -133,7 +170,7 @@ unsigned int TxIn::exportRawWithSignatureScript( std::shared_ptr<unsigned char> 
 
 	/* 署名スクリプトの書き出し */
 	std::shared_ptr<unsigned char> exportedSignatureScript; unsigned int exportedSignatureScriptLength = 0;
-	exportedSignatureScriptLength = _body._signatureScript->exportRawWithSignatureScript( _tempSign._sign, _tempSign._signLength ,exportedSignatureScript );
+	exportedSignatureScriptLength = _body._signatureScript->exportRawWithSignatureScript( exportedSignatureScript );
 	_body._script_bytes = exportedSignatureScriptLength; // スクリプト長のセット
 
 
@@ -152,19 +189,18 @@ unsigned int TxIn::exportRawWithSignatureScript( std::shared_ptr<unsigned char> 
 
 
 
-void TxIn::sign( std::shared_ptr<unsigned char> sign , unsigned int signLength , bool isSigned )
-{
-	_tempSign._sign = sign;
-	_tempSign._signLength = signLength;
-	_tempSign._isSigned = isSigned;
-}
-
-
 
 bool TxIn::isSigned()
 {
-	return _tempSign._isSigned;
+	return _body._signatureScript->isSigned();
 }
+
+
+void TxIn::sign( std::shared_ptr<unsigned char> sign , unsigned int signLength , bool isSigned )
+{
+	_body._signatureScript->sign( sign , signLength, isSigned );
+}
+
 
 
 
@@ -181,6 +217,34 @@ EVP_PKEY *TxIn::pkey()
 }
 
 
+
+/*
+int TxIn::importRaw( std::shared_ptr<unsigned char> fromRaw )
+{
+	unsigned int currentPtr = 0;
+	_body._prevOut = std::make_shared<PrevOut>( fromRaw ); // prevOutの取り込み
+	memcpy( &_body._script_bytes , fromRaw.get() + currentPtr , sizeof(_body._script_bytes) );
+}
+*/
+
+
+int TxIn::importRaw( unsigned char *fromRaw ) // ポインタの先頭が揃っていることを確認
+{
+	unsigned int currentPtr = 0;
+	unsigned int prevOutLength;
+	_body._prevOut = std::shared_ptr<PrevOut>();
+	prevOutLength = _body._prevOut->importRaw( fromRaw );  currentPtr += prevOutLength;// prevOutの取り込み
+
+	memcpy( &_body._script_bytes , fromRaw + currentPtr , sizeof(_body._script_bytes) ); currentPtr += sizeof(_body._script_bytes);  // script_bytesの取り込み
+
+	unsigned int signatureScriptLength = 0;
+	_body._signatureScript = std::make_shared<SignatureScript>();
+	signatureScriptLength = _body._signatureScript->importRaw( fromRaw + currentPtr, static_cast<unsigned int>(_body._script_bytes) ); currentPtr += signatureScriptLength;
+
+	memcpy( &_body._sequence , fromRaw + currentPtr  , sizeof(_body._sequence) ); currentPtr += sizeof(_body._sequence);
+
+	return currentPtr;
+}
 
 
 /*

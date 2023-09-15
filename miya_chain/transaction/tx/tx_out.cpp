@@ -41,6 +41,23 @@ void TxOut::pubKeyHash( std::shared_ptr<unsigned char> pubKeyHash )
 
 
 
+int TxOut::importRaw( unsigned char *fromRaw )
+{
+	unsigned int currentPtr = 0;
+
+	memcpy( &(_body._value) , fromRaw , sizeof(_body._value) ); currentPtr += sizeof(_body._value); // valueの書き出し
+	memcpy( &(_body._pkScriptBytes), fromRaw + currentPtr , sizeof(_body._pkScriptBytes) ); currentPtr += sizeof(_body._pkScriptBytes); // pkScriptBytesの書き出し
+
+
+	// lockingScriptの書き出し
+	_body._pkScript = std::make_shared<PkScript>();
+	currentPtr += _body._pkScript->importRaw( fromRaw + currentPtr, static_cast<unsigned int>(_body._pkScriptBytes) );
+
+	return currentPtr;
+}
+
+
+
 /*
 unsigned int TxOut::exportRaw( unsigned char **ret )
 {
