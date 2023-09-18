@@ -77,7 +77,6 @@ unsigned short SignatureScript::exportRawWithSignatureScript( std::shared_ptr<un
 
 	if( _pkey == nullptr ) return 0;
 
-
 	unsigned int rawPubKeyLength; std::shared_ptr<unsigned char> rawPueKey;
 	rawPubKeyLength = cipher::ECDSAManager::toRawPubKey( _pkey , &rawPueKey ); // 生の公開鍵を書き出す
 	

@@ -39,40 +39,21 @@ int main()
 	ControlInterface interface;
 	std::shared_ptr<tx::P2PKH> loadedP2PKH = interface.createTxFromJsonFile("../control_interface/tx_origin/payment_tx_info_0000.json");
 
-	for( auto itr : loadedP2PKH->ins() )
+	for( auto itr : loadedP2PKH->ins() ) // 入力に対する秘密鍵の設定
 		itr->pkey( ecdsaManager.myPkey() );
-
-	for( auto itr : loadedP2PKH->ins() )
-	{
-		std::cout << "------------------------------------" << "\n";
-		std::shared_ptr<unsigned char> rawPrevOut; unsigned int rawPrevOutLength;
-		rawPrevOutLength = itr->prevOut()->exportRaw( &rawPrevOut );
-		for( int i=0; i<rawPrevOutLength; i++)
-		{
-			printf("%02X", rawPrevOut.get()[i]);
-		} std::cout << "\n";
-
-
-		std::shared_ptr<unsigned char> rawTxIn; unsigned int rawTxInLength;
-		rawTxInLength = itr->exportRawWithPubKeyHash(&rawTxIn);
-		for( int i=0; i<rawTxInLength; i++)
-		{
-			printf("%02X", rawTxIn.get()[i]);
-		} std::cout << "\n";
-		std::cout << "------------------------------------" << "\n";
-	}
 
 
 
 	loadedP2PKH->sign();
 
+	std::shared_ptr<unsigned char> rawTx; unsigned int rawTxLength;
+	rawTxLength = loadedP2PKH->exportRaw( &rawTx );
 
-	for( auto itr : loadedP2PKH->ins() )
+	std::cout << rawTxLength << "\n";
+	for( int i=0 ;i<rawTxLength ; i++)
 	{
-		std::cout << itr->isSigned() << "\n";
-	}
-
-
+		printf("%02X", rawTx.get()[i]);
+	} std::cout << "\n";
 
 	return 0;
 

@@ -52,7 +52,8 @@ public:
 
 class SignatureScript // unLockingScript // 秘密鍵を持っていることの証明
 {
-private:
+//private:
+public:
 	int _scriptType; // pubkeyHash , signature
 	unsigned int _scriptLength; // 実用上は必要ない, 確認用
 
@@ -65,7 +66,7 @@ private:
 	} _signature;
 
 
-public:
+//public:
 	void pkey( EVP_PKEY *pkey );
 	void sign( std::shared_ptr<unsigned char> sign, unsigned int signLength , bool isSigned = false );
 

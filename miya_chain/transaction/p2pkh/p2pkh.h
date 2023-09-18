@@ -46,6 +46,7 @@ private:
 
 
 public:
+	P2PKH();
 
 	std::shared_ptr<unsigned char> txID(); // このトランザクションのtxIDを計算する
 
@@ -60,7 +61,7 @@ public:
 	
 	bool sign(); // 全てのtxに対して署名を行う
 	
-	unsigned int exportRaw( std::shared_ptr<unsigned char> retRaw ); // 書き出しに先駆けて必ず署名を完了させる必要がある
+	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw ); // 書き出しに先駆けて必ず署名を完了させる必要がある
 	unsigned int importRaw( std::shared_ptr<unsigned char> fromRaw , unsigned int fromRawLength );
 
 /*

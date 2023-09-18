@@ -18,6 +18,10 @@ namespace tx{
 
 
 
+P2PKH::P2PKH()
+{
+	memset( &(_body._version), 0x00 , sizeof(_body._version));
+}
 
 unsigned short P2PKH::inCount()
 {
@@ -168,7 +172,7 @@ bool P2PKH::sign()
 		// 書き出したデータをハッシュして,秘密鍵で署名を作成する
 		std::shared_ptr<unsigned char> hashedExportedRaw; unsigned int hashedExportedRawLength = 0;
 		std::shared_ptr<unsigned char> encryptedExportedRaw; unsigned int encryptedExportedRawLength;
-		hashedExportedRawLength = hash::SHAHash( exportedRaw , exportedRawLength , &hashedExportedRaw , "sha1" );
+		// hashedExportedRawLength = hash::SHAHash( exportedRaw , exportedRawLength , &hashedExportedRaw , "sha256" );
 
 		// 署名値を生成する
 		signLength = cipher::ECDSAManager::sign( exportedRaw, exportedRawLength, _body._ins.at(i)->pkey(), &sign );
@@ -185,7 +189,7 @@ bool P2PKH::sign()
 
 
 
-unsigned int P2PKH::exportRaw( std::shared_ptr<unsigned char> retRaw )
+unsigned int P2PKH::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 {
 	// 全てのtx_inの署名が住んでいることを確認する
 	for( auto itr : _body._ins )
@@ -204,7 +208,6 @@ unsigned int P2PKH::exportRaw( std::shared_ptr<unsigned char> retRaw )
 	}
 
 
-
 	for( auto itr : _body._outs )
 	{
 		exportRawLength = itr->exportRaw( &exportRawTx );
@@ -220,25 +223,26 @@ unsigned int P2PKH::exportRaw( std::shared_ptr<unsigned char> retRaw )
 	exportedRawTxOutsLength = formatExportedRawTxVector( exportedRawTxOutVector , &exportedRawTxOuts );
 		 
 	unsigned int retRawLength = 0; unsigned int formatPtr = 0;
-	uint32_t tx_in_count = static_cast<uint32_t>(_body._ins.size());
-	uint32_t tx_out_count = static_cast<uint32_t>(_body._outs.size());
+	uint32_t tx_in_count = htonl(_body._ins.size());
+	uint32_t tx_out_count = htonl(_body._outs.size());
 	retRawLength = sizeof(_body._version) + sizeof(tx_in_count) + exportedRawTxInsLength + sizeof(tx_out_count) + exportedRawTxOutsLength ;
+	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[retRawLength] );
 
 
 	/* [(uint32) version] 書き出し */
-	memcpy( retRaw.get() , &(_body._version) , sizeof(_body._version) ); formatPtr += sizeof(_body._version);
+	memcpy( (*retRaw).get() , &(_body._version) , sizeof(_body._version) ); formatPtr += sizeof(_body._version);
 
 	/* [(uint32) tx_in_count] 書き出し */
-	memcpy( retRaw.get() + formatPtr , &tx_in_count , sizeof(tx_in_count) ); formatPtr += sizeof(tx_in_count);
+	memcpy( (*retRaw).get() + formatPtr , &tx_in_count , sizeof(tx_in_count) ); formatPtr += sizeof(tx_in_count);
 
 	/* [(可変長) tx_ins] 書き出し */
-	memcpy( retRaw.get() + formatPtr , exportedRawTxIns.get() , exportedRawTxInsLength ); formatPtr += exportedRawTxInsLength;
+	memcpy( (*retRaw).get() + formatPtr , exportedRawTxIns.get() , exportedRawTxInsLength ); formatPtr += exportedRawTxInsLength;
 
 	/* [(uint32) tx_out_count] 書き出し */
-	memcpy( retRaw.get() + formatPtr , &tx_out_count , sizeof(tx_out_count) ); formatPtr += sizeof(tx_out_count);
+	memcpy( (*retRaw).get() + formatPtr , &tx_out_count , sizeof(tx_out_count) ); formatPtr += sizeof(tx_out_count);
 
 	/* [(可変長) tx_outs] 書き出し */
-	memcpy( retRaw.get() + formatPtr , exportedRawTxOuts.get() , exportedRawTxOutsLength ); formatPtr += exportedRawTxOutsLength;
+	memcpy( (*retRaw).get() + formatPtr , exportedRawTxOuts.get() , exportedRawTxOutsLength ); formatPtr += exportedRawTxOutsLength;
 
 	return formatPtr;
 }
