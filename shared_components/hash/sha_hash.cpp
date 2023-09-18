@@ -44,13 +44,13 @@ unsigned char* SHAHash( unsigned char* HashMessage, size_t HashMessageSize , cha
 
 
 
-unsigned int SHAHash( std::shared_ptr<unsigned char> targetMSG , size_t targetMSGLength, std::shared_ptr<unsigned char> ret ,char* SHAtype )
+unsigned int SHAHash( std::shared_ptr<unsigned char> targetMSG , size_t targetMSGLength, std::shared_ptr<unsigned char> *ret ,char* SHAtype )
 {
 	const EVP_MD *md; // MessageDigest
 	size_t HashSize;
 	unsigned int retLength;
 	//unsigned char* Ret;
-
+	
 	EVP_MD_CTX *mdctx = EVP_MD_CTX_create(); // MessageDigest Context の新規作成と初期化 下コメントを簡略化した処理
 	/*
 	EVP_MD_CTX *mdctx; // MessageDigest Context
@@ -64,14 +64,14 @@ unsigned int SHAHash( std::shared_ptr<unsigned char> targetMSG , size_t targetMS
 	//cout << DIGEST_NAME_SHA512 << "\n";
 	
 	//Ret = (unsigned char *)malloc( EVP_MD_size(md) );
-	ret = std::make_shared<unsigned char>( EVP_MD_size(md) );
+	*ret = std::shared_ptr<unsigned char>( new unsigned char[EVP_MD_size(md)] );
 
 
 	EVP_DigestInit_ex( mdctx, md, NULL ); // 第3引数は暗号エンジン
 																						
 	EVP_DigestUpdate( mdctx, targetMSG.get(), targetMSGLength );
 
-	EVP_DigestFinal_ex( mdctx, ret.get() , (unsigned int *)&retLength );
+	EVP_DigestFinal_ex( mdctx, (*ret).get() , (unsigned int *)&retLength );
 
 
 	// 非推奨 EVP_DigestFinalで自動的に削除される

@@ -12,13 +12,14 @@ namespace tx{
 
 PrevOut::PrevOut()
 {
-	_body._txID = std::make_shared<unsigned char>(256/8);
+	//_body._txID = std::make_shared<unsigned char>(256/8);
+	_body._txID = std::shared_ptr<unsigned char>( new unsigned char[32] );
 }
 
 
 PrevOut::PrevOut( std::shared_ptr<unsigned char> fromRaw )
 {
-	_body._txID = std::make_shared<unsigned char>(256/8);
+	_body._txID = std::shared_ptr<unsigned char>( new unsigned char[32] );
 	this->importRaw( fromRaw );
 }
 
@@ -30,19 +31,35 @@ std::shared_ptr<unsigned char> PrevOut::txID()
 	return _body._txID;
 }
 
-unsigned short PrevOut::index()
+void PrevOut::txID( std::shared_ptr<unsigned char> target )
 {
-	return static_cast<unsigned short>(_body._index);
+	_body._txID = target;
 }
 
 
-unsigned int PrevOut::exportRaw( std::shared_ptr<unsigned char> retRaw )
+void PrevOut::txID( const unsigned char *target )
 {
-	retRaw = std::make_shared<unsigned char>( sizeof(_body) );
-	memcpy( retRaw.get() , &_body , sizeof(_body) );
+	std::copy( target , target + 32 , _body._txID.get() );
+}
 
-	return sizeof(_body);
-	
+unsigned short PrevOut::index()
+{
+	return static_cast<unsigned short>(ntohl(_body._index));
+}
+
+void PrevOut::index( int target )
+{
+	_body._index = htonl(target);
+}
+
+
+unsigned int PrevOut::exportRaw( std::shared_ptr<unsigned char> *retRaw )
+{
+	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[ 32 + sizeof(_body._index)] ); // あとで修正する
+	memcpy( (*retRaw).get() , _body._txID.get() , 32 );
+	memcpy( (*retRaw).get() + 32, &(_body._index) , sizeof(_body._index) );
+
+	return 32 + sizeof(_body._index);
 }
 
 
@@ -64,7 +81,7 @@ int PrevOut::importRaw( std::shared_ptr<unsigned char> fromRaw )
 int PrevOut::importRaw( unsigned char* fromRaw )
 {
 	if( _body._txID == nullptr ) return -1;
-	_body._txID = std::make_shared<unsigned char>(*fromRaw);
+	// _body._txID = std::make_shared<unsigned char>(*fromRaw);
 	memcpy( &_body._index, fromRaw + (256/8) , sizeof(_body._index) );
 
 	return ( (256/8) + sizeof(_body._index) ); // 流石に雑すぎる?
@@ -72,6 +89,17 @@ int PrevOut::importRaw( unsigned char* fromRaw )
 
 
 
+
+
+
+
+
+
+TxIn::TxIn()
+{
+	_body._prevOut = std::shared_ptr<PrevOut>( new PrevOut );
+	_body._signatureScript = std::shared_ptr<SignatureScript>( new SignatureScript );
+}
 
 
 
@@ -95,12 +123,25 @@ std::shared_ptr<PrevOut> TxIn::prevOut()
 }
 
 
+unsigned int TxIn::scriptBytes()
+{
+	return ntohl(_body._script_bytes);
+}
+
+
+void TxIn::scriptBytes( unsigned int bytes )
+{
+	_body._script_bytes = htonl(bytes);
+}
+
+
+
+
 // トランザクション全体署名用に空で書き出すメソッド
-unsigned int TxIn::exportRawWithEmpty( std::shared_ptr<unsigned char> retRaw )
+unsigned int TxIn::exportRawWithEmpty( std::shared_ptr<unsigned char> *retRaw )
 {
 
-				
-	retRaw = std::make_shared<unsigned char>( sizeof( struct PrevOut ) + sizeof( _body._sequence) );
+
 	/*
 	  空で書き出す際に必要な要素は⭐️のみ
 		⭐️std::shared_ptr<PrevOut> _prevOut;
@@ -110,10 +151,13 @@ unsigned int TxIn::exportRawWithEmpty( std::shared_ptr<unsigned char> retRaw )
 	 */
 	unsigned int formatPtr = 0;
 	std::shared_ptr<unsigned char> rawPrevOut; unsigned int rawPrevOutSize;
-	rawPrevOutSize = _body._prevOut->exportRaw( rawPrevOut );
+	rawPrevOutSize = _body._prevOut->exportRaw( &rawPrevOut );
 
-	memcpy( retRaw.get() , rawPrevOut.get() , rawPrevOutSize ); formatPtr+= rawPrevOutSize;
-	memcpy( retRaw.get() + formatPtr , &(_body._sequence) , sizeof(_body._sequence) );  formatPtr += sizeof(_body._sequence);
+
+	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[ rawPrevOutSize+ sizeof( _body._sequence)] );
+
+	memcpy( (*retRaw).get() , rawPrevOut.get() , rawPrevOutSize ); formatPtr+= rawPrevOutSize;
+	memcpy( (*retRaw).get() + formatPtr , &(_body._sequence) , sizeof(_body._sequence) );  formatPtr += sizeof(_body._sequence);
 
 	rawPrevOut.reset(); // 一応削除しておく
 	return formatPtr;
@@ -123,7 +167,7 @@ unsigned int TxIn::exportRawWithEmpty( std::shared_ptr<unsigned char> retRaw )
 
 
 
-unsigned int TxIn::exportRawWithPubKeyHash( std::shared_ptr<unsigned char> retRaw )
+unsigned int TxIn::exportRawWithPubKeyHash( std::shared_ptr<unsigned char> *retRaw )
 {
 	if( _pkey == nullptr ) return 0;
 
@@ -134,31 +178,34 @@ unsigned int TxIn::exportRawWithPubKeyHash( std::shared_ptr<unsigned char> retRa
 
 	// PrevOutの書き出し
 	std::shared_ptr<unsigned char> rawPrevOut; unsigned int rawPrevOutSize;
-	rawPrevOutSize = _body._prevOut->exportRaw( rawPrevOut );
+	rawPrevOutSize = _body._prevOut->exportRaw( &rawPrevOut );
 
-	/* 公開鍵ハッシュの書き出し */
+	/* 自身の公開鍵ハッシュの書き出し */
 	std::shared_ptr<unsigned char> exportedPubKeyHash; unsigned int exportedPubKeyHashLength = 0;
-	exportedPubKeyHashLength = _body._signatureScript->exportRawWithPubKeyHash( exportedPubKeyHash );
-	_body._script_bytes = exportedPubKeyHashLength; // スクリプト長のセット
+	exportedPubKeyHashLength = _body._signatureScript->exportRawWithPubKeyHash( &exportedPubKeyHash );
 
 
+	//_body._script_bytes = htonl(exportedPubKeyHashLength); // スクリプト長のセット
+	this->scriptBytes(exportedPubKeyHashLength);
 
-	retRaw = std::make_shared<unsigned char>( sizeof(struct PrevOut) + sizeof(_body._sequence) + sizeof(_body._script_bytes) + _body._script_bytes );
-	memcpy( retRaw.get() , rawPrevOut.get() , rawPrevOutSize ); formatPtr+= rawPrevOutSize;
-	memcpy( retRaw.get() + formatPtr , &(_body._script_bytes) , sizeof(_body._script_bytes) ); formatPtr+= sizeof(_body._script_bytes);
-	memcpy( retRaw.get() + formatPtr , exportedPubKeyHash.get() , exportedPubKeyHashLength ); formatPtr+= exportedPubKeyHashLength;
-	memcpy( retRaw.get() + formatPtr , &(_body._sequence) , sizeof(_body._sequence) );  formatPtr += sizeof(_body._sequence);
 
-	rawPrevOut.reset();
-	exportedPubKeyHash.reset(); // 念の為解放しておく
-	
+	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[sizeof(struct PrevOut) + sizeof(_body._sequence) + sizeof(_body._script_bytes) + _body._script_bytes] );
+	memcpy( (*retRaw).get() , rawPrevOut.get() , rawPrevOutSize ); formatPtr+= rawPrevOutSize;
+	memcpy( (*retRaw).get() + formatPtr , &(_body._script_bytes) , sizeof(_body._script_bytes) ); formatPtr+= sizeof(_body._script_bytes);
+	memcpy( (*retRaw).get() + formatPtr , exportedPubKeyHash.get() , exportedPubKeyHashLength ); formatPtr+= exportedPubKeyHashLength;
+	memcpy( (*retRaw).get() + formatPtr , &(_body._sequence) , sizeof(_body._sequence) );  formatPtr += sizeof(_body._sequence);
+
+
+	//rawPrevOut.reset();
+	//exportedPubKeyHash.reset(); // 念の為解放しておく
+
 	return formatPtr;
 }
 
 
 
 
-unsigned int TxIn::exportRawWithSignatureScript( std::shared_ptr<unsigned char> retRaw )
+unsigned int TxIn::exportRawWithSignatureScript( std::shared_ptr<unsigned char> *retRaw )
 {
 	if( !(isSigned()) ) return 0; // 正式な署名が行われていなければリターン
 
@@ -166,23 +213,22 @@ unsigned int TxIn::exportRawWithSignatureScript( std::shared_ptr<unsigned char> 
 
 	// PrevOutの書き出し
 	std::shared_ptr<unsigned char> rawPrevOut; unsigned int rawPrevOutSize;
-	rawPrevOutSize = _body._prevOut->exportRaw( rawPrevOut );
+	rawPrevOutSize = _body._prevOut->exportRaw( &rawPrevOut );
 
 	/* 署名スクリプトの書き出し */
 	std::shared_ptr<unsigned char> exportedSignatureScript; unsigned int exportedSignatureScriptLength = 0;
-	exportedSignatureScriptLength = _body._signatureScript->exportRawWithSignatureScript( exportedSignatureScript );
+	exportedSignatureScriptLength = _body._signatureScript->exportRawWithSignatureScript( &exportedSignatureScript );
 	_body._script_bytes = exportedSignatureScriptLength; // スクリプト長のセット
 
 
-	retRaw = std::make_shared<unsigned char>( sizeof(struct PrevOut) + sizeof(_body._sequence) + sizeof(_body._script_bytes) + _body._script_bytes );
-	memcpy( retRaw.get() , rawPrevOut.get() , rawPrevOutSize ); formatPtr+= rawPrevOutSize;
-	memcpy( retRaw.get() + formatPtr , &(_body._script_bytes) , sizeof(_body._script_bytes) ); formatPtr+= sizeof(_body._script_bytes);
-	memcpy( retRaw.get() + formatPtr , exportedSignatureScript.get() , exportedSignatureScriptLength ); formatPtr+= exportedSignatureScriptLength;
-	memcpy( retRaw.get() + formatPtr , &(_body._sequence) , sizeof(_body._sequence) );  formatPtr += sizeof(_body._sequence);
+	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[sizeof(struct PrevOut) + sizeof(_body._sequence) + sizeof(_body._script_bytes) + _body._script_bytes] );
+	memcpy( (*retRaw).get() , rawPrevOut.get() , rawPrevOutSize ); formatPtr+= rawPrevOutSize;
+	memcpy( (*retRaw).get() + formatPtr , &(_body._script_bytes) , sizeof(_body._script_bytes) ); formatPtr+= sizeof(_body._script_bytes);
+	memcpy( (*retRaw).get() + formatPtr , exportedSignatureScript.get() , exportedSignatureScriptLength ); formatPtr+= exportedSignatureScriptLength;
+	memcpy( (*retRaw).get() + formatPtr , &(_body._sequence) , sizeof(_body._sequence) );  formatPtr += sizeof(_body._sequence);
 
 	rawPrevOut.reset();
 	exportedSignatureScript.reset(); // 念の為解放しておく
-
 
 	return formatPtr;
 }
@@ -253,22 +299,26 @@ int TxIn::importRaw( unsigned char *fromRaw ) // ポインタの先頭が揃っ�
 void from_json( const json &from , TxIn &to )
 {
 
+	std::string sUTXOTxID = from["utxo_tx_id"].get<std::string>();
+
+	//std::string sUTXOTxID = "e7a4cf8a4a6f5b12c087adfc4d0be4a8108b5c13c6a4c856ab2aecd6e9731f2d";
 
 
+	std::vector<unsigned char> hexBinaryVector;
+	for( size_t i = 0; i<64; i+=2 ) // あとで修正
+	{
+		std::string subString = sUTXOTxID.substr(i,2);
+		unsigned char byte = static_cast<unsigned char>(std::stoul(subString,nullptr,16));
+		hexBinaryVector.push_back(byte);
+	}
 
 
-	to._body._value = htonll(static_cast<int64_t>(from["value"])); // ビックエディアンに変換する
+	unsigned char *hexBinary = new unsigned char[hexBinaryVector.size()];
+	std::copy( hexBinaryVector.begin() , hexBinaryVector.end(), hexBinary );
+	to.prevOut()->txID(reinterpret_cast<const unsigned char*>(hexBinary));
 
-	//to._pubKeyHash = from["address"];
-	std::string sAddress = from["address"].get<std::string>();
-	const unsigned char *ccAddress = reinterpret_cast<const unsigned char*>(sAddress.c_str());
 
-	//to._pubKeyHash = std::make_shared<unsigned char>(20);
-	to._pubKeyHash = std::shared_ptr<unsigned char>(new unsigned char[20] , [](unsigned char *ptr){
-			delete[] ptr;
-			});
-	std::copy( ccAddress, ccAddress + 20 , to._pubKeyHash.get() );
-
+	to.prevOut()->index( static_cast<int>(from["index"]) );
 
 }
 
@@ -278,7 +328,7 @@ void from_json( const json &from , TxIn &to )
 PrevOut::PrevOut(){
 
 
-	// dummy 
+	// dummy
 	const char* id = "aaaaaaaaaabbbbbbbbbb";
 	_txID = (unsigned char *)id;
 	_index = htonl( 10 );
@@ -288,7 +338,7 @@ PrevOut::PrevOut(){
 
 
 unsigned int PrevOut::exportRaw( unsigned char **ret )
-{	
+{
 
 	unsigned int pos = 0;
 	*ret = new unsigned char[ exportRawSize() ];
@@ -329,7 +379,7 @@ unsigned int PrevOut::exportRawSize()
 
 
 TxIn::TxIn() : _sig(nullptr) , _sigSize(0)
-{ 
+{
 	memset( &_sequence , 0xff , sizeof(_sequence) );
 	//_signatureScript = NULL;
 
@@ -344,10 +394,10 @@ TxIn::TxIn() : _sig(nullptr) , _sigSize(0)
 
 unsigned char* TxIn::sig()
 {
-	return _sig;	
+	return _sig;
 }
-											
-										
+
+
 void TxIn::sig( unsigned char *sig )
 {
 	_sig = sig;
@@ -387,7 +437,7 @@ unsigned int TxIn::autoTakeInSignatureScript( unsigned char* from )
 
 	pos += sizeof(_sequence); // あとでちゃんと書き直す
 
-	
+
 	 //ここで取り出す？
 
 	_pkey = _signatureScript->pubKey();
@@ -486,22 +536,22 @@ unsigned int TxIn::exportRaw( unsigned char **ret )
 	*ret = new unsigned char[ exportRawSize() ];
 
 
-	 //= PrevOut の書き出し ================================================== 
+	 //= PrevOut の書き出し ==================================================
 	unsigned char* prevOutBuff = NULL; unsigned int prevOutBuffSize = 0;
 
-	// dummyで仮置き	
-	_prevOut = new PrevOut; 
-														
+	// dummyで仮置き
+	_prevOut = new PrevOut;
+
 	prevOutBuffSize = _prevOut->exportRaw( &prevOutBuff );
-	// =====================================================================  
+	// =====================================================================
 
 
-	 = SignatureScript の書き出し ================================================== 
+	 = SignatureScript の書き出し ==================================================
 	unsigned char *signatureScriptBuff = NULL; unsigned int signatureScriptBuffSize = 0;
 	signatureScriptBuffSize =  _signatureScript->exportRaw( &signatureScriptBuff );
 	_script_bytes = htonl( signatureScriptBuffSize ); // スクリプトサイズのセット
-	 =====================================================================  
-	
+	 =====================================================================
+
 
 	unsigned int pos = 0;
 	memcpy( *ret , prevOutBuff , prevOutBuffSize );  pos += prevOutBuffSize;

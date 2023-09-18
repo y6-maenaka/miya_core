@@ -58,7 +58,6 @@ unsigned int PkScript::exportRawWithP2PKHPkScript( std::shared_ptr<unsigned char
 {
 	if( pubKeyHash == nullptr ) return 0;
 
-	std::cout << "( check 0 )" << "\n";
 
 	OP_CODES pushOPCODE;
 

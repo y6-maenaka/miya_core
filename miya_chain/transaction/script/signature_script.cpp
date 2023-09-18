@@ -53,27 +53,25 @@ unsigned int SignatureScript::importRaw( unsigned char* fromRaw , unsigned int f
 }
 
 
-unsigned short SignatureScript::exportRawWithPubKeyHash( std::shared_ptr<unsigned char> ret )
+unsigned short SignatureScript::exportRawWithPubKeyHash( std::shared_ptr<unsigned char> *ret )
 {
 	if( _pkey == nullptr ) return 0;
 
 	unsigned int rawPubKeyLength; std::shared_ptr<unsigned char> rawPueKey;
-	rawPubKeyLength = cipher::ECDSAManager::toRawPubKey( _pkey , rawPueKey ); // 生の公開鍵を書き出す
-	
+	rawPubKeyLength = cipher::ECDSAManager::toRawPubKey( _pkey , &rawPueKey ); // 生の公開鍵を書き出す
+
 	unsigned int rawPubKeyHashLength; std::shared_ptr<unsigned char> rawPubKeyHash;
-	rawPubKeyHashLength = hash::SHAHash( rawPueKey, rawPubKeyLength , rawPubKeyHash , "sha1" ); // 160bitsでダイジェスト変換
+	rawPubKeyHashLength = hash::SHAHash( rawPueKey, rawPubKeyLength , &rawPubKeyHash , "sha1" ); // 160bitsでダイジェスト変換
 
-	memcpy( ret.get() , rawPubKeyHash.get() , rawPubKeyLength );
-
-	rawPueKey.reset();
-	rawPubKeyHash.reset();
+	*ret = std::shared_ptr<unsigned char>( new unsigned char[rawPubKeyHashLength] );
+	memcpy( (*ret).get() , rawPubKeyHash.get() , rawPubKeyHashLength );
 
 	return rawPubKeyHashLength;
 }
 
 
 
-unsigned short SignatureScript::exportRawWithSignatureScript( std::shared_ptr<unsigned char> ret )
+unsigned short SignatureScript::exportRawWithSignatureScript( std::shared_ptr<unsigned char> *ret )
 {
 	// 書き出す署名スクリプトは sign + 公開鍵
 
@@ -81,13 +79,13 @@ unsigned short SignatureScript::exportRawWithSignatureScript( std::shared_ptr<un
 
 
 	unsigned int rawPubKeyLength; std::shared_ptr<unsigned char> rawPueKey;
-	rawPubKeyLength = cipher::ECDSAManager::toRawPubKey( _pkey , rawPueKey ); // 生の公開鍵を書き出す
+	rawPubKeyLength = cipher::ECDSAManager::toRawPubKey( _pkey , &rawPueKey ); // 生の公開鍵を書き出す
 	
-	ret = std::make_shared<unsigned char>( _signature._signLength + rawPubKeyLength );  
+	*ret = std::shared_ptr<unsigned char>( new unsigned char[_signature._signLength + rawPubKeyLength] );  
 
 	unsigned int formatPtr = 0;
-	memcpy( ret.get(), _signature._sign.get() , _signature._signLength ); formatPtr += _signature._signLength;
-	memcpy( ret.get() + formatPtr , rawPueKey.get() , rawPubKeyLength ); formatPtr += rawPubKeyLength;
+	memcpy( (*ret).get(), _signature._sign.get() , _signature._signLength ); formatPtr += _signature._signLength;
+	memcpy( (*ret).get() + formatPtr , rawPueKey.get() , rawPubKeyLength ); formatPtr += rawPubKeyLength;
 
 	return formatPtr;
 }

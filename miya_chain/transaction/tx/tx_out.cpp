@@ -20,34 +20,22 @@ unsigned short TxOut::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 		retRaw = nullptr; return 0;
 	}
 
-	std::cout << "check point 0" << "\n";
 // 先ず,pkScriptを書き出す バイト長などを格納しなければならない為
 	std::shared_ptr<unsigned char> exportedRawPkScript; unsigned int exportedRawPkScriptLength = 0;
-	std::cout << "check point 0-1" << "\n";
 
 	exportedRawPkScriptLength = _body._pkScript->exportRawWithP2PKHPkScript( &exportedRawPkScript , _pubKeyHash );
-	std::cout << "check point 0-2" << "\n";
 	_body._pkScriptBytes = htonll(static_cast<uint64_t>(exportedRawPkScriptLength)); // 書き出しと同時に代入は怖いので
 	//_body._pkScriptBytes = (exportedRawPkScriptLength); // 書き出しと同時に代入は怖いので
-
-	std::cout << "check point 1" << "\n";
-
-	std::cout << pkScriptBytes() << "\n";
 
 	*retRaw = std::shared_ptr<unsigned char>( new unsigned char [sizeof(_body._value) + sizeof(_body._pkScriptBytes) + pkScriptBytes()] );
 
 	unsigned int formatPtr = 0;
 
-	std::cout << "check	point 2" << "\n";
 	memcpy( (*retRaw).get() , &(_body._value), sizeof(_body._value) ); formatPtr+= sizeof(_body._value); // valueの書き出し
 
-	std::cout << "check	point 3" << "\n";
 	memcpy( (*retRaw).get() + formatPtr , &(_body._pkScriptBytes) , sizeof(_body._pkScriptBytes) ); formatPtr+= sizeof(_body._pkScriptBytes); // _pkScriptBytesの書き出し
-	std::cout << "check	point 4" << "\n";
 
-	std::cout << formatPtr << "\n";
 	memcpy( (*retRaw).get() + formatPtr , exportedRawPkScript.get() , pkScriptBytes() ); formatPtr+= pkScriptBytes();
-	std::cout << "check	point 5" << "\n";
 
 	exportedRawPkScript.reset(); // 一応解放しておく
 	return formatPtr;

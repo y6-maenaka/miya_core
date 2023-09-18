@@ -14,7 +14,7 @@ namespace hash{
 
 unsigned char* SHAHash( unsigned char* HashMessage , size_t HashMessageSize, char* SHAtype );
 //std::shared_ptr<unsigned char> SHAHash( std::shared_ptr<unsigned char> target , size_t targetLength, char* SHAtype );
-unsigned int SHAHash( std::shared_ptr<unsigned char> targetMSG , size_t targetMSGLength, std::shared_ptr<unsigned char> ret ,char* SHAtype );
+unsigned int SHAHash( std::shared_ptr<unsigned char> targetMSG , size_t targetMSGLength, std::shared_ptr<unsigned char> *ret ,char* SHAtype );
 
 
 void FreeDigest( void *target );

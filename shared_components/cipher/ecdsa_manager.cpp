@@ -318,12 +318,16 @@ int ECDSAManager::toRawPubKey( unsigned char **ret , EVP_PKEY* pkey )
 
 
 
-unsigned int ECDSAManager::toRawPubKey( EVP_PKEY *pkey , std::shared_ptr<unsigned char> ret )
+unsigned int ECDSAManager::toRawPubKey( EVP_PKEY *pkey , std::shared_ptr<unsigned char> *ret )
 {
-	unsigned char *output; unsigned int outputLength;
-	outputLength = i2d_PUBKEY( pkey , &output );
+	unsigned char *output = nullptr; unsigned int outputLength;
+	outputLength = i2d_PUBKEY( pkey ,  &output );
+	//outputLength = i2d_PUBKEY( pkey , &output );
 
-	ret = std::make_shared<unsigned char>( *output );
+	// *ret = std::make_shared<unsigned char>( *output );
+	*ret = std::shared_ptr<unsigned char>( output , [](unsigned char* ptr){
+		if( ptr ) OPENSSL_free(ptr);
+	});
 
 	return outputLength;
 }
@@ -382,14 +386,14 @@ int ECDSAManager::Sign( unsigned char *target, size_t targetLen , unsigned char*
 
 
 
-unsigned int ECDSAManager::sign( std::shared_ptr<unsigned char> target , unsigned int targetLength, EVP_PKEY *pkey , std::shared_ptr<unsigned char> retSign )
+unsigned int ECDSAManager::sign( std::shared_ptr<unsigned char> target , unsigned int targetLength, EVP_PKEY *pkey , std::shared_ptr<unsigned char> *retSign )
 {
 
 	size_t sigLen;
 
 	// 対象をハッシュ化する
 	std::shared_ptr<unsigned char> targetDigest; unsigned int targetDigestLength = 0;
-	targetDigestLength = hash::SHAHash( target , targetLength , targetDigest , "sha256" );
+	targetDigestLength = hash::SHAHash( target , targetLength , &targetDigest , "sha256" );
 	if( targetDigestLength <= 0 || targetDigest == nullptr ) return 0;
 
 	EVP_PKEY_CTX *sctx = NULL;
@@ -398,7 +402,7 @@ unsigned int ECDSAManager::sign( std::shared_ptr<unsigned char> target , unsigne
 	EVP_PKEY_sign_init( sctx );
 	EVP_PKEY_sign( sctx , NULL , &sigLen , targetDigest.get() , targetDigestLength ); // 署名値のサイズを取得する
 
-	retSign = std::make_shared<unsigned char>(sigLen); memset( retSign.get() , 0x00 , sigLen );
+	*retSign = std::shared_ptr<unsigned char>( new unsigned char[sigLen] ); memset( (*retSign).get() , 0x00 , sigLen );
 
 	if( retSign == nullptr )
 	{
@@ -406,7 +410,7 @@ unsigned int ECDSAManager::sign( std::shared_ptr<unsigned char> target , unsigne
 		return 0;
 	}
 
-	EVP_PKEY_sign( sctx , retSign.get() , &sigLen , targetDigest.get() , targetDigestLength );
+	EVP_PKEY_sign( sctx , (*retSign).get() , &sigLen , targetDigest.get() , targetDigestLength );
 
 	EVP_PKEY_CTX_free( sctx );
 
@@ -446,6 +450,26 @@ bool ECDSAManager::Verify( unsigned char *sig, size_t sigLen , unsigned char *ta
 
 		return false;
 }
+
+
+/*
+bool ECDSAManager::writePkey( const char *path , EVP_PKEY *pkey )
+{
+	FILE *writeTargetFP = fopen( path , pkey );
+	if( !writeTargetFP ) return false;
+
+
+}
+
+
+
+EVP_PKEY* ECDSAManager::readPkey( const char *path )
+{
+
+}
+*/
+
+
 																														
 																														
 }; // close cipher namespace

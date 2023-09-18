@@ -19,8 +19,14 @@
 #include "../../control_interface/control_interface.h"
 
 
-int main(){
+int main()
+{
 	std::cout << " WELCOME TO MIYA COIN CLIENT [ MIYA_CORE ] " << "\n";
+
+
+	cipher::ECDSAManager ecdsaManager;
+	ecdsaManager.init( (unsigned char *)"hello", 5 );
+	ecdsaManager.printPkey( ecdsaManager.myPkey() );
 
 
 	/*
@@ -31,10 +37,44 @@ int main(){
 
 
 	ControlInterface interface;
-	interface.createTxFromJsonFile("../control_interface/tx_origin/payment_tx_info_0000.json");
+	std::shared_ptr<tx::P2PKH> loadedP2PKH = interface.createTxFromJsonFile("../control_interface/tx_origin/payment_tx_info_0000.json");
+
+	for( auto itr : loadedP2PKH->ins() )
+		itr->pkey( ecdsaManager.myPkey() );
+
+	for( auto itr : loadedP2PKH->ins() )
+	{
+		std::cout << "------------------------------------" << "\n";
+		std::shared_ptr<unsigned char> rawPrevOut; unsigned int rawPrevOutLength;
+		rawPrevOutLength = itr->prevOut()->exportRaw( &rawPrevOut );
+		for( int i=0; i<rawPrevOutLength; i++)
+		{
+			printf("%02X", rawPrevOut.get()[i]);
+		} std::cout << "\n";
+
+
+		std::shared_ptr<unsigned char> rawTxIn; unsigned int rawTxInLength;
+		rawTxInLength = itr->exportRawWithPubKeyHash(&rawTxIn);
+		for( int i=0; i<rawTxInLength; i++)
+		{
+			printf("%02X", rawTxIn.get()[i]);
+		} std::cout << "\n";
+		std::cout << "------------------------------------" << "\n";
+	}
+
+
+
+	loadedP2PKH->sign();
+
+
+	for( auto itr : loadedP2PKH->ins() )
+	{
+		std::cout << itr->isSigned() << "\n";
+	}
+
+
 
 	return 0;
-
 
 	auto p2pManager = std::make_shared<ekp2p::EKP2P>();
 	std::thread p2pManagerTH([p2pManager](){

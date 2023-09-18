@@ -57,19 +57,18 @@ public:
 
 	static void printPkey( EVP_PKEY *pkey );
 	static int toRawPubKey( unsigned char **ret , EVP_PKEY* pkey );
-	static unsigned int toRawPubKey( EVP_PKEY *pkey , std::shared_ptr<unsigned char> ret );
+	static unsigned int toRawPubKey( EVP_PKEY *pkey , std::shared_ptr<unsigned char> *ret );
 
 	static EVP_PKEY* toPkey( unsigned char* rawPubKey , unsigned int rawPubKeySize );
 
 
 	static int Sign( unsigned char *target, size_t targetLen , unsigned char** sig, EVP_PKEY* pri_key = ECDSAManager::_myPkey );
-
-	
 	static bool Verify( unsigned char *sig, size_t sigLen , unsigned char *target, size_t targetLen, EVP_PKEY* pub_key = ECDSAManager::_myPkey );
 
+	static unsigned int sign( std::shared_ptr<unsigned char> target , unsigned int targetLength, EVP_PKEY *pkey , std::shared_ptr<unsigned char> *retSign );
 
-	static unsigned int sign( std::shared_ptr<unsigned char> target , unsigned int targetLength, EVP_PKEY *pkey , std::shared_ptr<unsigned char> retSign );
-
+	bool writePkey( const char *path , EVP_PKEY *pkey );
+	EVP_PKEY* readPkey( const char *path );
 };
 
 

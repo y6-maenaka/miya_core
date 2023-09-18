@@ -43,17 +43,13 @@ std::shared_ptr<tx::P2PKH> ControlInterface::createTxFromJsonFile( const char *f
 	for( auto itr : tos )
 	{
 		std::shared_ptr< tx::TxOut > newTxOut = std::make_shared<tx::TxOut>();
-
 		*newTxOut = itr;
-
 		loadedP2PKH.add( newTxOut );
-	
 	}
-	std::cout << "Loaded Successfuly Done TxOut (" << loadedP2PKH.outCount() << ")" << "\n";
+	std::cout << "\033[34m"  << "Loading Successfuly Done TxOut (" << loadedP2PKH.outCount() << ")" << "\033[0m" << "\n";
 
-	
+
 	std::shared_ptr<unsigned char> rawTxOut; unsigned int rawTxOutLength;
-
 
 
 	// 送金元のトランザクション情報作成
@@ -61,11 +57,10 @@ std::shared_ptr<tx::P2PKH> ControlInterface::createTxFromJsonFile( const char *f
 	for( auto itr : froms )
 	{
 		std::shared_ptr<tx::TxIn> newTxIn = std::make_shared<tx::TxIn>();
-
-
-
+		*newTxIn = itr;
+		loadedP2PKH.add( newTxIn );
 	}
+	std::cout  << "\033[34m" << "Loading Successfuly Done TxIn (" << loadedP2PKH.inCount() << ")" << "\033[0m" << "\n";
 
-
-	return nullptr;
+	return std::make_shared<tx::P2PKH>( loadedP2PKH );
 }

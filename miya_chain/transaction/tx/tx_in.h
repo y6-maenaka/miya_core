@@ -7,6 +7,7 @@
 #include <variant>
 #include <string.h>
 #include "openssl/evp.h"
+#include <algorithm>
 
 
 #include "../../../shared_components/json.hpp"
@@ -40,9 +41,12 @@ public:
 	PrevOut( std::shared_ptr<unsigned char> fromRaw );
 
 	std::shared_ptr<unsigned char> txID();
+	void txID( std::shared_ptr<unsigned char> target );
+	void txID( const unsigned char *target );
 	unsigned short index();
+	void index( int target );
 
-	unsigned int exportRaw( std::shared_ptr<unsigned char> retRaw );
+	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );
 	int importRaw( std::shared_ptr<unsigned char> fromRaw );
 	int importRaw( unsigned char* fromRaw );
 	
@@ -62,8 +66,8 @@ private:
 			
 	struct Body// __attribute__((packed))
 	{
-		std::shared_ptr<PrevOut> _prevOut;
-		uint32_t _script_bytes; // unLockingScriptのバイト長
+		std::shared_ptr<PrevOut> _prevOut; // 36 bytes
+		uint32_t _script_bytes; // unLockingScriptのバイト長 // 40
 		std::shared_ptr<SignatureScript> _signatureScript; // unlockingScriptの本体
 		uint32_t _sequence;
 
@@ -72,28 +76,22 @@ private:
 	} _body;
 
 
-	/*
-	struct 
-	{
-		std::shared_ptr<unsigned char> _sign;
-		unsigned int _signLength;
-		bool _isSigned = false;
-
-	}	_tempSign;
-	*/
-	
 
 	EVP_PKEY *_pkey; // 署名と公開鍵セットに使われる
 
 public:
+	TxIn();
 	std::shared_ptr<SignatureScript> signatureScript(){ return _body._signatureScript; }; // テスト用getter 後に削除する
 
 
 	std::shared_ptr<PrevOut> prevOut(); // getter
 
-	unsigned int exportRawWithEmpty( std::shared_ptr<unsigned char> retRaw );
-	unsigned int exportRawWithPubKeyHash( std::shared_ptr<unsigned char> retRaw );
-	unsigned int exportRawWithSignatureScript( std::shared_ptr<unsigned char> retRaw ); // 署名値が格納されたTxInの書き出し
+	unsigned int scriptBytes();
+	void scriptBytes( unsigned int bytes );
+
+	unsigned int exportRawWithEmpty( std::shared_ptr<unsigned char> *retRaw ); // check OK
+	unsigned int exportRawWithPubKeyHash( std::shared_ptr<unsigned char> *retRaw ); // ckeck OK
+	unsigned int exportRawWithSignatureScript( std::shared_ptr<unsigned char> *retRaw ); // 署名値が格納されたTxInの書き出し
 
 	void sign( std::shared_ptr<unsigned char> sign , unsigned int signLength , bool isSigned = false ); // 上位ラッパによって署名値が算出された後に格納する ただのsetter このクラスが自身で署名を行うことはできない
 	bool isSigned();

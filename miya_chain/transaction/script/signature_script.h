@@ -6,6 +6,7 @@
 #include <memory>
 #include <variant>
 #include <iostream>
+#include <unistd.h>
 
 #include "./script.h"
 #include "openssl/evp.h"
@@ -73,8 +74,8 @@ public:
 	// void toP2PKHSignatureScript( std::shared_ptr<unsigned char> sign );
 	unsigned int importRaw( unsigned char* fromRaw , unsigned int fromRawLength );
 	
-	unsigned short exportRawWithPubKeyHash( std::shared_ptr<unsigned char> ret ); // 署名用に公開鍵ハッシュをセットして書き出す
-	unsigned short exportRawWithSignatureScript( std::shared_ptr<unsigned char> ret ); //  署名が格納されたものを書き出す(本命)
+	unsigned short exportRawWithPubKeyHash( std::shared_ptr<unsigned char> *ret ); // 署名用に公開鍵ハッシュをセットして書き出す
+	unsigned short exportRawWithSignatureScript( std::shared_ptr<unsigned char> *ret ); //  署名が格納されたものを書き出す(本命)
 	// unsigned short exportRaw( std::shared_ptr<unsigned char> ret );
 };
 
