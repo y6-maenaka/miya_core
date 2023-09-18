@@ -8,3 +8,5 @@
 
 - opensslで実装しているshaHash,ecdsa関係の関数のメモリリークが怪しい
 
+- ecdsaManagerのsignでsha256でハッシュしていて変更不可 修正する
+

@@ -178,6 +178,8 @@ bool P2PKH::sign()
 		signLength = cipher::ECDSAManager::sign( exportedRaw, exportedRawLength, _body._ins.at(i)->pkey(), &sign );
 
 		_body._ins.at(i)->sign( sign, signLength , true ); // 配下tx_inのsignature_scriptに署名値を格納
+
+		std::cout << "verify result -> " << cipher::ECDSAManager::verify( sign, signLength , exportedRaw, exportedRawLength ,_body._ins.at(i)->pkey(), "sha256" ) << "\n";
 	}
 
 	return true;

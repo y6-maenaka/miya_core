@@ -452,6 +452,33 @@ bool ECDSAManager::Verify( unsigned char *sig, size_t sigLen , unsigned char *ta
 }
 
 
+bool ECDSAManager::verify( std::shared_ptr<unsigned char> sig , size_t sigLength , std::shared_ptr<unsigned char> msg , size_t msgLength , EVP_PKEY *pubKey , char *hashType )
+{
+	std::shared_ptr<unsigned char> md; unsigned int mdLength;
+	mdLength = hash::SHAHash( msg , msgLength , &md , hashType );
+
+	return verify( sig , sigLength , md, mdLength ,pubKey );
+}
+
+
+bool ECDSAManager::verify( std::shared_ptr<unsigned char> sig , size_t sigLength , std::shared_ptr<unsigned char> msgDigest , size_t msgDigestLength , EVP_PKEY *pubKey )
+{
+	EVP_PKEY_CTX *vctx = NULL;
+	vctx = EVP_PKEY_CTX_new( pubKey , NULL );
+
+	if( !msgDigest ) return false;
+
+	EVP_PKEY_verify_init( vctx );
+
+	int ret = EVP_PKEY_verify( vctx , (const unsigned char *)(sig.get()) , sigLength , (unsigned char *)(msgDigest.get()) , msgDigestLength );
+
+	EVP_PKEY_CTX_free( vctx );
+
+	return (ret == 1);
+}
+
+
+
 /*
 bool ECDSAManager::writePkey( const char *path , EVP_PKEY *pkey )
 {

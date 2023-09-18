@@ -189,7 +189,7 @@ unsigned int TxIn::exportRawWithPubKeyHash( std::shared_ptr<unsigned char> *retR
 	this->scriptBytes(exportedPubKeyHashLength);
 
 
-	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[sizeof(struct PrevOut) + sizeof(_body._sequence) + sizeof(_body._script_bytes) + _body._script_bytes] );
+	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[ rawPrevOutSize + sizeof(_body._sequence) + sizeof(_body._script_bytes) + this->scriptBytes() ] );
 	memcpy( (*retRaw).get() , rawPrevOut.get() , rawPrevOutSize ); formatPtr+= rawPrevOutSize;
 	memcpy( (*retRaw).get() + formatPtr , &(_body._script_bytes) , sizeof(_body._script_bytes) ); formatPtr+= sizeof(_body._script_bytes);
 	memcpy( (*retRaw).get() + formatPtr , exportedPubKeyHash.get() , exportedPubKeyHashLength ); formatPtr+= exportedPubKeyHashLength;
