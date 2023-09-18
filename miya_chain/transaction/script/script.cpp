@@ -4,20 +4,39 @@
 namespace tx{
 
 
+// std::visitでOP_CODESからコードを取得するのに必要
+GetRawCode getRawCode; // st::visitの第一引数にはラムダ or 関数オブジェクトの関数型である必要があるため
+
 
 
 void Script::pushBack( OP_CODES opcode , std::shared_ptr<unsigned char> data )
 {
-	_script.push_back( std::make_pair( opcode, data ) );
+	if( std::holds_alternative<OP_DATA>(opcode) )
+		_script.push_back( std::make_pair( opcode, data ) );
+	else
+		_script.push_back( std::make_pair( opcode , nullptr ) );
 }
 
 
 
 
-unsigned int OP_DATALength( OP_CODES opcode )
+unsigned int Script::OP_DATALength( OP_CODES opcode )
+{
+	//unsigned int ret = 0;
+	//ret = static_cast<unsigned short>(std::get<static_cast<int>(OP_CODES_ID::COMMON)>(opcode));
+
+	if( std::holds_alternative<OP_DATA>(opcode) )
+		return static_cast<unsigned int>( std::get<OP_DATA>(opcode)._code);
+
+	//if( ret >= 1 && ret <= 95 ) return ret;
+	return 0;
+}
+
+
+unsigned int Script::OP_DATALength( unsigned char opcode )
 {
 	unsigned int ret = 0;
-	ret = static_cast<unsigned short>(std::get<static_cast<int>(OP_CODES_ID::COMMON)>(opcode));
+	ret = static_cast<unsigned short>(opcode);
 
 	if( ret >= 1 && ret <= 95 ) return ret;
 	return 0;
@@ -25,16 +44,20 @@ unsigned int OP_DATALength( OP_CODES opcode )
 
 
 
+
 unsigned short Script::exportScriptContentSize( OP_CODES opcode )
 {
+	/*
 	if( opcode.index() == static_cast<int>(OP_CODES_ID::OP_DATA) ) // opcodeがOP_DATAだった場合は格納しているデータのバイト長を返却する
-		return static_cast<unsigned short>(std::get<static_cast<int>(OP_CODES_ID::OP_DATA)>(opcode)) + 1;
+		//return static_cast<unsigned short>(std::get<static_cast<int>(OP_CODES_ID::OP_DATA)>(opcode)) + 1;
+		return static_cast<unsigned short>(std::get<OP_DATA>(opcode)._length);
+	*/
+
+	if( std::holds_alternative<OP_DATA>(opcode) )
+		return this->OP_DATALength(opcode) + 1;
 
 	return 1;
 }
-
-
-
 
 
 
@@ -50,20 +73,31 @@ unsigned int Script::exportRawSize()
 }
 
 
-unsigned int Script::exportRaw( std::shared_ptr<unsigned char> retRaw )
+unsigned int Script::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 {
 	if( _script.size() <= 0 ) // OP_CODEが挿入されていない場合はリターン
 	{
 		retRaw = nullptr; return 0;
 	}
 
+
 	unsigned int retRawLength = exportRawSize(); // 全体書き出しサイズの取得
-	retRaw = std::make_shared<unsigned char>( retRawLength );
+	//*retRaw = std::make_shared<unsigned char>( retRawLength );
+	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[retRawLength] );
+
 
 	unsigned int formatPtr = 0;
+	unsigned char temp;
 	for( auto itr : _script )
 	{
-		memcpy( retRaw.get() + formatPtr , (itr.second).get() , exportScriptContentSize(itr.first) ); formatPtr+= exportScriptContentSize(itr.first);
+		temp = std::visit( getRawCode , itr.first );
+		memcpy( (*retRaw).get() + formatPtr ,  &temp , 1 ); formatPtr += 1; 
+
+		if( std::holds_alternative<OP_DATA>(itr.first) ){
+			
+			memcpy( (*retRaw).get() + formatPtr , itr.second.get() , OP_DATALength(itr.first) ); formatPtr += OP_DATALength(itr.first);
+		}
+
 	}
 	
 	return formatPtr;
@@ -73,6 +107,7 @@ unsigned int Script::exportRaw( std::shared_ptr<unsigned char> retRaw )
 
 int Script::importRaw( unsigned char *fromRaw , unsigned int fromRawLength )
 {
+	/*
 	OP_CODES opcode;
 
 	for( int i=0; i<fromRawLength; )
@@ -80,15 +115,19 @@ int Script::importRaw( unsigned char *fromRaw , unsigned int fromRawLength )
 		unsigned char rawOpcode;
 		memcpy( &rawOpcode , fromRaw + i, 1);  i+=1; // OPCODEの取得
 		opcode.emplace<static_cast<int>(OP_CODES_ID::COMMON)>(rawOpcode);
-	
-		if( OP_DATALength(opcode) > 0 ){
-			pushBack( opcode , std::make_shared<unsigned char>(*(fromRaw+i)) ); i+=OP_DATALength(opcode);
+
+
+		 
+
+		if(  OP_DATALength( std::get<static_cast<int>(OP_CODES_ID::COMMON)>(opcode)) > 0 ){
+			pushBack( opcode , std::make_shared<unsigned char>(*(fromRaw+i)) ); i+=OP_DATALength( std::get<static_cast<int>(OP_CODES_ID::COMMON)>(opcode)) ;
 		}
 		else
 			pushBack( opcode, std::make_shared<unsigned char>(rawOpcode) ); // ポインタは進めない
 	}
 
 	return _script.size();
+	*/
 }
 
 /*

@@ -9,6 +9,12 @@ namespace tx{
 
 
 
+PkScript::PkScript()
+{
+	_script = std::make_shared<Script>();
+
+}
+
 
 
 
@@ -48,15 +54,24 @@ unsigned int PkScript::exportRawWithP2PKHScript( std::shared_ptr<unsigned char> 
 
 
 
-unsigned int PkScript::exportRawWithP2PKHPkScript( std::shared_ptr<unsigned char> retRaw , std::shared_ptr<unsigned char> pubKeyHash )
+unsigned int PkScript::exportRawWithP2PKHPkScript( std::shared_ptr<unsigned char> *retRaw , std::shared_ptr<unsigned char> pubKeyHash )
 {
 	if( pubKeyHash == nullptr ) return 0;
 
+	std::cout << "( check 0 )" << "\n";
+
 	OP_CODES pushOPCODE;
 
+	/*
+	std::cout << "( check 1 )" << "\n";
 	// OP_DUPの追加
-	pushOPCODE.emplace<static_cast<int>(OP_CODES_ID::OP_DUP)>(OP_DUP);
-	_script->pushBack( pushOPCODE , std::make_shared<unsigned char>(OP_DUP) );
+	pushOPCODE.emplace<static_cast<int>(OP_CODES_ID::OP_DUP)>(_OP_DUP);
+
+	std::cout << "( check 1-1 )" << "\n";
+
+	_script->pushBack( pushOPCODE , std::make_shared<unsigned char>(_OP_DUP._code) );
+
+	std::cout << "( check 2 )" << "\n";
 
 	// OP_HASH_160の追加
 	pushOPCODE.emplace<static_cast<int>(OP_CODES_ID::OP_HASH_160)>(OP_HASH_160);
@@ -73,6 +88,19 @@ unsigned int PkScript::exportRawWithP2PKHPkScript( std::shared_ptr<unsigned char
 	// OP_CHECKSIGの追加
 	pushOPCODE.emplace<static_cast<int>(OP_CODES_ID::OP_CHECKSIG)>(OP_CHECKSIG);
 	_script->pushBack( pushOPCODE , std::make_shared<unsigned char>(OP_CHECKSIG) );
+	*/
+
+	// OP_DUPの追加
+	_script->pushBack( _OP_DUP );
+	// OP_HASH_160の追加
+	_script->pushBack( _OP_HASH_160 );
+	// OP_DATA(pubkeyHash)の追加
+	OP_DATA _OP_DATA(0x14);
+	_script->pushBack( _OP_DATA , pubKeyHash );
+	//OP_EQUALVERIFYの追加
+	_script->pushBack( _OP_EQUALVERIFY );
+	//OP_CHECKSIGの追加
+	_script->pushBack( _OP_CHECKSIG );
 
 
 	unsigned char retRawLength = _script->exportRaw( retRaw ); // 全体の書き出し

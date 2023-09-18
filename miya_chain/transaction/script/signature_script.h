@@ -3,9 +3,13 @@
 
 
 
+#include <memory>
+#include <variant>
+#include <iostream>
 
 #include "./script.h"
 #include "openssl/evp.h"
+
 
 
 namespace tx{

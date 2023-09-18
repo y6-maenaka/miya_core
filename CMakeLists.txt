@@ -4,8 +4,8 @@ project(MIYA_CORE CXX)
 add_subdirectory( ekp2p )
 add_subdirectory( miya_chain )
 add_subdirectory( miya_db )
-add_subdirectory( shared_components )
 add_subdirectory( control_interface )
+add_subdirectory( shared_components )
 
 
 
@@ -14,13 +14,12 @@ include_directories( ${OPENSSL_INCLUDE_DIRS} )
 
 
 
-
 if( BUILD_CORE )
 add_executable( core_ver_0 ./release/core/ver_0.cpp )
 target_link_libraries( core_ver_0 PRIVATE
+												SHARED_COMPONENTS
 												EKP2P
 												MIYA_CHAIN
-												SHARED_COMPONENTS
 												CONTROL_INTERFACE
 )
 #target_include_directories( core_ver_0 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include )

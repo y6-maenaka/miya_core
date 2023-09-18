@@ -1,0 +1,30 @@
+
+{
+	"source" : [
+		{
+			"utxo_tx_id" : "参照するutxoID1",
+			"index" : 0
+		},
+		{
+			"utxo_tx_id" : "参照するutxoID2",
+			"index" : 1
+		}
+	],
+
+	"destination" : [
+		{
+			"address" : "1BvBMSEYstWetqTFn5Au",
+			"value" : 23980
+		},
+		{
+			"address" : "3Cbq7aT1tY8kMxWLbi22",
+			"value" : 23982
+		},
+		{
+			"address" : "2BaaMSEYstWetqTFn411",
+			"value" : 23002
+		}
+	]
+
+}
+

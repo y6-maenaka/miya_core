@@ -9,6 +9,8 @@
 #include "openssl/evp.h"
 
 
+#include "../../../shared_components/json.hpp"
+using json = nlohmann::json;
 
 namespace tx{
 class SignatureScript;
@@ -84,6 +86,9 @@ private:
 	EVP_PKEY *_pkey; // 署名と公開鍵セットに使われる
 
 public:
+	std::shared_ptr<SignatureScript> signatureScript(){ return _body._signatureScript; }; // テスト用getter 後に削除する
+
+
 	std::shared_ptr<PrevOut> prevOut(); // getter
 
 	unsigned int exportRawWithEmpty( std::shared_ptr<unsigned char> retRaw );
@@ -98,6 +103,12 @@ public:
 
 	int importRaw( std::shared_ptr<unsigned char> fromRaw );
 	int importRaw( unsigned char *fromRaw );
+
+
+	friend void to_json( json& from , const TxIn &to );
+	friend void from_json( const json &from , TxIn &to );
+
+
 };
 
 

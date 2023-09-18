@@ -33,16 +33,10 @@ add_library( MIYA_CHAIN STATIC
 							message/protocol_message/block_header_msg.cpp
 							message/message.cpp
 
-							#transaction/txcb_table_manager/txcb_table_manager.cpp
-							#transaction/txcb_table_manager/txcb/txcb.cpp
-							#transaction/txcb_table_manager/txcb_bucket/txcb_bucket.cpp
-							#transaction/txcb_table_manager/txcb_table/txcb_table.cpp
-
-						
 							transaction/p2pkh/p2pkh.cpp
-
 						
 )
+
 
 
 add_definitions( -std=c++17 )

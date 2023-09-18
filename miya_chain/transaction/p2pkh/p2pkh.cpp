@@ -120,7 +120,7 @@ bool P2PKH::sign()
 		
 		for( auto itr : _body._outs )
 		{
-			exportedRawTxLength = itr->exportRaw( exportexRawTx );
+			exportedRawTxLength = itr->exportRaw( &exportexRawTx );
 			exportedRawTxOutVector.push_back( std::make_pair(exportexRawTx, exportedRawTxLength ) );
 		}
 
@@ -197,7 +197,7 @@ unsigned int P2PKH::exportRaw( std::shared_ptr<unsigned char> retRaw )
 
 	for( auto itr : _body._outs )
 	{
-		exportRawLength = itr->exportRaw( exportRawTx );
+		exportRawLength = itr->exportRaw( &exportRawTx );
 		exportedRawTxOutVector.push_back( std::make_pair(exportRawTx,exportRawLength) );
 	}
 

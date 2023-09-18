@@ -247,6 +247,33 @@ int TxIn::importRaw( unsigned char *fromRaw ) // ポインタの先頭が揃っ�
 }
 
 
+
+
+
+void from_json( const json &from , TxIn &to )
+{
+
+
+
+
+
+	to._body._value = htonll(static_cast<int64_t>(from["value"])); // ビックエディアンに変換する
+
+	//to._pubKeyHash = from["address"];
+	std::string sAddress = from["address"].get<std::string>();
+	const unsigned char *ccAddress = reinterpret_cast<const unsigned char*>(sAddress.c_str());
+
+	//to._pubKeyHash = std::make_shared<unsigned char>(20);
+	to._pubKeyHash = std::shared_ptr<unsigned char>(new unsigned char[20] , [](unsigned char *ptr){
+			delete[] ptr;
+			});
+	std::copy( ccAddress, ccAddress + 20 , to._pubKeyHash.get() );
+
+
+}
+
+
+
 /*
 PrevOut::PrevOut(){
 

@@ -16,6 +16,7 @@
 #include "../../ekp2p/ekp2p.h"
 // #include "../../ekp2p/kademlia/k_routing_table.h"
 
+#include "../../control_interface/control_interface.h"
 
 
 int main(){
@@ -28,7 +29,12 @@ int main(){
 	p2pManager->start();
 	*/
 
-	
+
+	ControlInterface interface;
+	interface.createTxFromJsonFile("../control_interface/tx_origin/payment_tx_info_0000.json");
+
+	return 0;
+
 
 	auto p2pManager = std::make_shared<ekp2p::EKP2P>();
 	std::thread p2pManagerTH([p2pManager](){
