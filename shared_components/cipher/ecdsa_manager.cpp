@@ -345,13 +345,6 @@ EVP_PKEY* ECDSAManager::toPkey( unsigned char* rawPubKey , unsigned int rawPubKe
 	pkey = d2i_PUBKEY( NULL , &_rawPubKey , rawPubKeySize );
 	
 
-	std::cout << "~~~~~~~~~~~~~~~~" << "\n";
-	if( pkey == NULL ) std::cout << "pkey is nullptr" << "\n";
-	else std::cout << "pkey is not nullptr" << "\n";
-	ECDSAManager::printPkey( pkey );
-	std::cout << "~~~~~~~~~~~~~~~~" << "\n";
-
-
 
 	return pkey;
 }

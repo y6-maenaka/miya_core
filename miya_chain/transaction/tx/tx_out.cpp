@@ -9,7 +9,8 @@ namespace tx{
 
 TxOut::TxOut()
 {
-	_body._pkScript = std::make_shared<PkScript>();
+	//_body._pkScript = std::make_shared<PkScript>();
+	_body._pkScript = std::shared_ptr<PkScript>( new PkScript );
 }
 
 
@@ -24,6 +25,7 @@ unsigned short TxOut::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 	std::shared_ptr<unsigned char> exportedRawPkScript; unsigned int exportedRawPkScriptLength = 0;
 
 	exportedRawPkScriptLength = _body._pkScript->exportRawWithP2PKHPkScript( &exportedRawPkScript , _pubKeyHash );
+
 	_body._pkScriptBytes = htonll(static_cast<uint64_t>(exportedRawPkScriptLength)); // 書き出しと同時に代入は怖いので
 	//_body._pkScriptBytes = (exportedRawPkScriptLength); // 書き出しと同時に代入は怖いので
 
@@ -38,6 +40,8 @@ unsigned short TxOut::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 	memcpy( (*retRaw).get() + formatPtr , exportedRawPkScript.get() , pkScriptBytes() ); formatPtr+= pkScriptBytes();
 
 	exportedRawPkScript.reset(); // 一応解放しておく
+	
+
 	return formatPtr;
 }
 
@@ -60,13 +64,14 @@ int TxOut::importRaw( unsigned char *fromRaw )
 {
 	unsigned int currentPtr = 0;
 
-	memcpy( &(_body._value) , fromRaw , sizeof(_body._value) ); currentPtr += sizeof(_body._value); // valueの書き出し
-	memcpy( &(_body._pkScriptBytes), fromRaw + currentPtr , sizeof(_body._pkScriptBytes) ); currentPtr += sizeof(_body._pkScriptBytes); // pkScriptBytesの書き出し
+	memcpy( &(_body._value) , fromRaw , sizeof(_body._value) ); currentPtr += sizeof(_body._value); // valueの読み込み
+
+	// pkScriptBytes の読み込み
+	memcpy( &(_body._pkScriptBytes) , fromRaw + currentPtr , sizeof(_body._pkScriptBytes) ); currentPtr += sizeof(_body._pkScriptBytes);
 
 
-	// lockingScriptの書き出し
-	_body._pkScript = std::make_shared<PkScript>();
-	currentPtr += _body._pkScript->importRaw( fromRaw + currentPtr, static_cast<unsigned int>(_body._pkScriptBytes) );
+	unsigned int importedPkScriptLength;
+	importedPkScriptLength = _body._pkScript->importRaw( fromRaw + currentPtr , this->pkScriptBytes() ); currentPtr += importedPkScriptLength;
 
 	return currentPtr;
 }
@@ -76,7 +81,8 @@ int TxOut::importRaw( unsigned char *fromRaw )
 
 unsigned short TxOut::value()
 {
-	return static_cast<unsigned short>(_body._value);
+	//return static_cast<unsigned short>(_body._value);
+	return ntohll(_body._value);
 }
 
 

@@ -43,6 +43,9 @@ unsigned int Script::OP_DATALength( unsigned char opcode )
 }
 
 
+
+
+
 OP_CODES Script::parseRawOPCode( unsigned char rawOPCode ) // メモリ効率があまり良くない実装 要修正
 {
 
@@ -60,6 +63,19 @@ OP_CODES Script::parseRawOPCode( unsigned char rawOPCode ) // メモリ効率が
 			OP_DATA ret(rawOPCode);
 			return ret;
 	}
+}
+
+
+
+unsigned char Script::rawOPCode( OP_CODES opcode )
+{
+	if( std::holds_alternative<OP_DUP>(opcode) ) return (std::get<OP_DUP>(opcode))._code;
+	if( std::holds_alternative<OP_HASH_160>(opcode) ) return (std::get<OP_HASH_160>(opcode))._code;
+	if( std::holds_alternative<OP_EQUALVERIFY>(opcode) ) return (std::get<OP_EQUALVERIFY>(opcode))._code;
+	if( std::holds_alternative<OP_CHECKSIG>(opcode) ) return (std::get<OP_CHECKSIG>(opcode))._code;
+	if( std::holds_alternative<OP_DATA>(opcode) ) return (std::get<OP_DATA>(opcode))._code;
+
+	else return 0x00;
 }
 
 
@@ -107,17 +123,19 @@ unsigned int Script::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 
 	unsigned int formatPtr = 0;
 	unsigned char temp;
+	unsigned char rawOPCode;
 	for( auto itr : _script )
 	{
-		temp = std::visit( getRawCode , itr.first );
-		memcpy( (*retRaw).get() + formatPtr ,  &temp , 1 ); formatPtr += 1; 
+		rawOPCode = this->rawOPCode( itr.first );
+		memcpy( (*retRaw).get() + formatPtr ,  &rawOPCode , 1 ); formatPtr += 1;  // OP_CODEの書き出し
 
-		if( std::holds_alternative<OP_DATA>(itr.first) ){
-			
+		if( std::holds_alternative<OP_DATA>(itr.first) )
+		{
 			memcpy( (*retRaw).get() + formatPtr , itr.second.get() , OP_DATALength(itr.first) ); formatPtr += OP_DATALength(itr.first);
 		}
 
 	}
+
 	
 	return formatPtr;
 }
@@ -158,6 +176,13 @@ int Script::importRaw( unsigned char *fromRaw , unsigned int fromRawLength )
 int Script::OPCount()
 {
 	return _script.size();
+}
+
+
+
+void Script::clear()
+{
+	_script.clear();
 }
 
 

@@ -57,9 +57,10 @@ unsigned int PkScript::exportRawWithP2PKHScript( std::shared_ptr<unsigned char> 
 unsigned int PkScript::exportRawWithP2PKHPkScript( std::shared_ptr<unsigned char> *retRaw , std::shared_ptr<unsigned char> pubKeyHash )
 {
 	if( pubKeyHash == nullptr ) return 0;
+	if( _script->OPCount() > 0 ) _script->clear();
 
 
-	OP_CODES pushOPCODE;
+	//OP_CODES pushOPCODE;
 
 	/*
 	std::cout << "( check 1 )" << "\n";
@@ -102,7 +103,9 @@ unsigned int PkScript::exportRawWithP2PKHPkScript( std::shared_ptr<unsigned char
 	_script->pushBack( _OP_CHECKSIG );
 
 
-	unsigned char retRawLength = _script->exportRaw( retRaw ); // 全体の書き出し
+	unsigned int retRawLength = _script->exportRaw( retRaw ); // 全体の書き出し
+
+
 	return retRawLength;
 }
 
@@ -111,8 +114,7 @@ unsigned int PkScript::exportRawWithP2PKHPkScript( std::shared_ptr<unsigned char
 
 unsigned int PkScript::importRaw( unsigned char *fromRaw, unsigned int fromRawLength )
 {
-	_script->importRaw( fromRaw , fromRawLength );
-
+	return _script->importRaw( fromRaw , fromRawLength );
 }
 
 

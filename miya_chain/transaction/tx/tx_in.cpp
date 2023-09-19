@@ -218,10 +218,7 @@ unsigned int TxIn::exportRawWithSignatureScript( std::shared_ptr<unsigned char> 
 	std::shared_ptr<unsigned char> exportedSignatureScript; unsigned int exportedSignatureScriptLength = 0;
 	exportedSignatureScriptLength = _body._signatureScript->exportRawWithSignatureScript( &exportedSignatureScript );
 	this->scriptBytes(exportedSignatureScriptLength); // スクリプト長のセット
-
-	std::cout << _body._signatureScript->_signature._signLength << "\n";
-	std::cout << "sssss -> " <<  this->scriptBytes() << "\n";
-
+																													 
 	unsigned int formatPtr = 0;
 	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[ rawPrevOutSize + sizeof(_body._sequence) + sizeof(_body._script_bytes) + this->scriptBytes() ] );
 	memcpy( (*retRaw).get() , rawPrevOut.get() , rawPrevOutSize ); formatPtr+= rawPrevOutSize;
@@ -281,29 +278,15 @@ int TxIn::importRaw( unsigned char *fromRaw ) // ポインタの先頭が揃っ�
 	unsigned int currentPtr = 0;
 	unsigned int prevOutLength;
 
-	std::cout << "\n\n";
-	for( int i=0; i<40; i++ )
-	{
-		printf("%02X", fromRaw[i] );
-	} std::cout << "\n";
-
-	std::cout << "< check 0 >" << "\n";
 	// _body._prevOut = std::shared_ptr<PrevOut>();
 	prevOutLength = _body._prevOut->importRaw( fromRaw );  currentPtr += prevOutLength;// prevOutの取り込み
-	std::cout << "prevOutLength -> " << prevOutLength << "\n";
-	std::cout << "< check 1 >" << "\n";
-	std::cout << "index -> " << _body._prevOut->index() << "\n";
 
 	memcpy( &_body._script_bytes , fromRaw + currentPtr , sizeof(_body._script_bytes) ); currentPtr += sizeof(_body._script_bytes);  // script_bytesの取り込み
-	std::cout << "scriptBytes -> "  << scriptBytes() << "\n";
-
 
 	unsigned int signatureScriptLength = 0;
 	signatureScriptLength = _body._signatureScript->importRaw( fromRaw + currentPtr, this->scriptBytes() ); currentPtr += signatureScriptLength; // 署名スクリプトの取り込み
 
-	std::cout << "< check 3 >" << "\n";
 	memcpy( &_body._sequence , fromRaw + currentPtr  , sizeof(_body._sequence) ); currentPtr += sizeof(_body._sequence);
-	std::cout << "< check 4 >" << "\n";
 
 	return currentPtr;
 }

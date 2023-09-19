@@ -66,7 +66,7 @@ unsigned int SignatureScript::importRaw( unsigned char* fromRaw , unsigned int f
 
 	// ここから公開鍵を取り出す
 
-	return _signature._signLength;
+	return fromRawLength;
 }
 
 
@@ -124,7 +124,6 @@ unsigned short SignatureScript::exportRawWithSignatureScript( std::shared_ptr<un
 	_script->pushBack( _OP_DATA_PUBKEY , rawPubKey ); // 生公開鍵をデータとして追加
 
 	unsigned retLength = _script->exportRaw( ret );
-	std::cout << " ##  export SignatureScript Length -> " << retLength << "\n";
 
 	return retLength;
 	//return _script->exportRaw( ret );

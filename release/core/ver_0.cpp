@@ -53,6 +53,7 @@ int main()
 	std::shared_ptr<tx::P2PKH> importP2PKH = std::make_shared<tx::P2PKH>();
 	importP2PKH->importRaw( rawTx , rawTxLength);
 
+
 	return 0;
 
 	auto p2pManager = std::make_shared<ekp2p::EKP2P>();

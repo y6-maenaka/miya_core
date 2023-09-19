@@ -179,11 +179,6 @@ bool P2PKH::sign()
 
 		_body._ins.at(i)->sign( sign, signLength , true ); // 配下tx_inのsignature_scriptに署名値を格納
 
-		std::cout << "signLength -> " << signLength << "\n";
-		std::cout << "msgLength -> " << exportedRawLength << "\n";
-		std::cout << "verify result -> " << cipher::ECDSAManager::verify( sign, signLength , exportedRaw, exportedRawLength ,_body._ins.at(i)->pkey(), "sha256" ) << "\n";
-
-
 		exportedRawTxInVector.clear();
 		exportedRawTxOutVector.clear();
 	}
@@ -252,6 +247,7 @@ unsigned int P2PKH::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 	/* [(可変長) tx_outs] 書き出し */
 	memcpy( (*retRaw).get() + formatPtr , exportedRawTxOuts.get() , exportedRawTxOutsLength ); formatPtr += exportedRawTxOutsLength;
 
+
 	return formatPtr;
 }
 
@@ -265,8 +261,6 @@ unsigned int P2PKH::importRaw( std::shared_ptr<unsigned char> fromRaw, unsigned 
 
 	unsigned int currentPtr = 0;
 
-	std::cout << "check 0" << "\n";
-
 
 	/* versionの取り込み */
 	if( sizeof(_body._version) + currentPtr <= fromRawLength )
@@ -276,8 +270,6 @@ unsigned int P2PKH::importRaw( std::shared_ptr<unsigned char> fromRaw, unsigned 
 	}
 
 
-	std::cout << "check 1" << "\n";
-
 	/* tx_in_countの取り込み*/
 	uint32_t tx_in_count;
 	if( sizeof(tx_in_count) + currentPtr <= fromRawLength )
@@ -286,25 +278,16 @@ unsigned int P2PKH::importRaw( std::shared_ptr<unsigned char> fromRaw, unsigned 
 		currentPtr += sizeof(tx_in_count);
 	}
 
-	std::cout << "tx_in_count -> " << ntohl(tx_in_count) << "\n";
-
-	std::cout << "check 2" << "\n";
-
 	/* tx_inの取り込み */ // 本来は種類によって取り込みを分ける
 	unsigned int importedTxInLength = 0; 
 	for( int i=0; i< ntohl(tx_in_count); i++ )
 	{
-		std::cout << "check 2-1" << "\n";
 		std::shared_ptr<TxIn> importedTxIn = std::shared_ptr<TxIn>( new TxIn );
-		std::cout << "check 2-2" << "\n";
 		importedTxInLength = importedTxIn->importRaw( fromRaw.get() + currentPtr ); // ここだけunsigned char*だと不自然だけど..
-		std::cout << "check 2-3" << "\n";
 		currentPtr += importedTxInLength;	
-		std::cout << "check 2-4" << "\n";
 		_body._ins.push_back( importedTxIn );
 	}
 
-	std::cout << "===========================" << "\n";
 
 	/*tx_out_countの取り込み*/
 	uint32_t tx_out_count;
@@ -317,15 +300,17 @@ unsigned int P2PKH::importRaw( std::shared_ptr<unsigned char> fromRaw, unsigned 
 	
 	/* tx_outの取り込み */ // 本来は種類によって取り込みを分ける
 	unsigned int importedTxOutLength = 0;
-	std::shared_ptr<TxOut> importedTxOut;
 	for( int i=0; i<ntohl(tx_out_count); i++ )
 	{
-		importedTxOut = std::make_shared<TxOut>();
+		std::shared_ptr<TxOut> importedTxOut = std::shared_ptr<TxOut>( new TxOut );
+		
 		importedTxOutLength = importedTxOut->importRaw( fromRaw.get() + currentPtr );
+		currentPtr += importedTxOutLength;
+		_body._outs.push_back( importedTxOut );
+
 	}
 
-	return 10;
-
+	return 0;
 }
 
 

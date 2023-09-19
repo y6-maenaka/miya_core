@@ -11,6 +11,9 @@
 #include <iostream>
 
 
+#include "../script/signature_script.h"
+#include "../script/pk_script.h"
+#include "../script/script.h"
 
 #include "../../../shared_components/json.hpp"
 using json = nlohmann::json;

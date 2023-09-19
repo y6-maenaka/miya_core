@@ -111,6 +111,7 @@ private:
 	/* ----------------------------------------------------------  */	
 
 	OP_CODES parseRawOPCode( unsigned char rawOPCode );
+	unsigned char rawOPCode( OP_CODES opcode );
 
 public:
 	//void push_back( std::variant<_OP_DUP, _OP_HASH_160, _OP_EQUALVERIFY, _OP_CHECKSIG> OP_CODE , std::shared_ptr<unsigned char> data = nullptr );
@@ -122,6 +123,7 @@ public:
 	int importRaw( unsigned char *fromRaw , unsigned int fromRawLength );
 
 	int OPCount();
+	void clear();
 	std::pair< OP_CODES , std::shared_ptr<unsigned char> > at( int i );
 };
 
