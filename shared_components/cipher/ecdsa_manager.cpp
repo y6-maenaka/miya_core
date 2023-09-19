@@ -270,6 +270,7 @@ bool ECDSAManager::saveNewPkey( unsigned char* pemPass , unsigned int passSize )
 
 void ECDSAManager::printPkey( EVP_PKEY *pkey )
 {
+	if( pkey == nullptr ) return;
 
 	BIO *output_bio = BIO_new_fp( stdout, 0 );
 
@@ -338,13 +339,36 @@ unsigned int ECDSAManager::toRawPubKey( EVP_PKEY *pkey , std::shared_ptr<unsigne
 
 EVP_PKEY* ECDSAManager::toPkey( unsigned char* rawPubKey , unsigned int rawPubKeySize )
 {
-	EVP_PKEY* pkey = nullptr; 
+	EVP_PKEY* pkey = NULL; 
 	const unsigned char* _rawPubKey = rawPubKey;
 
 	pkey = d2i_PUBKEY( NULL , &_rawPubKey , rawPubKeySize );
+	
+
+	std::cout << "~~~~~~~~~~~~~~~~" << "\n";
+	if( pkey == NULL ) std::cout << "pkey is nullptr" << "\n";
+	else std::cout << "pkey is not nullptr" << "\n";
+	ECDSAManager::printPkey( pkey );
+	std::cout << "~~~~~~~~~~~~~~~~" << "\n";
+
+
 
 	return pkey;
 }
+
+
+
+/*
+EVP_PKEY* ECDSAManager::toPKEY( std::shared_ptr<unsigned char> from , unsigned int fromLength )
+{
+	EVP_PKEY *pkey;
+	//unsigned char *rawFrom = from.get();
+	const unsigned char* rawFrom = from.get();
+	d2i_PUBKEY( &pkey , &rawFrom, fromLength  );
+
+	return pkey;
+}
+*/
 
 
 
@@ -388,7 +412,6 @@ int ECDSAManager::Sign( unsigned char *target, size_t targetLen , unsigned char*
 
 unsigned int ECDSAManager::sign( std::shared_ptr<unsigned char> target , unsigned int targetLength, EVP_PKEY *pkey , std::shared_ptr<unsigned char> *retSign )
 {
-
 	size_t sigLen;
 
 	// 対象をハッシュ化する
@@ -410,12 +433,16 @@ unsigned int ECDSAManager::sign( std::shared_ptr<unsigned char> target , unsigne
 		return 0;
 	}
 
+	//sigLen = 64;
 	EVP_PKEY_sign( sctx , (*retSign).get() , &sigLen , targetDigest.get() , targetDigestLength );
 
 	EVP_PKEY_CTX_free( sctx );
 
 	return sigLen;
 }
+
+
+
 
 
 
@@ -452,6 +479,7 @@ bool ECDSAManager::Verify( unsigned char *sig, size_t sigLen , unsigned char *ta
 }
 
 
+
 bool ECDSAManager::verify( std::shared_ptr<unsigned char> sig , size_t sigLength , std::shared_ptr<unsigned char> msg , size_t msgLength , EVP_PKEY *pubKey , char *hashType )
 {
 	std::shared_ptr<unsigned char> md; unsigned int mdLength;
@@ -476,6 +504,9 @@ bool ECDSAManager::verify( std::shared_ptr<unsigned char> sig , size_t sigLength
 
 	return (ret == 1);
 }
+
+
+
 
 
 

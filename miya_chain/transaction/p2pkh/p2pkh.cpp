@@ -122,7 +122,7 @@ bool P2PKH::sign()
 			else
 				rawSignLength = _body._ins.at(j)->exportRawWithEmpty( &exportexRawTx );
 
-			exportedRawTxInVector.push_back( std::make_pair(exportexRawTx,exportedRawTxLength) ); // 生のtx_inを全て
+			exportedRawTxInVector.push_back( std::make_pair(exportexRawTx,rawSignLength) ); // 生のtx_inを全て
 		}
 
 		
@@ -179,7 +179,13 @@ bool P2PKH::sign()
 
 		_body._ins.at(i)->sign( sign, signLength , true ); // 配下tx_inのsignature_scriptに署名値を格納
 
+		std::cout << "signLength -> " << signLength << "\n";
+		std::cout << "msgLength -> " << exportedRawLength << "\n";
 		std::cout << "verify result -> " << cipher::ECDSAManager::verify( sign, signLength , exportedRaw, exportedRawLength ,_body._ins.at(i)->pkey(), "sha256" ) << "\n";
+
+
+		exportedRawTxInVector.clear();
+		exportedRawTxOutVector.clear();
 	}
 
 	return true;
@@ -259,6 +265,8 @@ unsigned int P2PKH::importRaw( std::shared_ptr<unsigned char> fromRaw, unsigned 
 
 	unsigned int currentPtr = 0;
 
+	std::cout << "check 0" << "\n";
+
 
 	/* versionの取り込み */
 	if( sizeof(_body._version) + currentPtr <= fromRawLength )
@@ -266,6 +274,9 @@ unsigned int P2PKH::importRaw( std::shared_ptr<unsigned char> fromRaw, unsigned 
 		memcpy( &(_body._version) , fromRaw.get() , sizeof(_body._version) ); // _versionの取り出し
 		currentPtr += sizeof(_body._version);
 	}
+
+
+	std::cout << "check 1" << "\n";
 
 	/* tx_in_countの取り込み*/
 	uint32_t tx_in_count;
@@ -275,16 +286,25 @@ unsigned int P2PKH::importRaw( std::shared_ptr<unsigned char> fromRaw, unsigned 
 		currentPtr += sizeof(tx_in_count);
 	}
 
+	std::cout << "tx_in_count -> " << ntohl(tx_in_count) << "\n";
+
+	std::cout << "check 2" << "\n";
+
 	/* tx_inの取り込み */ // 本来は種類によって取り込みを分ける
 	unsigned int importedTxInLength = 0; 
-	std::shared_ptr<TxIn> importedTxIn;
-	for( int i=0; i<static_cast<unsigned int>(tx_in_count); i++ )
+	for( int i=0; i< ntohl(tx_in_count); i++ )
 	{
-		importedTxIn = std::make_shared<TxIn>();
-		importedTxInLength = importedTxIn->importRaw( fromRaw.get() + currentPtr ); // ここだけunsigned char*だと不自然
+		std::cout << "check 2-1" << "\n";
+		std::shared_ptr<TxIn> importedTxIn = std::shared_ptr<TxIn>( new TxIn );
+		std::cout << "check 2-2" << "\n";
+		importedTxInLength = importedTxIn->importRaw( fromRaw.get() + currentPtr ); // ここだけunsigned char*だと不自然だけど..
+		std::cout << "check 2-3" << "\n";
 		currentPtr += importedTxInLength;	
+		std::cout << "check 2-4" << "\n";
 		_body._ins.push_back( importedTxIn );
 	}
+
+	std::cout << "===========================" << "\n";
 
 	/*tx_out_countの取り込み*/
 	uint32_t tx_out_count;
@@ -298,7 +318,7 @@ unsigned int P2PKH::importRaw( std::shared_ptr<unsigned char> fromRaw, unsigned 
 	/* tx_outの取り込み */ // 本来は種類によって取り込みを分ける
 	unsigned int importedTxOutLength = 0;
 	std::shared_ptr<TxOut> importedTxOut;
-	for( int i=0; i<static_cast<unsigned int>(tx_out_count); i++ )
+	for( int i=0; i<ntohl(tx_out_count); i++ )
 	{
 		importedTxOut = std::make_shared<TxOut>();
 		importedTxOutLength = importedTxOut->importRaw( fromRaw.get() + currentPtr );

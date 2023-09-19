@@ -7,6 +7,7 @@
 #include <variant>
 #include <iostream>
 #include <unistd.h>
+#include <map>
 
 #include "./script.h"
 #include "openssl/evp.h"
@@ -65,8 +66,11 @@ public:
 		bool _isSigned = false;
 	} _signature;
 
+	std::shared_ptr<Script> _script; // unlockingScript読み書きだし用
+
 
 //public:
+	SignatureScript();
 	void pkey( EVP_PKEY *pkey );
 	void sign( std::shared_ptr<unsigned char> sign, unsigned int signLength , bool isSigned = false );
 

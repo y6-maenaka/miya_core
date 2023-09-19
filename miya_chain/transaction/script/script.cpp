@@ -43,6 +43,25 @@ unsigned int Script::OP_DATALength( unsigned char opcode )
 }
 
 
+OP_CODES Script::parseRawOPCode( unsigned char rawOPCode ) // メモリ効率があまり良くない実装 要修正
+{
+
+	switch( static_cast<unsigned short>(rawOPCode) )
+	{
+		case static_cast<unsigned short>(_OP_DUP._code):
+			return _OP_DUP;
+		case static_cast<unsigned short>(_OP_HASH_160._code):
+			return _OP_HASH_160;
+		case static_cast<unsigned short>(_OP_EQUALVERIFY._code):
+			return _OP_EQUALVERIFY;
+		case static_cast<unsigned short>(_OP_CHECKSIG._code):
+			return _OP_CHECKSIG;
+		default:
+			OP_DATA ret(rawOPCode);
+			return ret;
+	}
+}
+
 
 
 unsigned short Script::exportScriptContentSize( OP_CODES opcode )
@@ -107,27 +126,45 @@ unsigned int Script::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 
 int Script::importRaw( unsigned char *fromRaw , unsigned int fromRawLength )
 {
-	/*
-	OP_CODES opcode;
+	// 先頭の1bytesを取得する
+	int i=0;
+	unsigned short opDataLength; 
+	OP_CODES opcode; unsigned char rawOPCode;
+	unsigned short OPDataLength;
 
-	for( int i=0; i<fromRawLength; )
+	while( i < fromRawLength ) // あってる？
 	{
-		unsigned char rawOpcode;
-		memcpy( &rawOpcode , fromRaw + i, 1);  i+=1; // OPCODEの取得
-		opcode.emplace<static_cast<int>(OP_CODES_ID::COMMON)>(rawOpcode);
+		rawOPCode = fromRaw[i];
+		opcode = parseRawOPCode( rawOPCode );
+	
 
-
-		 
-
-		if(  OP_DATALength( std::get<static_cast<int>(OP_CODES_ID::COMMON)>(opcode)) > 0 ){
-			pushBack( opcode , std::make_shared<unsigned char>(*(fromRaw+i)) ); i+=OP_DATALength( std::get<static_cast<int>(OP_CODES_ID::COMMON)>(opcode)) ;
+		if( (OPDataLength =  OP_DATALength(opcode)) > 0 ){ // データが挿入されている場合　
+			i+=1; // OP_CODE文進める
+			std::shared_ptr<unsigned char> opdata = std::shared_ptr<unsigned char>( new unsigned char[OPDataLength] );
+			memcpy( opdata.get() , fromRaw + i , OPDataLength ); // 怖いのコピーしたものを格納する
+			this->pushBack( opcode , opdata );
+			i += OPDataLength;
+		}else{
+			this->pushBack( opcode );
+			i+=1;
 		}
-		else
-			pushBack( opcode, std::make_shared<unsigned char>(rawOpcode) ); // ポインタは進めない
 	}
+	
+	return i;
+}
 
+
+
+int Script::OPCount()
+{
 	return _script.size();
-	*/
+}
+
+
+
+std::pair< OP_CODES , std::shared_ptr<unsigned char> > Script::at( int i )
+{
+	return _script.at(i);
 }
 
 /*

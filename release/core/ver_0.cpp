@@ -25,15 +25,9 @@ int main()
 
 
 	cipher::ECDSAManager ecdsaManager;
-	ecdsaManager.init( (unsigned char *)"hello", 5 );
+	ecdsaManager.init( (unsigned char *)"hello", 5 ); // priKeyには鍵がかかっているので
 	ecdsaManager.printPkey( ecdsaManager.myPkey() );
 
-
-	/*
-	ekp2p::EKP2P *p2pManager = new ekp2p::EKP2P;
-	p2pManager->init();
-	p2pManager->start();
-	*/
 
 
 	ControlInterface interface;
@@ -43,8 +37,8 @@ int main()
 		itr->pkey( ecdsaManager.myPkey() );
 
 
+	loadedP2PKH->sign(); // トランザクションのTxIn用に署名を作成する
 
-	loadedP2PKH->sign();
 
 	std::shared_ptr<unsigned char> rawTx; unsigned int rawTxLength;
 	rawTxLength = loadedP2PKH->exportRaw( &rawTx );
@@ -54,6 +48,10 @@ int main()
 	{
 		printf("%02X", rawTx.get()[i]);
 	} std::cout << "\n";
+
+
+	std::shared_ptr<tx::P2PKH> importP2PKH = std::make_shared<tx::P2PKH>();
+	importP2PKH->importRaw( rawTx , rawTxLength);
 
 	return 0;
 

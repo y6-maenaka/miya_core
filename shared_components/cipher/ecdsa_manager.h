@@ -60,6 +60,7 @@ public:
 	static unsigned int toRawPubKey( EVP_PKEY *pkey , std::shared_ptr<unsigned char> *ret );
 
 	static EVP_PKEY* toPkey( unsigned char* rawPubKey , unsigned int rawPubKeySize );
+	//static EVP_PKEY* toPKEY( std::shared_ptr<unsigned char> from , unsigned int fromLength );
 
 
 	static int Sign( unsigned char *target, size_t targetLen , unsigned char** sig, EVP_PKEY* pri_key = ECDSAManager::_myPkey );

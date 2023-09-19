@@ -8,6 +8,11 @@ namespace tx{
 
 
 
+SignatureScript::SignatureScript()
+{
+	_script = std::shared_ptr<Script>( new Script );
+}
+
 
 
 void SignatureScript::pkey( EVP_PKEY *pkey )
@@ -42,12 +47,24 @@ unsigned int SignatureScript::importRaw( unsigned char* fromRaw , unsigned int f
 
 
 	// 署名の取り込み
-	_signature._signLength = fromRawLength - (160/8);
-	_signature._sign = std::make_shared<unsigned char>(_signature._signLength);
-	memcpy( _signature._sign.get() , fromRaw , _signature._signLength );
+	//_signature._signLength = fromRawLength - (160/8); // 公開鍵ハッシュを取り除いたサイズ
+	//_signature._sign = std::shared_ptr<unsigned char>( new unsigned char[_signature._signLength]);
+	//memcpy( _signature._sign.get() , fromRaw , _signature._signLength );
 
 	// 公開鍵の取り出し
-	_pkey = cipher::ECDSAManager::toPkey( fromRaw + _signature._signLength , (160/8) );
+	//_pkey = cipher::ECDSAManager::toPkey( fromRaw + _signature._signLength , (160/8) );
+	_script->importRaw( fromRaw , fromRawLength ); // 生の署名スクリプトを取り込む
+
+
+	std::pair< OP_CODES , std::shared_ptr<unsigned char> > rawSignPair = _script->at(0); // 署名の取り出し
+	_signature._sign = rawSignPair.second;
+	_signature._signLength = _script->OP_DATALength(rawSignPair.first);
+
+
+	std::pair< OP_CODES , std::shared_ptr<unsigned char> > rawPubKeyPair = _script->at(1); // マジックナンバーだがP2PKHではこのインデックスしか取りえないので問題ないかも
+	_pkey = cipher::ECDSAManager::toPkey( rawPubKeyPair.second.get() , _script->OP_DATALength(rawPubKeyPair.first) );
+
+	// ここから公開鍵を取り出す
 
 	return _signature._signLength;
 }
@@ -77,16 +94,41 @@ unsigned short SignatureScript::exportRawWithSignatureScript( std::shared_ptr<un
 
 	if( _pkey == nullptr ) return 0;
 
+	/*	
 	unsigned int rawPubKeyLength; std::shared_ptr<unsigned char> rawPueKey;
 	rawPubKeyLength = cipher::ECDSAManager::toRawPubKey( _pkey , &rawPueKey ); // 生の公開鍵を書き出す
-	
+
+	std::cout << "RawPubKey Length -> " << rawPubKeyLength << "\n";
 	*ret = std::shared_ptr<unsigned char>( new unsigned char[_signature._signLength + rawPubKeyLength] );  
 
 	unsigned int formatPtr = 0;
 	memcpy( (*ret).get(), _signature._sign.get() , _signature._signLength ); formatPtr += _signature._signLength;
 	memcpy( (*ret).get() + formatPtr , rawPueKey.get() , rawPubKeyLength ); formatPtr += rawPubKeyLength;
 
+	std::cout << " ## formatPtr -> "  << formatPtr << "\n";
+
 	return formatPtr;
+	*/
+	
+
+
+	
+	OP_DATA _OP_DATA_SIGN(static_cast<unsigned char>( _signature._signLength & 0xFF ));
+	_script->pushBack( _OP_DATA_SIGN , _signature._sign ); // 署名をデータとして追加
+
+
+	unsigned short _rawPubKeyLength; std::shared_ptr<unsigned char> rawPubKey; 
+	_rawPubKeyLength = cipher::ECDSAManager::toRawPubKey( _pkey,  &rawPubKey );
+
+	OP_DATA _OP_DATA_PUBKEY( static_cast<unsigned char>( _rawPubKeyLength & 0xFF ));
+	_script->pushBack( _OP_DATA_PUBKEY , rawPubKey ); // 生公開鍵をデータとして追加
+
+	unsigned retLength = _script->exportRaw( ret );
+	std::cout << " ##  export SignatureScript Length -> " << retLength << "\n";
+
+	return retLength;
+	//return _script->exportRaw( ret );
+	
 }
 
 
