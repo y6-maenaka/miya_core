@@ -21,6 +21,11 @@ void SignatureScript::pkey( EVP_PKEY *pkey )
 }
 
 
+EVP_PKEY *SignatureScript::pkey()
+{
+	return _pkey;
+}
+
 void SignatureScript::sign( std::shared_ptr<unsigned char> sign, unsigned int signLength, bool isSigned )
 {
 	_signature._sign = sign;
@@ -60,9 +65,12 @@ unsigned int SignatureScript::importRaw( unsigned char* fromRaw , unsigned int f
 	_signature._sign = rawSignPair.second;
 	_signature._signLength = _script->OP_DATALength(rawSignPair.first);
 
-
 	std::pair< OP_CODES , std::shared_ptr<unsigned char> > rawPubKeyPair = _script->at(1); // マジックナンバーだがP2PKHではこのインデックスしか取りえないので問題ないかも
 	_pkey = cipher::ECDSAManager::toPkey( rawPubKeyPair.second.get() , _script->OP_DATALength(rawPubKeyPair.first) );
+
+	if( _pkey == nullptr )
+		std::cout << "[ Warning ] pkey is nullptr" << "\n";
+
 
 	// ここから公開鍵を取り出す
 

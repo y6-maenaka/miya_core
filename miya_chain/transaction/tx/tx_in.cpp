@@ -78,10 +78,21 @@ int PrevOut::importRaw( std::shared_ptr<unsigned char> fromRaw )
 
 
 
+
 int PrevOut::importRaw( unsigned char* fromRaw )
 {
 	if( _body._txID == nullptr ) return -1;
 	// _body._txID = std::make_shared<unsigned char>(*fromRaw);
+
+	std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << "\n";
+	for( int i=0; i<32; i++)
+	{
+		printf("%02X", fromRaw[i] );
+	} std::cout << "\n";
+	std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << "\n";
+	
+
+	memcpy( _body._txID.get(), fromRaw  , 256/8 );
 	memcpy( &_body._index, fromRaw + (256/8) , sizeof(_body._index) );
 
 	return ( (256/8) + sizeof(_body._index) ); // 流石に雑すぎる?
@@ -169,16 +180,18 @@ unsigned int TxIn::exportRawWithEmpty( std::shared_ptr<unsigned char> *retRaw )
 
 unsigned int TxIn::exportRawWithPubKeyHash( std::shared_ptr<unsigned char> *retRaw )
 {
-	if( _pkey == nullptr ) return 0;
 
 	// 生の公開鍵を取得する
-	_body._signatureScript->pkey( _pkey ); // 署名スクリプトに公開鍵をセット
+	if( _body._signatureScript->pkey() == nullptr ){
+		_body._signatureScript->pkey( _pkey ); // 署名スクリプトに公開鍵をセット
+	}
 
 	unsigned int formatPtr = 0;
 
 	// PrevOutの書き出し
 	std::shared_ptr<unsigned char> rawPrevOut; unsigned int rawPrevOutSize;
 	rawPrevOutSize = _body._prevOut->exportRaw( &rawPrevOut );
+
 
 	/* 自身の公開鍵ハッシュの書き出し */
 	std::shared_ptr<unsigned char> exportedPubKeyHash; unsigned int exportedPubKeyHashLength = 0;
@@ -187,6 +200,16 @@ unsigned int TxIn::exportRawWithPubKeyHash( std::shared_ptr<unsigned char> *retR
 
 	//_body._script_bytes = htonl(exportedPubKeyHashLength); // スクリプト長のセット
 	this->scriptBytes(exportedPubKeyHashLength);
+
+	std::cout << "***************************" << "\n";
+	std::cout << scriptBytes() << "\n";
+	for( int i=0; i<rawPrevOutSize; i++ )
+	{
+		printf("%02X", rawPrevOut.get()[i]);
+	} std::cout << "\n";
+	std::cout << "***************************" << "\n";
+
+
 
 
 	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[ rawPrevOutSize + sizeof(_body._sequence) + sizeof(_body._script_bytes) + this->scriptBytes() ] );
@@ -281,10 +304,29 @@ int TxIn::importRaw( unsigned char *fromRaw ) // ポインタの先頭が揃っ�
 	// _body._prevOut = std::shared_ptr<PrevOut>();
 	prevOutLength = _body._prevOut->importRaw( fromRaw );  currentPtr += prevOutLength;// prevOutの取り込み
 
+	std::cout << "||||||||||||||||||||||||||||||||||||||||" << "\n";
+	std::cout << prevOutLength << "\n";
+	for( int i=0; i<32; i++)
+	{
+		printf("%02X", _body._prevOut->_body._txID.get()[i]);
+	} std::cout << "\n";
+	std::cout << "||||||||||||||||||||||||||||||||||||||||" << "\n";
+
+	
 	memcpy( &_body._script_bytes , fromRaw + currentPtr , sizeof(_body._script_bytes) ); currentPtr += sizeof(_body._script_bytes);  // script_bytesの取り込み
 
 	unsigned int signatureScriptLength = 0;
 	signatureScriptLength = _body._signatureScript->importRaw( fromRaw + currentPtr, this->scriptBytes() ); currentPtr += signatureScriptLength; // 署名スクリプトの取り込み
+
+
+
+	unsigned char rawPubKeyLength = _body._signatureScript->script()->OP_DATALength( _body._signatureScript->script()->at(1).first );
+	std::cout << "rawPubKeyLength -> " << static_cast<unsigned short>(rawPubKeyLength) << "\n";
+	for( int i=0; i<static_cast<unsigned short>(rawPubKeyLength); i++)
+	{
+		printf("%02X",_body._signatureScript->script()->at(1).second.get()[i] );
+	} std::cout << "\n";
+	_pkey = cipher::ECDSAManager::toPkey( _body._signatureScript->script()->at(1).second.get() , static_cast<unsigned short>(rawPubKeyLength) );
 
 	memcpy( &_body._sequence , fromRaw + currentPtr  , sizeof(_body._sequence) ); currentPtr += sizeof(_body._sequence);
 

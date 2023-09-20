@@ -122,6 +122,14 @@ bool P2PKH::sign()
 			else
 				rawSignLength = _body._ins.at(j)->exportRawWithEmpty( &exportexRawTx );
 
+			std::cout << "## >> " << rawSignLength << "\n";
+			std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
+			for( int i=0; i<rawSignLength; i++ )
+			{
+				printf("%02X", exportexRawTx.get()[i]);
+			} std::cout << "\n";
+			std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
+
 			exportedRawTxInVector.push_back( std::make_pair(exportexRawTx,rawSignLength) ); // 生のtx_inを全て
 		}
 
@@ -129,6 +137,7 @@ bool P2PKH::sign()
 		for( auto itr : _body._outs )
 		{
 			exportedRawTxLength = itr->exportRaw( &exportexRawTx );
+			std::cout << "@@ >> " << exportedRawTxLength << "\n";
 			exportedRawTxOutVector.push_back( std::make_pair(exportexRawTx, exportedRawTxLength ) );
 		}
 		
@@ -179,6 +188,29 @@ bool P2PKH::sign()
 
 		_body._ins.at(i)->sign( sign, signLength , true ); // 配下tx_inのsignature_scriptに署名値を格納
 
+		if( cipher::ECDSAManager::verify( sign, signLength , exportedRaw, exportedRawLength ,_body._ins.at(i)->pkey(), "sha256" ) )
+			std::cout << "\033[32m" <<  "[ TxIn(" << i << ") ] Verify Successfyly Done" << "\033[0m" << "\n";
+
+		std::cout << "-----------------" << "\n";
+		std::cout << exportedRawTxInVector.size() << "\n";
+		std::cout << exportedRawTxOutVector.size() << "\n";
+		std::cout << exportedRawTxInsLength << "\n";
+		std::cout << exportedRawTxOutsLength << "\n";
+		std::cout << signLength << "\n";
+		std::cout << exportedRawLength  << "\n";
+
+
+		for( int i=0; i<exportedRawLength; i++ )
+		{
+			printf("%02X", exportedRaw.get()[i]);
+		} std::cout << "\n";
+		std::cout << "-----------------" << "\n";
+
+
+		std::cout << "-----------------" << "\n";
+
+
+
 		exportedRawTxInVector.clear();
 		exportedRawTxOutVector.clear();
 	}
@@ -188,6 +220,120 @@ bool P2PKH::sign()
 
 
 
+bool P2PKH::verify()
+{
+	std::vector< std::pair<std::shared_ptr<unsigned char>,unsigned int> > exportedRawTxInVector;
+	std::vector< std::pair<std::shared_ptr<unsigned char>,unsigned int> > exportedRawTxOutVector;
+	std::shared_ptr<unsigned char> exportexRawTx; unsigned int exportedRawTxLength;
+	std::shared_ptr<unsigned char> rawSign; unsigned int rawSignLength = 0;
+	unsigned int formatPtr = 0;
+
+	for( auto itr : _body._ins )
+	{
+		printf("%p\n", itr->signatureScript()->_pkey );
+	}
+
+
+	for( int i=0; i<_body._ins.size(); i++ )
+	{
+		for( int j=0; j<_body._ins.size(); j++ )
+		{
+		
+			if( i == j ) // 公開鍵ハッシュを格納する
+				rawSignLength = _body._ins.at(j)->exportRawWithPubKeyHash( &exportexRawTx );
+			else
+				rawSignLength = _body._ins.at(j)->exportRawWithEmpty( &exportexRawTx );
+
+			std::cout << "## >> " << rawSignLength << "\n";
+			std::cout << "Merker -> " << i << " - " << j << "\n";
+			std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
+			for( int i=0; i<rawSignLength; i++ )
+			{
+				printf("%02X", exportexRawTx.get()[i]);
+			} std::cout << "\n";
+			std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
+			exportedRawTxInVector.push_back( std::make_pair(exportexRawTx,rawSignLength) ); // 生のtx_inを全て
+		}
+
+		
+		for( auto itr : _body._outs )
+		{
+			exportedRawTxLength = itr->exportRaw( &exportexRawTx );
+
+			std::cout << "@@ >> " << exportedRawTxLength << "\n";
+			exportedRawTxOutVector.push_back( std::make_pair(exportexRawTx, exportedRawTxLength ) );
+		}
+		
+
+
+
+		unsigned int exportedRawTxInsLength = 0; std::shared_ptr<unsigned char> exportedRawTxIns; 
+		exportedRawTxInsLength = formatExportedRawTxVector( exportedRawTxInVector, &exportedRawTxIns );
+
+		unsigned int exportedRawTxOutsLength = 0; std::shared_ptr<unsigned char> exportedRawTxOuts;
+		exportedRawTxOutsLength = formatExportedRawTxVector( exportedRawTxOutVector , &exportedRawTxOuts );
+		 
+
+
+		formatPtr = 0;
+		unsigned int exportedRawLength; std::shared_ptr<unsigned char> exportedRaw;
+		uint32_t tx_in_count = htonl(_body._ins.size());
+		uint32_t tx_out_count = htonl(_body._outs.size());
+
+
+		exportedRawLength = sizeof(_body._version) + sizeof(tx_in_count) + exportedRawTxInsLength + sizeof(tx_out_count) + exportedRawTxOutsLength;
+		exportedRaw = std::shared_ptr<unsigned char>( new unsigned char[exportedRawLength] );
+
+		/* [(uint32) version] 書き出し */
+		memcpy( exportedRaw.get() , &(_body._version) , sizeof(_body._version) ); formatPtr += sizeof(_body._version);
+
+		/* [(uint32) tx_in_count] 書き出し */
+		memcpy( exportedRaw.get() + formatPtr , &tx_in_count , sizeof(tx_in_count) ); formatPtr += sizeof(tx_in_count);
+
+		/* [(可変長) tx_ins] 書き出し */
+		memcpy( exportedRaw.get() + formatPtr , exportedRawTxIns.get() , exportedRawTxInsLength ); formatPtr += exportedRawTxInsLength;
+
+		/* [(uint32) tx_out_count] 書き出し */
+		memcpy( exportedRaw.get() + formatPtr , &tx_out_count , sizeof(tx_out_count) ); formatPtr += sizeof(tx_out_count);
+
+		/* [(可変長) tx_outs] 書き出し */
+		memcpy( exportedRaw.get() + formatPtr , exportedRawTxOuts.get() , exportedRawTxOutsLength ); formatPtr += exportedRawTxOutsLength;
+
+
+
+		// 書き出したデータをハッシュして,秘密鍵で署名を作成する
+		std::shared_ptr<unsigned char> hashedExportedRaw; unsigned int hashedExportedRawLength = 0;
+		std::shared_ptr<unsigned char> encryptedExportedRaw; unsigned int encryptedExportedRawLength;
+		// hashedExportedRawLength = hash::SHAHash( exportedRaw , exportedRawLength , &hashedExportedRaw , "sha256" );
+
+		std::shared_ptr<unsigned char> sign; unsigned int signLength;
+		sign = _body._ins.at(i)->signatureScript()->_signature._sign;
+		signLength = _body._ins.at(i)->signatureScript()->_signature._signLength;
+
+		std::cout << "-----------------" << "\n";
+		std::cout << exportedRawTxInVector.size() << "\n";
+		std::cout << exportedRawTxOutVector.size() << "\n";
+		std::cout << exportedRawTxInsLength << "\n";
+		std::cout << exportedRawTxOutsLength << "\n";
+		std::cout << signLength << "\n";
+		std::cout << exportedRawLength  << "\n";
+
+		for( int i=0; i<exportedRawLength; i++ )
+		{
+			printf("%02X", exportedRaw.get()[i]);
+		} std::cout << "\n";
+		std::cout << "-----------------" << "\n";
+
+		if( cipher::ECDSAManager::verify(  sign ,signLength , exportedRaw, exportedRawLength ,_body._ins.at(i)->pkey(), "sha256" ) )
+			std::cout << "\033[32m" <<  "[ TxIn(" << i << ") ] Verify Successfyly Done" << "\033[0m" << "\n";
+		else
+			std::cout <<  "[ TxIn(" << i << ") ] Verify Missed" << "\n";
+
+		exportedRawTxInVector.clear();
+		exportedRawTxOutVector.clear();
+	}
+
+}
 
 
 

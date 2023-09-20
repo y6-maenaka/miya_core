@@ -29,14 +29,15 @@ constexpr unsigned short PREV_OUT_SIZE = /*TX_ID_SIZE*/20 + (32 / 8);
 
 struct PrevOut
 {
-private:
+//private:
+public:
 	struct __attribute__((packed))
 	{
 		std::shared_ptr<unsigned char> _txID; // 参照するトランザクションID
 		uint32_t _index; // 参照するtx_outのインデックス
 	} _body;
 
-public:
+//public:
 	PrevOut();
 	PrevOut( std::shared_ptr<unsigned char> fromRaw );
 

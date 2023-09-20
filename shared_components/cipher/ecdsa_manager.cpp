@@ -3,7 +3,7 @@
 
 namespace cipher{
 
-EVP_PKEY *ECDSAManager::_myPkey = NULL;
+EVP_PKEY *ECDSAManager::_myPkey = nullptr;
 unsigned char* ECDSAManager::_pemPass = NULL;
 unsigned int ECDSAManager::_pemPassSize = 0;
 
@@ -22,7 +22,7 @@ bool ECDSAManager::init( unsigned char* pemPass , unsigned int passSize ){
 
 	if( _myPkey == NULL ) 
 	{
-		char yn;
+		char yn; // yes or no
 		/* 既存のpemファイルを読み込めない場合 */
 		std::cout << "鍵ファイルが見つかりません\n\n新規作成 [y]\n" << "取り消し [n]\n"  << " -> ";
 		std::cin >> yn;
@@ -270,14 +270,17 @@ bool ECDSAManager::saveNewPkey( unsigned char* pemPass , unsigned int passSize )
 
 void ECDSAManager::printPkey( EVP_PKEY *pkey )
 {
+	
 	if( pkey == nullptr ) return;
 
 	BIO *output_bio = BIO_new_fp( stdout, 0 );
 
 	// error happen here 
 	EVP_PKEY_print_private( output_bio , pkey , 0 , NULL );
+	EVP_PKEY_print_public(output_bio, pkey, 0, NULL);
 	
 	BIO_vfree( output_bio );
+	
 }
 
 
@@ -322,10 +325,9 @@ int ECDSAManager::toRawPubKey( unsigned char **ret , EVP_PKEY* pkey )
 unsigned int ECDSAManager::toRawPubKey( EVP_PKEY *pkey , std::shared_ptr<unsigned char> *ret )
 {
 	unsigned char *output = nullptr; unsigned int outputLength;
-	outputLength = i2d_PUBKEY( pkey ,  &output );
-	//outputLength = i2d_PUBKEY( pkey , &output );
 
-	// *ret = std::make_shared<unsigned char>( *output );
+	outputLength = i2d_PUBKEY( pkey ,  &output );
+
 	*ret = std::shared_ptr<unsigned char>( output , [](unsigned char* ptr){
 		if( ptr ) OPENSSL_free(ptr);
 	});
@@ -477,6 +479,7 @@ bool ECDSAManager::verify( std::shared_ptr<unsigned char> sig , size_t sigLength
 {
 	std::shared_ptr<unsigned char> md; unsigned int mdLength;
 	mdLength = hash::SHAHash( msg , msgLength , &md , hashType );
+
 
 	return verify( sig , sigLength , md, mdLength ,pubKey );
 }

@@ -58,7 +58,6 @@ public:
 	int _scriptType; // pubkeyHash , signature
 	unsigned int _scriptLength; // 実用上は必要ない, 確認用
 
-	EVP_PKEY *_pkey = nullptr; // with公開鍵書き出し,署名書き出しで必要 (必須)
 	struct
 	{
 		std::shared_ptr<unsigned char> _sign;
@@ -66,12 +65,16 @@ public:
 		bool _isSigned = false;
 	} _signature;
 
+
+	EVP_PKEY *_pkey = nullptr; // with公開鍵書き出し,署名書き出しで必要 (必須)
 	std::shared_ptr<Script> _script; // unlockingScript読み書きだし用
 
 
 //public:
+	std::shared_ptr<Script> script(){ return _script; };
 	SignatureScript();
 	void pkey( EVP_PKEY *pkey );
+	EVP_PKEY *pkey();
 	void sign( std::shared_ptr<unsigned char> sign, unsigned int signLength , bool isSigned = false );
 
 	bool isSigned();

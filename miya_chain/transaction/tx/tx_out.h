@@ -61,7 +61,7 @@ private:
 	{
 		int64_t _value = 0; // 8 bytes
 		uint64_t _pkScriptBytes; // lockingScriptのバイト長
-		std::shared_ptr<PkScript> _pkScript; 
+		std::shared_ptr<PkScript> _pkScript;  // lockingScript
 		
 	} _body;
 

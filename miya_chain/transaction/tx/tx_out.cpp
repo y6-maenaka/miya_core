@@ -14,7 +14,7 @@ TxOut::TxOut()
 }
 
 
-unsigned short TxOut::exportRaw( std::shared_ptr<unsigned char> *retRaw )
+unsigned short TxOut::exportRaw( std::shared_ptr<unsigned char> *retRaw ) // これが正常に書き出せていない
 {
 	if( _pubKeyHash == nullptr )
 	{
@@ -69,9 +69,10 @@ int TxOut::importRaw( unsigned char *fromRaw )
 	// pkScriptBytes の読み込み
 	memcpy( &(_body._pkScriptBytes) , fromRaw + currentPtr , sizeof(_body._pkScriptBytes) ); currentPtr += sizeof(_body._pkScriptBytes);
 
-
 	unsigned int importedPkScriptLength;
 	importedPkScriptLength = _body._pkScript->importRaw( fromRaw + currentPtr , this->pkScriptBytes() ); currentPtr += importedPkScriptLength;
+
+	_pubKeyHash = _body._pkScript->script()->at(2).second;
 
 	return currentPtr;
 }
