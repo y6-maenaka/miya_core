@@ -39,7 +39,6 @@ public:
 
 //public:
 	PrevOut();
-	PrevOut( std::shared_ptr<unsigned char> fromRaw );
 
 	std::shared_ptr<unsigned char> txID();
 	void txID( std::shared_ptr<unsigned char> target );
@@ -48,7 +47,7 @@ public:
 	void index( int target );
 
 	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );
-	int importRaw( std::shared_ptr<unsigned char> fromRaw );
+	//int importRaw( std::shared_ptr<unsigned char> fromRaw );
 	int importRaw( unsigned char* fromRaw );
 	
 };

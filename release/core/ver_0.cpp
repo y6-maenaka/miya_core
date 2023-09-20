@@ -31,29 +31,6 @@ int main()
 	ecdsaManager.init( (unsigned char *)"hello", 5 ); // priKeyには鍵がかかっているので
 	//ecdsaManager.printPkey( ecdsaManager.myPkey() );
 
-	EVP_PKEY* dummy = EVP_PKEY_dup( ecdsaManager.myPkey() );
-	dummy = ecdsaManager.myPkey();
-
-
-
-	unsigned char buff[10]; 
-	memcpy( buff, "HelloWorld", 10 );
-	std::shared_ptr<unsigned char> wrapedBuffer = std::shared_ptr<unsigned char>( new unsigned char[10] );
-	memcpy( wrapedBuffer.get() , buff, 10 );
-	std::shared_ptr<unsigned char> sign; unsigned int signLength;
-	signLength = cipher::ECDSAManager::sign( wrapedBuffer, 10 , ecdsaManager.myPkey(),&sign);
-
-
-	std::shared_ptr<unsigned char> rawPubKey; unsigned int rawPubKeyLength;
-	rawPubKeyLength = cipher::ECDSAManager::toRawPubKey( ecdsaManager.myPkey() , &rawPubKey );
-	
-	EVP_PKEY* subKey = cipher::ECDSAManager::toPkey( rawPubKey.get(), rawPubKeyLength );
-	cipher::ECDSAManager::printPkey( subKey );
-
-
-	
-	std::cout << cipher::ECDSAManager::verify( sign , signLength , wrapedBuffer, 10 , subKey, "sha256" ) << "\n";
-
 
 
 

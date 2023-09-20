@@ -122,14 +122,6 @@ bool P2PKH::sign()
 			else
 				rawSignLength = _body._ins.at(j)->exportRawWithEmpty( &exportexRawTx );
 
-			std::cout << "## >> " << rawSignLength << "\n";
-			std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
-			for( int i=0; i<rawSignLength; i++ )
-			{
-				printf("%02X", exportexRawTx.get()[i]);
-			} std::cout << "\n";
-			std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
-
 			exportedRawTxInVector.push_back( std::make_pair(exportexRawTx,rawSignLength) ); // 生のtx_inを全て
 		}
 
@@ -137,7 +129,6 @@ bool P2PKH::sign()
 		for( auto itr : _body._outs )
 		{
 			exportedRawTxLength = itr->exportRaw( &exportexRawTx );
-			std::cout << "@@ >> " << exportedRawTxLength << "\n";
 			exportedRawTxOutVector.push_back( std::make_pair(exportexRawTx, exportedRawTxLength ) );
 		}
 		
@@ -191,25 +182,6 @@ bool P2PKH::sign()
 		if( cipher::ECDSAManager::verify( sign, signLength , exportedRaw, exportedRawLength ,_body._ins.at(i)->pkey(), "sha256" ) )
 			std::cout << "\033[32m" <<  "[ TxIn(" << i << ") ] Verify Successfyly Done" << "\033[0m" << "\n";
 
-		std::cout << "-----------------" << "\n";
-		std::cout << exportedRawTxInVector.size() << "\n";
-		std::cout << exportedRawTxOutVector.size() << "\n";
-		std::cout << exportedRawTxInsLength << "\n";
-		std::cout << exportedRawTxOutsLength << "\n";
-		std::cout << signLength << "\n";
-		std::cout << exportedRawLength  << "\n";
-
-
-		for( int i=0; i<exportedRawLength; i++ )
-		{
-			printf("%02X", exportedRaw.get()[i]);
-		} std::cout << "\n";
-		std::cout << "-----------------" << "\n";
-
-
-		std::cout << "-----------------" << "\n";
-
-
 
 		exportedRawTxInVector.clear();
 		exportedRawTxOutVector.clear();
@@ -228,11 +200,6 @@ bool P2PKH::verify()
 	std::shared_ptr<unsigned char> rawSign; unsigned int rawSignLength = 0;
 	unsigned int formatPtr = 0;
 
-	for( auto itr : _body._ins )
-	{
-		printf("%p\n", itr->signatureScript()->_pkey );
-	}
-
 
 	for( int i=0; i<_body._ins.size(); i++ )
 	{
@@ -244,14 +211,6 @@ bool P2PKH::verify()
 			else
 				rawSignLength = _body._ins.at(j)->exportRawWithEmpty( &exportexRawTx );
 
-			std::cout << "## >> " << rawSignLength << "\n";
-			std::cout << "Merker -> " << i << " - " << j << "\n";
-			std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
-			for( int i=0; i<rawSignLength; i++ )
-			{
-				printf("%02X", exportexRawTx.get()[i]);
-			} std::cout << "\n";
-			std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
 			exportedRawTxInVector.push_back( std::make_pair(exportexRawTx,rawSignLength) ); // 生のtx_inを全て
 		}
 
@@ -259,8 +218,6 @@ bool P2PKH::verify()
 		for( auto itr : _body._outs )
 		{
 			exportedRawTxLength = itr->exportRaw( &exportexRawTx );
-
-			std::cout << "@@ >> " << exportedRawTxLength << "\n";
 			exportedRawTxOutVector.push_back( std::make_pair(exportexRawTx, exportedRawTxLength ) );
 		}
 		
@@ -310,19 +267,6 @@ bool P2PKH::verify()
 		sign = _body._ins.at(i)->signatureScript()->_signature._sign;
 		signLength = _body._ins.at(i)->signatureScript()->_signature._signLength;
 
-		std::cout << "-----------------" << "\n";
-		std::cout << exportedRawTxInVector.size() << "\n";
-		std::cout << exportedRawTxOutVector.size() << "\n";
-		std::cout << exportedRawTxInsLength << "\n";
-		std::cout << exportedRawTxOutsLength << "\n";
-		std::cout << signLength << "\n";
-		std::cout << exportedRawLength  << "\n";
-
-		for( int i=0; i<exportedRawLength; i++ )
-		{
-			printf("%02X", exportedRaw.get()[i]);
-		} std::cout << "\n";
-		std::cout << "-----------------" << "\n";
 
 		if( cipher::ECDSAManager::verify(  sign ,signLength , exportedRaw, exportedRawLength ,_body._ins.at(i)->pkey(), "sha256" ) )
 			std::cout << "\033[32m" <<  "[ TxIn(" << i << ") ] Verify Successfyly Done" << "\033[0m" << "\n";
