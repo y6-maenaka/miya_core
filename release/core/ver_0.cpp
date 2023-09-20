@@ -6,6 +6,7 @@
 #include "../../miya_chain/transaction/tx/tx_in.h"
 #include "../../miya_chain/transaction/tx/tx_out.h"
 #include "../../miya_chain/transaction/p2pkh/p2pkh.h"
+#include "../../miya_chain/transaction/coinbase/coinbase.h"
 #include "../../miya_chain/transaction/script/signature_script.h"
 
 #include "../../miya_chain/transaction/txcb_table_manager/txcb_table_manager.h"
@@ -32,6 +33,15 @@ int main()
 	//ecdsaManager.printPkey( ecdsaManager.myPkey() );
 
 
+	std::shared_ptr<unsigned char> text = std::shared_ptr<unsigned char>( new unsigned char[10] ); memcpy( text.get(), "HelloWorld", 10 );
+	tx::Coinbase coinbase( 10 , text, 10 );
+
+
+	std::shared_ptr<unsigned char> rawCoinbase; unsigned int rawCoinbaseLength;
+	rawCoinbaseLength = coinbase._body._txIn->exportRaw( &rawCoinbase );
+
+
+	return 0;
 
 
 

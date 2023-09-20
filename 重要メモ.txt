@@ -10,3 +10,5 @@
 
 - ecdsaManagerのsignでsha256でハッシュしていて変更不可 修正する
 
+
+- トランザクションのlockingScirpt,unLockingScripitのscriyt_bytesが書き出す際にしかセットされない設計

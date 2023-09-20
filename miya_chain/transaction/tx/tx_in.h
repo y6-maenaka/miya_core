@@ -8,6 +8,7 @@
 #include <string.h>
 #include "openssl/evp.h"
 #include <algorithm>
+#include <cstdint>
 
 
 #include "../../../shared_components/json.hpp"
@@ -15,6 +16,7 @@ using json = nlohmann::json;
 
 namespace tx{
 class SignatureScript;
+struct PrevOut;
 
 
 constexpr unsigned short PREV_OUT_SIZE = /*TX_ID_SIZE*/20 + (32 / 8);
@@ -25,32 +27,6 @@ constexpr unsigned short PREV_OUT_SIZE = /*TX_ID_SIZE*/20 + (32 / 8);
 
 
 
-
-
-struct PrevOut
-{
-//private:
-public:
-	struct __attribute__((packed))
-	{
-		std::shared_ptr<unsigned char> _txID; // 参照するトランザクションID
-		uint32_t _index; // 参照するtx_outのインデックス
-	} _body;
-
-//public:
-	PrevOut();
-
-	std::shared_ptr<unsigned char> txID();
-	void txID( std::shared_ptr<unsigned char> target );
-	void txID( const unsigned char *target );
-	unsigned short index();
-	void index( int target );
-
-	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );
-	//int importRaw( std::shared_ptr<unsigned char> fromRaw );
-	int importRaw( unsigned char* fromRaw );
-	
-};
 
 
 
@@ -83,12 +59,13 @@ public:
 	TxIn();
 	std::shared_ptr<SignatureScript> signatureScript(){ return _body._signatureScript; }; // テスト用getter 後に削除する
 
-
+	void toCoinbaseInput( uint32_t height, std::shared_ptr<unsigned char> text , unsigned short textLength );
 	std::shared_ptr<PrevOut> prevOut(); // getter
 
 	unsigned int scriptBytes();
 	void scriptBytes( unsigned int bytes );
 
+	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );
 	unsigned int exportRawWithEmpty( std::shared_ptr<unsigned char> *retRaw ); // check OK
 	unsigned int exportRawWithPubKeyHash( std::shared_ptr<unsigned char> *retRaw ); // ckeck OK
 	unsigned int exportRawWithSignatureScript( std::shared_ptr<unsigned char> *retRaw ); // 署名値が格納されたTxInの書き出し

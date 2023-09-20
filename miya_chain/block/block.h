@@ -4,6 +4,7 @@
 
 
 #include <vector>
+#include <memory>
 
 
 namespace tx
@@ -44,7 +45,8 @@ struct Block
 {
 	BlockHeader _header;
 
-
+	//std::shared_ptr<tx::CoinBase> _coinbase;
+	//std::vector std::shared_ptr<tx::P2PKH>> _txVector; // トランザクションのリスト
 	std::vector<tx::P2PKH> _txVector; // トランザクションのリスト
 };
 

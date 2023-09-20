@@ -10,6 +10,9 @@ add_library( MIYA_CHAIN STATIC
 
 							transaction/tx/tx_in.cpp
 							transaction/tx/tx_out.cpp
+							transaction/tx/prev_out.cpp	
+
+
 
 							transaction/script/script.cpp
 							transaction/script/pk_script.cpp
@@ -34,6 +37,7 @@ add_library( MIYA_CHAIN STATIC
 							message/message.cpp
 
 							transaction/p2pkh/p2pkh.cpp
+							transaction/coinbase/coinbase.cpp
 						
 )
 

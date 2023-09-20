@@ -1,94 +1,13 @@
 #include "tx_in.h"
 
 #include "./common.h"
+#include "./prev_out.h"
 #include "../script/signature_script.h"
+#include "../script/script.h"
 #include "../../../shared_components/cipher/ecdsa_manager.h"
 
 
 namespace tx{
-
-
-
-
-PrevOut::PrevOut()
-{
-	//_body._txID = std::make_shared<unsigned char>(256/8);
-	_body._txID = std::shared_ptr<unsigned char>( new unsigned char[32] );
-}
-
-
-
-
-
-
-std::shared_ptr<unsigned char> PrevOut::txID()
-{
-	return _body._txID;
-}
-
-void PrevOut::txID( std::shared_ptr<unsigned char> target )
-{
-	_body._txID = target;
-}
-
-
-void PrevOut::txID( const unsigned char *target )
-{
-	std::copy( target , target + 32 , _body._txID.get() );
-}
-
-unsigned short PrevOut::index()
-{
-	return static_cast<unsigned short>(ntohl(_body._index));
-}
-
-void PrevOut::index( int target )
-{
-	_body._index = htonl(target);
-}
-
-
-unsigned int PrevOut::exportRaw( std::shared_ptr<unsigned char> *retRaw )
-{
-	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[ 32 + sizeof(_body._index)] ); // あとで修正する
-	memcpy( (*retRaw).get() , _body._txID.get() , 32 );
-	memcpy( (*retRaw).get() + 32, &(_body._index) , sizeof(_body._index) );
-
-	return 32 + sizeof(_body._index);
-}
-
-
-
-
-/*
-int PrevOut::importRaw( std::shared_ptr<unsigned char> fromRaw )
-{
-	if( fromRaw == nullptr ) return -1;
-
-	memcpy( _body._txID.get() , fromRaw.get() , 256/8 ); // あとでマジックナンバーは修正する
-	memcpy( &(_body._index) , fromRaw.get() + (256/8) , sizeof(_body._index) );
-
-	return ( (256/8) + sizeof(_body._index) ); // 流石に雑すぎる?
-}
-*/
-
-
-
-
-
-int PrevOut::importRaw( unsigned char* fromRaw )
-{
-	if( _body._txID == nullptr ) return -1;
-	// _body._txID = std::make_shared<unsigned char>(*fromRaw);
-
-
-	memcpy( _body._txID.get(), fromRaw  , 256/8 );
-	memcpy( &_body._index, fromRaw + (256/8) , sizeof(_body._index) );
-
-	return ( (256/8) + sizeof(_body._index) ); // 流石に雑すぎる?
-}
-
-
 
 
 
@@ -124,6 +43,35 @@ std::shared_ptr<PrevOut> TxIn::prevOut()
 }
 
 
+
+void TxIn::toCoinbaseInput( uint32_t height, std::shared_ptr<unsigned char> text , unsigned short textLength )
+{
+
+	memset( &(_body._sequence), 0x00 , sizeof(_body._sequence) ); // coinbasenのシーケンスは0
+
+	// PrevOutの初期化
+	std::shared_ptr<unsigned char> emptyTxID = std::shared_ptr<unsigned char>( new unsigned char[32] ); memset( emptyTxID.get(), 0x00 , 32 ); // magic number
+	_body._prevOut->index( UINT32_MAX );
+
+ // heightをscriptにプッシュ	
+ // 任意の文字をscriptにプッシュ
+	OP_DATA	heigthData(0x04);
+	uint32_t heightWithLissleEndian = htonl(height);
+	std::shared_ptr<unsigned char> cHeigth = std::shared_ptr<unsigned char>( new unsigned char[sizeof(height)] ); memcpy( cHeigth.get() , &heightWithLissleEndian, sizeof(height) );
+	_body._signatureScript->script()->pushBack( heigthData, cHeigth );
+
+	if( textLength - sizeof(height) <= 100 ){ //  heightと合わせて100バイトまで
+		OP_DATA msgData(static_cast<unsigned char>(textLength));
+		_body._signatureScript->script()->pushBack( msgData, text);
+	} 
+
+
+	return;
+}
+
+
+
+
 unsigned int TxIn::scriptBytes()
 {
 	return ntohl(_body._script_bytes);
@@ -134,6 +82,31 @@ void TxIn::scriptBytes( unsigned int bytes )
 {
 	_body._script_bytes = htonl(bytes);
 }
+
+
+
+
+unsigned int TxIn::exportRaw( std::shared_ptr<unsigned char> *retRaw )
+{
+	std::shared_ptr<unsigned char> rawPrevOut; unsigned int rawPrevOutLength;
+	rawPrevOutLength = _body._prevOut->exportRaw( &rawPrevOut ); // PrevOutの書き出し
+
+	std::shared_ptr<unsigned char> rawScript; unsigned int rawScriptLength;
+	rawScriptLength = _body._signatureScript->script()->exportRaw( &rawScript ); // coinbaseScriptの書き出し
+	this->scriptBytes( rawScriptLength );
+
+
+	int formatPtr = 0;
+	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[rawPrevOutLength + sizeof(_body._script_bytes) + this->scriptBytes() + sizeof(_body._sequence)] );
+
+	memcpy( (*retRaw).get() , rawPrevOut.get() , rawPrevOutLength ); formatPtr+= rawPrevOutLength;
+	memcpy( (*retRaw).get() + formatPtr , &(_body._script_bytes) , sizeof(_body._script_bytes) ); formatPtr+= sizeof(_body._script_bytes);
+	memcpy( (*retRaw).get() + formatPtr , rawScript.get() , rawScriptLength ); formatPtr+= rawScriptLength;
+	memcpy( (*retRaw).get() + formatPtr , &(_body._sequence) , sizeof(_body._sequence) );  formatPtr += sizeof(_body._sequence);
+
+	return formatPtr;
+}
+
 
 
 

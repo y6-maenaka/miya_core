@@ -4,6 +4,7 @@
 #include "../../transaction/p2pkh/p2pkh.h"
 #include "../../transaction/tx/tx_in.h"
 #include "../../transaction/tx/tx_out.h"
+#include "../../transaction/tx/prev_out.h"
 
 
 namespace miya_chain
