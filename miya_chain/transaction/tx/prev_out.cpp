@@ -36,8 +36,15 @@ void PrevOut::txID( std::shared_ptr<unsigned char> target )
 
 void PrevOut::txID( const unsigned char *target )
 {
+	if( target == nullptr )
+	{
+		memset( _body._txID.get() , 0x00 , 32 );
+		return;
+	}
 	std::copy( target , target + 32 , _body._txID.get() );
 }
+
+
 
 unsigned short PrevOut::index()
 {

@@ -14,6 +14,14 @@ TxOut::TxOut()
 }
 
 
+
+void TxOut::init( unsigned int value , std::shared_ptr<unsigned char> pubKeyHash )
+{
+	_body._value = htonll(value);
+	_pubKeyHash	= pubKeyHash;
+}
+
+
 unsigned short TxOut::exportRaw( std::shared_ptr<unsigned char> *retRaw ) // これが正常に書き出せていない
 {
 	if( _pubKeyHash == nullptr )
@@ -87,10 +95,13 @@ unsigned short TxOut::value()
 }
 
 
+
+
 unsigned int TxOut::pkScriptBytes()
 {
 	return static_cast<unsigned int >(ntohll(_body._pkScriptBytes));
 }
+
 
 
 void to_json( json& from , const TxOut &to )

@@ -308,7 +308,6 @@ unsigned int P2PKH::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 	}
 
 
-
 	unsigned int exportedRawTxInsLength = 0; std::shared_ptr<unsigned char> exportedRawTxIns; 
 	exportedRawTxInsLength = formatExportedRawTxVector( exportedRawTxInVector, &exportedRawTxIns );
 

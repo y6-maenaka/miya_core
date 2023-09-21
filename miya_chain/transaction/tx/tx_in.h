@@ -59,7 +59,6 @@ public:
 	TxIn();
 	std::shared_ptr<SignatureScript> signatureScript(){ return _body._signatureScript; }; // テスト用getter 後に削除する
 
-	void toCoinbaseInput( uint32_t height, std::shared_ptr<unsigned char> text , unsigned short textLength );
 	std::shared_ptr<PrevOut> prevOut(); // getter
 
 	unsigned int scriptBytes();

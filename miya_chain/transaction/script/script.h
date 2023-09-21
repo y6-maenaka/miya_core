@@ -68,32 +68,6 @@ enum class OP_CODES_ID : int
 };
 
 
-/*
-class Script{
-
-
-protected:
-	unsigned short OPDataSize( unsigned char target );
-	std::vector< std::pair< unsigned char , void *> > _script; // protectedメンバーへ
-	// 
-
-public:
-																														 
-
-	Script(){};
-
-	// decode
-	Script( unsigned char* rawScript , unsigned int rawScriptSize );
-	int scriptCnt(); // getter
-
-	// encode( export )
-	unsigned int exportRaw( unsigned char** ret  ); // return retSize with unsigned int 
-	unsigned int exportRawSize();
-
-	
-	int takeInScript( unsigned char* from , unsigned int fromSize );
-};
-*/
 
 
 
@@ -101,7 +75,6 @@ class Script
 {
 private:
 	std::vector< std::pair< OP_CODES, std::shared_ptr<unsigned char> > > _script;
-
 
 	unsigned int exportRawSize();
 

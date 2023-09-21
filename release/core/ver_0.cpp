@@ -34,15 +34,27 @@ int main()
 
 
 	std::shared_ptr<unsigned char> text = std::shared_ptr<unsigned char>( new unsigned char[10] ); memcpy( text.get(), "HelloWorld", 10 );
+
 	tx::Coinbase coinbase( 10 , text, 10 );
 
 
+	std::shared_ptr<unsigned char> pubKeyHash = std::shared_ptr<unsigned char>( new unsigned char[20] ); 
+	memcpy( pubKeyHash.get() , "aaaaaaaaaaaaaaaaaaaa", 20 );
+
+	std::shared_ptr<tx::TxOut> coinbaseOutput = std::shared_ptr<tx::TxOut>( new tx::TxOut );
+	coinbaseOutput->init( 1000, pubKeyHash );
+	coinbase.add( coinbaseOutput );
+
 	std::shared_ptr<unsigned char> rawCoinbase; unsigned int rawCoinbaseLength;
-	rawCoinbaseLength = coinbase._body._txIn->exportRaw( &rawCoinbase );
+	rawCoinbaseLength = coinbase.exportRaw(&rawCoinbase);
+
+	
+	std::shared_ptr<tx::Coinbase> loadedCoinbase = std::shared_ptr<tx::Coinbase>( new tx::Coinbase );
+	loadedCoinbase->importRaw( rawCoinbase, rawCoinbaseLength  );
+
 
 
 	return 0;
-
 
 
 	ControlInterface interface;

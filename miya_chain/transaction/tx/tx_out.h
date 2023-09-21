@@ -26,29 +26,6 @@ class PkScript;
 
 
 
-/*
-struct TxOut{
-
-	int64_t _value;
-	uint32_t _pkScriptBytes;
-	PkScript *_pkScript;
-	//void* pk_script;
-
-	unsigned int exportRaw( unsigned char **ret );
-	unsigned int exportRawSize();
-
-	TxOut();
-	TxOut( unsigned int value );
-
-
-	unsigned int autoTakeInPkScript( unsigned char* from ); // 取り込んだバイト分リターンする
-	unsigned int pkScriptBytes();
-
-} __attribute__((__packed__));
-*/
-
-
-
 
 
 
@@ -62,15 +39,15 @@ private:
 		int64_t _value = 0; // 8 bytes
 		uint64_t _pkScriptBytes; // lockingScriptのバイト長
 		std::shared_ptr<PkScript> _pkScript;  // lockingScript
-		
 	} _body;
 
 
 	std::shared_ptr<unsigned char> _pubKeyHash = nullptr;
 	void hello(){ std::cout << "Hello TxOut"; };
 public:
-
 	TxOut();
+
+	void init( unsigned int value , std::shared_ptr<unsigned char> pubKeyHash );
 
 	std::shared_ptr<PkScript> pkScript(){ return _body._pkScript; }; // テスト用getter 後に削除する
 
@@ -82,6 +59,7 @@ public:
 
 
 	unsigned short value();
+	void value( unsigned int value );
 	unsigned int pkScriptBytes();
 
 	friend void to_json( json& from , const TxOut &to );

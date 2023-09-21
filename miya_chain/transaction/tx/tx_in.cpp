@@ -44,31 +44,6 @@ std::shared_ptr<PrevOut> TxIn::prevOut()
 
 
 
-void TxIn::toCoinbaseInput( uint32_t height, std::shared_ptr<unsigned char> text , unsigned short textLength )
-{
-
-	memset( &(_body._sequence), 0x00 , sizeof(_body._sequence) ); // coinbasenのシーケンスは0
-
-	// PrevOutの初期化
-	std::shared_ptr<unsigned char> emptyTxID = std::shared_ptr<unsigned char>( new unsigned char[32] ); memset( emptyTxID.get(), 0x00 , 32 ); // magic number
-	_body._prevOut->index( UINT32_MAX );
-
- // heightをscriptにプッシュ	
- // 任意の文字をscriptにプッシュ
-	OP_DATA	heigthData(0x04);
-	uint32_t heightWithLissleEndian = htonl(height);
-	std::shared_ptr<unsigned char> cHeigth = std::shared_ptr<unsigned char>( new unsigned char[sizeof(height)] ); memcpy( cHeigth.get() , &heightWithLissleEndian, sizeof(height) );
-	_body._signatureScript->script()->pushBack( heigthData, cHeigth );
-
-	if( textLength - sizeof(height) <= 100 ){ //  heightと合わせて100バイトまで
-		OP_DATA msgData(static_cast<unsigned char>(textLength));
-		_body._signatureScript->script()->pushBack( msgData, text);
-	} 
-
-
-	return;
-}
-
 
 
 
@@ -258,13 +233,10 @@ int TxIn::importRaw( unsigned char *fromRaw ) // ポインタの先頭が揃っ�
 	// _body._prevOut = std::shared_ptr<PrevOut>();
 	prevOutLength = _body._prevOut->importRaw( fromRaw );  currentPtr += prevOutLength;// prevOutの取り込み
 
-	
 	memcpy( &_body._script_bytes , fromRaw + currentPtr , sizeof(_body._script_bytes) ); currentPtr += sizeof(_body._script_bytes);  // script_bytesの取り込み
 
 	unsigned int signatureScriptLength = 0;
 	signatureScriptLength = _body._signatureScript->importRaw( fromRaw + currentPtr, this->scriptBytes() ); currentPtr += signatureScriptLength; // 署名スクリプトの取り込み
-
-
 
 	unsigned char rawPubKeyLength = _body._signatureScript->script()->OP_DATALength( _body._signatureScript->script()->at(1).first );
 	_pkey = cipher::ECDSAManager::toPkey( _body._signatureScript->script()->at(1).second.get() , static_cast<unsigned short>(rawPubKeyLength) );

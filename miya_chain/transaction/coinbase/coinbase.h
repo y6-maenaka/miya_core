@@ -12,24 +12,28 @@ namespace tx
 
 struct TxIn;
 struct TxOut;
+struct CoinbaseTxIn;
 
 
 
 struct Coinbase
 {
-//private:
-public:
+private:
     struct 
 		{
       int32_t _version;
-      std::shared_ptr<TxIn> _txIn;
-			std::vector< std::shared_ptr<TxOut> > _txOuts;
+			std::shared_ptr<CoinbaseTxIn> _txIn;
+	  std::shared_ptr<TxOut> _txOut;
     } _body;
 
-//public:
+public:
 	Coinbase( unsigned int height , std::shared_ptr<unsigned char> text , unsigned int textLength );
+	Coinbase();
 
 	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );
+	void importRaw( std::shared_ptr<unsigned char> from , unsigned int fromLength );
+
+	void add( std::shared_ptr<tx::TxOut> target );
 };
 
 
