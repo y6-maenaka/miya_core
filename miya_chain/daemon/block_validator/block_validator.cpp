@@ -38,7 +38,8 @@ void BlockValidationControlBlock::importStrucretHeader( std::shared_ptr<BlockHea
 {
 	_blockHash = std::shared_ptr<unsigned char>(target->_blockHash);
 	_rawBlock._txCount = target->_txCount;
-	_structedBlock._block->_header = target->_blockHeader;
+	_structedBlock._block->header( target->_blockHeader );
+	//_structedBlock._block->header( target->_blockHeader );
 }
 
 void BlockValidationControlBlock::blockHash( unsigned char* target )
@@ -111,13 +112,13 @@ void BlockValidationControlBlock::autoStart()
 
 		// 残ったトランザクション問い合わせルーチン
 		
-		while( !(activePropagetedNodeVector.empty()) && _structedBlock._block->_txVector.size() < _rawBlock._txCount )
+		while( !(activePropagetedNodeVector.empty()) && _structedBlock._block->txVector().size() < _rawBlock._txCount )
 		{
 			pack._ekp2pBlock._sourceNodeAddr = (*nodeItr); 
 			pack._ekp2pBlock._relayKNodeAddrVector  = std::vector<std::shared_ptr<ekp2p::KNodeAddr>>(); // 中継ノードは一旦空で
 			
 			requestMSG.blockHash( _blockHash );
-			requestMSG._txSequenceFrom = _structedBlock._block->_txVector.size(); // 不足したトランザクションを途中から収集するには
+			requestMSG._txSequenceFrom = _structedBlock._block->txVector().size(); // 不足したトランザクションを途中から収集するには
 		}
 
 
@@ -275,7 +276,7 @@ void BlockValidator::start()
 					bvcb->importStrucretHeader( blockHeaderMSG ); // ブロックハッシュとブロックヘッダをセット
 					bvcb->networks( popedSB->sourceKNodeAddr() , popedSB->relayKNodeAddrVector() );
 					_pendingQueue.enqueue( bvcb ); // キューに追加する
-					bvcb->_structedBlock._block->_txVector.resize( blockHeaderMSG->txCount() ); // blockのトランザクション個数を増やす
+					bvcb->_structedBlock._block->txVector().resize( blockHeaderMSG->txCount() ); // blockのトランザクション個数を増やす
 					bvcb->autoStart(); // 検証ルーチンをスタートする
 				}
 				break;

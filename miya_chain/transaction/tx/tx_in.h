@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <memory>
 #include <variant>
+#include <string>
 #include <string.h>
 #include "openssl/evp.h"
 #include <algorithm>

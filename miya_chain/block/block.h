@@ -5,11 +5,14 @@
 
 #include <vector>
 #include <memory>
+#include <iostream>
+#include <functional>
 
 
 namespace tx
 {
-	class P2PKH;
+	struct P2PKH;
+	struct Coinbase;
 }
 
 
@@ -43,11 +46,26 @@ struct BlockHeader
 
 struct Block
 {
+private:
+//public:
 	BlockHeader _header;
+	std::shared_ptr<tx::Coinbase> _coinbase;
+	// std::vector<tx::P2PKH> _txVector; // トランザクションのリスト
+	std::vector< std::shared_ptr<tx::P2PKH> > _txVector;
 
-	//std::shared_ptr<tx::CoinBase> _coinbase;
-	//std::vector std::shared_ptr<tx::P2PKH>> _txVector; // トランザクションのリスト
-	std::vector<tx::P2PKH> _txVector; // トランザクションのリスト
+
+public:
+	Block();
+	BlockHeader header(){ return _header; };
+	void header( std::shared_ptr<BlockHeader> target );
+	void header( BlockHeader target );
+
+	std::vector< std::shared_ptr<tx::P2PKH> > txVector();
+
+	void coinbase( std::shared_ptr<tx::Coinbase> coinbase ); // setter
+	void add( std::shared_ptr<tx::P2PKH> p2pkh ); // getter
+
+	unsigned int  calcMerkleRoot( std::shared_ptr<unsigned char> *ret );
 };
 
 

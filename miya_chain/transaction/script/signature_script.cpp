@@ -81,6 +81,7 @@ unsigned int SignatureScript::importRaw( unsigned char* fromRaw , unsigned int f
 unsigned short SignatureScript::exportRawWithPubKeyHash( std::shared_ptr<unsigned char> *ret )
 {
 	if( _pkey == nullptr ) return 0;
+	if( _script->OPCount() > 0 ) _script->clear();
 
 	unsigned int rawPubKeyLength; std::shared_ptr<unsigned char> rawPueKey;
 	rawPubKeyLength = cipher::ECDSAManager::toRawPubKey( _pkey , &rawPueKey ); // 生の公開鍵を書き出す
@@ -101,6 +102,7 @@ unsigned short SignatureScript::exportRawWithSignatureScript( std::shared_ptr<un
 	// 書き出す署名スクリプトは sign + 公開鍵
 
 	if( _pkey == nullptr ) return 0;
+	if( _script->OPCount() > 0 ) _script->clear();
 
 	/*	
 	unsigned int rawPubKeyLength; std::shared_ptr<unsigned char> rawPueKey;

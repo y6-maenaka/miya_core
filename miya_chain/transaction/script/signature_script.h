@@ -28,25 +28,6 @@ enum class SCRIPT_TYPE : int {
 
 
 
-/*
-class SignatureScript : public Script {
-
-private:
-	int _scriptType;
-
-public:
-	SignatureScript() : _scriptType(0) {};
-	
-	int scriptType(); // getter
-	
-	EVP_PKEY *pubKey();
-	unsigned int sig( unsigned char **sig );
-
-	// 署名関係
-	SignatureScript *createSigScript( unsigned char* sig , unsigned int sigSize , EVP_PKEY *pkey );
-	SignatureScript *createHashedPubKeyScript( EVP_PKEY *pkey ); 
-};
-*/
 
 
 

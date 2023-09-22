@@ -3,6 +3,7 @@
 #include "./coinbase_tx_in.h"
 #include "../tx/tx_out.h"
 
+#include "../../../shared_components/hash/sha_hash.h"
 
 
 namespace tx
@@ -70,9 +71,22 @@ void Coinbase::importRaw( std::shared_ptr<unsigned char> from , unsigned int fro
 }
 
 
+
 void Coinbase::add( std::shared_ptr<tx::TxOut> target )
 {
 	_body._txOut = target;
+}
+
+
+
+
+unsigned int Coinbase::calcTxID( std::shared_ptr<unsigned char> *ret )
+{
+
+	std::shared_ptr<unsigned char> exportedCoinbase; unsigned int exportedCoinbaseLength;
+	exportedCoinbaseLength = this->exportRaw( &exportedCoinbase );
+	
+	return hash::SHAHash( exportedCoinbase, exportedCoinbaseLength , ret , "sha256" );
 }
 
 

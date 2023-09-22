@@ -3,6 +3,8 @@
 #include "../../shared_components/cipher/ecdsa_manager.h"
 #include "../../shared_components/middle_buffer/middle_buffer.h"
 
+#include "../../miya_chain/block/block.h"
+
 #include "../../miya_chain/transaction/tx/tx_in.h"
 #include "../../miya_chain/transaction/tx/tx_out.h"
 #include "../../miya_chain/transaction/p2pkh/p2pkh.h"
@@ -35,7 +37,7 @@ int main()
 
 	std::shared_ptr<unsigned char> text = std::shared_ptr<unsigned char>( new unsigned char[10] ); memcpy( text.get(), "HelloWorld", 10 );
 
-	tx::Coinbase coinbase( 10 , text, 10 );
+	tx::Coinbase _coinbase( 10 , text, 10 );
 
 
 	std::shared_ptr<unsigned char> pubKeyHash = std::shared_ptr<unsigned char>( new unsigned char[20] ); 
@@ -43,18 +45,16 @@ int main()
 
 	std::shared_ptr<tx::TxOut> coinbaseOutput = std::shared_ptr<tx::TxOut>( new tx::TxOut );
 	coinbaseOutput->init( 1000, pubKeyHash );
-	coinbase.add( coinbaseOutput );
+	_coinbase.add( coinbaseOutput );
 
 	std::shared_ptr<unsigned char> rawCoinbase; unsigned int rawCoinbaseLength;
-	rawCoinbaseLength = coinbase.exportRaw(&rawCoinbase);
+	rawCoinbaseLength = _coinbase.exportRaw(&rawCoinbase);
 
 	
 	std::shared_ptr<tx::Coinbase> loadedCoinbase = std::shared_ptr<tx::Coinbase>( new tx::Coinbase );
 	loadedCoinbase->importRaw( rawCoinbase, rawCoinbaseLength  );
 
 
-
-	return 0;
 
 
 	ControlInterface interface;
@@ -70,19 +70,32 @@ int main()
 	std::shared_ptr<unsigned char> rawTx; unsigned int rawTxLength;
 	rawTxLength = loadedP2PKH->exportRaw( &rawTx );
 
-	std::cout << rawTxLength << "\n";
-	for( int i=0 ;i<rawTxLength ; i++)
-	{
-		printf("%02X", rawTx.get()[i]);
-	} std::cout << "\n";
 
+	/* インポート */
 
 	std::shared_ptr<tx::P2PKH> importP2PKH = std::make_shared<tx::P2PKH>();
 	importP2PKH->importRaw( rawTx , rawTxLength);
 
 	importP2PKH->verify();
 
+
+
+	block::Block block;
+	block.coinbase( std::make_shared<tx::Coinbase>(_coinbase) );
+	block.add( loadedP2PKH );
+	block.add( importP2PKH );
+
+	std::shared_ptr<unsigned char> mRoot; unsigned int mRootLength;
+	mRootLength = block.calcMerkleRoot( &mRoot );
+	std::cout << "----------------------------------------------------" << "\n";
+	for( int i=0; i<mRootLength; i++ )
+	{
+		printf("%02X", mRoot.get()[i]);
+	} std::cout << "\n";
+	std::cout << "----------------------------------------------------" << "\n";
+	
 	return 0;
+
 
 	auto p2pManager = std::make_shared<ekp2p::EKP2P>();
 	std::thread p2pManagerTH([p2pManager](){

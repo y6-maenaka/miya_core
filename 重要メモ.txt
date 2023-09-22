@@ -14,3 +14,4 @@
 - トランザクションのlockingScirpt,unLockingScripitのscriyt_bytesが書き出す際にしかセットされない設計
 
 - coinbaseInputもsignatureScriptで兼用しているため,読み書き込みが一部おかしい
+-ノーマルtx_inとコインベースtx_inがほぼ似ているがそれぞれ独立して作っている

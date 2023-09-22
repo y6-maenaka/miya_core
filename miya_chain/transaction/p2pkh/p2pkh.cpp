@@ -337,6 +337,9 @@ unsigned int P2PKH::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 	memcpy( (*retRaw).get() + formatPtr , exportedRawTxOuts.get() , exportedRawTxOutsLength ); formatPtr += exportedRawTxOutsLength;
 
 
+	//std::cout << "### " << _body._ins.at(0)->scriptBytes() << "\n";
+	//std::cout << "### " << _body._outs.at(0)->pkScriptBytes() << "\n";
+
 	return formatPtr;
 }
 
@@ -403,6 +406,28 @@ unsigned int P2PKH::importRaw( std::shared_ptr<unsigned char> fromRaw, unsigned 
 }
 
 
+
+
+
+unsigned int P2PKH::calcTxID( std::shared_ptr<unsigned char> *ret )
+{
+	std::shared_ptr<unsigned char> exportedP2PKH; unsigned int exportedP2PKHLength;
+	exportedP2PKHLength = this->exportRaw( &exportedP2PKH );
+
+
+
+	/*
+	std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
+	std::cout << exportedP2PKHLength << "\n";
+	for( int i=0; i<exportedP2PKHLength; i++)
+	{
+		printf("%02X", exportedP2PKH.get()[i]);
+	} std::cout << "\n";
+	std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
+	*/
+
+	return hash::SHAHash( exportedP2PKH, exportedP2PKHLength , ret , "sha256" );
+}
 
 /*
 int P2PKH::TxInCnt()

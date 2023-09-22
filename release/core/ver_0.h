@@ -4,7 +4,7 @@
 
 
 #include <iostream>
-
+#include <memory>
 
 //#include "../../miya_core/transaction/script/pk_script.h"
 

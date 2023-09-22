@@ -134,9 +134,6 @@ unsigned int TxIn::exportRawWithPubKeyHash( std::shared_ptr<unsigned char> *retR
 	/* 自身の公開鍵ハッシュの書き出し */
 	std::shared_ptr<unsigned char> exportedPubKeyHash; unsigned int exportedPubKeyHashLength = 0;
 	exportedPubKeyHashLength = _body._signatureScript->exportRawWithPubKeyHash( &exportedPubKeyHash );
-
-
-	//_body._script_bytes = htonl(exportedPubKeyHashLength); // スクリプト長のセット
 	this->scriptBytes(exportedPubKeyHashLength);
 
 
@@ -213,16 +210,6 @@ EVP_PKEY *TxIn::pkey()
 	return _pkey;
 }
 
-
-
-/*
-int TxIn::importRaw( std::shared_ptr<unsigned char> fromRaw )
-{
-	unsigned int currentPtr = 0;
-	_body._prevOut = std::make_shared<PrevOut>( fromRaw ); // prevOutの取り込み
-	memcpy( &_body._script_bytes , fromRaw.get() + currentPtr , sizeof(_body._script_bytes) );
-}
-*/
 
 
 int TxIn::importRaw( unsigned char *fromRaw ) // ポインタの先頭が揃っていることを確認

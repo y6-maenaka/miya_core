@@ -34,6 +34,8 @@ public:
 	void importRaw( std::shared_ptr<unsigned char> from , unsigned int fromLength );
 
 	void add( std::shared_ptr<tx::TxOut> target );
+
+	unsigned int calcTxID( std::shared_ptr<unsigned char> *ret ); // 一旦全てを書き出してハッシュするため頻繁には呼び出さないこと
 };
 
 
