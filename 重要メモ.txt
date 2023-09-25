@@ -15,3 +15,6 @@
 
 - coinbaseInputもsignatureScriptで兼用しているため,読み書き込みが一部おかしい
 -ノーマルtx_inとコインベースtx_inがほぼ似ているがそれぞれ独立して作っている
+
+- validationScriptのOP_CODEの不正チェックが甘い -> 少なくともpopできたか否かのチェックはする
+

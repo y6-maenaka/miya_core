@@ -10,18 +10,51 @@
 #include <unistd.h>
 
 
+
 namespace tx{
 
+
+class Script;
+class ScriptStack;
+class ValidationStack;
+class ValidationOptions;
+
+
+
+
+
 // 継承で作った方がいい
-struct OP_COMMON{ static constexpr unsigned char _code = 0x00; };
-struct OP_DUP{ static constexpr unsigned char _code = 0x76; };
-struct OP_HASH_160{ static constexpr unsigned char _code = 0xa9; };
-struct OP_EQUALVERIFY{ static constexpr unsigned char _code = 0x88; };
-struct OP_CHECKSIG{ static constexpr unsigned char _code = 0xac; };
+struct OP_COMMON{
+	static constexpr unsigned char _code = 0x00; 
+};
+
+struct OP_DUP
+{ 
+	static constexpr unsigned char _code = 0x76; 
+	static bool exe( ValidationStack *stack , ValidationOptions *optionsPtr = nullptr );
+};
+
+struct OP_HASH_160{ 
+	static constexpr unsigned char _code = 0xa9; 
+	static bool exe( ValidationStack *stack , ValidationOptions *optionsPtr = nullptr );
+};
+
+struct OP_EQUALVERIFY
+{ 
+	static constexpr unsigned char _code = 0x88; 
+	static bool exe( ValidationStack *stack , ValidationOptions *optionsPtr = nullptr );
+};
+
+struct OP_CHECKSIG{ 
+	static constexpr unsigned char _code = 0xac;
+	static bool exe( ValidationStack *stack , ValidationOptions *optionsPtr = nullptr );
+};
+
 struct OP_DATA
 { 
 	unsigned char _code = 0x00; 
 	OP_DATA( unsigned char length ){ _code = length; };
+	static bool exe( ValidationStack *stack , ValidationOptions *optionsPtr = nullptr );
 };
 
 
@@ -33,14 +66,6 @@ constexpr OP_CHECKSIG _OP_CHECKSIG;
 
 
 
-/*
-typedef unsigned char _OP_DUP;  constexpr _OP_DUP OP_DUP = 0x76; // 76
-typedef unsigned char _OP_HASH_160;  constexpr _OP_HASH_160 OP_HASH_160 = 0xa9; // 169 
-typedef unsigned char _OP_EQUALVERIFY;  constexpr _OP_EQUALVERIFY OP_EQUALVERIFY = 0x88; // 136
-typedef unsigned char _OP_CHECKSIG;  constexpr _OP_CHECKSIG OP_CHECKSIG = 0xac; // 172
-typedef unsigned char _OP_DATA; 
-*/
-
 using OP_CODES = std::variant < OP_COMMON , OP_DUP, OP_HASH_160, OP_EQUALVERIFY, OP_CHECKSIG, OP_DATA>;
 
 
@@ -51,7 +76,8 @@ template <typename T>
 		return op._code;
 	}
 };
-				
+
+
 
 
 
@@ -59,12 +85,12 @@ template <typename T>
 
 enum class OP_CODES_ID : int
 {
-	COMMON = 0,
-	OP_DUP = 1 ,
-	OP_HASH_160,
-	OP_EQUALVERIFY,
-	OP_CHECKSIG,
-	OP_DATA
+COMMON = 0,
+OP_DUP = 1 ,
+OP_HASH_160,
+OP_EQUALVERIFY,
+OP_CHECKSIG,
+OP_DATA
 };
 
 
@@ -89,15 +115,19 @@ private:
 public:
 	//void push_back( std::variant<_OP_DUP, _OP_HASH_160, _OP_EQUALVERIFY, _OP_CHECKSIG> OP_CODE , std::shared_ptr<unsigned char> data = nullptr );
 	void pushBack( OP_CODES opcode , std::shared_ptr<unsigned char> data = nullptr );
-	unsigned int OP_DATALength( OP_CODES opcode );
-	unsigned int OP_DATALength( unsigned char opcode );
-	
+	static unsigned int OP_DATALength( OP_CODES opcode );
+	static unsigned int OP_DATALength( unsigned char opcode );
+
 	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );
 	int importRaw( unsigned char *fromRaw , unsigned int fromRawLength );
 
 	int OPCount();
 	void clear();
 	std::pair< OP_CODES , std::shared_ptr<unsigned char> > at( int i );
+
+
+	std::vector< std::pair< OP_CODES, std::shared_ptr<unsigned char> > >::iterator begin();
+	std::vector< std::pair< OP_CODES, std::shared_ptr<unsigned char> > >::iterator end();
 };
 
 

@@ -9,6 +9,53 @@ namespace block
 
 
 
+
+BlockHeader::BlockHeader()
+{
+	_time = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+}
+
+
+void BlockHeader::merkleRoot( std::shared_ptr<unsigned char> target )
+{
+	memcpy( _merkleRoot , target.get() , 32 );
+}
+
+
+
+void BlockHeader::updateTime()
+{	
+	_time = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+}
+
+
+unsigned int BlockHeader::exportRaw( std::shared_ptr<unsigned char> *retRaw )
+{
+	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[sizeof(struct BlockHeader)] );
+	memcpy( (*retRaw).get(), this, sizeof(struct BlockHeader) );
+}
+
+
+
+uint32_t BlockHeader::nonce()
+{
+	return _nonce;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Block::Block()
 {
 	_coinbase = nullptr;
@@ -109,6 +156,19 @@ unsigned int Block::calcMerkleRoot( std::shared_ptr<unsigned char> *ret )
 	return 32;
 }
 
+
+
+
+void Block::merkleRoot( std::shared_ptr<unsigned char> target )
+{
+	return _header.merkleRoot( target );
+}
+
+
+unsigned int Block::exportHeader( std::shared_ptr<unsigned char> *retRaw )
+{
+	return _header.exportRaw( retRaw );
+}
 
 
 

@@ -1,11 +1,84 @@
 #include "script.h"
 
 
+#include "script_validator.h"
+#include "../../../shared_components/hash/sha_hash.h"
+#include "../../../shared_components/cipher/ecdsa_manager.h"
+
 namespace tx{
 
 
 // std::visitでOP_CODESからコードを取得するのに必要
 GetRawCode getRawCode; // st::visitの第一引数にはラムダ or 関数オブジェクトの関数型である必要があるため
+
+
+
+
+
+
+bool OP_DUP::exe( ValidationStack *stack, ValidationOptions *optionsPtr )
+{
+	/* スタックのトップから要素を一つ取り出して複製してプッシュ */
+	std::shared_ptr< std::pair<OP_CODES, std::shared_ptr<unsigned char>> > popedElem = stack->popBack(); 
+	stack->pushBack( popedElem->first, popedElem->second );
+	stack->pushBack( popedElem->first, popedElem->second );
+	return true;
+}
+
+bool OP_HASH_160::exe( ValidationStack *stack , ValidationOptions *optionsPtr  )
+{
+
+	std::shared_ptr< std::pair<OP_CODES, std::shared_ptr<unsigned char>> > popedElem = stack->popBack(); 
+	std::shared_ptr<unsigned char> md; unsigned int mdLength;
+	mdLength = hash::SHAHash( popedElem->second, Script::OP_DATALength(popedElem->first) , &md , "sha256" );
+
+	OP_DATA opData(0xa0);
+	stack->pushBack( opData, md );
+
+	return true;
+}
+
+bool OP_EQUALVERIFY::exe( ValidationStack *stack ,ValidationOptions *optionsPtr  )
+{
+	
+	std::shared_ptr< std::pair<OP_CODES, std::shared_ptr<unsigned char>> > popedElem_1 = stack->popBack(); 
+	std::shared_ptr< std::pair<OP_CODES, std::shared_ptr<unsigned char>> > popedElem_2 = stack->popBack(); 
+
+	if( memcmp( popedElem_1->second.get() , popedElem_2->second.get(), Script::OP_DATALength(popedElem_1->first) ) == 0 ) return true;
+
+	return false;
+};
+
+
+bool OP_CHECKSIG::exe( ValidationStack *stack , ValidationOptions *optionsPtr ) // 検証にはトランザクションハッシュデータが必要がだが
+{
+	std::shared_ptr< std::pair<OP_CODES, std::shared_ptr<unsigned char>> > popedElem1 = stack->popBack(); // 正常であれば公開鍵が格納されている
+	std::shared_ptr< std::pair<OP_CODES, std::shared_ptr<unsigned char>> > popedElem2 = stack->popBack();  // 正常であれば署名が格納されている
+
+	EVP_PKEY *pubKey = NULL;
+	pubKey = cipher::ECDSAManager::toPkey( popedElem1->second.get() , Script::OP_DATALength(popedElem1->first) );
+	
+	return cipher::ECDSAManager::verify( popedElem2->second, Script::OP_DATALength(popedElem2->first), optionsPtr->_txHash.first , optionsPtr->_txHash.second , pubKey ,"sha256" );
+};
+
+bool OP_DATA::exe( ValidationStack *stack , ValidationOptions *optionsPtr  )
+{
+
+	return false;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -82,11 +155,6 @@ unsigned char Script::rawOPCode( OP_CODES opcode )
 
 unsigned short Script::exportScriptContentSize( OP_CODES opcode )
 {
-	/*
-	if( opcode.index() == static_cast<int>(OP_CODES_ID::OP_DATA) ) // opcodeがOP_DATAだった場合は格納しているデータのバイト長を返却する
-		//return static_cast<unsigned short>(std::get<static_cast<int>(OP_CODES_ID::OP_DATA)>(opcode)) + 1;
-		return static_cast<unsigned short>(std::get<OP_DATA>(opcode)._length);
-	*/
 
 	if( std::holds_alternative<OP_DATA>(opcode) )
 		return this->OP_DATALength(opcode) + 1;
@@ -191,6 +259,28 @@ std::pair< OP_CODES , std::shared_ptr<unsigned char> > Script::at( int i )
 {
 	return _script.at(i);
 }
+
+
+
+
+
+
+
+std::vector< std::pair< OP_CODES, std::shared_ptr<unsigned char> > >::iterator Script::begin()
+{
+	return _script.begin();
+}
+
+
+std::vector< std::pair< OP_CODES, std::shared_ptr<unsigned char> > >::iterator Script::end()
+{
+	return _script.end();
+}
+
+
+
+
+
 
 /*
 int Script::scriptCnt()

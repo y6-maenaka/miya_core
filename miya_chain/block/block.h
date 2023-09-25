@@ -7,6 +7,7 @@
 #include <memory>
 #include <iostream>
 #include <functional>
+#include <chrono>
 
 
 namespace tx
@@ -23,17 +24,33 @@ namespace block
 
 
 
+/*
+ nBit について
+ 前2bytesが指数部 ( 00000000 00000000 ) 
+ 後ろ2bytseがマントリップ ( 00000000 00000000 ) // 0の個数
+ */
+
+
 
 
 
 struct BlockHeader
 {
-	int32_t _version;
+	int32_t _version; // 
 	unsigned char _previousBlockHeaderHash[32];
-	unsigned char _merkleRootHash[32];
+	unsigned char _merkleRoot[32];
 	uint32_t _time; // このブロックが生成された時のタイムスタンプ
 	uint32_t _nBits; // 採掘難易度 目標のnonce値
 	uint32_t _nonce; // ナンス値
+
+
+	BlockHeader();
+	void merkleRoot( std::shared_ptr<unsigned char> target );
+	void updateTime();
+	uint32_t nonce();
+
+	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );
+
 
 } __attribute__((packed)); 
 
@@ -50,7 +67,6 @@ private:
 //public:
 	BlockHeader _header;
 	std::shared_ptr<tx::Coinbase> _coinbase;
-	// std::vector<tx::P2PKH> _txVector; // トランザクションのリスト
 	std::vector< std::shared_ptr<tx::P2PKH> > _txVector;
 
 
@@ -65,7 +81,10 @@ public:
 	void coinbase( std::shared_ptr<tx::Coinbase> coinbase ); // setter
 	void add( std::shared_ptr<tx::P2PKH> p2pkh ); // getter
 
-	unsigned int  calcMerkleRoot( std::shared_ptr<unsigned char> *ret );
+	unsigned int calcMerkleRoot( std::shared_ptr<unsigned char> *ret );
+	void merkleRoot( std::shared_ptr<unsigned char> target );
+
+	unsigned int exportHeader( std::shared_ptr<unsigned char> *retRaw );
 };
 
 

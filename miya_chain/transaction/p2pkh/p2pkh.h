@@ -65,6 +65,7 @@ public:
 	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw ); // 書き出しに先駆けて必ず署名を完了させる必要がある
 	unsigned int importRaw( std::shared_ptr<unsigned char> fromRaw , unsigned int fromRawLength );
 
+	unsigned int txHashOnTxIn( int index , std::shared_ptr<unsigned char> *retRaw );
 
 	unsigned int calcTxID( std::shared_ptr<unsigned char> *ret ); // 一旦全てを書き出してハッシュするため頻繁には呼び出さないこと
 	/*
