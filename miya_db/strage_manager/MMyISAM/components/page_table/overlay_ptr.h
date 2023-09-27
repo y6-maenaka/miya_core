@@ -34,6 +34,7 @@ private:
 public:
 	optr(){}; 
 	optr( unsigned char *addr ); // フリーメモリ管理領域にはアクセスしないようにする
+	optr( unsigned char *addr , CacheTable *cacheTable );
 
 	void cacheTable( CacheTable *cacheTable );
 	CacheTable *cacheTable(){ return _cacheTable; };
@@ -50,7 +51,8 @@ public:
 	void value( unsigned char target ); // setter
 
 	//OverlayPtr* operator []( size_t n ); 
-	std::unique_ptr<optr> operator +( unsigned long addend ) const;
+	std::shared_ptr<optr> operator +( unsigned long addend ) const;
+	//std::shared_ptr<optr> operator +( unsigned long addend ) const;
 
 	std::unique_ptr<unsigned char> mapToMemory( unsigned int size );
 

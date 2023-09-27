@@ -20,7 +20,73 @@
 
 int main(){
 
+
+	int dataFd = open("../miya_db/table_files/test_table/test.oswap", O_RDWR , (mode_t)0600 );
+	int freeListFd = open("../miya_db/table_files/test_table/test.ofl", O_RDWR , (mode_t)0600 );
+
+
+	// オーバレイメモリマネージャーの初期化
+	miya_db::OverlayMemoryManager *oMemoryManager = new miya_db::OverlayMemoryManager(dataFd , freeListFd );
+
+
+	std::cout << miya_db::O_NODE_ITEMSET_SIZE << "\n";
+
+	miya_db::OBtree btree( (std::shared_ptr<miya_db::OverlayMemoryManager>(oMemoryManager)) );
+	std::shared_ptr<miya_db::ONode>	rootNode = btree.rootONode();
+
+
+
+	std::shared_ptr<unsigned char> key_1 = std::shared_ptr<unsigned char>( new unsigned char[20] );
+	memcpy( key_1.get() , "aaaaaaaaaaaaaaaaaaaa", 20 );
+	btree.rootONode()->add( key_1 );
+
+
+
+	std::shared_ptr<unsigned char> key_3 = std::shared_ptr<unsigned char>( new unsigned char[20] );
+	memcpy( key_3.get() , "cccccccccccccccccccc", 20 );
+	btree.rootONode()->add( key_3 );
+
+
+	std::cout << "-------------------------------------------------" << "\n";
+
+	std::shared_ptr<unsigned char> key_2 = std::shared_ptr<unsigned char>( new unsigned char[20] );
+	memcpy( key_2.get() , "bbbbbbbbbbbbbbbbbbbb", 20 );
+	btree.rootONode()->add( key_2 );
+
+
+	std::cout << "Add Done" << "\n";
+
 	
+	std::shared_ptr<miya_db::ONode> newRootNode = rootNode->parent();
+	std::shared_ptr<miya_db::ONode> child_1 = newRootNode->child(0);
+	std::shared_ptr<miya_db::ONode> child_2 = newRootNode->child(1);
+
+	std::cout << "=======================================================" << "\n";
+	std::cout << newRootNode->itemSet()->keyCount() << "\n";
+	std::cout << newRootNode->itemSet()->childCount() << "\n";
+	std::shared_ptr<miya_db::optr> pullKey_0 = newRootNode->itemSet()->key(0);
+	pullKey_0->printValueContinuously(20); std::cout << "\n";
+
+	std::cout << "------------------------------" << "\n";
+	std::cout << "child(1)" << "\n";
+	child_1->itemSet()->Optr()->printAddr(); std::cout << "\n";
+	std::cout << child_1->itemSet()->keyCount() << "\n";
+	std::cout << child_1->itemSet()->childCount() << "\n";
+	std::shared_ptr<miya_db::optr> pullKey_1 = child_1->itemSet()->key(0);
+	pullKey_1->printValueContinuously(20); std::cout << "\n";
+
+
+	std::cout << "------------------------------" << "\n";
+	std::cout << "child(2)" << "\n";
+	child_2->itemSet()->Optr()->printAddr(); std::cout << "\n";
+	std::cout << child_2->itemSet()->keyCount() << "\n";
+	std::cout << child_2->itemSet()->childCount() << "\n";
+	std::shared_ptr<miya_db::optr> pullKey_2 = child_2->itemSet()->key(0);
+	pullKey_2->printValueContinuously(20); std::cout << "\n";
+
+
+
+
 	/*
 	MiddleBuffer buffer(100);
 
@@ -283,7 +349,7 @@ int main(){
 	omemcpy( tmp.get() , (void*)hello , 12 );
 	*/	
 
-	deallocate_test_pattern_1();
+	//deallocate_test_pattern_1();
 	//common_test();
 	//optr_test();
 

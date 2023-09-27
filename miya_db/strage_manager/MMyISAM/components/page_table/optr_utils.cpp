@@ -44,6 +44,45 @@ void *omemcpy( void* dest , optr *src , unsigned long n )
 
 
 
+std::shared_ptr<optr> omemcpy( std::shared_ptr<optr> dest , std::shared_ptr<optr> src , unsigned long n )
+{	 
+	for( unsigned long i = 0; i<n; i++ )
+		( *(dest.get()) + i)->value( (*(src.get()) + i)->value() );
+
+	return dest;
+};
+
+
+
+
+std::shared_ptr<optr> omemcpy( std::shared_ptr<optr> dest , void *src , unsigned long n )
+{
+	for( unsigned long i = 0; i<n; i++)
+	{
+		//printf(" [%02X]\n", (*dest + i)->value() );
+		(*(dest.get()) + i)->value( static_cast<unsigned char*>(src)[i] );	
+	}
+
+	return dest;
+};
+
+
+void *omemcpy( void* dest , std::shared_ptr<optr> src , unsigned long n )
+{
+	for( unsigned long i = 0; i<n; i++ )	
+		(static_cast<unsigned char*>(dest))[i] = (*(src.get()) +i)->value();
+
+	return dest;
+}
+
+
+
+
+
+
+
+
+
 
 
 

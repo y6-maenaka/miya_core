@@ -52,6 +52,14 @@ optr *omemcpy( optr *dest , void *src , unsigned long n );
 void *omemcpy( void* dest , optr *src , unsigned long n );
 
 
+
+std::shared_ptr<optr> omemcpy( std::shared_ptr<optr> dest , std::shared_ptr<optr> src , unsigned long n );
+std::shared_ptr<optr> omemcpy( std::shared_ptr<optr> dest , void *src , unsigned long n );
+void *omemcpy( void* dest , std::shared_ptr<optr> src , unsigned long n );
+
+
+
+
 /*
 optr *omemcpy( optr* dest , optr* src , unsigned long n )
 optr *omemcpy( optr *dest , void *src , unsigned long n );

@@ -70,7 +70,8 @@ std::unique_ptr<ControlBlock> MetaBlock::freeBlockHead() // 要修正
 	if( ocmp( (*_primaryOptr + (CONTROL_BLOCK_HEAD_OFFSET)).get() , addrZero , CONTROL_BLOCK_LENGTH ) == 0 )
 		return nullptr;
 
-	optr *retOptr = new optr;
+	//optr *retOptr = new optr;
+	std::shared_ptr<optr> retOptr = std::make_shared<optr>();
 	unsigned char retAddr[5] = {0,0,0,0,0};
 	omemcpy( retAddr , (*_primaryOptr + CONTROL_BLOCK_HEAD_OFFSET).get() , CONTROL_BLOCK_LENGTH );
 	retOptr->cacheTable( _primaryOptr->cacheTable() ); retOptr->addr( retAddr );
@@ -124,7 +125,8 @@ std::unique_ptr<ControlBlock> MetaBlock::allocatedBlockHead()
 	if( ocmp( (*_primaryOptr + (ALLOCATED_BLOCK_HEAD_OFFSET)).get() , addrZero , CONTROL_BLOCK_LENGTH ) == 0 )
 		return nullptr;
 
-	optr *retOptr = new optr;
+	//optr *retOptr = new optr;
+	std::shared_ptr<optr> retOptr = std::make_shared<optr>();
 	unsigned char retAddr[5]; memset( retAddr , 0x00 , CONTROL_BLOCK_LENGTH ); omemcpy( retAddr , (*_primaryOptr + ALLOCATED_BLOCK_HEAD_OFFSET).get() , CONTROL_BLOCK_LENGTH );
 	retOptr->cacheTable( _primaryOptr->cacheTable() ); retOptr->addr( retAddr );
 	ControlBlock retControlBlock( retOptr );
@@ -137,12 +139,7 @@ std::unique_ptr<ControlBlock> MetaBlock::allocatedBlockHead()
 
 void MetaBlock::unUsedControlBlockHead( ControlBlock* targetUnUsedControlBlock )
 {
-	std::cout << " ----- unUsedControlBlockHead func Called ---- " << "\n";
-	if( targetUnUsedControlBlock == nullptr ) std::cout << "nullptr" << "\n";
-	else targetUnUsedControlBlock->blockOptr()->printAddr(); std::cout << "\n";
-	std::cout << "-----------------" << "\n";
-
-
+	
 
 	if( _primaryOptr == nullptr ){
  		return;
@@ -155,13 +152,10 @@ void MetaBlock::unUsedControlBlockHead( ControlBlock* targetUnUsedControlBlock )
 	}
 	else
 	{
-		std::cout << "check point 1" << "\n";
 		if( unUsedControlBlockHead() == nullptr )
 		{
-			std::cout << "chek point 2" << "\n";
 			omemcpy( ((*_primaryOptr) + UNUSED_BLOCK_HEAD_OFFSET ).get() , targetUnUsedControlBlock->blockAddr() , CONTROL_BLOCK_LENGTH ); // 先頭未使用ブロックが置き換えられる
 			((*_primaryOptr) + UNUSED_BLOCK_HEAD_OFFSET	)->printValueContinuously( 5 ); std::cout << "\n";
-			unUsedControlBlockHead()->blockOptr()->printAddr(); std::cout << "\n";
 
 			unUsedControlBlockHead()->prevControlBlock( unUsedControlBlockHead().get() );
 			unUsedControlBlockHead()->nextControlBlock( unUsedControlBlockHead().get() );
@@ -169,7 +163,6 @@ void MetaBlock::unUsedControlBlockHead( ControlBlock* targetUnUsedControlBlock )
 			return;
 		}
 
-		std::cout << "check point 3" << "\n";
 		targetUnUsedControlBlock->nextControlBlock( unUsedControlBlockHead().get() );
 		targetUnUsedControlBlock->prevControlBlock( unUsedControlBlockHead()->prevControlBlock().get() );
 
@@ -196,7 +189,8 @@ std::unique_ptr<ControlBlock> MetaBlock::unUsedControlBlockHead()
 	unsigned char* retAddr = new unsigned char[5];
  	omemcpy( retAddr , (*_primaryOptr + UNUSED_BLOCK_HEAD_OFFSET).get() , CONTROL_BLOCK_LENGTH );
 
-	optr *retOptr = new optr( retAddr ); retOptr->cacheTable( _primaryOptr->cacheTable() ); 
+	//optr *retOptr = new optr( retAddr ); 
+	std::shared_ptr<optr> retOptr = std::shared_ptr<optr>( new optr(retAddr) ); retOptr->cacheTable( _primaryOptr->cacheTable() ); 
 	ControlBlock retControlBlock( retOptr );
 
 	return std::make_unique<ControlBlock>( retControlBlock );
@@ -209,8 +203,6 @@ std::unique_ptr<ControlBlock> MetaBlock::unUsedControlBlockHead()
 std::unique_ptr<ControlBlock> MetaBlock::useUnUsedControlBlockHead()
 {
 
-	std::cout << "useUnUsedControlBlockHead() called" << "\n";
-
 	if( _primaryOptr == nullptr ) return nullptr;
 
 	unsigned char addrZero[5] = {0, 0, 0, 0, 0};
@@ -220,7 +212,8 @@ std::unique_ptr<ControlBlock> MetaBlock::useUnUsedControlBlockHead()
 	unsigned char* retAddr = new unsigned char[5];
  	omemcpy( retAddr , (*_primaryOptr + UNUSED_BLOCK_HEAD_OFFSET).get() , CONTROL_BLOCK_LENGTH );
 
-	optr *retOptr = new optr( retAddr ); retOptr->cacheTable( _primaryOptr->cacheTable() ); 
+	//optr *retOptr = new optr( retAddr ); 
+	std::shared_ptr<optr> retOptr = std::shared_ptr<optr>( new optr(retAddr) ); retOptr->cacheTable( _primaryOptr->cacheTable() ); 
 	ControlBlock retControlBlock( retOptr );
 
 	/* 以降は未使用ブロックを使用済みにするシーケンス*/
@@ -265,7 +258,8 @@ std::unique_ptr<ControlBlock> MetaBlock::controlBlockTail()
 {
 	unsigned char controlBlockTailOptrAddr[5] = {0,0,0,0,0};
 	omemcpy( controlBlockTailOptrAddr , (*_primaryOptr + CONTROL_BLOCK_TAIL_OFFSET).get() , CONTROL_BLOCK_LENGTH  );
-	optr* controlBlockTailOptr = new optr( controlBlockTailOptrAddr ); 
+	std::shared_ptr<optr> controlBlockTailOptr = std::shared_ptr<optr>( new optr(controlBlockTailOptrAddr) );
+	//optr* controlBlockTailOptr = new optr( controlBlockTailOptrAddr ); 
 	controlBlockTailOptr->cacheTable( _primaryOptr->cacheTable() );
 
 	ControlBlock controlBlockTail( controlBlockTailOptr );

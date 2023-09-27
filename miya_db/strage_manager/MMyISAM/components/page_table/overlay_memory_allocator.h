@@ -128,13 +128,14 @@ public:
 struct ControlBlock
 {
 private:
-	optr *_blockOptr;
+	//optr *_blockOptr;
+	std::shared_ptr<optr> _blockOptr;
 
 public:
 	ControlBlock(){};
-	ControlBlock( optr *optr );
+	ControlBlock( std::shared_ptr<optr> optr );
 
-	optr* blockOptr(); // getter
+	std::shared_ptr<optr> blockOptr(); // getter
 	unsigned char* blockAddr();
 
 
@@ -182,7 +183,7 @@ protected:
 public:
 	OverlayMemoryAllocator( int dataFileFD  = -1 , int freeListFileFD = -1 );
 
-	std::unique_ptr<optr> allocate( unsigned long allocateSize );
+	std::shared_ptr<optr> allocate( unsigned long allocateSize );
 	void deallocate( optr *target );
 
 	std::unique_ptr<ControlBlock> freeBlockHead();
@@ -208,8 +209,7 @@ public:
 	void printControlFile();
 	void printFreeBlockChain();
 
-
-
+	std::shared_ptr<optr> get( unsigned char* oAddr );
 
 }; // close miya_db
 

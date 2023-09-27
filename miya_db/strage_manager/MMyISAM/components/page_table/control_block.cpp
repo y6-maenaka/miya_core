@@ -12,12 +12,13 @@ namespace miya_db
 
 
 /* テストOK　動作確認済み */
-ControlBlock::ControlBlock( optr *optr )
+ControlBlock::ControlBlock( std::shared_ptr<optr> optr )
 {
 	_blockOptr = optr;
+
 }
 
-optr* ControlBlock::blockOptr()
+std::shared_ptr<optr> ControlBlock::blockOptr()
 {
 	return _blockOptr;
 }
@@ -35,13 +36,16 @@ unsigned char* ControlBlock::blockAddr()
 /* ---------------------------------------------------------------------------------- */
 std::unique_ptr<ControlBlock> ControlBlock::prevControlBlock()
 {
+
 	if( _blockOptr == nullptr )  return nullptr;
 
 	unsigned char retOptrAddr[5] = {0,0,0,0,0};
 	omemcpy( retOptrAddr , _blockOptr , CONTROL_BLOCK_LENGTH  );
 
-	optr *retOptr  = new optr( retOptrAddr ); retOptr->cacheTable( _blockOptr->cacheTable() );
+	//optr *retOptr  = new optr( retOptrAddr ); retOptr->cacheTable( _blockOptr->cacheTable() );
+	std::shared_ptr<optr> retOptr = std::shared_ptr<optr>( new optr(retOptrAddr) ); retOptr->cacheTable( _blockOptr->cacheTable() );
 	ControlBlock retControlBlock( retOptr );
+	
 
 	return std::make_unique<ControlBlock>( retControlBlock );
 }
@@ -69,7 +73,8 @@ std::unique_ptr<ControlBlock> ControlBlock::nextControlBlock()
 
 	unsigned char retOptrAddr[5] = {0,0,0,0,0};
 	omemcpy( retOptrAddr ,(*_blockOptr + PREV_FREE_BLOCK_OPTR_LENGTH).get() , CONTROL_BLOCK_LENGTH );
-	optr* retOptr = new optr( retOptrAddr ); retOptr->cacheTable( _blockOptr->cacheTable() );
+	//optr* retOptr = new optr( retOptrAddr ); retOptr->cacheTable( _blockOptr->cacheTable() );
+	std::shared_ptr<optr> retOptr = std::shared_ptr<optr>( new optr(retOptrAddr) ); retOptr->cacheTable( _blockOptr->cacheTable() );
 	
 	ControlBlock retControlBlock( retOptr );
 	return std::make_unique<ControlBlock>( retControlBlock );

@@ -17,6 +17,7 @@
 int deallocate_test_pattern_1()
 {
 
+	/*
 	int dataFd = open("../miya_db/table_files/test_table/test.oswap", O_RDWR , (mode_t)0600 );
 	int freeListFd = open("../miya_db/table_files/test_table/test.ofl", O_RDWR , (mode_t)0600 );
 
@@ -90,6 +91,7 @@ int deallocate_test_pattern_1()
 
 	manager->memoryAllocator()->printControlFile();
 	return 0;
+	*/
 
 	/*
 	manager->deallocate( allocatedOptr_2.get() , 100 );

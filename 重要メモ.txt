@@ -18,3 +18,9 @@
 
 - validationScriptのOP_CODEの不正チェックが甘い -> 少なくともpopできたか否かのチェックはする
 
+
+- optrをテンプレートくらすに変更する
+
+-btreeのoptrは参照で渡した方が操作しやすそう
+
+- optrのキャッシュ　LRUの挙動が怪しい

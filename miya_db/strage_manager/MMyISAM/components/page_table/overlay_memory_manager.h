@@ -34,10 +34,10 @@ public:
 
 	OverlayMemoryAllocator* memoryAllocator(){ return _memoryAllocator; };
 
-	std::unique_ptr<optr> allocate( unsigned long size );
+	std::shared_ptr<optr> allocate( unsigned long size );
 	void deallocate( optr *target );
 
-	//CacheTable* cacheTable(){ return _cacheTable; };
+	std::shared_ptr<optr> get( unsigned char* oAddr );
 };
 
 

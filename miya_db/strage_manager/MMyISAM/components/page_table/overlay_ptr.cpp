@@ -24,6 +24,14 @@ void optr::cacheTable( CacheTable *cacheTable )
 }
 
 
+
+optr::optr( unsigned char *addr , CacheTable *cacheTable )
+{
+	memcpy( _addr, addr , sizeof( _addr ));
+	_cacheTable = cacheTable;
+}
+
+
 unsigned char *optr::addr()
 {
 	return _addr;
@@ -113,7 +121,7 @@ unsigned char* OverlayPtr::operator []( size_t n )
 
 
 
-std::unique_ptr<optr> optr::operator +( unsigned long addend ) const
+std::shared_ptr<optr> optr::operator +( unsigned long addend ) const
 {
 	uint64_t ulongOptr = 0;
 
@@ -127,7 +135,7 @@ std::unique_ptr<optr> optr::operator +( unsigned long addend ) const
 
 	ulongOptr += addend;
 	
-	std::unique_ptr<optr> newOptr( new optr );
+	std::shared_ptr<optr> newOptr( new optr );
 	newOptr->cacheTable( _cacheTable );
 	newOptr->addr( ulongOptr );
 
@@ -135,15 +143,46 @@ std::unique_ptr<optr> optr::operator +( unsigned long addend ) const
 }
 
 
+/*
+std::shared_ptr<optr> optr::operator +( unsigned long addend ) const
+{
+	uint64_t ulongOptr = 0;
+
+	unsigned short exponentialList[5] = {64, 32, 16, 8, 0};
+	
+	ulongOptr += static_cast<unsigned long>(_addr[0]) * pow(2, exponentialList[0]) ;
+	ulongOptr += static_cast<unsigned long>(_addr[1]) * pow(2, exponentialList[1]) ;
+	ulongOptr += static_cast<unsigned long>(_addr[2]) * pow(2, exponentialList[2]) ;
+	ulongOptr += static_cast<unsigned long>(_addr[3]) * pow(2, exponentialList[3]) ;
+	ulongOptr += static_cast<unsigned long>(_addr[4]) * pow(2, exponentialList[4]) ;
+
+	ulongOptr += addend;
+	
+	std::shared_ptr<optr> newOptr( new optr );
+	newOptr->cacheTable( _cacheTable );
+	newOptr->addr( ulongOptr );
+
+	return newOptr;
+}
+*/
+
+
+
+
+
+
+
+
 
 
 std::unique_ptr<unsigned char> optr::mapToMemory( unsigned int size )
 {
-	unsigned char* ret = new unsigned char[size];
+	//unsigned char* ret = new unsigned char[size];
+	std::unique_ptr<unsigned char> ret = std::unique_ptr<unsigned char>( new unsigned char[size] );
 
-	omemcpy( ret , this ,static_cast<unsigned long>(size) );
+	omemcpy( ret.get() , this ,static_cast<unsigned long>(size) );
 	
-	return std::unique_ptr<unsigned char>( ret );
+	return ret;
 
 
 	// exportarrayの実装

@@ -17,8 +17,10 @@ OverlayMemoryManager::OverlayMemoryManager( const char* targetFilePath )
 	// ファイル名から２つのパスを生成する
 
 	//int fd = open( oswapFilePath , O_RDWR, (mode_t)0600 );
-	
+
 	//init( fd );
+
+
 }
 
 
@@ -38,7 +40,7 @@ int OverlayMemoryManager::init( int dataFileFD , int freeListFileFD )
 		_cacheTable = new CacheTable( targetFD );
 
 		// primaryOptrを作成する
-		
+
 		optr *primaryOptr = new optr;
 		primaryOptr->cacheTable( _cacheTable );
 
@@ -47,10 +49,14 @@ int OverlayMemoryManager::init( int dataFileFD , int freeListFileFD )
 		return 0;
 	}
 	*/
+
+
+
+
 	_memoryAllocator = new OverlayMemoryAllocator( dataFileFD , freeListFileFD );
 
-	
-	return -1;
+
+	return 0;
 };
 
 
@@ -59,10 +65,10 @@ int OverlayMemoryManager::init( int dataFileFD , int freeListFileFD )
 
 
 
-std::unique_ptr<optr> OverlayMemoryManager::allocate( unsigned long size )
+std::shared_ptr<optr> OverlayMemoryManager::allocate( unsigned long size )
 {
 	/* フリーメモリリンクリストの先頭にアクセス -> 通常0x000000 */
-	
+
 	return _memoryAllocator->allocate( size );
 }
 
@@ -73,6 +79,12 @@ void OverlayMemoryManager::deallocate( optr* targetOptr )
 	return _memoryAllocator->deallocate( targetOptr );
 }
 
+
+
+std::shared_ptr<optr> OverlayMemoryManager::get( unsigned char* oAddr )
+{
+	return _memoryAllocator->get(oAddr);
+}
 
 
 }; // close miya_db namespace
