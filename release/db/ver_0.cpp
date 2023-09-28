@@ -37,27 +37,34 @@ int main(){
 
 
 	std::shared_ptr<unsigned char> key_1 = std::shared_ptr<unsigned char>( new unsigned char[20] );
-	memcpy( key_1.get() , "aaaaaaaaaaaaaaaaaaaa", 20 );
-	btree.rootONode()->add( key_1 );
+	memcpy( key_1.get() , "cccccccccccccccccccc", 20 );
+	btree.add( key_1 );
+
+
+	std::shared_ptr<unsigned char> key_2 = std::shared_ptr<unsigned char>( new unsigned char[20] );
+	memcpy( key_2.get() , "ffffffffffffffffffff", 20 );
+	btree.add( key_2 );
 
 
 
 	std::shared_ptr<unsigned char> key_3 = std::shared_ptr<unsigned char>( new unsigned char[20] );
-	memcpy( key_3.get() , "cccccccccccccccccccc", 20 );
-	btree.rootONode()->add( key_3 );
+	memcpy( key_3.get() , "hhhhhhhhhhhhhhhhhhhh", 20 );
+	btree.add( key_3 );
 
 
 	std::cout << "-------------------------------------------------" << "\n";
 
-	std::shared_ptr<unsigned char> key_2 = std::shared_ptr<unsigned char>( new unsigned char[20] );
-	memcpy( key_2.get() , "bbbbbbbbbbbbbbbbbbbb", 20 );
-	btree.rootONode()->add( key_2 );
-
-
 	std::cout << "Add Done" << "\n";
+
+
 
 	
 	std::shared_ptr<miya_db::ONode> newRootNode = rootNode->parent();
+
+
+	std::cout << "| | | || | | | | || | ||   " << newRootNode->isLeaf() << "\n";
+
+
 	std::shared_ptr<miya_db::ONode> child_1 = newRootNode->child(0);
 	std::shared_ptr<miya_db::ONode> child_2 = newRootNode->child(1);
 
@@ -86,6 +93,44 @@ int main(){
 
 
 
+
+	std::cout << "\n\n\n\n\n-----------------------------------------------" << "\n";
+	printf("<<<<<<<<<<<< %p\n", rootNode->overlayMemoryManager().get() );
+	
+			
+	
+	std::shared_ptr<unsigned char> key_4 = std::shared_ptr<unsigned char>( new unsigned char[20] );
+	memcpy( key_4.get() , "bbbbbbbbbbbbbbbbbbbb", 20 );
+	//newRootNode->add( key_4 );
+	btree.rootONode( newRootNode );
+	printf(">>>>>>> %p\n",btree.rootONode()->overlayMemoryManager().get() );
+	btree.add( key_4 );
+
+
+
+	std::cout << "\n\n\n\n\n\n\n------------------------------------------------------------------"	 << "\n";
+
+
+	
+	std::shared_ptr<unsigned char> key_5 = std::shared_ptr<unsigned char>( new unsigned char[20] );
+	memcpy( key_5.get() , "dddddddddddddddddddd", 20 );
+	printf("%p\n",btree.rootONode()->overlayMemoryManager().get() );
+	btree.add( key_5 );
+
+
+
+	
+	std::shared_ptr<unsigned char> key_6 = std::shared_ptr<unsigned char>( new unsigned char[20] );
+	memcpy( key_6.get() , "eeeeeeeeeeeeeeeeeeee", 20 );
+	printf("%p\n",btree.rootONode()->overlayMemoryManager().get() );
+	btree.add( key_6 );
+
+	
+	std::cout << "\n\n\n\n\n";
+	miya_db::OBtree::printSubTree( newRootNode );
+	
+	return 0;
+	
 
 	/*
 	MiddleBuffer buffer(100);

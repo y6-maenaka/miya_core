@@ -69,6 +69,8 @@ std::shared_ptr<optr> OverlayMemoryManager::allocate( unsigned long size )
 {
 	/* フリーメモリリンクリストの先頭にアクセス -> 通常0x000000 */
 
+	printf("%p\n", _memoryAllocator );
+	std::cout << "allocate() called from memory manager" << "\n";
 	return _memoryAllocator->allocate( size );
 }
 

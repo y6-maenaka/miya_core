@@ -38,6 +38,17 @@ void ViewItemSet::importItemSet( std::shared_ptr<ONodeItemSet> itemSet )
 
 
 
+void ViewItemSet::moveInsert( unsigned short index ,std::shared_ptr<ONode> target )
+{
+	for( int i = _child.size()-1; i > index; i-- )
+		_child.at(i) = _child.at(i-1);
+
+	_child.at(index) = target;
+}
+
+
+
+
 /*
 	-------------------- 初期化関係 -----------------------
 */
@@ -102,6 +113,39 @@ void ONodeItemSet::keyCount( unsigned short num ) // キー個数の挿入
 {
 	(*_optr + KEY_ELEMENT_OFFSET)->value( static_cast<unsigned char>(num) );
 }
+
+
+
+
+void ONodeItemSet::sortKey()
+{
+	// loke buble sort
+	std::shared_ptr<optr> oKey_j0; std::shared_ptr<optr> oKey_j1;
+	std::shared_ptr<unsigned char> key_j0 = std::shared_ptr<unsigned char>( new unsigned char[20] );
+	std::shared_ptr<unsigned char> key_j1 = std::shared_ptr<unsigned char>( new unsigned char[20] );
+
+
+	for( int i=0; i < keyCount()-1; i++ )
+	{
+		std::cout << "in roop 1" << "\n";
+		std::cout << keyCount() << "\n";
+		for( int j=keyCount()-1; j>i; j-- )
+		{
+			std::cout << "in roop 2" << "\n";
+			std::cout << j << "\n";
+			oKey_j0 = key(j);  oKey_j1 = key(j-1);
+			omemcpy( key_j0.get(), oKey_j0, KEY_SIZE ); omemcpy( key_j1.get(), oKey_j1, KEY_SIZE );
+			std::cout << "hello" << "\n";
+			if( memcmp( key_j1.get() , key_j0.get() , KEY_SIZE ) > 0  )
+			{
+				omemcpy( oKey_j0.get() , key_j1.get() , KEY_SIZE );
+				omemcpy( oKey_j1.get() , key_j0.get() , KEY_SIZE );
+			}
+		}
+	}
+
+
+}
 /* -------------------------------------------------------------- */
 
 
@@ -142,7 +186,7 @@ std::shared_ptr<ONode> ONodeItemSet::child( unsigned short index )
 
 	std::shared_ptr<optr> childOptr = std::make_shared<optr>( oAddr, childHead->cacheTable() );
 	
-	return std::make_shared<ONode>(childOptr  );
+	return std::make_shared<ONode>( childOptr);
 
 	//return std::make_shared<optr>( oAddr , _optr->cacheTable() );
 	
@@ -151,6 +195,10 @@ std::shared_ptr<ONode> ONodeItemSet::child( unsigned short index )
 	//return std::make_shared<ONode>( childHead );
 	//return nullptr;
 }
+
+
+
+
 
 
 void ONodeItemSet::child( unsigned short index , std::shared_ptr<ONode> targetONode )
@@ -174,6 +222,17 @@ void ONodeItemSet::child( unsigned short index , std::shared_ptr<ONode> targetON
 	std::cout << "=====================" << "\n";
 
 
+}
+
+
+
+
+void ONodeItemSet::moveInsert( unsigned short index , std::shared_ptr<ONode> targetONode )
+{
+	for( int i = childCount(); i > index; i-- )
+		child(i, child(i-1) );
+
+	child(index, targetONode );
 }
 /* -------------------------------------------------------------- */
 
@@ -267,6 +326,7 @@ ONode::ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager )
 {
 	_oMemoryManager = oMemoryManager;
 
+	std::cout << "allocate before" << "\n";
 	std::shared_ptr<optr> baseOptr = oMemoryManager->allocate( O_NODE_ITEMSET_SIZE ); // 新規作成の場合
 	std::cout << "ONode Allocated With -> "; baseOptr->printAddr(); std::cout << "\n";
 	_itemSet = std::make_shared<ONodeItemSet>( baseOptr );
@@ -285,10 +345,10 @@ ONode::ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared
 std::shared_ptr<ONode> ONode::parent()
 {
 	//return std::make_shared<ONode>( new ONode( _itemSet->Optr()) );
-	std::cout << "こーるど"	 << "\n";
-	_itemSet->Optr()->printValueContinuously(5); std::cout << "\n";
-	return std::make_shared<ONode>( _itemSet->parent() );
+	return std::make_shared<ONode>( _oMemoryManager , _itemSet->parent() );
 }
+
+
 
 
 void ONode::parent( std::shared_ptr<ONode> target )
@@ -335,7 +395,7 @@ std::shared_ptr<ONodeItemSet> ONode::itemSet()
 
 
 
-void ONode::add( std::shared_ptr<unsigned char> targetKey, std::shared_ptr<ONode> targetONode )
+void ONode::recursiveAdd( std::shared_ptr<unsigned char> targetKey, std::shared_ptr<ONode> targetONode )
 {
 	std::cout << "add() called" << "\n";
 
@@ -354,16 +414,14 @@ void ONode::add( std::shared_ptr<unsigned char> targetKey, std::shared_ptr<ONode
 			viewItemSet.importItemSet( _itemSet ); // 仮想アイテムセットに既存のアイテムセット情報を取り込む
 
 			// 一旦仮想アイテムセットに対象要素を追加する
-			viewItemSet._key.at( DEFAULT_KEY_COUNT ) = *_targetKey; 
+			viewItemSet._key.at( DEFAULT_KEY_COUNT ) = *_targetKey; // 繰り越したキーの挿入
 
 			std::cout << "check 0" << "\n";
 
-			if( *_targetONode != nullptr ) // 追加対象がリーフノードでない限りは追加される
-				viewItemSet._child.at( DEFAULT_CHILD_COUNT ) = *_targetONode;
-
 			unsigned short separatorKeyIndex = ((DEFAULT_KEY_COUNT+1)%2 == 0) ? ((DEFAULT_KEY_COUNT+1)/2)-1 : (DEFAULT_KEY_COUNT+1)/2;
 
-			std::cout << "check 1" << "\n";
+
+						std::cout << "check 1" << "\n";
 				
 			// 論理アイテムセットのキーをソートする
 			std::sort( viewItemSet._key.begin() , viewItemSet._key.end() , []( std::shared_ptr<unsigned char> a, std::shared_ptr<unsigned char> b){
@@ -371,15 +429,37 @@ void ONode::add( std::shared_ptr<unsigned char> targetKey, std::shared_ptr<ONode
 			});	 // viewItemSetのメソッドとした方が良い
 
 
+			unsigned short keyInsertedIndex = 0;
+			for( int i=0; i<viewItemSet._key.size(); i++ )
+			{
+				if( memcmp( viewItemSet._key.at(i).get(), targetKey.get(), KEY_SIZE ) == 0 ){
+					keyInsertedIndex = i;
+					break;
+				}
+			}
+
+			if( *_targetONode != nullptr ){ // 追加対象がリーフノードでない限りは追加される
+				std::cout << "\x1b[31m" << "IMPORTANT MARK" << "\x1b[m"	 << "\n";
+				viewItemSet.moveInsert( keyInsertedIndex , *_targetONode );
+			}
+				//viewItemSet._child.at( DEFAULT_CHILD_COUNT ) = *_targetONode; // 対象のキーを挿入した位置に子ノードを挿入しなければならない
+
+		
+
 			std::cout << "check 3" << "\n";
 
 			std::shared_ptr<unsigned char> separatorKey = viewItemSet._key.at( separatorKeyIndex ); // これは親ノードへの追加対象となる
+		
+			std::cout << "check 4" << "\n";
 			
+			_itemSet->Optr()->printAddr(); std::cout << "\n";
+			printf("%p\n", _oMemoryManager.get() );
 			// 分割ルーチンスタート 
 			// このアイテムセットは右子ノードとなる　分割対象の中央右ノードを格納する		
 			std::shared_ptr<ONode> splitONode = std::make_shared<ONode>( _oMemoryManager ); // (新たな右子ノード)  親ノードへの挿入対象となる 子ノードとして作成する
 			// メモリーマネージャーだけ渡すと	
 		
+			std::cout << "check 5" << "\n";
 
 			// エラーでそう
 			for( int i=0; i<(DEFAULT_KEY_COUNT+1)-separatorKeyIndex-1;i++)	{
@@ -432,6 +512,7 @@ void ONode::add( std::shared_ptr<unsigned char> targetKey, std::shared_ptr<ONode
 
 			//ONode* newRootNode = new ONode( _oMemoryManager ); // 新たなルートノードの作成
 			std::shared_ptr<ONode> newRootNode = std::shared_ptr<ONode>( new ONode(_oMemoryManager) );
+			newRootNode->isLeaf( true );
 
 			newRootNode->itemSet()->key( 0 ,targetKey );
 			newRootNode->itemSet()->keyCount(1);
@@ -483,18 +564,46 @@ void ONode::add( std::shared_ptr<unsigned char> targetKey, std::shared_ptr<ONode
 			return;  // 必ずリターンする
 		}
 
-		return parentONode->add( targetKey, targetONode );
-	}
-
-	else{ // 単純追加
-		std::cout << "キーの単純追加"	 << "\n";
+		// 親ノードが存在する場合
+		std::cout << "................................." << "\n";
+		parentONode->itemSet()->Optr()->printAddr(); std::cout << "\n";
 		for( int i=0; i<20; i++ )
 		{
 			printf("%c", targetKey.get()[i]);
 		} std::cout << "\n";
+		targetONode->itemSet()->Optr()->printAddr(); std::cout << "\n";
+		std::cout << "................................." << "\n";
+		return parentONode->recursiveAdd( targetKey, targetONode );
+	}
+
+	else{ // 単純追加
+		std::cout << "キーの単純追加"	 << "\n";
+
 
 		_itemSet->key( _itemSet->keyCount() , targetKey );
 		_itemSet->keyCount( _itemSet->keyCount() + 1 );
+		_itemSet->sortKey();
+
+		if( targetONode != nullptr )
+		{
+			unsigned short keyInsertedIndex = 0;
+			std::shared_ptr<optr> oKey; std::shared_ptr<unsigned char> uKey = std::shared_ptr<unsigned char>( new unsigned char[20] );
+			for( int i=0; i<_itemSet->keyCount(); i++ )
+			{
+				oKey = _itemSet->key(i); omemcpy( uKey.get(), oKey , KEY_SIZE );
+				if( memcmp( uKey.get(), targetKey.get(), KEY_SIZE ) == 0 ){
+					keyInsertedIndex = i;
+					std::cout << "\x1b[31m" << "^---^---^---^-- >> " << keyInsertedIndex << "\x1b[m"	<< "\n";
+					break;
+				}
+			}
+
+			std::cout << "\x1b[31m" << "MARK" << "\x1b[m"	 << "\n";
+			_itemSet->moveInsert( keyInsertedIndex + 1  , targetONode );
+			_itemSet->childCount( _itemSet->keyCount() + 1 );
+		}
+
+		
 		return; // 一応
 	}
 
@@ -517,6 +626,12 @@ std::shared_ptr<ONode> ONode::child( unsigned short index )
 void ONode::overlayMemoryManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager )
 {
 	_oMemoryManager = oMemoryManager;
+}
+
+
+std::shared_ptr<OverlayMemoryManager> ONode::overlayMemoryManager()
+{
+	return _oMemoryManager;
 }
 
 
@@ -588,6 +703,14 @@ OBtree::OBtree( std::shared_ptr<OverlayMemoryManager> oMemoryManager, std::share
 
 
 
+void OBtree::rootONode( std::shared_ptr<ONode> target )
+{
+	_rootONode = target;
+}
+
+
+
+
 const std::shared_ptr<ONode> OBtree::rootONode()
 {
 	return _rootONode;
@@ -596,7 +719,73 @@ const std::shared_ptr<ONode> OBtree::rootONode()
 
 
 
+void OBtree::add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<ONode> targetONode )
+{
+	std::shared_ptr<ONode> deepestONode;
 
+	std::shared_ptr<ONode> currentONode = _rootONode;
+
+	std::cout << "@@@@@@@@@@@@@ " << _rootONode->isLeaf() << "\n";
+	while( (currentONode->itemSet()->childCount() >= 1 ) )
+	{
+		std::cout << "分岐初め" << "\n";
+		for( int i=0; i<currentONode->itemSet()->childCount(); i++ )
+		{
+			std::shared_ptr<optr> keyOptr = currentONode->itemSet()->key(i);
+			std::shared_ptr<unsigned char> rawKey = std::shared_ptr<unsigned char>( new unsigned char[KEY_SIZE] );
+			omemcpy( rawKey.get() , keyOptr , KEY_SIZE );
+
+			if( memcmp( targetKey.get(), rawKey.get() , KEY_SIZE ) < 0 ){
+				currentONode = currentONode->child(i);
+				std::cout << "分岐ここ 0"	<< "\n";
+				goto direct;
+			}
+
+			if( memcmp( targetKey.get(), rawKey.get() ,KEY_SIZE ) < 0 ){
+				currentONode = currentONode->child(i);
+				std::cout << "分岐ここ 1" << "\n";
+			}
+			else{
+				currentONode = currentONode->child( currentONode->itemSet()->childCount()-1 );
+				std::cout << "分岐ここ 2" << "\n";
+			}
+
+			direct:
+				void;
+		}
+	}
+	std::cout << "分岐終了" << "\n";
+
+	deepestONode = currentONode;
+
+	return deepestONode->recursiveAdd( targetKey , targetONode );
+}
+
+
+
+int OBtree::printSubTree( std::shared_ptr<ONode> subtreeRoot )
+{
+
+	std::cout << "\n\n============================================" << "\n";
+	std::cout << "[ "; subtreeRoot->itemSet()->Optr()->printAddr(); std::cout << " ]\n";
+	std::cout << "[ キー個数 ] :: " << subtreeRoot->itemSet()->keyCount() << "\n";
+	for( int i=0; i<subtreeRoot->itemSet()->keyCount(); i++ )
+	{
+		std::shared_ptr<optr> oKey = subtreeRoot->itemSet()->key(i);
+		std::cout << "(" << i << ") "; oKey->printValueContinuously(20); std::cout << "\n";
+	}
+	std::cout << "[ 子ノード個数 ] :: " << subtreeRoot->itemSet()->childCount() << "\n";
+	std::cout << "============================================\n\n" << "\n";
+
+
+
+	for( int i=0; i<subtreeRoot->itemSet()->childCount(); i++ )
+	{
+		OBtree::printSubTree( subtreeRoot->child(i) );
+	}
+
+	return 0;
+}
 
 
 

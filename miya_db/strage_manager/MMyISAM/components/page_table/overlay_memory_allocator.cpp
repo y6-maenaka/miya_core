@@ -238,7 +238,8 @@ void OverlayMemoryAllocator::init()
 // どの仮想ファイルかを正確にする必要がある
 std::shared_ptr<optr> OverlayMemoryAllocator::allocate( unsigned long allocateSize )
 {
-
+	std::cout << "allocate("<< allocateSize << ") called" << "\n";
+	puts("hello");
 	// 一旦allocateSizeをunsigned char型に変換する
 	unsigned char ucAllocateSize[5];
 	ucAllocateSize[0] = 0; // 要修正

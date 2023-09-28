@@ -78,6 +78,7 @@ struct ViewItemSet // ノードの追加の時際,分割をサポートする仮
 
 	//void importItemSet( ONodeItemSet *itemSet );
 	void importItemSet( std::shared_ptr<ONodeItemSet> itemSet );
+	void moveInsert( unsigned short index ,std::shared_ptr<ONode> target );
 };
 
 
@@ -115,10 +116,12 @@ public:
 
 	std::shared_ptr<optr> key( unsigned short index );
 	void key( unsigned short index , std::shared_ptr<unsigned char> targetKey ); // setter
-																															 
+	void sortKey();
+
 	//std::unique_ptr<ONode> child( unsigned short index );
 	std::shared_ptr<ONode> child( unsigned short index );
 	void child( unsigned short index , std::shared_ptr<ONode> targetONode );
+	void moveInsert( unsigned short index , std::shared_ptr<ONode> targetONode );
 
 	std::shared_ptr<optr> dataOptr( unsigned short index );
 
@@ -151,14 +154,14 @@ public:
 	std::shared_ptr<ONode> parent();
 	//void parent( ONode* target );
 	void parent( std::shared_ptr<ONode> target );
+	std::shared_ptr<ONode> child( unsigned short index );
 
 	std::shared_ptr<ONodeItemSet> itemSet();
 
-
-	void add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<ONode> targetONode = nullptr );
+	void recursiveAdd( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<ONode> targetONode = nullptr );
+	//void add( 
 	unsigned char* splitONode( unsigned char* targetKey );
 	
-	std::shared_ptr<ONode> child( unsigned short index );
 
 	void isLeaf( bool flag ){ _isLeaf = flag; };
 	bool isLeaf(){ return _isLeaf; }; // getter
@@ -166,6 +169,7 @@ public:
 	void splitONode(); // キー数が閾値を超えるとスプリットする
 
 	void overlayMemoryManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager );
+	std::shared_ptr<OverlayMemoryManager> overlayMemoryManager();
 
 	/* 肝となるメソッド2つ */
 	//void registIndex( unsigned char* key , optr *dataPtr , optr* leftChildNode = nullptr, optr* rightChildNode = nullptr );
@@ -173,6 +177,8 @@ public:
 
 	// 被ラップ関係からのキャストだからあまりよくない
 	std::unique_ptr<ONode> subtreeKeySearch( ONode* targetONode,unsigned char *targetKey );  // 挿入一のノードを検索してくる
+
+
 };
 
 
@@ -193,9 +199,11 @@ private:
 
 public:
 	OBtree( std::shared_ptr<OverlayMemoryManager> oMemoryManager ,  std::shared_ptr<ONode> rootNode = nullptr );
+	void add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<ONode> targetONode  = nullptr );
 
-
+	void rootONode( std::shared_ptr<ONode> target );
 	const std::shared_ptr<ONode> rootONode();
+	static int printSubTree( std::shared_ptr<ONode> subtreeRoot );
 	// void registerIndex( unsigned char* key , optr *dataOptr ); // 実際にはdataOptrのアドレスunsigned char[5]が格納される
 
 };
