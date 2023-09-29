@@ -160,6 +160,7 @@ public:
 
 	// ルートノードが更新されるとONodeがリターンされる
 	std::shared_ptr<ONode> recursiveAdd( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<ONode> targetONode = nullptr );
+	std::shared_ptr<optr> subtreeFind( std::shared_ptr<unsigned char> targetKey );
 	//void add( 
 	unsigned char* splitONode( unsigned char* targetKey );
 	
@@ -175,6 +176,7 @@ public:
 	/* 肝となるメソッド2つ */
 	//void registIndex( unsigned char* key , optr *dataPtr , optr* leftChildNode = nullptr, optr* rightChildNode = nullptr );
 	void regist( unsigned char* targetKey , optr *targetDataOptr );
+
 
 	// 被ラップ関係からのキャストだからあまりよくない
 	std::unique_ptr<ONode> subtreeKeySearch( ONode* targetONode,unsigned char *targetKey );  // 挿入一のノードを検索してくる
@@ -201,6 +203,7 @@ private:
 public:
 	OBtree( std::shared_ptr<OverlayMemoryManager> oMemoryManager ,  std::shared_ptr<ONode> rootNode = nullptr );
 	void add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<ONode> targetONode  = nullptr );
+	std::shared_ptr<optr> find( std::shared_ptr<unsigned char> targetKey );
 
 	void rootONode( std::shared_ptr<ONode> target );
 	const std::shared_ptr<ONode> rootONode();

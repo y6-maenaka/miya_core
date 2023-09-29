@@ -121,6 +121,13 @@ int main(){
 	std::cout << "\n\n\n\n\n";
 	miya_db::OBtree::printSubTree( btree.rootONode() );
 
+
+	std::shared_ptr<unsigned char> dummy = std::shared_ptr<unsigned char>( new unsigned char[20] );
+	memcpy( dummy.get(),  "tttttttttttttttttttt", 20  );
+
+		
+
+	btree.find( dummy );
 	return 0;
 
 

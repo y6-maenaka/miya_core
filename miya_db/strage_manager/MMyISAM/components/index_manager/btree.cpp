@@ -714,6 +714,58 @@ void ONode::regist( unsigned char *targetKey , optr *targetDataOptr )
 
 
 
+std::shared_ptr<optr> ONode::subtreeFind( std::shared_ptr<unsigned char> targetKey )
+{
+	std::shared_ptr<ONode> candidateChild;
+	
+
+	std::shared_ptr<optr> keyOptr;
+	std::shared_ptr<unsigned char> rawKey = std::shared_ptr<unsigned char>( new unsigned char[5] );
+	int flag;
+
+	std::cout << _itemSet->keyCount() << "\n";
+	std::cout << "(address) : ";
+	_itemSet->Optr()->printAddr(); std::cout << "\n";
+	for( int i=0; i<_itemSet->keyCount(); i++ )
+	{
+		sleep(1);
+		keyOptr = _itemSet->key(i); omemcpy( rawKey.get(), keyOptr , 5 );
+
+		std::cout << "---------------------------------------" << "\n";
+		for( int i=0; i<20; i++ ){
+			printf("%02X", targetKey.get()[i]);
+		} std::cout << "\n";
+		keyOptr->printValueContinuously(20); std::cout << "\n";
+		std::cout << "---------------------------------------" << "\n";
+
+
+		flag = memcmp( targetKey.get() , rawKey.get() , 5 );
+
+		std::cout << "flag -> " << flag << "\n";
+
+		if( flag < 0 ){
+			std::cout << " << left" << "\n";
+			candidateChild = _itemSet->child(i);
+			if( candidateChild == nullptr ) return nullptr;
+			goto direct;
+		}
+		else if( flag == 0 ){
+			std::cout << "Hit!! with -> ";
+			_itemSet->Optr()->printAddr(); std::cout << "\n";
+			return nullptr;
+			//return this->_itemSet->dataOptr(i);	
+		}
+		std::cout << "skiped" << "\n";
+	}
+
+
+	candidateChild = _itemSet->child( _itemSet->childCount() -1 );
+	if( candidateChild == nullptr ) return nullptr;
+
+	direct:
+		return candidateChild->subtreeFind( targetKey );
+}
+
 
 
 
@@ -836,7 +888,13 @@ void OBtree::add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<ONo
 	if( newRootNode != nullptr )
 		_rootONode = newRootNode;
 	return;
+}
 
+
+
+std::shared_ptr<optr> OBtree::find( std::shared_ptr<unsigned char> targetKey )
+{
+	return _rootONode->subtreeFind( targetKey );
 }
 
 
