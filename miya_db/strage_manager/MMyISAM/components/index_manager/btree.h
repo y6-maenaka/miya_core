@@ -48,7 +48,7 @@ constexpr unsigned int ELEMENT_COUNT_SIZE = 1;
 /* 要素の個数からのポインタ */
 constexpr unsigned int KEY_ELEMENT_OFFSET = NODE_OPTR_SIZE; // 親ノードへのポインタ
 constexpr unsigned int CHILD_ELEMENT_OFFSET = KEY_ELEMENT_OFFSET + (ELEMENT_COUNT_SIZE + (KEY_SIZE*DEFAULT_KEY_COUNT));
-constexpr unsigned int DAYA_OPTR_ELEMENT_OFFSET = CHILD_ELEMENT_OFFSET + (ELEMENT_COUNT_SIZE) + (DATA_OPTR_SIZE*DEFAULT_CHILD_COUNT);
+constexpr unsigned int DATA_OPTR_ELEMENT_OFFSET = CHILD_ELEMENT_OFFSET + (ELEMENT_COUNT_SIZE) + (DATA_OPTR_SIZE*DEFAULT_CHILD_COUNT);
 
 
 constexpr unsigned int O_NODE_ITEMSET_SIZE = NODE_OPTR_SIZE  /* 親ノードへのポインタ */
@@ -75,10 +75,12 @@ struct ViewItemSet // ノードの追加の時際,分割をサポートする仮
 {
 	std::array< std::shared_ptr<unsigned char> , DEFAULT_KEY_COUNT+1> _key; // 分割の際に一体対象のキーも追加するためサイズはプラス１
 	std::array< std::shared_ptr<ONode> , DEFAULT_CHILD_COUNT+1> _child;
+	std::array< std::shared_ptr<optr>, DEFAULT_DATA_OPTR_COUNT+1> _dataOPtr;
 
 	//void importItemSet( ONodeItemSet *itemSet );
 	void importItemSet( std::shared_ptr<ONodeItemSet> itemSet );
-	void moveInsert( unsigned short index ,std::shared_ptr<ONode> target );
+	void moveInsertChild( unsigned short index ,std::shared_ptr<ONode> target );
+	void moveInsertDataOptr( unsigned short index , std::shared_ptr<optr> target );
 };
 
 
@@ -110,24 +112,28 @@ public:
 	void keyCount( unsigned short num );
 
 	unsigned short childCount();
+	std::shared_ptr<ONode> child( unsigned short index );
+	void child( unsigned short index , std::shared_ptr<ONode> targetONode );
 	void childCount( unsigned short num );
-
-	unsigned short dataOptrCount();
+	void moveInsertChild( unsigned short index , std::shared_ptr<ONode> targetONode );
 
 	std::shared_ptr<optr> key( unsigned short index );
 	void key( unsigned short index , std::shared_ptr<unsigned char> targetKey ); // setter
 	void sortKey();
 
-	//std::unique_ptr<ONode> child( unsigned short index );
-	std::shared_ptr<ONode> child( unsigned short index );
-	void child( unsigned short index , std::shared_ptr<ONode> targetONode );
-	void moveInsert( unsigned short index , std::shared_ptr<ONode> targetONode );
-
+	unsigned short dataOptrCount();
+	void dataOptrCount( unsigned short num );
 	std::shared_ptr<optr> dataOptr( unsigned short index );
+	void dataOptr( unsigned short index ,std::shared_ptr<optr> targetDataOptr );
+	void moveInsertDataOptr( unsigned short index , std::shared_ptr<optr> targetDataOptr );
+
+
+	//std::unique_ptr<ONode> child( unsigned short index );
 
 
 	std::array< std::shared_ptr<unsigned char> , DEFAULT_KEY_COUNT> *exportKeyArray();
 	std::array< std::shared_ptr<ONode> , DEFAULT_CHILD_COUNT> *exportChildArray();
+	std::array< std::shared_ptr<optr>, DEFAULT_DATA_OPTR_COUNT > *exportDataOptrArray();
 
 	void clear();
 };
@@ -159,7 +165,7 @@ public:
 	std::shared_ptr<ONodeItemSet> itemSet();
 
 	// ルートノードが更新されるとONodeがリターンされる
-	std::shared_ptr<ONode> recursiveAdd( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<ONode> targetONode = nullptr );
+	std::shared_ptr<ONode> recursiveAdd( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<optr> targetDataOptr ,std::shared_ptr<ONode> targetONode = nullptr );
 	std::shared_ptr<optr> subtreeFind( std::shared_ptr<unsigned char> targetKey );
 	//void add( 
 	unsigned char* splitONode( unsigned char* targetKey );
@@ -202,7 +208,7 @@ private:
 
 public:
 	OBtree( std::shared_ptr<OverlayMemoryManager> oMemoryManager ,  std::shared_ptr<ONode> rootNode = nullptr );
-	void add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<ONode> targetONode  = nullptr );
+	void add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<optr> dataOptr );
 	std::shared_ptr<optr> find( std::shared_ptr<unsigned char> targetKey );
 
 	void rootONode( std::shared_ptr<ONode> target );

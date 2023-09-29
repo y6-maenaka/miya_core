@@ -38,25 +38,25 @@ int main(){
 
 	std::shared_ptr<unsigned char> key_1 = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	memcpy( key_1.get() , "cccccccccccccccccccc", 20 );
-	btree.add( key_1 );
+	btree.add( key_1, nullptr );
 
 
 	std::shared_ptr<unsigned char> key_2 = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	memcpy( key_2.get() , "ffffffffffffffffffff", 20 );
-	btree.add( key_2 );
+	btree.add( key_2 , nullptr );
 
 
 
 	std::shared_ptr<unsigned char> key_3 = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	memcpy( key_3.get() , "hhhhhhhhhhhhhhhhhhhh", 20 );
-	btree.add( key_3 );
+	btree.add( key_3 , nullptr );
 
 
 	
 	std::shared_ptr<unsigned char> key_4 = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	memcpy( key_4.get() , "bbbbbbbbbbbbbbbbbbbb", 20 );
 	//newRootNode->add( key_4 );
-	btree.add( key_4 );
+	btree.add( key_4, nullptr  );
 
 
 
@@ -66,7 +66,7 @@ int main(){
 	std::shared_ptr<unsigned char> key_5 = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	memcpy( key_5.get() , "dddddddddddddddddddd", 20 );
 	printf("%p\n",btree.rootONode()->overlayMemoryManager().get() );
-	btree.add( key_5 );
+	btree.add( key_5 , nullptr );
 
 
 	std::cout << "\n\n\n\n\n\n\n------------------------------------------------------------------"	 << "\n";
@@ -74,13 +74,13 @@ int main(){
 	std::shared_ptr<unsigned char> key_6 = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	memcpy( key_6.get() , "gggggggggggggggggggg", 20 );
 	printf("%p\n",btree.rootONode()->overlayMemoryManager().get() );
-	btree.add( key_6 );
+	btree.add( key_6 , nullptr );
 
 
 	std::shared_ptr<unsigned char> key_7 = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	memcpy( key_7.get() , "iiiiiiiiiiiiiiiiiiii", 20 );
 	printf("%p\n",btree.rootONode()->overlayMemoryManager().get() );
-	btree.add( key_7 );
+	btree.add( key_7 , nullptr );
 
 
 
@@ -89,7 +89,7 @@ int main(){
 	std::shared_ptr<unsigned char> key_8 = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	memcpy( key_8.get() , "uuuuuuuuuuuuuuuuuuuu", 20 );
 	printf("%p\n",btree.rootONode()->overlayMemoryManager().get() );
-	btree.add( key_8 );
+	btree.add( key_8 , nullptr );
 
 
 
@@ -101,19 +101,19 @@ int main(){
 	std::shared_ptr<unsigned char> key_9 = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	memcpy( key_9.get() , "zzzzzzzzzzzzzzzzzzzz", 20 );
 	printf("%p\n",btree.rootONode()->overlayMemoryManager().get() );
-	btree.add( key_9 );
+	btree.add( key_9 , nullptr );
 
 
 	std::shared_ptr<unsigned char> key_10 = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	memcpy( key_10.get() , "yyyyyyyyyyyyyyyyyyyy", 20 );
 	printf("%p\n",btree.rootONode()->overlayMemoryManager().get() );
-	btree.add( key_10 );
+	btree.add( key_10 , nullptr  );
 
 
 	std::shared_ptr<unsigned char> key_11 = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	memcpy( key_11.get() , "xxxxxxxxxxxxxxxxxxxx", 20 );
 	printf("%p\n",btree.rootONode()->overlayMemoryManager().get() );
-	btree.add( key_11 );
+	btree.add( key_11 , nullptr );
 
 
 
