@@ -52,33 +52,10 @@ int main(){
 	btree.add( key_3 );
 
 
-
-	
-	std::shared_ptr<miya_db::ONode> newRootNode = rootNode->parent();
-
-
-
-
-	std::shared_ptr<miya_db::ONode> child_1 = newRootNode->child(0);
-	std::shared_ptr<miya_db::ONode> child_2 = newRootNode->child(1);
-
-	std::shared_ptr<miya_db::optr> pullKey_0 = newRootNode->itemSet()->key(0);
-	pullKey_0->printValueContinuously(20); std::cout << "\n";
-
-	std::shared_ptr<miya_db::optr> pullKey_1 = child_1->itemSet()->key(0);
-	pullKey_1->printValueContinuously(20); std::cout << "\n";
-
-
-	std::shared_ptr<miya_db::optr> pullKey_2 = child_2->itemSet()->key(0);
-	pullKey_2->printValueContinuously(20); std::cout << "\n";
-
-
-			
 	
 	std::shared_ptr<unsigned char> key_4 = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	memcpy( key_4.get() , "bbbbbbbbbbbbbbbbbbbb", 20 );
 	//newRootNode->add( key_4 );
-	btree.rootONode( newRootNode );
 	btree.add( key_4 );
 
 
@@ -105,13 +82,6 @@ int main(){
 	printf("%p\n",btree.rootONode()->overlayMemoryManager().get() );
 	btree.add( key_7 );
 
-
-
-
-
-
-	std::shared_ptr<miya_db::ONode> newNewRootNode = newRootNode->parent();
-	btree.rootONode( newNewRootNode );
 
 
 
@@ -149,7 +119,7 @@ int main(){
 
 
 	std::cout << "\n\n\n\n\n";
-	miya_db::OBtree::printSubTree( newNewRootNode );
+	miya_db::OBtree::printSubTree( btree.rootONode() );
 
 	return 0;
 

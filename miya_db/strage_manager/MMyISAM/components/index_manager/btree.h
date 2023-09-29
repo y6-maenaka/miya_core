@@ -158,7 +158,8 @@ public:
 
 	std::shared_ptr<ONodeItemSet> itemSet();
 
-	void recursiveAdd( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<ONode> targetONode = nullptr );
+	// ルートノードが更新されるとONodeがリターンされる
+	std::shared_ptr<ONode> recursiveAdd( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<ONode> targetONode = nullptr );
 	//void add( 
 	unsigned char* splitONode( unsigned char* targetKey );
 	

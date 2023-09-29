@@ -370,7 +370,7 @@ std::shared_ptr<ONodeItemSet> ONode::itemSet()
 
 
 
-void ONode::recursiveAdd( std::shared_ptr<unsigned char> targetKey, std::shared_ptr<ONode> targetONode )
+std::shared_ptr<ONode> ONode::recursiveAdd( std::shared_ptr<unsigned char> targetKey, std::shared_ptr<ONode> targetONode )
 {
 	std::cout << "add() called" << "\n";
 
@@ -628,7 +628,7 @@ void ONode::recursiveAdd( std::shared_ptr<unsigned char> targetKey, std::shared_
 			newRootNode->parent( nullptr ); // 新たなルートノードの親ノードは0x00(無設定)になる
 			
 			std::cout << "$$ 4" << "\n";
-			return;  // 必ずリターンする
+			return newRootNode;  // 必ずリターンする
 		}
 
 		// 親ノードが存在する場合
@@ -671,12 +671,12 @@ void ONode::recursiveAdd( std::shared_ptr<unsigned char> targetKey, std::shared_
 		}
 
 		
-		return; // 一応
+		return nullptr; // 一応
 	}
 
 	// ノードが分割されることはないので単純に追加する
 
-	return;
+	return nullptr;
 }
 
 
@@ -831,7 +831,12 @@ void OBtree::add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<ONo
 
 	std::cout << "(DeepestNodeAddr) :: "; deepestONode->itemSet()->Optr()->printAddr(); std::cout << "\n";
 
-	return deepestONode->recursiveAdd( targetKey , targetONode );
+	std::shared_ptr<ONode> newRootNode;
+	newRootNode = deepestONode->recursiveAdd( targetKey , targetONode );
+	if( newRootNode != nullptr )
+		_rootONode = newRootNode;
+	return;
+
 }
 
 
