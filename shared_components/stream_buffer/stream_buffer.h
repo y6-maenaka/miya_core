@@ -45,11 +45,12 @@ struct SBSegment
 		std::shared_ptr<unsigned char> _body;
 	} _sbBlock;
 
-
-	struct options
+public:
+	struct Options
 	{
-		std::shared_ptr<std::any> option1;
-	} _options;
+		//std::shared_ptr<std::any> option1;
+		std::any option1;
+	} options;
 
 
 	SBSegment(){};

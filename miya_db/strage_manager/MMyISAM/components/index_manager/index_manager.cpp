@@ -1,19 +1,34 @@
 #include "index_manager.h"
 
+#include "../btree/btree.h"
+
 
 namespace miya_db{
 
-void IndexLogicAddr::operator	+ (int offset){
 
-	unsigned char Coffset[5]; memset( Coffset , 0x00 , sizeof(Coffset) );
 
-	Coffset |= (Coffset[0] << 32); 
-	Coffset |= (Coffset[1] << (32 - 8));
-	Coffset |= (Coffset[2] << (32 - 16));
-	Coffset |= (Coffset[3] << (32 - 24));
-	Coffset |= (Coffset[4] << (32 - 32));
 
-}
+IndexManager::IndexManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager )
+{
+	_masterBtree = 	std::shared_ptr<OBtree>( new OBtree(oMemoryManager) );
+};
+
+
+
+
+void IndexManager::add( std::shared_ptr<unsigned char> key , std::shared_ptr<optr> dataOptr )
+{
+	return _masterBtree->add( key , dataOptr );
+};
+
+
+
+
+std::shared_ptr<optr> IndexManager::find( std::shared_ptr<unsigned char> key )
+{
+	return _masterBtree->find( key );
+};
+
 
 
 

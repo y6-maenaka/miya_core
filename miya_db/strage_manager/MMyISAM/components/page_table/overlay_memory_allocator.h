@@ -174,7 +174,9 @@ private:
 	MetaBlock *_metaBlock;
 
 	const CacheTable *_dataCacheTable = nullptr;
+	//std::shared_ptr<CacheTable> _dataCacheTable = nullptr;
 	const CacheTable *_freeListCacheTable = nullptr;
+	//std::shared_ptr<CacheTable> _freeListCacheTable = nullptr;
 
 protected:
 
@@ -210,6 +212,8 @@ public:
 	void printFreeBlockChain();
 
 	std::shared_ptr<optr> get( unsigned char* oAddr );
+
+	const std::shared_ptr<CacheTable> dataCacheTable();
 
 }; // close miya_db
 

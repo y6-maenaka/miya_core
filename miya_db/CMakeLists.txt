@@ -3,6 +3,12 @@ cmake_minimum_required( VERSION 3.2 )
 
 add_library( MIYA_DB STATIC 
 
+
+				strage_manager/MMyISAM/MMyISAM.cpp
+				strage_manager/unified_storage_manager/unified_storage_manager.cpp
+
+				miya_db/database_manager.cpp
+
 				#strage_manager/MMyISAM/components/index_manager/b_tree.cpp
 				strage_manager/MMyISAM/components/index_manager/btree.cpp
 				#strage_manager/MMyISAM/components/index_manager/node_item_set.cpp
@@ -25,5 +31,5 @@ add_library( MIYA_DB STATIC
 )
 
 
-add_definitions( -std=c++14 )
+add_definitions( -std=c++17 )
 

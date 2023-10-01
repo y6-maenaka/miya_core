@@ -30,6 +30,7 @@ class optr
 private:
 	unsigned char _addr[5];
 	CacheTable *_cacheTable;
+	//std::shared_ptr<CacheTable> _cacheTable;
 
 public:
 	optr(){}; 

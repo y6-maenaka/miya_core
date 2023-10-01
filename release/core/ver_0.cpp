@@ -22,13 +22,15 @@
 
 #include "../../control_interface/control_interface.h"
 
+
+#include "../../miya_db/miya_db/database_manager.h"
+
 int main()
 {
 	std::cout << " WELCOME TO MIYA COIN CLIENT [ MIYA_CORE ] " << "\n";
 
-
+	miya_db::DatabaseManager dbManager;
 		
-	streamBuffer_UnitTest();
 
 	return 0;
 

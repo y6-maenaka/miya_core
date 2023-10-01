@@ -162,10 +162,12 @@ OverlayMemoryAllocator::OverlayMemoryAllocator( int dataFileFD , int freeListFil
 
 
 	if( dataFileFD < 0 ) return;
-	_dataCacheTable = new CacheTable( dataFileFD );
+		_dataCacheTable = new CacheTable( dataFileFD );
+		//_dataCacheTable = std::shared_ptr<CacheTable>( new CacheTable(dataFileFD) );
 
 	if( freeListFileFD < 0 ) return;
-	_freeListCacheTable = new CacheTable( freeListFileFD );
+		_freeListCacheTable = new CacheTable( freeListFileFD );
+		//_freeListCacheTable = std::shared_ptr<CacheTable>( new CacheTable(freeListFileFD) );
 
 
 	printf("Seted FreeList CacheTable with -> %p\n" , _freeListCacheTable );
@@ -643,6 +645,13 @@ std::shared_ptr<optr> OverlayMemoryAllocator::get( unsigned char* oAddr )
 
 
 
+
+
+
+const std::shared_ptr<CacheTable> OverlayMemoryAllocator::dataCacheTable()
+{
+	return std::shared_ptr<CacheTable>(const_cast<CacheTable*>(_dataCacheTable));
+}
 
 
 }; // close miya_db namespace

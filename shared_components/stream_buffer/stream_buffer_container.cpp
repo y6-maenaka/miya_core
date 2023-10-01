@@ -8,7 +8,7 @@
 
 void StreamBufferContainer::pushOne( std::unique_ptr<SBSegment> target )
 {
-
+	// 複数のstreamBufferが追加される
 	_sbs.at(0)->enqueue( std::move(target) );
 }
 

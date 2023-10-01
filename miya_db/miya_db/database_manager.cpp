@@ -1,21 +1,19 @@
 #include "database_manager.h"
 
+#include "../../shared_components/stream_buffer/stream_buffer.h"
+#include "../../shared_components/stream_buffer/stream_buffer_container.h"
+
+
+#include "../strage_manager/MMyISAM/MMyISAM.h"
+
 namespace miya_db{
 
 
 
 
-ConnectionInterface::ConnectionInterface()
-{
-	_inbandMiddleBuffer = new MiddleBuffer( 10000 );
-	_connectionManager = new ConnectionManager( _inbandMiddleBuffer , _outbandMiddleBuffer );
-	_connectionManager.startMonitor( port );
-}
 
 
-
-
-void DataBaseManager::loadInformationSchema( char *path )
+void DatabaseManager::loadInformationSchema( char *path )
 {
 	FILE *schema = nullptr;
 
@@ -24,9 +22,10 @@ void DataBaseManager::loadInformationSchema( char *path )
 
 
 
-void DataBaseManager::startQueryHandleThread( bool isAdditionalThread )
-{
 
+void DatabaseManager::startQueryHandleThread( bool isAdditionalThread )
+{
+	/*
 	std::thread queryHanalder( [&](){
 		std::cout << "query handler started" << "\n";
 
@@ -62,12 +61,23 @@ void DataBaseManager::startQueryHandleThread( bool isAdditionalThread )
 		
 		delete queryPack;
 	});
-
+	*/
 }
 
 
 
 
+void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer> sbContainer, std::string fileName )
+{
+	std::cout << "Started MiyaDB [ Light Mode ]" << "\n";
+
+
+	// respondスレッドを用意する
+
+
+	
+
+}
 
 
 

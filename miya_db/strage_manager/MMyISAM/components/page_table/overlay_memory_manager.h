@@ -2,6 +2,7 @@
 #define B2BCCAA9_4237_45CF_8F1A_B7E2E523CD40
 
 
+#include <string>
 #include <unistd.h>
 #include <fcntl.h>
 #include <filesystem>
@@ -31,6 +32,7 @@ private:
 public:
 	OverlayMemoryManager( int dataFileFD , int freeListFileFD );
 	OverlayMemoryManager( const char* targetFilePath );
+	OverlayMemoryManager( std::string fileName );
 
 	OverlayMemoryAllocator* memoryAllocator(){ return _memoryAllocator; };
 

@@ -1,15 +1,16 @@
 #ifndef CD595D1E_AA1A_439E_9D55_12032E706D4D
 #define CD595D1E_AA1A_439E_9D55_12032E706D4D
 
+#include <memory>
+#include <string>
 
-
-#include "../unified_strage_engine/unified_strage_engine.h"
-
+//#include "../unified_strage_engine/unified_strage_engine.h"
+#include "./unified_strage_engine/unified_strage_engine.cpp"
 
 namespace miya_db{
 
 
-
+class OverlayMemoryManager;
 
 
 
@@ -17,11 +18,14 @@ namespace miya_db{
 class MMyISAM : public UnifiedStrageEngine { // 継承したほうがいい?
 
 private:	
+	std::shared_ptr<OverlayMemoryManager> _dataOverlayMemoryManager; // データが保存されているファイルのマネージャー
+	std::shared_ptr<IndexManager> _indexManager; // インデックスが保存されているマネージャーを渡す
 
 public:
+	MMyISAM( std::string fileName );
 
-	void update();
-	void get();
+	void regist( std::shared_ptr<unsigned char> data , size_t dataLength , std::shared_ptr<unsigned char> key ); // メソッド名が微妙
+	void get( std::shared_ptr<unsigned char> key );
 
 };
 

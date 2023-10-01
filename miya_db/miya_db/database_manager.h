@@ -5,33 +5,32 @@
 #include <chrono>
 
 
+
+class StreamBuffer;
+class StreamBufferContainer;
+
+
+class InformationSchema;
+
+
+
+
+
 namespace miya_db{
 
 class ConnectionManager;
 
 
-constexpr char *INFORMATION_SCHEMA_PATH = "./.config/.information_schema.json"
+constexpr char *INFORMATION_SCHEMA_PATH = "./.config/.information_schema.json";
+
 
 class DatabaseManager{
 
 private:
 	
-	struct ConnectionInterface
-	{
-		ConnectionManager *_connectionManager;
-		MiddleBuffer *_inbandMiddlerBuffer;
 
-		ConnectionInterface( MiddleBuffer *middleBuffer ){ // constructor
-			// set mifflebuffer ptr to connection manager under module
-			_connectionManager = ConnectionManager( middleBuffer );
-		}
-		
-	}	_connectionInterface;
-
-
-	InformationSchema *_informationSchema; // plannerが参照することが多い
+	std::shared_ptr<InformationSchema> _informationSchema; // plannerが参照することが多い
 																				 // ここにテーブルがロードされているか否かなども保存される
-
 
 
 protected:
@@ -43,6 +42,9 @@ public:
 	void startQueryHandleThread( bool isAdditionalThread = false ); // 基本的にこのスレッドがクエリを解析し,データを取得し,レスポンスを作成する. // additional=trueであれば,キャパが余れば自身で勝手に解放する
 	void init();
 
+
+	void startWithLightMode( std::shared_ptr<StreamBufferContainer> sbContainer, std::string fileName ); // 簡易的に起動する場合
+	/* パイプの役割はStreamBufferで代替する */
 };
 
 

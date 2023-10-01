@@ -30,6 +30,24 @@ OverlayMemoryManager::OverlayMemoryManager( int dataFileFD , int freeListFileFD 
 }
 
 
+OverlayMemoryManager::OverlayMemoryManager( std::string fileName )
+{
+	std::shared_ptr<char> dataFilePath = std::shared_ptr<char>( new char[256] );
+	std::shared_ptr<char> freeListFilePath = std::shared_ptr<char>( new char[256] );
+	sprintf( dataFilePath.get() ,  "../miya_db/table_files/%s/%s.oswap", fileName.c_str(), fileName.c_str() );
+	sprintf( freeListFilePath.get() ,  "../miya_db/table_files/%s/%s.ofl", fileName.c_str(), fileName.c_str() );
+
+
+	std::cout << dataFilePath.get() << "\n";
+	std::cout << freeListFilePath.get() << "\n";
+
+
+	int dataFd = open( dataFilePath.get(), O_RDWR , (mode_t)0600 );
+	int freeListFd = open( freeListFilePath.get(), O_RDWR , (mode_t)0600 );
+
+	init( dataFd , freeListFd );
+}
+
 
 
 int OverlayMemoryManager::init( int dataFileFD , int freeListFileFD )

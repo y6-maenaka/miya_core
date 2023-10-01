@@ -22,6 +22,10 @@ void streamBuffer_UnitTest()
 			usleep(500000);
 			std::unique_ptr<SBSegment> segment = std::make_unique<SBSegment>();
 			segment->_controlBlock._reserved = htons(10);
+
+			int num = 100;
+			segment->options.option1 = num;
+
 			sbContainer->pushOne( std::move(segment) );
 			std::cout << ">>> push" << "\n";
 		}
@@ -56,6 +60,11 @@ void streamBuffer_UnitTest()
 			segment = sbContainer->popOne();
 			std::cout << "\n======================" << "\n";
 			std::cout << "poped <- " << ntohs( segment->_controlBlock._reserved ) << "\n";
+			if( segment->options.option1.type() == typeid(int) ){
+			std::cout << "casted" << "\n";
+				std::cout << std::any_cast<int>(segment->options.option1) << "\n";
+			}
+
 			std::cout << "======================" << "\n";
 		}
 	});

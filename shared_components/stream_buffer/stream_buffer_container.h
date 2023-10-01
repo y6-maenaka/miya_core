@@ -28,8 +28,8 @@ private:
 	unsigned short _bufferCount;
 	std::vector< std::shared_ptr<StreamBuffer> > _sbs;
 
-	std::function<void()> _scaleOutRequest;
-	std::function<void()> _scaleDownRequest;
+	std::function<void()> _scaleOutRequest; // スケールアップフラグが立ったデータセグメントを受信したらスケールアウトする (StreamBufferの個数を増やす)
+	std::function<void()> _scaleDownRequest; 
 
 
 public:
