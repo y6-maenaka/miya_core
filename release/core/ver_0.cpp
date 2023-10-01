@@ -2,6 +2,7 @@
 
 #include "../../shared_components/cipher/ecdsa_manager.h"
 #include "../../shared_components/middle_buffer/middle_buffer.h"
+#include "../../shared_components/stream_buffer/test/unit_test.h"
 
 #include "../../miya_chain/block/block.h"
 
@@ -21,13 +22,16 @@
 
 #include "../../control_interface/control_interface.h"
 
-
 int main()
 {
 	std::cout << " WELCOME TO MIYA COIN CLIENT [ MIYA_CORE ] " << "\n";
 
 
-	
+		
+	streamBuffer_UnitTest();
+
+	return 0;
+
 
 
 	cipher::ECDSAManager ecdsaManager;

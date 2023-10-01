@@ -633,7 +633,7 @@ std::shared_ptr<optr> ONode::subtreeFind( std::shared_ptr<unsigned char> targetK
 			goto direct;
 		}
 		else if( flag == 0 ){
-			return nullptr; // 本来はここでデータポインタを返却する
+			return _itemSet->dataOptr(i);
 		}
 	}
 

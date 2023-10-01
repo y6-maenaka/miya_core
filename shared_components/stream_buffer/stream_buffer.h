@@ -7,6 +7,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <functional>
+#include <any>
 
 
 
@@ -28,7 +29,7 @@ struct SBSegment
 		uint8_t _flag;
 		uint8_t _type;
 		uint16_t _bodySize;
-		uint16_t reserved;
+		uint16_t _reserved;
 	} _controlBlock;
 
 
@@ -47,7 +48,7 @@ struct SBSegment
 
 	struct options
 	{
-		void *_option1;
+		std::shared_ptr<std::any> option1;
 	} _options;
 
 

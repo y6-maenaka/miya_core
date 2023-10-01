@@ -7,8 +7,6 @@ pkg_search_module(OPENSSL REQUIRED openssl)
 
 
 
-
-
 if( OPENSSL_FOUND )
 	include_directories( ${OPENSSL_INCLUDE_DIRS} )
 	message(STATUS "Using OpenSSL ${OPENSSL_VERSION}")
@@ -28,6 +26,7 @@ add_library( SHARED_COMPONENTS SHARED
 							middle_buffer/middle_buffer.cpp
 							stream_buffer/stream_buffer.cpp
 							stream_buffer/stream_buffer_container.cpp
+							stream_buffer/test/unit_test.cpp
 )
 
 
@@ -40,4 +39,4 @@ target_link_libraries( SHARED_COMPONENTS PUBLIC
 
 
 
-add_definitions( -std=c++14 )
+add_definitions( -std=c++17 )

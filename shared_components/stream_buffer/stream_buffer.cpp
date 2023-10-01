@@ -4,8 +4,6 @@
 
 
 
-
-
 SBSegment::SBSegment( void* body , unsigned short bodyLength )
 {
 	if( body == nullptr || bodyLength <= 0 ) return;
@@ -82,7 +80,6 @@ StreamBuffer::StreamBuffer()
 
 void StreamBuffer::enqueue( std::unique_ptr<SBSegment> target )
 {
-
 	// ロックの獲得
 	std::unique_lock<std::mutex> lock(_mtx);  // 他が使用中だとブロッキングする. 他プロセスが解放するとそこからスタート
 
@@ -111,7 +108,7 @@ std::unique_ptr<SBSegment> StreamBuffer::dequeue()
 	_popContributer._popCV.wait( lock , [&]{
 		return !(_sb._queue.empty()); // emptyでなければ待機状態を解除する
 	});
-	
+
 	
 	std::unique_ptr<SBSegment> ret = std::move( _sb._queue.front() );
 	_sb._queue.erase( _sb._queue.cbegin() );

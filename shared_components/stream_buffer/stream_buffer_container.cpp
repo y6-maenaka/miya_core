@@ -8,6 +8,7 @@
 
 void StreamBufferContainer::pushOne( std::unique_ptr<SBSegment> target )
 {
+
 	_sbs.at(0)->enqueue( std::move(target) );
 }
 
@@ -28,11 +29,13 @@ std::unique_ptr<SBSegment> StreamBufferContainer::popOne()
 
 StreamBufferContainer::StreamBufferContainer( std::function<void()> scaleOutHandler , std::function<void()> scaleDownHandler )
 {
-	StreamBuffer *newStreamBuffer = new StreamBuffer;
+	std::shared_ptr<StreamBuffer> newStreamBuffer = std::make_shared<StreamBuffer>();
 	_sbs.push_back( newStreamBuffer );
 	_bufferCount = 1;
 
+	if( scaleOutHandler != nullptr )
+		_scaleOutRequest = scaleOutHandler;
 
-	_scaleOutRequest = scaleOutHandler;
-	_scaleDownRequest = scaleDownHandler;
+	if( scaleDownHandler != nullptr )
+		_scaleDownRequest = scaleDownHandler;
 }

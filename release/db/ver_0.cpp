@@ -29,16 +29,19 @@ int main(){
 	miya_db::OverlayMemoryManager *oMemoryManager = new miya_db::OverlayMemoryManager(dataFd , freeListFd );
 
 
+	
 	std::cout << miya_db::O_NODE_ITEMSET_SIZE << "\n";
 
 	miya_db::OBtree btree( (std::shared_ptr<miya_db::OverlayMemoryManager>(oMemoryManager)) );
 	std::shared_ptr<miya_db::ONode>	rootNode = btree.rootONode();
 
+	unsigned char testInputAddr[5]; memset( testInputAddr , 0x11, 5 );
+	std::shared_ptr<miya_db::optr> testInput = std::make_shared<miya_db::optr>( testInputAddr );
 
 
 	std::shared_ptr<unsigned char> key_1 = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	memcpy( key_1.get() , "cccccccccccccccccccc", 20 );
-	btree.add( key_1, nullptr );
+	btree.add( key_1, testInput );
 
 
 	std::shared_ptr<unsigned char> key_2 = std::shared_ptr<unsigned char>( new unsigned char[20] );
@@ -125,9 +128,12 @@ int main(){
 	std::shared_ptr<unsigned char> dummy = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	memcpy( dummy.get(),  "tttttttttttttttttttt", 20  );
 
-		
 
-	btree.find( dummy );
+
+	std::shared_ptr<miya_db::optr> test = btree.find( key_1 );
+
+	testInput->printAddr(); std::cout << "\n";
+	std::cout << "ret > "; test->printAddr(); std::cout << "\n";
 	return 0;
 
 

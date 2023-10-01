@@ -26,13 +26,12 @@ class StreamBufferContainer
 
 private:
 	unsigned short _bufferCount;
-	std::vector<StreamBuffer*> _sbs;
+	std::vector< std::shared_ptr<StreamBuffer> > _sbs;
 
 	std::function<void()> _scaleOutRequest;
 	std::function<void()> _scaleDownRequest;
 
 
-protected:
 public:
 
 
@@ -40,7 +39,7 @@ public:
 	std::unique_ptr<SBSegment> popOne();
 
 
-	StreamBufferContainer( std::function<void()> scaleOutHandler , std::function<void()> scaleDownHandler );
+	StreamBufferContainer( std::function<void()> scaleOutHandler = nullptr , std::function<void()> scaleDownHandler = nullptr );
 };
 
 
