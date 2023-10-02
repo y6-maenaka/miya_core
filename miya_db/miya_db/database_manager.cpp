@@ -3,8 +3,10 @@
 #include "../../shared_components/stream_buffer/stream_buffer.h"
 #include "../../shared_components/stream_buffer/stream_buffer_container.h"
 
+#include "./query_context/query_context.h"
 
 #include "../strage_manager/MMyISAM/MMyISAM.h"
+
 
 namespace miya_db{
 
@@ -67,14 +69,38 @@ void DatabaseManager::startQueryHandleThread( bool isAdditionalThread )
 
 
 
-void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer> sbContainer, std::string fileName )
+void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer> toSBContainer, std::shared_ptr<StreamBufferContainer> backSBContainer ,std::string fileName )
 {
 	std::cout << "Started MiyaDB [ Light Mode ]" << "\n";
-
+	std::shared_ptr<MMyISAM> mmyisam = std::shared_ptr<MMyISAM>( new MMyISAM(fileName) ); // 簡易的に指定のストレージエンジンを使用
 
 	// respondスレッドを用意する
+	std::thread lightMiyaDBThread([&]()
+	{
+		std::unique_ptr<SBSegment> sbSegment;
+		for(;;)
+		{
+			// 1. ポップ
+			sbSegment = toSBContainer->popOne();
 
+			// クエリの取り出し
+			//  クエリの解析と対応する操作メソッドの呼び出し
+			std::shared_ptr<QueryContext>	qctx;
+			qctx = parseQuery( sbSegment->body() , sbSegment->bodyLength() );
 
+			// 2. 処理
+			switch( qctx->type() )
+			{
+				case 1:
+					//mmyisam->add( qctx );
+					break;
+			}
+		
+			backSBContainer->pushOne( std::move(sbSegment) );
+		}
+		
+		//
+	});
 	
 
 }

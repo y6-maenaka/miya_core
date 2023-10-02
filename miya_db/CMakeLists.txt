@@ -27,9 +27,12 @@ add_library( MIYA_DB STATIC
 				strage_manager/MMyISAM/components/page_table/cache_manager/cache_table_LRU.cpp
 				strage_manager/MMyISAM/components/page_table/cache_manager/mapper/mapper.cpp
 
+				miya_db_client/miya_db_client.cpp
+				miya_db/query_parser/query_parser.cpp
+
 
 )
 
 
-add_definitions( -std=c++17 )
+add_definitions( -std=c++17 -w )
 

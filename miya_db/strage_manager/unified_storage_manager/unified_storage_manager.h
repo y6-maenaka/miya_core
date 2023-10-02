@@ -3,6 +3,9 @@
 
 
 
+namespace miya_db
+{
+
 
 class UnifiedStorageManager // どのストレージマネージャーを使っても
 {
@@ -10,7 +13,9 @@ class UnifiedStorageManager // どのストレージマネージャーを使っ�
 public:
 	virtual void update();
 	virtual void get();
-}
+};
+
+};
 
 
 

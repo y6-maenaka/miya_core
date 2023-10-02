@@ -3,7 +3,11 @@
 
 #include <thread>
 #include <chrono>
+#include <memory>
 
+
+
+#include "./query_parser/query_parser.h"
 
 
 class StreamBuffer;
@@ -24,7 +28,8 @@ class ConnectionManager;
 constexpr char *INFORMATION_SCHEMA_PATH = "./.config/.information_schema.json";
 
 
-class DatabaseManager{
+class DatabaseManager : public QueryParser
+	{
 
 private:
 	
@@ -43,7 +48,8 @@ public:
 	void init();
 
 
-	void startWithLightMode( std::shared_ptr<StreamBufferContainer> sbContainer, std::string fileName ); // 簡易的に起動する場合
+	// 本来はstreamBuffer内のbufferではなく生のバイナリフォーマットbsonでメッセージ交換する
+	void startWithLightMode( std::shared_ptr<StreamBufferContainer> toSBContainer, std::shared_ptr<StreamBufferContainer> backSBContainer ,std::string fileName ); // 簡易的に起動する場合
 	/* パイプの役割はStreamBufferで代替する */
 };
 

@@ -3,6 +3,7 @@
 #include "../../shared_components/cipher/ecdsa_manager.h"
 #include "../../shared_components/middle_buffer/middle_buffer.h"
 #include "../../shared_components/stream_buffer/test/unit_test.h"
+#include "../../shared_components/json.hpp"
 
 #include "../../miya_chain/block/block.h"
 
@@ -30,7 +31,8 @@ int main()
 	std::cout << " WELCOME TO MIYA COIN CLIENT [ MIYA_CORE ] " << "\n";
 
 	miya_db::DatabaseManager dbManager;
-		
+	
+
 
 	return 0;
 

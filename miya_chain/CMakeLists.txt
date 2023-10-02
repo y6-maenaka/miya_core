@@ -42,6 +42,8 @@ add_library( MIYA_CHAIN STATIC
 							transaction/p2pkh/p2pkh.cpp
 							transaction/coinbase/coinbase.cpp
 							transaction/coinbase/coinbase_tx_in.cpp
+
+							utxo/utxo.cpp
 						
 )
 
