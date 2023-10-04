@@ -13,6 +13,11 @@ namespace miya_db
 
 
 
+
+
+
+
+
 struct QueryContext
 {
 private:
@@ -26,7 +31,6 @@ private:
 
 	struct 
 	{
-
 		std::shared_ptr<unsigned char> _key;
 		size_t _keyLength;
 
@@ -42,6 +46,13 @@ public:
 	int type(){ return _type; };
 	void key( std::shared_ptr<unsigned char> key , size_t keyLength );
 	void value( std::shared_ptr<unsigned char> data , size_t dataLength );
+
+
+	std::shared_ptr<unsigned char> key();
+	size_t keyLength();
+
+	std::shared_ptr<unsigned char> value();
+	size_t valueLength();
 };
 
 

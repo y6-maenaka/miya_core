@@ -4,6 +4,9 @@
 #include <thread>
 #include <chrono>
 #include <memory>
+#include <vector>
+
+#include <unistd.h>
 
 
 
@@ -25,7 +28,14 @@ namespace miya_db{
 class ConnectionManager;
 
 
+
+
+
 constexpr char *INFORMATION_SCHEMA_PATH = "./.config/.information_schema.json";
+
+constexpr int QUERY_ADD = 1;
+constexpr int QUERY_SELECT = 2;
+
 
 
 class DatabaseManager : public QueryParser
@@ -33,7 +43,6 @@ class DatabaseManager : public QueryParser
 
 private:
 	
-
 	std::shared_ptr<InformationSchema> _informationSchema; // plannerが参照することが多い
 																				 // ここにテーブルがロードされているか否かなども保存される
 
@@ -47,9 +56,10 @@ public:
 	void startQueryHandleThread( bool isAdditionalThread = false ); // 基本的にこのスレッドがクエリを解析し,データを取得し,レスポンスを作成する. // additional=trueであれば,キャパが余れば自身で勝手に解放する
 	void init();
 
+	void hello();
 
 	// 本来はstreamBuffer内のbufferではなく生のバイナリフォーマットbsonでメッセージ交換する
-	void startWithLightMode( std::shared_ptr<StreamBufferContainer> toSBContainer, std::shared_ptr<StreamBufferContainer> backSBContainer ,std::string fileName ); // 簡易的に起動する場合
+	void startWithLightMode( std::shared_ptr<StreamBufferContainer> popSBContainer, std::shared_ptr<StreamBufferContainer> pushSBContainer ,std::string fileName ); // 簡易的に起動する場合
 	/* パイプの役割はStreamBufferで代替する */
 };
 

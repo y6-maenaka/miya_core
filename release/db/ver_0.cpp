@@ -7,7 +7,7 @@
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/overlay_memory_manager.h"
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/optr_utils.h"
 
-
+#include "../../miya_db/miya_db/database_manager.h"
 
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/unit_test.h"
 
@@ -20,6 +20,12 @@
 
 int main(){
 
+	miya_db::DatabaseManager dbManager;
+	dbManager.hello();
+	
+
+
+	return 0;
 
 	int dataFd = open("../miya_db/table_files/test_table/test.oswap", O_RDWR , (mode_t)0600 );
 	int freeListFd = open("../miya_db/table_files/test_table/test.ofl", O_RDWR , (mode_t)0600 );

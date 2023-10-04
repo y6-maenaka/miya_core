@@ -14,9 +14,24 @@ include_directories( ${OPENSSL_INCLUDE_DIRS} )
 
 
 
+
+if( BUILD_DB )
+add_executable( db_ver_0 ./release/db/ver_0.cpp )
+target_link_libraries( db_ver_0 PRIVATE
+												MIYA_DB
+												SHARED_COMPONENTS
+)
+target_compile_options( db_ver_0 PUBLIC -Wall )
+endif()
+
+
+
+
+
 if( BUILD_CORE )
 add_executable( core_ver_0 ./release/core/ver_0.cpp )
 target_link_libraries( core_ver_0 PRIVATE
+												MIYA_DB
 												SHARED_COMPONENTS
 												EKP2P
 												MIYA_CHAIN
@@ -27,16 +42,6 @@ target_compile_options( core_ver_0 PUBLIC -Wall )
 endif()
 
 
-
-
-if( BUILD_DB )
-add_executable( db_ver_0 ./release/db/ver_0.cpp )
-target_link_libraries( db_ver_0 PRIVATE
-												MIYA_DB
-												SHARED_COMPONENTS
-)
-target_compile_options( db_ver_0 PUBLIC -Wall )
-endif()
 
 
 

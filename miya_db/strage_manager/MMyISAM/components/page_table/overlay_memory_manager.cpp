@@ -37,13 +37,18 @@ OverlayMemoryManager::OverlayMemoryManager( std::string fileName )
 	sprintf( dataFilePath.get() ,  "../miya_db/table_files/%s/%s.oswap", fileName.c_str(), fileName.c_str() );
 	sprintf( freeListFilePath.get() ,  "../miya_db/table_files/%s/%s.ofl", fileName.c_str(), fileName.c_str() );
 
+	int dataFd = open( dataFilePath.get(), O_RDWR | O_CREAT , (mode_t)0600 ); // セーフにするには新規作成は行わない方が良い
+	int freeListFd = open( freeListFilePath.get(), O_RDWR | O_CREAT , (mode_t)0600 ); 
 
+
+	std::cout << "----------------------------------" << "\n";
 	std::cout << dataFilePath.get() << "\n";
+	std::cout << dataFd << "\n";
+	std::cout << "----------------------------------" << "\n";
 	std::cout << freeListFilePath.get() << "\n";
+	std::cout << freeListFd << "\n";
+	std::cout << "-----------------------------------" << "\n";
 
-
-	int dataFd = open( dataFilePath.get(), O_RDWR , (mode_t)0600 );
-	int freeListFd = open( freeListFilePath.get(), O_RDWR , (mode_t)0600 );
 
 	init( dataFd , freeListFd );
 }
@@ -104,6 +109,17 @@ void OverlayMemoryManager::deallocate( optr* targetOptr )
 std::shared_ptr<optr> OverlayMemoryManager::get( unsigned char* oAddr )
 {
 	return _memoryAllocator->get(oAddr);
+}
+
+
+
+
+
+std::shared_ptr<optr> OverlayMemoryManager::wrap( std::shared_ptr<optr> target )
+{
+	target->cacheTable( _memoryAllocator->dataCacheTable().get() );
+
+	return target;
 }
 
 

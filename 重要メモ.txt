@@ -26,3 +26,6 @@
 - optrのキャッシュ　LRUの挙動が怪しい
 
 - btreeのexportでメモリーリークする可能性
+
+
+- MMyISAMのupdate()で領域が増える場合の対策 -> flagmentの収集

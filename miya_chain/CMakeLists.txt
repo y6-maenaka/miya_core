@@ -43,11 +43,12 @@ add_library( MIYA_CHAIN STATIC
 							transaction/coinbase/coinbase.cpp
 							transaction/coinbase/coinbase_tx_in.cpp
 
-							utxo/utxo.cpp
+							utxo_set/utxo.cpp
+							utxo_set/utxo_set.cpp
 						
 )
 
 
 
-add_definitions( -std=c++17 )
+add_definitions( -std=c++17 -w )
 

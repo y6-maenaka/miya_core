@@ -2,16 +2,16 @@ cmake_minimum_required( VERSION 3.2 )
 
 
 add_library( MIYA_DB STATIC 
-
+				
+				
+				strage_manager/MMyISAM/components/value_store_manager/value_store_manager.cpp
 
 				strage_manager/MMyISAM/MMyISAM.cpp
 				strage_manager/unified_storage_manager/unified_storage_manager.cpp
 
-				miya_db/database_manager.cpp
 
-				#strage_manager/MMyISAM/components/index_manager/b_tree.cpp
 				strage_manager/MMyISAM/components/index_manager/btree.cpp
-				#strage_manager/MMyISAM/components/index_manager/node_item_set.cpp
+				strage_manager/MMyISAM/components/index_manager/index_manager.cpp
 
 				strage_manager/MMyISAM/components/page_table/page_table.cpp
 				strage_manager/MMyISAM/components/page_table/overlay_ptr.cpp
@@ -27,9 +27,10 @@ add_library( MIYA_DB STATIC
 				strage_manager/MMyISAM/components/page_table/cache_manager/cache_table_LRU.cpp
 				strage_manager/MMyISAM/components/page_table/cache_manager/mapper/mapper.cpp
 
+				miya_db/database_manager.cpp
 				miya_db_client/miya_db_client.cpp
 				miya_db/query_parser/query_parser.cpp
-
+				miya_db/query_context/query_context.cpp
 
 )
 

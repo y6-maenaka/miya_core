@@ -1,6 +1,6 @@
 #include "index_manager.h"
 
-#include "../btree/btree.h"
+#include "./btree.h"
 
 
 namespace miya_db{
@@ -11,6 +11,8 @@ namespace miya_db{
 IndexManager::IndexManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager )
 {
 	_masterBtree = 	std::shared_ptr<OBtree>( new OBtree(oMemoryManager) );
+
+	
 };
 
 

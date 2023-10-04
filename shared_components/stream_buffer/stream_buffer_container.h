@@ -24,7 +24,8 @@ constexpr unsigned short MAX_SB_COUNT = 3;
 class StreamBufferContainer
 {
 
-private:
+//private:
+public:
 	unsigned short _bufferCount;
 	std::vector< std::shared_ptr<StreamBuffer> > _sbs;
 
@@ -32,7 +33,7 @@ private:
 	std::function<void()> _scaleDownRequest; 
 
 
-public:
+//public:
 
 
 	void pushOne( std::unique_ptr<SBSegment> target );

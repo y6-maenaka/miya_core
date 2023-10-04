@@ -34,7 +34,7 @@ UnifiedStrageManager *QueryParser::suggestTable()
 
 
 
-std::shared_ptr<QueryContext> parseQuery( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength )
+std::shared_ptr<QueryContext> QueryParser::parseQuery( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength )
 {
 	std::vector<uint8_t> fromBson;
 	fromBson.assign( fromRaw.get() , fromRaw.get() + fromRawLength );
@@ -43,15 +43,12 @@ std::shared_ptr<QueryContext> parseQuery( std::shared_ptr<unsigned char> fromRaw
 	nlohmann::json serializedQuery = nlohmann::json::from_bson( fromBson ); // ここで大量のエラーが発生する
 
 
-	if( !(serializedQuery.contains("query")) )
+	if( !(serializedQuery.contains("query")) ){
 		return nullptr;
-
-	if(  !(serializedQuery.contains("query")) || !(serializedQuery["query"].is_binary()) )
-		return nullptr;
+	}
 
 
-
-	std::shared_ptr<QueryContext>	queryContext = std::make_shared<QueryContext>( serializedQuery["query"] );
+	std::shared_ptr<QueryContext> queryContext = std::make_shared<QueryContext>( serializedQuery["query"] );
 
 	switch( static_cast<int>(serializedQuery["query"]) )
 	{
@@ -62,18 +59,30 @@ std::shared_ptr<QueryContext> parseQuery( std::shared_ptr<unsigned char> fromRaw
 			std::vector<uint8_t> valueVector; 
 			valueVector = serializedQuery["value"].get_binary();
 
-
 			std::shared_ptr<unsigned char> value = std::shared_ptr<unsigned char>( new unsigned char[valueVector.size()] );
-
 			//std::copy( queryData.begin(), queryData.begin() + queryData.size(), data.get() );
 			std::copy( valueVector.begin() , valueVector.begin() + valueVector.size() , value.get() );
 			queryContext->value( value , valueVector.size() );
+
+
+			if( !(serializedQuery["key"].is_binary()) ) return nullptr;
+			std::vector<uint8_t> keyVector;
+			keyVector = serializedQuery["key"].get_binary();
+
+			std::shared_ptr<unsigned char> key = std::shared_ptr<unsigned char>( new unsigned char[keyVector.size()] );
+			std::copy( keyVector.begin() , keyVector.begin() + keyVector.size() , key.get() );
+			queryContext->key( key , keyVector.size() );
+
+
 			break;
 		}
 
 		case 2: // find
 		{
+			std::cout << "( check 0 )" << "\n";
 			if( !(serializedQuery["key"].is_binary() ) ) return nullptr;
+			std::cout << "( check 1 )" << "\n";
+
 			std::vector<uint8_t> keyVector;
 			keyVector = serializedQuery["key"].get_binary();
 

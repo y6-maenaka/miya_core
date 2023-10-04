@@ -22,4 +22,40 @@ void QueryContext::value( std::shared_ptr<unsigned char> data , size_t dataLengt
 }
 
 
+
+
+std::shared_ptr<unsigned char> QueryContext::key()
+{
+	return _data._key;
+}
+
+
+size_t QueryContext::keyLength()
+{
+	return _data._keyLength;
+}
+
+
+
+std::shared_ptr<unsigned char> QueryContext::value()
+{
+	return _data._value;
+}
+
+
+
+size_t QueryContext::valueLength()
+{
+	return _data._valueLength;
+}
+
+
+
+
+
+
+
+
+
+
 };

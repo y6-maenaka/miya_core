@@ -4,6 +4,8 @@
 #include "../../shared_components/middle_buffer/middle_buffer.h"
 #include "../../shared_components/stream_buffer/test/unit_test.h"
 #include "../../shared_components/json.hpp"
+#include "../../shared_components/stream_buffer/stream_buffer.h"
+#include "../../shared_components/stream_buffer/stream_buffer_container.h"
 
 #include "../../miya_chain/block/block.h"
 
@@ -12,6 +14,7 @@
 #include "../../miya_chain/transaction/p2pkh/p2pkh.h"
 #include "../../miya_chain/transaction/coinbase/coinbase.h"
 #include "../../miya_chain/transaction/script/signature_script.h"
+#include "../../miya_chain/utxo_set/utxo_set.h"
 
 #include "../../miya_chain/transaction/txcb_table_manager/txcb_table_manager.h"
 #include "../../miya_chain/transaction/txcb_table_manager/txcb_table/txcb_table.h"
@@ -31,8 +34,20 @@ int main()
 	std::cout << " WELCOME TO MIYA COIN CLIENT [ MIYA_CORE ] " << "\n";
 
 	miya_db::DatabaseManager dbManager;
+	//dbManager.startWithLightMode( ,"test");
+
+	std::shared_ptr<StreamBufferContainer> toDBSBContainer = std::make_shared<StreamBufferContainer>();
+	std::shared_ptr<StreamBufferContainer> fromDBSBContainer = std::make_shared<StreamBufferContainer>();
+
+	dbManager.hello();
 	
 
+	std::string localFile = "test";
+	dbManager.startWithLightMode( toDBSBContainer , fromDBSBContainer , localFile );
+
+
+	miya_chain::LightUTXOSet utxoSet( toDBSBContainer , fromDBSBContainer );
+	utxoSet.testInquire();
 
 	return 0;
 

@@ -16,10 +16,11 @@ class optr;
 
 class IndexManager{
 
-private:
+//private:
+public:
 	std::shared_ptr<OBtree> _masterBtree; // バックアップファイルから起動する場合は
 
-public:
+//public:
 
 	IndexManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager );
 
