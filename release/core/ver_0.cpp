@@ -33,25 +33,51 @@ int main()
 {
 	std::cout << " WELCOME TO MIYA COIN CLIENT [ MIYA_CORE ] " << "\n";
 
+
+	cipher::ECDSAManager ecdsaManager;
+	ecdsaManager.init( (unsigned char *)"hello", 5 ); // priKeyには鍵がかかっているので
+
+	/* 必須セットアップ */
+
+
+	ControlInterface interface;
+	std::shared_ptr<tx::P2PKH> loadedP2PKH = interface.createTxFromJsonFile("../control_interface/tx_origin/payment_tx_info_0000.json");
+
+	for( auto itr : loadedP2PKH->ins() ) // 入力に対する秘密鍵の設定
+		itr->pkey( ecdsaManager.myPkey() );
+
+
+	loadedP2PKH->sign(); // トランザクションのTxIn用に署名を作成する
+
+
+
+
+	std::shared_ptr<unsigned char> rawTxOut; size_t rawTxOutLength;
+	rawTxOutLength = loadedP2PKH->outs().at(0)->exportRaw( &rawTxOut );
+
+
+
+	std::cout << "create Tx Done" << "\n";
+
+
 	miya_db::DatabaseManager dbManager;
 	//dbManager.startWithLightMode( ,"test");
 
 	std::shared_ptr<StreamBufferContainer> toDBSBContainer = std::make_shared<StreamBufferContainer>();
 	std::shared_ptr<StreamBufferContainer> fromDBSBContainer = std::make_shared<StreamBufferContainer>();
 
-	dbManager.hello();
-	
 
 	std::string localFile = "test";
 	dbManager.startWithLightMode( toDBSBContainer , fromDBSBContainer , localFile );
 
 
 	miya_chain::LightUTXOSet utxoSet( toDBSBContainer , fromDBSBContainer );
-	utxoSet.testInquire();
+	utxoSet.testInquire( rawTxOut , rawTxOutLength );
 
 	return 0;
 
 
+	/*
 
 	cipher::ECDSAManager ecdsaManager;
 	ecdsaManager.init( (unsigned char *)"hello", 5 ); // priKeyには鍵がかかっているので
@@ -94,7 +120,7 @@ int main()
 	rawTxLength = loadedP2PKH->exportRaw( &rawTx );
 
 
-	/* インポート */
+	// インポート 
 
 	std::shared_ptr<tx::P2PKH> importP2PKH = std::make_shared<tx::P2PKH>();
 	importP2PKH->importRaw( rawTx , rawTxLength);
@@ -128,6 +154,22 @@ int main()
 
 
 	sleep(3);
+
+
+
+	*/
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

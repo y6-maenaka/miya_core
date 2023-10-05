@@ -42,6 +42,9 @@ public:
 	std::shared_ptr<optr> get( unsigned char* oAddr );
 
 	std::shared_ptr<optr> wrap( std::shared_ptr<optr> target );
+
+	std::shared_ptr<CacheTable> dataCacheTable();
+	std::shared_ptr<CacheTable> freeListCacheTable();
 };
 
 

@@ -61,7 +61,7 @@ public:
 	void store( std::shared_ptr<tx::P2PKH> targetTx ); // 一応dumpしてSBCに流す
 
 
-	void testInquire();
+	void testInquire( std::shared_ptr<unsigned char> data , size_t dataLength );
 
 };
 

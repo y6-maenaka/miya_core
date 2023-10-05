@@ -29,16 +29,19 @@ class optr
 {
 private:
 	unsigned char _addr[5];
-	CacheTable *_cacheTable;
-	//std::shared_ptr<CacheTable> _cacheTable;
+	//CacheTable *_cacheTable;
+	std::shared_ptr<CacheTable> _cacheTable;
 
 public:
 	optr(){}; 
 	optr( unsigned char *addr ); // フリーメモリ管理領域にはアクセスしないようにする
-	optr( unsigned char *addr , CacheTable *cacheTable );
+	// optr( unsigned char *addr , CacheTable *cacheTable );
+	optr( unsigned char *addr , std::shared_ptr<CacheTable> cacheTable );
 
-	void cacheTable( CacheTable *cacheTable );
-	CacheTable *cacheTable(){ return _cacheTable; };
+	//void cacheTable( CacheTable *cacheTable );
+	void cacheTable( std::shared_ptr<CacheTable> cacheTable );
+	// CacheTable *cacheTable(){ return _cacheTable; };
+	std::shared_ptr<CacheTable> cacheTable(){ return _cacheTable; };
 
 	unsigned char *addr(); // getter // get with unsigned char[5]
 	void addr( unsigned long ulongOptr );

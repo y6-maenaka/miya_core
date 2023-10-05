@@ -109,18 +109,11 @@ std::unique_ptr<SBSegment> StreamBuffer::dequeue()
 		return !(_sb._queue.empty()); // emptyでなければ待機状態を解除する
 	});
 
-	std::cout << "--- dequeue --- "  << "\n";
-	std::cout << _sb._queue.size() << "\n";
-
-	std::cout << "*** 1 ***" << "\n";
 
 	std::unique_ptr<SBSegment> ret = std::move( _sb._queue.front() );
-	std::cout << "*** 2 ***" << "\n";
 	_sb._queue.erase( _sb._queue.cbegin() );
-	std::cout << "*** 2 ***" << "\n";
 
 	_pushContributer._pushCV.notify_all();
-	std::cout << "*** 3 ***" << "\n";
 	
 	return std::move( ret );
 }

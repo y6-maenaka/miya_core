@@ -52,7 +52,11 @@ short CacheTable::cacheFind( unsigned short frame )
 
 CacheTable::CacheTable( int fd )
 {
-	_mapper = new Mapper( fd );
+	// _mapper = new Mapper( fd );
+	// _mapper = std::make_shared<Mapper>( fd );
+	_mapper = std::shared_ptr<Mapper>( new Mapper(fd) );
+
+	printf("Initialized Mapper Address ==> %p\n", _mapper.get() );
 
 	memset( &_cacheList, 0x00 , sizeof(_cacheList) );
 	std::fill( _cacheList._cacheingList, _cacheList._cacheingList + CACHE_BLOCK_COUNT, -1);

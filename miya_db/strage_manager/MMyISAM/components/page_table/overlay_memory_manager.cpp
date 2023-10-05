@@ -117,10 +117,26 @@ std::shared_ptr<optr> OverlayMemoryManager::get( unsigned char* oAddr )
 
 std::shared_ptr<optr> OverlayMemoryManager::wrap( std::shared_ptr<optr> target )
 {
-	target->cacheTable( _memoryAllocator->dataCacheTable().get() );
+	target->cacheTable( _memoryAllocator->dataCacheTable() );
 
 	return target;
 }
+
+
+
+std::shared_ptr<CacheTable> OverlayMemoryManager::dataCacheTable()
+{
+	return _memoryAllocator->dataCacheTable();
+}
+
+
+std::shared_ptr<CacheTable> OverlayMemoryManager::freeListCacheTable()
+{
+	return _memoryAllocator->freeListCacheTable();
+}
+
+
+
 
 
 }; // close miya_db namespace

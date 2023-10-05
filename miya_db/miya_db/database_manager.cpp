@@ -82,57 +82,38 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 	std::cout << "Launching MiyaDB [ Light Mode ]" << "\n";
 	std::shared_ptr<MMyISAM> mmyisam = std::shared_ptr<MMyISAM>( new MMyISAM(fileName) ); // 簡易的に指定のストレージエンジンを使用
 
-
 	std::cout << "MMyISAM setuped" << "\n";
-
-	printf(" mmyisam -> %p\n", mmyisam.get() );
-	printf(" mmyisam->indexManager -> %p\n", mmyisam->_indexManager.get() );
-	printf(" mmyisam->indexManager->masterBtree -> %p\n", mmyisam->_indexManager->_masterBtree.get() );
-
-	std::shared_ptr<int> num = std::make_shared<int>(10);
-	printf(" num -> %d\n", *num );
-	printf(" num -> %p\n", num.get() );
 
 	// respondスレッドを用意する &(参照)でキャプチャするとスマートポインタのアドレスが変わる
 	std::thread lightMiyaDBThread([mmyisam, popSBContainer, pushSBContainer, this]() 
 	{
 		std::cout << "Started MiayDB(light) Handler Thread" << "\n";
 		
-
 		std::unique_ptr<SBSegment> sbSegment;
 		std::vector<uint8_t> dumpedJson;
 		std::shared_ptr<unsigned char> dumpedJsonRaw; 
 		nlohmann::json responseJson; responseJson["status"] = -1;
 		int flag;
+
+		return;
+
+
 		for(;;)
 		{
-			std::cout << "< check 0 >" << "\n";
-
-			printf( "%p\n", popSBContainer->_sbs.at(0).get() );
-
-
 			// 1. ポップ
 			sbSegment = popSBContainer->popOne();
-
-
-			std::cout << "< check 1 >" << "\n";
 
 			// クエリの取り出し
 			//  クエリの解析と対応する操作メソッドの呼び出し
 			std::shared_ptr<QueryContext> qctx;
 			qctx = parseQuery( sbSegment->body() , sbSegment->bodyLength() );
 
-			std::cout << "< check 2 >" << "\n";
-			printf("pointer -> %p\n", qctx.get() );
-
-			std::cout << "type() -> " << qctx->type() << "\n";
-			
-
 			// 2. 処理
 			switch( qctx->type() )
 			{
 				case QUERY_ADD: // 1 add
 					std::cout << "## (HANDLE) QUERY_ADD" << "\n";
+
 					flag = mmyisam->add( qctx );
 
 					std::cout << "Flag -> " << flag << "\n";
@@ -146,32 +127,20 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 				
 				case QUERY_SELECT: // 2 get
 					std::cout << "## (HANDLE) QUERY_SELECT"	<< "\n";
-					std::cout << "< check 2.5 >" << "\n";
-
-					printf("%p\n", mmyisam.get() );
-					printf("%p\n", qctx.get() );
-					puts("mmyisam->get() call before");
-
-					mmyisam->hello();
 					flag = mmyisam->get( qctx );
 
-					std::cout << "< check 3 >" << "\n";
 
 					responseJson["status"] = 0;
 					std::vector<uint8_t> valueVector; valueVector.assign( qctx->value().get(), qctx->value().get() + qctx->valueLength() );
 					responseJson["value"] = nlohmann::json::binary( valueVector );
 
-					std::cout << "< check 4 >" << "\n";
 
 					dumpedJson = nlohmann::json::to_bson( responseJson );
 					dumpedJsonRaw = std::shared_ptr<unsigned char>( new unsigned char[dumpedJson.size()] );
 					std::copy( dumpedJson.begin() , dumpedJson.begin() + dumpedJson.size() ,  dumpedJsonRaw.get() );
 
-					std::cout << "< check 5 >" << "\n";
-
 					sbSegment->body( dumpedJsonRaw , dumpedJson.size() );
 
-					std::cout << "< check 6 >" << "\n";
 					break;
 			}
 		

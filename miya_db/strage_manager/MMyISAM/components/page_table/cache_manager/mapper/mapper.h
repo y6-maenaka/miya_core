@@ -21,7 +21,8 @@ class Mapper
 {
 
 
-private:
+//private:
+public:
 	int _fd;
 	//off_t _currentFileSize;
 	long _systemPageSize;

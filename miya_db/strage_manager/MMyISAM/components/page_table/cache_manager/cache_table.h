@@ -27,9 +27,11 @@ class Mapper;
 class CacheTable
 {
 
-private:
+public:
+//private:
 
-	Mapper *_mapper;
+	//Mapper *_mapper;
+	std::shared_ptr<Mapper> _mapper;
 
 	struct
 	{
@@ -52,7 +54,8 @@ public:
 	void cacheingList();
 	void invalidList();
 
-	Mapper *mapper(){ return _mapper; }; // getter
+	// Mapper *mapper(){ return _mapper; }; // getter
+	std::shared_ptr<Mapper> mapper(){ return _mapper; };
 
 	bool init();
 	CacheTable( int fd );

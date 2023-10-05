@@ -173,10 +173,10 @@ class OverlayMemoryAllocator
 private:
 	MetaBlock *_metaBlock;
 
-	const CacheTable *_dataCacheTable = nullptr;
-	//std::shared_ptr<CacheTable> _dataCacheTable = nullptr;
-	const CacheTable *_freeListCacheTable = nullptr;
-	//std::shared_ptr<CacheTable> _freeListCacheTable = nullptr;
+	//CacheTable *_dataCacheTable = nullptr;
+	std::shared_ptr<CacheTable> _dataCacheTable = nullptr;
+	//CacheTable *_freeListCacheTable = nullptr;
+	std::shared_ptr<CacheTable> _freeListCacheTable = nullptr;
 
 protected:
 
@@ -213,7 +213,8 @@ public:
 
 	std::shared_ptr<optr> get( unsigned char* oAddr );
 
-	const std::shared_ptr<CacheTable> dataCacheTable();
+	std::shared_ptr<CacheTable> dataCacheTable();
+	std::shared_ptr<CacheTable> freeListCacheTable();
 
 }; // close miya_db
 

@@ -162,21 +162,23 @@ OverlayMemoryAllocator::OverlayMemoryAllocator( int dataFileFD , int freeListFil
 
 
 	if( dataFileFD < 0 ) return;
-		_dataCacheTable = new CacheTable( dataFileFD );
+		//_dataCacheTable = new CacheTable( dataFileFD );
+		_dataCacheTable = std::shared_ptr<CacheTable>( new CacheTable(dataFileFD) );
 		//_dataCacheTable = std::shared_ptr<CacheTable>( new CacheTable(dataFileFD) );
 
 	if( freeListFileFD < 0 ) return;
-		_freeListCacheTable = new CacheTable( freeListFileFD );
+		//_freeListCacheTable = new CacheTable( freeListFileFD );
+		_freeListCacheTable = std::shared_ptr<CacheTable>( new CacheTable(freeListFileFD) );
 		//_freeListCacheTable = std::shared_ptr<CacheTable>( new CacheTable(freeListFileFD) );
 
 
-	printf("Seted FreeList CacheTable with -> %p\n" , _freeListCacheTable );
-	printf("Seted DataCache CacheTable with -> %p\n" , _dataCacheTable );
+	printf("Seted DataCache CacheTable with -> %d - %p\n" , dataFileFD , _dataCacheTable.get() );
+	printf("Seted FreeList CacheTable with -> %d - %p\n" , freeListFileFD ,_freeListCacheTable.get() );
 
 	/* MetaBlockの初期化 */
 	unsigned char addrZero[5] = {0,0,0,0,0};
 	optr* primaryOptr = new optr( addrZero );
-	primaryOptr->cacheTable(  const_cast<CacheTable*>(_freeListCacheTable) );
+	primaryOptr->cacheTable(  _freeListCacheTable );
 	_metaBlock = new MetaBlock( primaryOptr );
 
 
@@ -246,7 +248,7 @@ std::shared_ptr<optr> OverlayMemoryAllocator::allocate( unsigned long allocateSi
 	ucAllocateSize[0] = 0; // 要修正
 	ucAllocateSize[1] = (allocateSize >> 24 ) & 0xFF;
 	ucAllocateSize[2] = (allocateSize >> 16 ) & 0xFF;
-	ucAllocateSize[3]	= (allocateSize >> 8 ) & 0xFF;
+	ucAllocateSize[3] = (allocateSize >> 8 ) & 0xFF;
 	ucAllocateSize[4] = (allocateSize) & 0xFF;
 
 	std::unique_ptr<ControlBlock> targetControlBlock = findFreeBlock( _metaBlock->freeBlockHead().get() , allocateSize );
@@ -298,9 +300,10 @@ std::shared_ptr<optr> OverlayMemoryAllocator::allocate( unsigned long allocateSi
 	}
 
 	optr *ret = new optr( newAllocatedBlock->mappingOptr()->addr() );
-	ret->cacheTable( const_cast<CacheTable*>(_dataCacheTable) );
+	ret->cacheTable( _dataCacheTable );
 
 
+	std::cout << "Retuened Optr" << "\n";
 
 	return std::make_shared<optr>( *ret );
 }
@@ -425,7 +428,7 @@ void OverlayMemoryAllocator::printControlFile()
 	//optr* firstControlBlockOptr = new optr( firstControlBlockOptrAddr ); 
 	//std::shared_ptr<optr> firstControlBlockOptr = new optr( firstControlBlockOptrAddr );
 	std::shared_ptr<optr> firstControlBlockOptr = std::shared_ptr<optr>( new optr(firstControlBlockOptrAddr) );
-	firstControlBlockOptr->cacheTable( const_cast<CacheTable*>(_freeListCacheTable) );
+	firstControlBlockOptr->cacheTable( _freeListCacheTable );
 
 	
 	//firstControlBlockOptr->printValueContinuously( 20 ); std::cout << "\n";
@@ -484,7 +487,7 @@ void OverlayMemoryAllocator::printControlFile()
 std::unique_ptr<ControlBlock> OverlayMemoryAllocator::newControlBlock()
 {
 	ControlBlock newControlBlock( ( *(_metaBlock->controlBlockTail()->blockOptr()) + FREE_BLOCK_CONTROL_BLOCK_LENGTH ) );
-	newControlBlock.blockOptr()->cacheTable( const_cast<CacheTable*>(_freeListCacheTable) ); // セットしないとなぜかエラ〜になる
+	newControlBlock.blockOptr()->cacheTable( _freeListCacheTable ); // セットしないとなぜかエラ〜になる
 
 	_metaBlock->controlBlockTail( &newControlBlock );
 	return std::make_unique<ControlBlock>( newControlBlock );	
@@ -638,7 +641,7 @@ std::unique_ptr<ControlBlock> OverlayMemoryAllocator::unUsedControlBlockHead()
 std::shared_ptr<optr> OverlayMemoryAllocator::get( unsigned char* oAddr )
 {
 	std::shared_ptr<optr> ret = std::shared_ptr<optr>( new optr(oAddr) );
-	ret->cacheTable( const_cast<CacheTable*>(_dataCacheTable) );
+	ret->cacheTable( _dataCacheTable );
 
 	return ret;
 }
@@ -648,9 +651,16 @@ std::shared_ptr<optr> OverlayMemoryAllocator::get( unsigned char* oAddr )
 
 
 
-const std::shared_ptr<CacheTable> OverlayMemoryAllocator::dataCacheTable()
+std::shared_ptr<CacheTable> OverlayMemoryAllocator::dataCacheTable()
 {
-	return std::shared_ptr<CacheTable>(const_cast<CacheTable*>(_dataCacheTable));
+	//return std::shared_ptr<CacheTable>(const_cast<CacheTable*>(_dataCacheTable));
+	return _dataCacheTable;
+}
+
+std::shared_ptr<CacheTable> OverlayMemoryAllocator::freeListCacheTable()
+{
+	//return std::shared_ptr<CacheTable>(const_cast<CacheTable*>(_freeListCacheTable));
+	return _freeListCacheTable;
 }
 
 

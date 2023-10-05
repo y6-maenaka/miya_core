@@ -17,15 +17,21 @@ optr::optr( unsigned char *addr )
 
 
 
-
+/*
 void optr::cacheTable( CacheTable *cacheTable )
+{
+	_cacheTable = cacheTable;
+}
+*/
+
+void optr::cacheTable( std::shared_ptr<CacheTable> cacheTable )
 {
 	_cacheTable = cacheTable;
 }
 
 
 
-optr::optr( unsigned char *addr , CacheTable *cacheTable )
+optr::optr( unsigned char *addr , std::shared_ptr<CacheTable> cacheTable )
 {
 	memcpy( _addr, addr , sizeof( _addr ));
 	_cacheTable = cacheTable;

@@ -79,9 +79,7 @@ std::shared_ptr<QueryContext> QueryParser::parseQuery( std::shared_ptr<unsigned 
 
 		case 2: // find
 		{
-			std::cout << "( check 0 )" << "\n";
 			if( !(serializedQuery["key"].is_binary() ) ) return nullptr;
-			std::cout << "( check 1 )" << "\n";
 
 			std::vector<uint8_t> keyVector;
 			keyVector = serializedQuery["key"].get_binary();

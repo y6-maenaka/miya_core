@@ -18,7 +18,7 @@ namespace miya_db
 class optr;
 class OverlayMemoryManager;
 struct QueryContext;
-
+class CacheTable;
 
 
 /*
@@ -45,6 +45,7 @@ struct ValueFragmentHeader
 		std::shared_ptr<optr> _prevFlagment; // cacheTableはセットされていないため注意
 		std::shared_ptr<optr> _nextFlagment;
 
+		// ストアする本体のデータ長
 		uint64_t _valueLength;
 
 		// タイムスタンプ
@@ -52,8 +53,11 @@ struct ValueFragmentHeader
 
 	} _meta;
 
+	std::shared_ptr<CacheTable> _cacheTable;
+	
+
 public:
-	ValueFragmentHeader();
+	ValueFragmentHeader( std::shared_ptr<CacheTable> cacheTable );
 
 	void valueLength( size_t valueLength );
 	size_t valueLength();

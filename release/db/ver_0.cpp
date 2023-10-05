@@ -6,6 +6,7 @@
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/cache_manager/mapper/mapper.h"
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/overlay_memory_manager.h"
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/optr_utils.h"
+#include "../../miya_db/strage_manager/MMyISAM/components/.unit_test.h"
 
 #include "../../miya_db/miya_db/database_manager.h"
 
@@ -24,6 +25,7 @@ int main(){
 	dbManager.hello();
 	
 
+	optr_cache_unit_test();
 
 	return 0;
 
