@@ -28,7 +28,7 @@ class CacheTable;
 
 
 constexpr unsigned short VALUE_FLAGMENT_ADDR_SIZE = 5; // optrアドレスの長さと同じ
-constexpr unsigned short DEFAULT_VALUE_FLAGMENT_HEADER_SIZE = sizeof(uint16_t) + VALUE_FLAGMENT_ADDR_SIZE + VALUE_FLAGMENT_ADDR_SIZE + sizeof(uint64_t);
+constexpr unsigned short DEFAULT_VALUE_FLAGMENT_HEADER_SIZE = sizeof(uint16_t) + VALUE_FLAGMENT_ADDR_SIZE + VALUE_FLAGMENT_ADDR_SIZE + sizeof(uint64_t) + sizeof(uint64_t);
 
 
 
@@ -37,7 +37,7 @@ constexpr unsigned short DEFAULT_VALUE_FLAGMENT_HEADER_SIZE = sizeof(uint16_t) +
 
 struct ValueFragmentHeader
 {
-
+// 一旦publicで
 	struct
 	{
 		uint16_t _headerLength; // リスト構造なので意味がないかも

@@ -299,13 +299,16 @@ std::shared_ptr<optr> OverlayMemoryAllocator::allocate( unsigned long allocateSi
 		toUnUsedControlBlock( targetControlBlock.get() ); // 対象のコントロール(フリー)ブロックをチェーンから外す
 	}
 
-	optr *ret = new optr( newAllocatedBlock->mappingOptr()->addr() );
+	//optr *ret = new optr( newAllocatedBlock->mappingOptr()->addr() );
+	//ret->cacheTable( _dataCacheTable );
+
+	std::shared_ptr<optr> ret = std::shared_ptr<optr>( new optr( newAllocatedBlock->mappingOptr()->addr()) );
 	ret->cacheTable( _dataCacheTable );
 
-
+	return ret;
 	std::cout << "Retuened Optr" << "\n";
 
-	return std::make_shared<optr>( *ret );
+	//return std::make_shared<optr>( *ret );
 }
 
 

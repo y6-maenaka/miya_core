@@ -95,9 +95,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 		nlohmann::json responseJson; responseJson["status"] = -1;
 		int flag;
 
-		return;
-
-
+	
 		for(;;)
 		{
 			// 1. ポップ
@@ -112,7 +110,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 			switch( qctx->type() )
 			{
 				case QUERY_ADD: // 1 add
-					std::cout << "## (HANDLE) QUERY_ADD" << "\n";
+					std::cout << "\x1b[32m" << "## (HANDLE) QUERY_ADD" << "\x1b[39m" << "\n";
 
 					flag = mmyisam->add( qctx );
 
@@ -126,20 +124,28 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 					break;
 				
 				case QUERY_SELECT: // 2 get
-					std::cout << "## (HANDLE) QUERY_SELECT"	<< "\n";
+					std::cout << "\x1b[34m" << "## (HANDLE) QUERY_SELECT"	<<"\x1b[39m" << "\n";
 					flag = mmyisam->get( qctx );
 
+					std::cout << "**** check 1 " << "\n";
 
 					responseJson["status"] = 0;
 					std::vector<uint8_t> valueVector; valueVector.assign( qctx->value().get(), qctx->value().get() + qctx->valueLength() );
 					responseJson["value"] = nlohmann::json::binary( valueVector );
 
+					std::cout << "**** check 2 " << "\n";
 
 					dumpedJson = nlohmann::json::to_bson( responseJson );
 					dumpedJsonRaw = std::shared_ptr<unsigned char>( new unsigned char[dumpedJson.size()] );
 					std::copy( dumpedJson.begin() , dumpedJson.begin() + dumpedJson.size() ,  dumpedJsonRaw.get() );
 
+
+					std::cout << "**** check 3 " << "\n";
+
 					sbSegment->body( dumpedJsonRaw , dumpedJson.size() );
+
+
+					std::cout << "**** check 3 " << "\n";
 
 					break;
 			}

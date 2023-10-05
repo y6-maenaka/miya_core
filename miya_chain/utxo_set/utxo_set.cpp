@@ -57,6 +57,10 @@ void LightUTXOSet::testInquire( std::shared_ptr<unsigned char> data , size_t dat
 	exportedJsonVector = nlohmann::json::to_bson( queryJson );
 
 
+	std::cout << queryJson << "\n";
+
+	std::cout << "@@@ Value Length :::: " << valueVector.size() << "\n";
+
 	std::shared_ptr<unsigned char> exportedJsonRaw = std::shared_ptr<unsigned char>( new unsigned char[exportedJsonVector.size()] );
 	std::copy( exportedJsonVector.begin() , exportedJsonVector.begin() + exportedJsonVector.size() , exportedJsonRaw.get() );
 
@@ -66,17 +70,45 @@ void LightUTXOSet::testInquire( std::shared_ptr<unsigned char> data , size_t dat
 
 
 
-
-
 	sleep(2);
-	std::cout << "-------------------------------------" << "\n";
 
 	std::unique_ptr<SBSegment> responseSegment = std::make_unique<SBSegment>();
 
 	responseSegment = _popSBContainer->popOne();
 
-	std::cout << "poped" << "\n";
 
+	std::cout << "データの登録OK" << "\n";
+
+
+
+
+	std::cout << "\n\n\n\n-------------------------------------" << "\n";
+
+	std::unique_ptr<SBSegment> requestSegment = std::make_unique<SBSegment>();
+
+	nlohmann::json requestJson;
+	requestJson["query"] = 2;// get
+	requestJson["key"] = nlohmann::json::binary( keyVector );
+
+	std::vector<uint8_t> exportedRequestJsonVector = nlohmann::json::to_bson( requestJson );
+	std::shared_ptr<unsigned char> exportedRequestJsonRaw = std::shared_ptr<unsigned char>( new unsigned char[exportedRequestJsonVector.size()] );
+	std::copy( exportedRequestJsonVector.begin(), exportedRequestJsonVector.begin() + exportedRequestJsonVector.size() , exportedRequestJsonRaw.get() );
+
+	requestSegment->body( exportedRequestJsonRaw, exportedRequestJsonVector.size() );
+	_pushSBContainer->pushOne( std::move(requestSegment) );
+
+	
+	std::unique_ptr<SBSegment> getResponseSegment = _popSBContainer->popOne();
+	std::cout << "とりあえず仮取得できました" << "\n";
+
+	std::cout << "----------- 取得したデータ -----------" << "\n";
+	std::vector<uint8_t> getResponseSegmentVector;
+	getResponseSegmentVector.assign( getResponseSegment->body().get() , getResponseSegment->body().get() + getResponseSegment->bodyLength() );
+	
+	nlohmann::json ret = nlohmann::json::from_bson( getResponseSegmentVector );
+
+	std::cout << ret << "\n";
+	std::cout << getResponseSegment->bodyLength() << "\n";
 
 
 	return;

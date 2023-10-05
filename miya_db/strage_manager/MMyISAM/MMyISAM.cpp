@@ -26,25 +26,17 @@ MMyISAM::MMyISAM( std::string fileName )
     std::shared_ptr<OverlayMemoryManager> dataOverlayMemoryManager = std::shared_ptr<OverlayMemoryManager>( new OverlayMemoryManager(fileName) );
 		_valueStoreManager = std::shared_ptr<ValueStoreManager>( new ValueStoreManager(dataOverlayMemoryManager) );
 
-    //std::shared_ptr<optr> temp = dataOverlayMemoryManager->allocate(12);
-    //omemcpy( temp.get() , (unsigned char*)"HelloWorld1", 12 );
+		/*
+    std::shared_ptr<optr> temp = dataOverlayMemoryManager->allocate(12);
+    omemcpy( temp.get() , (unsigned char*)"HelloWorld1", 12 );
     printf("(1)dataCache -> %p\n", dataOverlayMemoryManager->dataCacheTable().get() );
     printf("(1)freeListCache -> %p\n", dataOverlayMemoryManager->freeListCacheTable().get() );
-
-		//std::cout << "----------------------------------------" << "\n";
-		//printf(" dataCache addr -> %p\n", dataOverlayMemoryManager->memoryAllocator()->dataCacheTable().get());
-		//printf(" mapper addr -> %p\n", dataOverlayMemoryManager->memoryAllocator()->dataCacheTable()->_mapper.get() );
-		//printf("%p\n", dataOverlayMemoryManager->memoryAllocator()->dataCacheTable()->_mapper );
-		//printf("%d\n", dataOverlayMemoryManager->memoryAllocator()->dataCacheTable()->_mapper->_systemPageSize);
-		//printf("%d\n", dataOverlayMemoryManager->memoryAllocator()->dataCacheTable()->_mapper->_fd);
-	
-		/*
-		std::shared_ptr<optr> temp_1 = dataOverlayMemoryManager->allocate( 11 );
-		printf("%p\n", temp_1->cacheTable() );
-		std::cout << "------------------------" << "\n";
-		omemcpy( temp_1.get() , (unsigned char*)"HelloWorld1", 11 );
+    std::cout << "----------------------------------------" << "\n";
+		printf("%p\n", dataOverlayMemoryManager->memoryAllocator()->dataCacheTable()->_mapper.get() );
+		printf("%d\n", dataOverlayMemoryManager->memoryAllocator()->dataCacheTable()->_mapper->_fd );
 		*/	
-    sleep(2);
+	
+    sleep(1);
 
     std::cout << "ValueStoreManager setuped" << "\n";
 
@@ -53,21 +45,17 @@ MMyISAM::MMyISAM( std::string fileName )
     std::shared_ptr<OverlayMemoryManager> indexOverlayMemoryManager = std::shared_ptr<OverlayMemoryManager>( new OverlayMemoryManager(fileName) );
     _indexManager = std::shared_ptr<IndexManager>( new IndexManager(indexOverlayMemoryManager) );
 
-  	
-
-		std::shared_ptr<optr> temp_2 = indexOverlayMemoryManager->allocate(11);
-    omemcpy( temp_2.get() , (unsigned char*)"HelloWorld2", 11 );
+		/*	
     printf("(2)dataCache -> %p\n", indexOverlayMemoryManager->dataCacheTable().get() );
     printf("(2)freeListCache -> %p\n", indexOverlayMemoryManager->freeListCacheTable().get() );
 
     std::cout << "----------------------------------------" << "\n";
 		printf("%p\n", indexOverlayMemoryManager->memoryAllocator()->dataCacheTable()->_mapper.get() );
 		printf("%d\n", indexOverlayMemoryManager->memoryAllocator()->dataCacheTable()->_mapper->_fd );
-		
-
+		*/	
 
 	
-    sleep(2);
+    sleep(1);
 }
 
 
