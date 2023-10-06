@@ -22,13 +22,14 @@ struct QueryContext
 {
 private:
 	const int _type;
-
+	uint32_t _id;
 
 	// 考慮すべき格納データ
 	// 1. add( key , data , dataLength )
 	// 2. update( key , data , dataLength )
 	// 3. select( key )
 
+	
 	struct 
 	{
 		std::shared_ptr<unsigned char> _key;
@@ -39,9 +40,11 @@ private:
 
 	} _data;
 
+	uint64_t _timestamp;
+
 
 public:
-	QueryContext( int type ) : _type(type){};
+	QueryContext( int type , uint32_t queryID ) : _type(type) , _id(queryID){};
 
 	int type(){ return _type; };
 	void key( std::shared_ptr<unsigned char> key , size_t keyLength );
@@ -53,6 +56,12 @@ public:
 
 	std::shared_ptr<unsigned char> value();
 	size_t valueLength();
+
+	uint32_t id();
+	void id( uint32_t target );
+
+	uint64_t timestamp();
+	void timestamp( uint64_t target );
 };
 
 

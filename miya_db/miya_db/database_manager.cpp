@@ -82,7 +82,6 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 	std::cout << "Launching MiyaDB [ Light Mode ]" << "\n";
 	std::shared_ptr<MMyISAM> mmyisam = std::shared_ptr<MMyISAM>( new MMyISAM(fileName) ); // 簡易的に指定のストレージエンジンを使用
 
-	std::cout << "MMyISAM setuped" << "\n";
 
 	// respondスレッドを用意する &(参照)でキャプチャするとスマートポインタのアドレスが変わる
 	std::thread lightMiyaDBThread([mmyisam, popSBContainer, pushSBContainer, this]() 
@@ -92,29 +91,58 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 		std::unique_ptr<SBSegment> sbSegment;
 		std::vector<uint8_t> dumpedJson;
 		std::shared_ptr<unsigned char> dumpedJsonRaw; 
-		nlohmann::json responseJson; responseJson["status"] = -1;
+		
 		int flag;
+		std::shared_ptr<QueryContext> qctx;
 
-	
+
+
+		auto failureSB = []( std::shared_ptr<QueryContext> qctx ) -> std::unique_ptr<SBSegment>
+		{
+			std::unique_ptr<SBSegment> ret = std::make_unique<SBSegment>();
+			nlohmann::json failureMSG; 
+			failureMSG["QueryID"] = qctx->id();
+			failureMSG["status"] = -1;
+			std::vector<uint8_t> failureMSGVector = nlohmann::json::to_bson( failureMSG );
+			std::shared_ptr<unsigned char> failureMSGRaw = std::shared_ptr<unsigned char>( new unsigned char[failureMSGVector.size()] );
+			std::copy( failureMSGVector.begin() , failureMSGVector.begin() + failureMSGVector.size() , failureMSGRaw.get() );
+			ret->body( failureMSGRaw , failureMSGVector.size() );
+			return std::move(ret);
+		};
+
+
+		nlohmann::json responseJson;
 		for(;;)
 		{
+			responseJson.clear();
 			// 1. ポップ
 			sbSegment = popSBContainer->popOne();
 
 			// クエリの取り出し
 			//  クエリの解析と対応する操作メソッドの呼び出し
-			std::shared_ptr<QueryContext> qctx;
-			qctx = parseQuery( sbSegment->body() , sbSegment->bodyLength() );
+			qctx = parseQuery( sbSegment->body() , sbSegment->bodyLength() ); // ここで定義するのはオーバーフローが大きい
+			
+			if( qctx == nullptr ) { // クエリメッセージの解析に失敗した場合
+				sbSegment = failureSB( qctx );
+				goto direct;
+			}
 
 			// 2. 処理
 			switch( qctx->type() )
 			{
+
+
+
 				case QUERY_ADD: // 1 add
-					std::cout << "\x1b[32m" << "## (HANDLE) QUERY_ADD" << "\x1b[39m" << "\n";
+					std::cout << " ### \x1b[32m" << "## (HANDLE) QUERY_ADD" << "\x1b[39m" << "\n";
 
-					flag = mmyisam->add( qctx );
-
-					std::cout << "Flag -> " << flag << "\n";
+					flag = mmyisam->add( qctx ); // addの実行
+					if( !flag ){
+						sbSegment = failureSB( qctx );
+						goto direct;
+					}
+					// Meta
+					responseJson["QueryID"] = qctx->id();
 					responseJson["status"] = 0;
 
 					dumpedJson = nlohmann::json::to_bson( responseJson );
@@ -122,34 +150,33 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 					std::copy( dumpedJson.begin() , dumpedJson.begin() + dumpedJson.size() , dumpedJsonRaw.get() );
 					sbSegment->body( dumpedJsonRaw , dumpedJson.size() );
 					break;
-				
+			
+
+
+
+
 				case QUERY_SELECT: // 2 get
-					std::cout << "\x1b[34m" << "## (HANDLE) QUERY_SELECT"	<<"\x1b[39m" << "\n";
+					std::cout << " ### \x1b[34m" << "## (HANDLE) QUERY_SELECT"	<<"\x1b[39m" << "\n";
 					flag = mmyisam->get( qctx );
-
-					std::cout << "**** check 1 " << "\n";
-
+					if( !flag ){
+						sbSegment = failureSB( qctx );
+						goto direct;
+					}
+					// Meta
+					responseJson["QueryID"] = qctx->id();
 					responseJson["status"] = 0;
+
 					std::vector<uint8_t> valueVector; valueVector.assign( qctx->value().get(), qctx->value().get() + qctx->valueLength() );
 					responseJson["value"] = nlohmann::json::binary( valueVector );
-
-					std::cout << "**** check 2 " << "\n";
 
 					dumpedJson = nlohmann::json::to_bson( responseJson );
 					dumpedJsonRaw = std::shared_ptr<unsigned char>( new unsigned char[dumpedJson.size()] );
 					std::copy( dumpedJson.begin() , dumpedJson.begin() + dumpedJson.size() ,  dumpedJsonRaw.get() );
-
-
-					std::cout << "**** check 3 " << "\n";
-
 					sbSegment->body( dumpedJsonRaw , dumpedJson.size() );
-
-
-					std::cout << "**** check 3 " << "\n";
-
 					break;
 			}
-		
+	
+			direct:
 			pushSBContainer->pushOne( std::move(sbSegment) );
 		}
 		
@@ -157,6 +184,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 	});
 
 	lightMiyaDBThread.detach();
+	std::cout << "LightMiyaDBThread Detached" << "\n";
 
 }
 

@@ -52,8 +52,30 @@ size_t QueryContext::valueLength()
 
 
 
+uint32_t QueryContext::id()
+{
+	return _id;
+}
 
 
+
+void QueryContext::id( uint32_t target )
+{
+	_id = target;
+}
+
+
+
+uint64_t QueryContext::timestamp()
+{
+	return _timestamp;
+}
+
+
+void QueryContext::timestamp( uint64_t target )
+{
+	_timestamp = target;
+}
 
 
 

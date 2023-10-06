@@ -18,6 +18,59 @@ struct QueryContext;
 
 
 
+
+
+/* -----------------------------------------
+
+	[ Query Format ]
+
+	< ADD(Request) >
+	 - id : .....
+	 - content
+		|- query : 1
+		|- key : xxxxxxxxxxxxxxxxxxxx
+		|- value : *********************
+
+
+	< ADD(Response) >
+	 - id : ....
+	 - status : true/false	
+	 - timestamp : timestamp
+
+
+
+
+
+
+	< GET(Request) >
+	 - id : ....
+	 - query : 2 
+	 - key : xxxxxxxxxxxxxxxxxxxx
+
+
+	< GET(Response) > 
+		- id : .....
+		-content
+			|- status : true/false
+			|- value : **************
+			|- timestamp : timestamp
+
+-------------------------------------------- */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class QueryParser
 {
 private:

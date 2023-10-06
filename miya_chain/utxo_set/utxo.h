@@ -4,9 +4,11 @@
 
 #include <memory>
 #include <vector>
+#include <algorithm>
 
 
 
+#include "../../shared_components/json.hpp"
 
 
 namespace tx
@@ -14,6 +16,7 @@ namespace tx
 	struct P2PKH;
 	struct Coinbase;
 	struct TxOut;
+	class PkScript;
 }
 
 
@@ -27,22 +30,32 @@ namespace miya_chain
 
 struct UTXO
 {
-	std::shared_ptr<unsigned char> _txID;
-	unsigned short _outputIndex;
 
-	unsigned int _amount;
-	//std::shared_ptr<unsigned char> _address; // 受信者のアドレス
-	// script		
+	struct Content
+	{
+		std::shared_ptr<unsigned char> _txID;
+		uint32_t _outputIndex;
+
+		uint64_t _amount;
+		std::shared_ptr<tx::PkScript> _pkScript;
+
+		bool _used; // UTXOの使用状態
+	} _content;
 	
-	bool _isUsed;
+	std::shared_ptr<tx::TxOut> _txOut;
 
-
+	
+	
 protected:
-	std::vector<uint8_t> dumpToBson();
-	bool parseFromBson( std::vector<uint8_t> from );
 
 public:
-	void set( std::shared_ptr<tx::TxOut> target );
+	UTXO(){}; // 必ずインポートが前提
+	UTXO( std::shared_ptr<tx::TxOut> target ); // utxoを登録する場合
+	std::vector<uint8_t> dumpToBson( bool isUsed = false );
+
+
+	void set( std::shared_ptr<tx::TxOut> target , std::shared_ptr<unsigned char> txID , unsigned short index );
+	bool set( nlohmann::json dbResponse );
 	
 };
 
