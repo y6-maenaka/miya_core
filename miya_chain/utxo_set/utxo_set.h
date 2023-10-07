@@ -35,6 +35,7 @@ namespace tx
 	struct P2PKH;
 	struct Coinbase;
 	struct TxOut;
+	struct PrevOut;
 }
 
 
@@ -66,6 +67,8 @@ public:
 
 
 	std::shared_ptr<UTXO> get( std::shared_ptr<unsigned char> txID , uint32_t index );
+	std::shared_ptr<UTXO> get( std::shared_ptr<tx::PrevOut> prevOut );
+
 	bool store( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_ptr<unsigned char> txID, uint32_t index );
 	bool store( std::shared_ptr<tx::P2PKH> targetTx ); // 一応dumpしてSBCに流す
 

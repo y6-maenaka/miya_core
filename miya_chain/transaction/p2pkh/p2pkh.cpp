@@ -10,6 +10,9 @@
 #include "../../../shared_components/hash/sha_hash.h"
 
 
+#include "../../utxo_set/utxo.h"
+#include "../../utxo_set/utxo_set.h"
+
 #include "openssl/bio.h" 
 #include "openssl/evp.h"
 
@@ -194,19 +197,21 @@ bool P2PKH::sign()
 
 
 
-bool P2PKH::verify()
+bool P2PKH::verify( std::shared_ptr<miya_chain::LightUTXOSet> utxoSet )
 {
 	// 参照しているUTXOからlockingScriptを取り出し,tx_inのlockingScriptと結合する	
 	// 全てのtx_inに対して行われる
 
 	int i=0;
+	std::shared_ptr<miya_chain::UTXO> utxo;
 	for( auto itr : _body._ins )
 	{
 		
 		// ここでutxoからpk_scriptを取得する
-		std::shared_ptr<PkScript>	utxoLockingScript;
+		utxo = utxoSet->get( itr->prevOut() );
+
 		std::shared_ptr<unsigned char> txHash; unsigned int txHashLength;
-		ScriptValidator validator( utxoLockingScript, itr->signatureScript() );
+		ScriptValidator validator( utxo->pkScript(), itr->signatureScript() );
 
 		txHashLength = this->txHashOnTxIn( i , &txHash );
 		validator.verifyP2PKHScript( txHash, txHashLength );

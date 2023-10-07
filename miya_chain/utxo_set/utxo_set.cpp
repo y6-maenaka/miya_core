@@ -8,6 +8,7 @@
 
 #include "../transaction/p2pkh/p2pkh.h"
 #include "../transaction/tx/tx_out.h"
+#include "../transaction/tx/prev_out.h"
 
 #include "./UTXO.h"
 
@@ -39,6 +40,8 @@ uint32_t LightUTXOSet::generateQueryID()
 
 
 
+
+
 std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<unsigned char> txID , uint32_t index )
 {
 	//  キーを作成する
@@ -51,6 +54,22 @@ std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<unsigned char> txID , u
 	rawKeyLength = hash::SHAHash( joinedIDIndex , joinedIDIndexLength, &rawKey , "sha1" );
 
 	std::vector<uint8_t> keyVector; keyVector.assign( rawKey.get() , rawKey.get() + rawKeyLength );
+
+
+	std::cout << "\x1b[33m" << "-----------------------------------------------------------" << "\x1b[39m" << "\n";
+	std::cout << "<< Search Information >> " << "\n";
+	std::cout << "\x1b[33m" <<  "(TxID) :: ";
+	for( int i=0; i<32; i++ )
+	{
+		printf("%02X", txID.get()[i]);
+	} std::cout << "\n";
+	std::cout << "(Index) :: " << index << "\n";
+	std::cout << "(Key) :: ";
+	for( auto itr : keyVector )
+	{
+		printf("%02X", static_cast<unsigned char>(itr) );
+	} std::cout << "\n";
+	std::cout << "-----------------------------------------------------------" << "\x1b[39m" << "\n";
 
 	// json形式でクエリを作成
 	nlohmann::json queryJson;
@@ -94,9 +113,10 @@ std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<unsigned char> txID , u
 		goto re;
 	}
 
-	if( !(responseJson.contains("status")) ) return nullptr;
 
+	if( !(responseJson.contains("status")) ) return nullptr;
 	if( (responseJson["status"]) != 0 ) return nullptr;
+
 
 	nlohmann::json valueJson = nlohmann::json::from_bson( responseJson["value"].get_binary() );
 	std::shared_ptr<UTXO> retUTXO = std::make_shared<UTXO>();
@@ -106,6 +126,13 @@ std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<unsigned char> txID , u
 	return nullptr;
 }
 
+
+
+
+std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<tx::PrevOut> prevOut )
+{
+	return get( prevOut->txID() , prevOut->index() );
+}
 
 
 
@@ -124,6 +151,21 @@ bool LightUTXOSet::store( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_pt
 	rawKeyLength = hash::SHAHash( joinedIDIndex, joinedIDIndexLength , &rawKey , "sha1" );
 
 	std::vector<uint8_t> keyVector; keyVector.assign( rawKey.get() , rawKey.get() + rawKeyLength );
+	
+	std::cout << "\x1b[32m" << "-----------------------------------------------------------" << "\x1b[39m" << "\n";
+	std::cout << " << Store Information >> " << "\n";
+	std::cout << "\x1b[32m" << "[TxID] :: " ;
+	for( int i=0; i<32; i++ )
+	{
+		printf("%02X", txID.get()[i]);
+	} std::cout << "\n";
+	std::cout << "[Index] :: " << index << "\n";
+	std::cout << "[Key] :: ";
+	for( auto itr : keyVector )
+	{
+		printf("%02X", static_cast<unsigned char>(itr));
+	} std::cout << "\n";
+	std::cout <<  "-----------------------------------------------------------" << "\x1b[39m" << "\n";
 
 
 	nlohmann::json queryJson;

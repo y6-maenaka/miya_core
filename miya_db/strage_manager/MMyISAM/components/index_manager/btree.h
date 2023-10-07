@@ -14,6 +14,9 @@
 
 
 
+#define FORMAT_CODE "HELLOMIYACOININDEX!!"
+
+
 
 namespace miya_db
 {
@@ -29,7 +32,7 @@ namespace miya_db
 
 
 
-constexpr unsigned int DEFAULT_THRESHOLD = 3;// 本来は5でいく
+constexpr unsigned int DEFAULT_THRESHOLD = 3;// 本番は5でいく
 constexpr unsigned int DEFAULT_CHILD_COUNT = DEFAULT_THRESHOLD; // 子の個数
 constexpr unsigned int DEFAULT_KEY_COUNT = DEFAULT_THRESHOLD - 1;
 constexpr unsigned int DEFAULT_DATA_OPTR_COUNT = DEFAULT_THRESHOLD - 1;
@@ -55,6 +58,10 @@ constexpr unsigned int O_NODE_ITEMSET_SIZE = NODE_OPTR_SIZE  /* 親ノードへ�
 																						+ ELEMENT_COUNT_SIZE + (KEY_SIZE * DEFAULT_KEY_COUNT) /* キーのサイズ */
 																						+ ELEMENT_COUNT_SIZE + (NODE_OPTR_SIZE * DEFAULT_CHILD_COUNT)
 																						+ ELEMENT_COUNT_SIZE + (DATA_OPTR_SIZE * DEFAULT_DATA_OPTR_COUNT);
+
+
+constexpr unsigned int META_ROOT_NODE_OFFSET = 20; // 定数を使う
+
 
 //class OBtreeNode;
 class ONode;

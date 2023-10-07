@@ -105,10 +105,13 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 			nlohmann::json failureMSG; 
 			failureMSG["QueryID"] = qctx->id();
 			failureMSG["status"] = -1;
+
 			std::vector<uint8_t> failureMSGVector = nlohmann::json::to_bson( failureMSG );
 			std::shared_ptr<unsigned char> failureMSGRaw = std::shared_ptr<unsigned char>( new unsigned char[failureMSGVector.size()] );
+
 			std::copy( failureMSGVector.begin() , failureMSGVector.begin() + failureMSGVector.size() , failureMSGRaw.get() );
 			ret->body( failureMSGRaw , failureMSGVector.size() );
+
 			return std::move(ret);
 		};
 
@@ -161,6 +164,8 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 				case QUERY_SELECT: // 2 get
 					std::cout << " ### \x1b[34m" << "## (HANDLE) QUERY_SELECT"	<<"\x1b[39m" << "\n";
 					flag = mmyisam->get( qctx );
+
+					std::cout << "mmyisam->get() Flag -> " << flag << "\n";
 				
 					if( !flag ){
 						sbSegment = failureSB( qctx );

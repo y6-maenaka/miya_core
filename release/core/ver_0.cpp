@@ -11,6 +11,7 @@
 
 #include "../../miya_chain/transaction/tx/tx_in.h"
 #include "../../miya_chain/transaction/tx/tx_out.h"
+#include "../../miya_chain/transaction//tx/prev_out.h"
 #include "../../miya_chain/transaction/p2pkh/p2pkh.h"
 #include "../../miya_chain/transaction/coinbase/coinbase.h"
 #include "../../miya_chain/transaction/script/signature_script.h"
@@ -66,19 +67,50 @@ int main()
 
 
 	miya_chain::LightUTXOSet utxoSet( toDBSBContainer , fromDBSBContainer );
-	utxoSet.store( loadedP2PKH );
+	// utxoSet.store( loadedP2PKH );
 
+	std::cout << "P2PKH stored" << "\n";
 	std::cout << "\n\n\n ----------------------------------------------- \n\n\n";
 
 
-	std::shared_ptr<miya_chain::UTXO> utxo = utxoSet.get( txID , 0 );
-	std::shared_ptr<unsigned char> exportedPkScript; size_t exportedPkScriptLength;
-	exportedPkScriptLength = utxo->_content._pkScript->_script->exportRaw( &exportedPkScript );
 
-	for( int i=0; i<exportedPkScriptLength; i++)
+	std::shared_ptr<unsigned char> searchTxID; size_t searchTxIDLength;
+	searchTxID = loadedP2PKH->ins().at(0)->prevOut()->txID();
+
+	std::cout << "==================================" << "\n";
+	for( int i=0; i<32; i++ )
 	{
-		printf("%02X", exportedPkScript.get()[i]);
+		printf("%02X", searchTxID.get()[i]);
 	} std::cout << "\n";
+	std::cout << "==================================" << "\n";
+
+
+
+
+	std::shared_ptr<miya_chain::UTXO> utxo = utxoSet.get( searchTxID , 0 );
+	if( utxo == nullptr ) 
+	{
+		std::cout << "utxo is nullptr" << "\n";
+	}
+	else
+	{
+		std::shared_ptr<unsigned char> exportedPkScript; size_t exportedPkScriptLength;
+		exportedPkScriptLength = utxo->_content._pkScript->_script->exportRaw( &exportedPkScript );
+
+		std::cout << "------------------------" << "\n";
+		for( int i=0; i<exportedPkScriptLength; i++)
+		{
+			printf("%02X", exportedPkScript.get()[i]);
+		} std::cout << "\n";
+		std::cout << "-------------------------" << "\n";
+	}
+
+	std::cout << "Hello World" << "\n";
+
+
+	/* トランザクション入力の検証 */
+
+
 
 	return 0;
 

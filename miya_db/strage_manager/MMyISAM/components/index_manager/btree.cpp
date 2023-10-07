@@ -86,7 +86,7 @@ void ONodeItemSet::clear()
 }
 
 
-std::shared_ptr<optr> ONodeItemSet::parent()
+std::shared_ptr<optr> ONodeItemSet::parent() // 無限ループする可能性あり
 {
 	unsigned char oAddr[5];
 	omemcpy( oAddr , _optr , 5 );
@@ -511,6 +511,15 @@ std::shared_ptr<ONode> ONode::recursiveAdd( std::shared_ptr<unsigned char> targe
 
 			//ONode* newRootNode = new ONode( _oMemoryManager ); // 新たなルートノードの作成
 			std::shared_ptr<ONode> newRootNode = std::shared_ptr<ONode>( new ONode(_oMemoryManager) );
+
+			/* ルートノード情報の上書き */
+			std::cout << "[ @ ] (Btree::ルートノードが上書きされました)" << "\n";
+			std::shared_ptr<unsigned char> metaHeadOAddr = std::shared_ptr<unsigned char>( new unsigned char[5] ); memset( metaHeadOAddr.get() , 0x00 , 5 );
+			std::shared_ptr<optr> metaHeadOptr = std::shared_ptr<optr>( new optr(metaHeadOAddr.get() , _oMemoryManager->dataCacheTable()) );
+			omemcpy( (*metaHeadOptr) + META_ROOT_NODE_OFFSET ,  newRootNode->itemSet()->Optr()->addr() , NODE_OPTR_SIZE );
+
+
+
 			newRootNode->isLeaf( true );
 
 			newRootNode->itemSet()->key( 0 ,targetKey );
@@ -691,11 +700,42 @@ OBtree::OBtree( std::shared_ptr<OverlayMemoryManager> oMemoryManager, std::share
 {
 	if( rootNode == nullptr )
 	{
-		unsigned char emptyOAddr[5]; memset( emptyOAddr, 0x00 , sizeof(emptyOAddr) );
-		//std::shared_ptr<optr>	baseOptr = oMemoryManager->get( emptyOAddr );
+		// インデックスファイルが初期化されているか調べる
+		std::shared_ptr<unsigned char> metaHeadOAddr = std::shared_ptr<unsigned char>( new unsigned char[5] );
+		memset( metaHeadOAddr.get() , 0x00 , 5 );
+		std::shared_ptr<optr>	metaHeadOptr = std::shared_ptr<optr>( new optr( metaHeadOAddr.get() , oMemoryManager->dataCacheTable() ) );
+		
+		if( ocmp( metaHeadOptr.get() , (unsigned char *)FORMAT_CODE , 20 ) != 0 ) // (初期化されていない)インデックスファイルを初期化する 
+		{
+			std::cout << "Btreeインデックスファイルの初期化されていない" << "\n";
+			// ここで確保する領域がファイル先頭であることが前提 それ以外だとエラーが発生する
+			std::shared_ptr<optr>	newMetaHeadOptr = oMemoryManager->allocate( 100 ); // Meta領域のサイズ分確保する
+			
+			_rootONode = std::shared_ptr<ONode>( new ONode(oMemoryManager) );  // meta領域に続いて領域を作成する
+			omemcpy( (*metaHeadOptr) + META_ROOT_NODE_OFFSET , _rootONode->itemSet()->Optr()->addr() , NODE_OPTR_SIZE ); // ルートノードのセット
 
+			omemcpy( metaHeadOptr.get() , (unsigned char *)(FORMAT_CODE) , 20 ); // フォーマットコードを設置する
+			return;	
+		}
+
+
+		std::cout << "Btreeインデックスファイルの初期は既に完了しています" << "\n";
+		// Meta情報を記録する領域を作成する
+		std::shared_ptr<unsigned char> rootNodeOAddr = std::shared_ptr<unsigned char>( new unsigned char[5] );
+		omemcpy( rootNodeOAddr.get() , (*metaHeadOptr) + META_ROOT_NODE_OFFSET , 5 );
+
+		std::shared_ptr<optr> rootNodeOptr = std::shared_ptr<optr>( new optr(rootNodeOAddr.get(), oMemoryManager->dataCacheTable() ));
+		_rootONode = std::shared_ptr<ONode>( new ONode( oMemoryManager ,rootNodeOptr) );
+
+		/*
+		unsigned char emptyOAddr[5]; memset( emptyOAddr, 0x00 , sizeof(emptyOAddr) );
 		_rootONode = std::shared_ptr<ONode>( new ONode( oMemoryManager ) );
+		*/
+		return;	
 	}
+
+	_rootONode = rootNode;
+
 }
 
 

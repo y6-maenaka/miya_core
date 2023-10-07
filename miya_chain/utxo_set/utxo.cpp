@@ -53,6 +53,10 @@ UTXO::UTXO( std::shared_ptr<tx::TxOut> target )
 
 
 
+std::shared_ptr<tx::PkScript> UTXO::pkScript()
+{
+	return _content._pkScript;
+}
 
 
 

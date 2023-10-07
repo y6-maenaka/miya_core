@@ -11,6 +11,19 @@
 
 
 
+
+
+
+namespace miya_chain
+{
+	class LightUTXOSet;
+}
+
+
+
+
+
+
 namespace tx{
 
 
@@ -60,7 +73,7 @@ public:
 	std::vector< std::shared_ptr<TxOut> > outs();
 	
 	bool sign(); // 全てのtxに対して署名を行う
-	bool verify();
+	bool verify( std::shared_ptr<miya_chain::LightUTXOSet> utxoSet /* prevOutの問い合わせ用オブジェクト */ ); 
 
 	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw ); // 書き出しに先駆けて必ず署名を完了させる必要がある
 	unsigned int importRaw( std::shared_ptr<unsigned char> fromRaw , unsigned int fromRawLength );
