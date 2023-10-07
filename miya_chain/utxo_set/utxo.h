@@ -54,7 +54,7 @@ public:
 	std::vector<uint8_t> dumpToBson( bool isUsed = false );
 
 
-	void set( std::shared_ptr<tx::TxOut> target , std::shared_ptr<unsigned char> txID , unsigned short index );
+	// void set( std::shared_ptr<tx::TxOut> target , std::shared_ptr<unsigned char> txID , unsigned short index );
 	bool set( nlohmann::json dbResponse );
 	
 };

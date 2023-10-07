@@ -22,7 +22,7 @@ struct QueryContext
 {
 private:
 	const int _type;
-	uint32_t _id;
+	uint32_t _id = 0;
 
 	// 考慮すべき格納データ
 	// 1. add( key , data , dataLength )
@@ -44,7 +44,7 @@ private:
 
 
 public:
-	QueryContext( int type , uint32_t queryID ) : _type(type) , _id(queryID){};
+	QueryContext( int type , uint32_t queryID ) : _type(type) , _id(queryID){ std::cout << "QueryContext Initialized -> " << queryID << "\n";};
 
 	int type(){ return _type; };
 	void key( std::shared_ptr<unsigned char> key , size_t keyLength );

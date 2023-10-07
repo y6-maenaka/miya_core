@@ -104,14 +104,16 @@ std::unique_ptr<SBSegment> StreamBuffer::dequeue()
 {
 	std::unique_lock<std::mutex> lock(_mtx);
 
-	
 	_popContributer._popCV.wait( lock , [&]{
 		return !(_sb._queue.empty()); // emptyでなければ待機状態を解除する
 	});
 
 
 	std::unique_ptr<SBSegment> ret = std::move( _sb._queue.front() );
+
+	//std::cout << "\x1b[31m" << "In StreamBuffer::dequeue() erase before queue size -> " << _sb._queue.size() << "\x1b[31m" << "\n";
 	_sb._queue.erase( _sb._queue.cbegin() );
+	//std::cout << "\x1b[31m" << "In StreamBuffer::dequeue() erase after queue size ->" << _sb._queue.size() << "\x1b[31m" <<  "\n";
 
 	_pushContributer._pushCV.notify_all();
 	

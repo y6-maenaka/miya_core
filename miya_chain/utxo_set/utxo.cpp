@@ -22,12 +22,28 @@ std::vector<uint8_t> UTXO::dumpToBson( bool isUsed )
 {
 	nlohmann::json retJson;
 
+
+
+
+	std::cout << "<<<< 1 " << "\n";
+
+
+
 	std::vector<uint8_t> txIDVector; txIDVector.assign( _content._txID.get() , _content._txID.get() + 32 );
+
+	std::cout << "<<<< 1.5" << "\n";
+
+
 	retJson["TxID"] = nlohmann::json::binary( txIDVector );
 
 	retJson["index"] = _content._outputIndex;
 
 	retJson["amount"] = _content._amount;
+
+
+
+
+	std::cout << "<<<< 2 " << "\n";
 
 	
 	std::shared_ptr<unsigned char> exportedRawPkScript; size_t exportedRawPkScriptLength;
@@ -35,6 +51,11 @@ std::vector<uint8_t> UTXO::dumpToBson( bool isUsed )
 	std::vector<uint8_t> pkScriptVector; pkScriptVector.assign( exportedRawPkScript.get() , exportedRawPkScript.get() + exportedRawPkScriptLength );
 	retJson["PkScript"] = nlohmann::json::binary( pkScriptVector );
 	
+
+
+	std::cout << "<<<< 3 " << "\n";
+
+
 
 	retJson["used"] = isUsed;
 
@@ -51,57 +72,70 @@ std::vector<uint8_t> UTXO::dumpToBson( bool isUsed )
 UTXO::UTXO( std::shared_ptr<tx::TxOut> target )
 {
 	_txOut = target;
+	_content._txID = std::shared_ptr<unsigned char>( new unsigned char[32] ); // あとで定数に置き換える
+	_content._pkScript = std::shared_ptr<tx::PkScript>( new tx::PkScript );
 }
 
 
 
-
-
-void UTXO::set( std::shared_ptr<tx::TxOut> target , std::shared_ptr<unsigned char> txID , unsigned short index )
-{
-
-}
 
 
 
 
 bool UTXO::set( nlohmann::json dbResponse )
 {
-	if( !(dbResponse.contains("value")) ) return false;
+
+	std::cout << "~~~ 2 ~~~" << "\n";
+	std::cout << dbResponse << "\n";
+
+	std::cout << "~~~ 3 ~~~" << "\n";
 
 
-	std::vector<uint8_t> valueVector = dbResponse["value"].get_binary();
-	nlohmann::json value = nlohmann::json::from_bson( valueVector );
+	if( !(dbResponse.contains("used")) ) return false;
+	_content._used = dbResponse["used"];
 
 
-	if( !(value.contains("used")) ) return false;
-	_content._used = value["used"];
+	std::cout << "~~~ 4 ~~~" << "\n";
 
 
-	if( !(value.contains("TxID")) ) return false;
-	if( !(value["TxID"].is_binary()) )  return false;
-	std::vector<uint8_t> txIDVector = value["TxID"].get_binary();
+
+	if( !(dbResponse.contains("TxID")) ) return false;
+	if( !(dbResponse["TxID"].is_binary()) )  return false;
+	std::vector<uint8_t> txIDVector = dbResponse["TxID"].get_binary();
+
+
+	std::cout << "~~~ 5 ~~~" << "\n";
 	
 	_content._txID = std::shared_ptr<unsigned char>( new unsigned char[txIDVector.size()] );
 	std::copy( txIDVector.begin() , txIDVector.begin() + txIDVector.size(), _content._txID.get() );
 
 
-	if( !(value.contains("index")) ) return false;
-	_content._outputIndex = static_cast<uint32_t>(value["index"]);
+	std::cout << "~~~ 6 ~~~" << "\n";
 
 
-	if( !(value.contains("amount")) )	return false;
-	_content._amount = static_cast<uint64_t>(value["amount"]);
+	if( !(dbResponse.contains("index")) ) return false;
+	_content._outputIndex = static_cast<uint32_t>(dbResponse["index"]);
+
+
+
+	std::cout << "~~~ 7 ~~~" << "\n";
+
+	if( !(dbResponse.contains("amount")) )	return false;
+	_content._amount = static_cast<uint64_t>(dbResponse["amount"]);
+
+
+	std::cout << "~~~ 8 ~~~" << "\n";
 
 	
-	if( !(value.contains("PkScript")) ) return false;
-	if( !(value["PkScript"].is_binary()) ) return false;
-	std::vector<uint8_t> pkScriptVector = value["PkScript"].get_binary();
+	if( !(dbResponse.contains("PkScript")) ) return false;
+	if( !(dbResponse["PkScript"].is_binary()) ) return false;
+	std::vector<uint8_t> pkScriptVector = dbResponse["PkScript"].get_binary();
 	std::shared_ptr<unsigned char> rawPkScript = std::shared_ptr<unsigned char>( new unsigned char[pkScriptVector.size()] );
 	std::copy( pkScriptVector.begin() , pkScriptVector.begin() + pkScriptVector.size() , rawPkScript.get() );
 	_content._pkScript = std::make_shared<tx::PkScript>();
 	_content._pkScript->importRaw( rawPkScript.get() , pkScriptVector.size() );
 
+	std::cout << "~~~ 9 ~~~" << "\n";
 
 	return true;
 }

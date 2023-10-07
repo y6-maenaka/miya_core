@@ -15,6 +15,7 @@
 #include "../../miya_chain/transaction/coinbase/coinbase.h"
 #include "../../miya_chain/transaction/script/signature_script.h"
 #include "../../miya_chain/utxo_set/utxo_set.h"
+#include "../../miya_chain/utxo_set/utxo.h"
 
 #include "../../miya_chain/transaction/txcb_table_manager/txcb_table_manager.h"
 #include "../../miya_chain/transaction/txcb_table_manager/txcb_table/txcb_table.h"
@@ -48,21 +49,14 @@ int main()
 
 
 	loadedP2PKH->sign(); // トランザクションのTxIn用に署名を作成する
-
-
-
-
-	std::shared_ptr<unsigned char> rawTxOut; size_t rawTxOutLength;
-	rawTxOutLength = loadedP2PKH->outs().at(0)->exportRaw( &rawTxOut );
-
-
-
-	std::cout << "create Tx Done" << "\n";
+	std::shared_ptr<unsigned char> txID; size_t txIDLength;
+	txIDLength = loadedP2PKH->calcTxID( &txID );
 
 
 	miya_db::DatabaseManager dbManager;
 	//dbManager.startWithLightMode( ,"test");
 
+	/* SBコンテナのセットアップ */
 	std::shared_ptr<StreamBufferContainer> toDBSBContainer = std::make_shared<StreamBufferContainer>();
 	std::shared_ptr<StreamBufferContainer> fromDBSBContainer = std::make_shared<StreamBufferContainer>();
 
@@ -72,7 +66,20 @@ int main()
 
 
 	miya_chain::LightUTXOSet utxoSet( toDBSBContainer , fromDBSBContainer );
-	utxoSet.testInquire( rawTxOut , rawTxOutLength );
+	utxoSet.store( loadedP2PKH );
+
+	sleep(2);
+	std::cout << "\n\n\n ----------------------------------------------- \n\n\n";
+
+
+	std::shared_ptr<miya_chain::UTXO> utxo = utxoSet.get( txID , 0 );
+	std::shared_ptr<unsigned char> exportedPkScript; size_t exportedPkScriptLength;
+	exportedPkScriptLength = utxo->_content._pkScript->_script->exportRaw( &exportedPkScript );
+
+	for( int i=0; i<exportedPkScriptLength; i++)
+	{
+		printf("%02X", exportedPkScript.get()[i]);
+	} std::cout << "\n";
 
 	return 0;
 

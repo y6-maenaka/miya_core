@@ -75,7 +75,8 @@ public:
 class StreamBuffer
 {
 
-private:
+//private:
+public:
 	std::mutex _mtx;
 
 	struct 

@@ -99,6 +99,8 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 
 		auto failureSB = []( std::shared_ptr<QueryContext> qctx ) -> std::unique_ptr<SBSegment>
 		{
+			std::cout << "Sorry. FailureSB Generated" << "\n";
+
 			std::unique_ptr<SBSegment> ret = std::make_unique<SBSegment>();
 			nlohmann::json failureMSG; 
 			failureMSG["QueryID"] = qctx->id();
@@ -114,6 +116,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 		nlohmann::json responseJson;
 		for(;;)
 		{
+			sleep(1);
 			responseJson.clear();
 			// 1. ポップ
 			sbSegment = popSBContainer->popOne();
@@ -121,7 +124,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 			// クエリの取り出し
 			//  クエリの解析と対応する操作メソッドの呼び出し
 			qctx = parseQuery( sbSegment->body() , sbSegment->bodyLength() ); // ここで定義するのはオーバーフローが大きい
-			
+
 			if( qctx == nullptr ) { // クエリメッセージの解析に失敗した場合
 				sbSegment = failureSB( qctx );
 				goto direct;
@@ -158,6 +161,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 				case QUERY_SELECT: // 2 get
 					std::cout << " ### \x1b[34m" << "## (HANDLE) QUERY_SELECT"	<<"\x1b[39m" << "\n";
 					flag = mmyisam->get( qctx );
+					std::cout << "mmiysam->get() done" << "\n";
 					if( !flag ){
 						sbSegment = failureSB( qctx );
 						goto direct;
@@ -166,18 +170,32 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 					responseJson["QueryID"] = qctx->id();
 					responseJson["status"] = 0;
 
+
+					std::cout << "#############" << "\n";
+					std::cout << "packed QueryID From MiyaDB -> " << responseJson["QueryID"] << "\n";
+					std::cout << "#############" << "\n";
+
 					std::vector<uint8_t> valueVector; valueVector.assign( qctx->value().get(), qctx->value().get() + qctx->valueLength() );
 					responseJson["value"] = nlohmann::json::binary( valueVector );
+
+					sleep(2);
+					std::cout << "pack data to responseJson Doen" << "\n";
+					std::cout << "==========================================" << "\n";
+					std::cout << "valueVector -> " << valueVector.size() << "\n";
+					std::cout << responseJson << "\n";
+					std::cout << "==========================================" << "\n";
 
 					dumpedJson = nlohmann::json::to_bson( responseJson );
 					dumpedJsonRaw = std::shared_ptr<unsigned char>( new unsigned char[dumpedJson.size()] );
 					std::copy( dumpedJson.begin() , dumpedJson.begin() + dumpedJson.size() ,  dumpedJsonRaw.get() );
 					sbSegment->body( dumpedJsonRaw , dumpedJson.size() );
+					std::cout << "pack dumped response to SBSegment Done" << "\n";
 					break;
 			}
 	
 			direct:
 			pushSBContainer->pushOne( std::move(sbSegment) );
+			std::cout << "Response PushBacked from MiyaDB" << "\n";
 		}
 		
 		//

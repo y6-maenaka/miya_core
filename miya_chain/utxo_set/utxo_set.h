@@ -58,6 +58,9 @@ private:
 	std::shared_ptr<StreamBufferContainer> _popSBContainer;
 
 
+protected:
+	static uint32_t generateQueryID();
+
 public:
 	LightUTXOSet( std::shared_ptr<StreamBufferContainer> pushSBContainer , std::shared_ptr<StreamBufferContainer> popSBContainer );
 

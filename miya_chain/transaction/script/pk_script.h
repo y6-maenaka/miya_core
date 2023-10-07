@@ -22,7 +22,8 @@ namespace tx{
 
 class PkScript 
 {
-private:
+//private:
+public:
 	std::shared_ptr<Script> _script;
 
 public:
