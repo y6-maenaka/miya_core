@@ -68,7 +68,6 @@ int main()
 	miya_chain::LightUTXOSet utxoSet( toDBSBContainer , fromDBSBContainer );
 	utxoSet.store( loadedP2PKH );
 
-	sleep(2);
 	std::cout << "\n\n\n ----------------------------------------------- \n\n\n";
 
 

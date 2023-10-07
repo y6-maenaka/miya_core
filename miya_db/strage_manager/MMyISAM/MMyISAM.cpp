@@ -26,8 +26,6 @@ MMyISAM::MMyISAM( std::string fileName )
     std::shared_ptr<OverlayMemoryManager> dataOverlayMemoryManager = std::shared_ptr<OverlayMemoryManager>( new OverlayMemoryManager(fileName) );
 		_valueStoreManager = std::shared_ptr<ValueStoreManager>( new ValueStoreManager(dataOverlayMemoryManager) );
 
-    std::cout << "ValueStoreManager setuped" << "\n";
-
     // インデックスの初期化
     fileName += "_index";
     std::shared_ptr<OverlayMemoryManager> indexOverlayMemoryManager = std::shared_ptr<OverlayMemoryManager>( new OverlayMemoryManager(fileName) );
