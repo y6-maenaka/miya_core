@@ -33,6 +33,8 @@ unsigned int BlockHeader::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 {
 	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[sizeof(struct BlockHeader)] );
 	memcpy( (*retRaw).get(), this, sizeof(struct BlockHeader) );
+
+	return sizeof(struct BlockHeader);
 }
 
 
@@ -44,6 +46,10 @@ uint32_t BlockHeader::nonce()
 
 
 
+uint32_t BlockHeader::time()
+{
+	return _time;
+}
 
 
 
@@ -170,6 +176,11 @@ unsigned int Block::exportHeader( std::shared_ptr<unsigned char> *retRaw )
 	return _header.exportRaw( retRaw );
 }
 
+
+uint32_t Block::time()
+{
+	return _header.time();
+}
 
 
 };

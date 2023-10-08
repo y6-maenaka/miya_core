@@ -16,7 +16,6 @@ endif()
 
 
 
-
 add_library( SHARED_COMPONENTS SHARED
 
 							cipher/ecdsa_manager.cpp

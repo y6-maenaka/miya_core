@@ -6,8 +6,11 @@
 #include "../../shared_components/json.hpp"
 #include "../../shared_components/stream_buffer/stream_buffer.h"
 #include "../../shared_components/stream_buffer/stream_buffer_container.h"
+#include "../../shared_components/hash/sha_hash.h"
 
 #include "../../miya_chain/block/block.h"
+
+#include "../../miya_chain/mining/simple_mining.h"
 
 #include "../../miya_chain/transaction/tx/tx_in.h"
 #include "../../miya_chain/transaction/tx/tx_out.h"
@@ -35,11 +38,11 @@ int main()
 {
 	std::cout << " WELCOME TO MIYA COIN CLIENT [ MIYA_CORE ] " << "\n";
 
-
+	/*
 	cipher::ECDSAManager ecdsaManager;
 	ecdsaManager.init( (unsigned char *)"hello", 5 ); // priKeyには鍵がかかっているので
 
-	/* 必須セットアップ */
+	// ここまでは必須セットアップ
 
 
 	ControlInterface interface;
@@ -67,7 +70,7 @@ int main()
 
 	miya_db::DatabaseManager dbManager;
 
-	/* SBコンテナのセットアップ */
+	// SBコンテナのセットアップ 
 	std::shared_ptr<StreamBufferContainer> toDBSBContainer = std::make_shared<StreamBufferContainer>();
 	std::shared_ptr<StreamBufferContainer> fromDBSBContainer = std::make_shared<StreamBufferContainer>();
 
@@ -122,18 +125,37 @@ int main()
 	if( flag ) std::cout << "verify successfuly done" << "\n";
 	else std::cout << "verify failure" << "\n";
 
-	/* トランザクション入力の検証 */
+	// トランザクション入力の検証 
 
 
 
 	return 0;
+	*/
 
 
-	/*
+	
 
 	cipher::ECDSAManager ecdsaManager;
 	ecdsaManager.init( (unsigned char *)"hello", 5 ); // priKeyには鍵がかかっているので
 	//ecdsaManager.printPkey( ecdsaManager.myPkey() );
+
+
+
+	miya_db::DatabaseManager dbManager;
+
+	// SBコンテナのセットアップ 
+	std::shared_ptr<StreamBufferContainer> toDBSBContainer = std::make_shared<StreamBufferContainer>();
+	std::shared_ptr<StreamBufferContainer> fromDBSBContainer = std::make_shared<StreamBufferContainer>();
+
+
+	std::string localFile = "test";
+	dbManager.startWithLightMode( toDBSBContainer , fromDBSBContainer , localFile );
+
+
+	miya_chain::LightUTXOSet utxoSet( toDBSBContainer , fromDBSBContainer );
+	//utxoSet.store( loadedP2PKH );
+
+
 
 
 	std::shared_ptr<unsigned char> text = std::shared_ptr<unsigned char>( new unsigned char[10] ); memcpy( text.get(), "HelloWorld", 10 );
@@ -177,7 +199,7 @@ int main()
 	std::shared_ptr<tx::P2PKH> importP2PKH = std::make_shared<tx::P2PKH>();
 	importP2PKH->importRaw( rawTx , rawTxLength);
 
-	importP2PKH->verify();
+	importP2PKH->verify( std::make_shared<miya_chain::LightUTXOSet>(utxoSet) );
 
 
 
@@ -188,16 +210,23 @@ int main()
 
 	std::shared_ptr<unsigned char> mRoot; unsigned int mRootLength;
 	mRootLength = block.calcMerkleRoot( &mRoot );
-	std::cout << "----------------------------------------------------" << "\n";
-	for( int i=0; i<mRootLength; i++ )
-	{
-		printf("%02X", mRoot.get()[i]);
-	} std::cout << "\n";
-	std::cout << "----------------------------------------------------" << "\n";
-	
+
+
+	std::cout << "GoodNight World" << "\n";
+
+
+
+	uint32_t nBits = 510013136;
+	miya_chain::simpleMining( nBits ,std::make_shared<block::Block>(block) );
+
+
 	return 0;
 
 
+
+
+
+	/*
 	auto p2pManager = std::make_shared<ekp2p::EKP2P>();
 	std::thread p2pManagerTH([p2pManager](){
 		p2pManager->init();
@@ -209,25 +238,8 @@ int main()
 
 
 
-	*/
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	/*
+	
 	MiyaCore miya_core;
 	miya_core.num  = 10;
 

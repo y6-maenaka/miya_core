@@ -51,6 +51,7 @@ struct BlockHeader
 
 	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );
 
+	uint32_t time();
 
 } __attribute__((packed)); 
 
@@ -85,6 +86,8 @@ public:
 	void merkleRoot( std::shared_ptr<unsigned char> target );
 
 	unsigned int exportHeader( std::shared_ptr<unsigned char> *retRaw );
+
+	uint32_t time();
 };
 
 

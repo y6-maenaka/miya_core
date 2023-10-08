@@ -1,4 +1,5 @@
-#include "simple_mining.h"
+//#include "simple_mining.h"
+#include "./simple_mining.h"
 
 
 #include "../block/block.h"
@@ -10,53 +11,32 @@ namespace miay_chain
 
 
 
-
+/*
 uint32_t simpleMining( uint32_t nBits , std::shared_ptr<block::Block> block )
 {
 
-	uint32_t nonce = block->header().nonce();
-	std::shared_ptr<unsigned char> rawHeader; unsigned int rawHeaderLength;
-	block->header().updateTime();
 
-	rawHeaderLength = block->exportHeader( &rawHeader );
+	unsigned char ucnBits[4]; memcpy( ucnBits, &nBits, sizeof(ucnBits) );
+	uint16_t coefficient; // 係数部 
+	memcpy( &coefficient , ucnBits, sizeof(coefficient) );
 
-	unsigned char nonceMask[32];
-
-
-	auto createNonceMack = [&](uint32_t nonce) -> std::shared_ptr<unsigned char> {
-		    // 関数の本体
-				//     return nullptr;
-				//     };
-	
-		std::shared_ptr<unsigned char> ret = std::shared_ptr<unsigned char>( new unsigned char[32] );
-		memset( ret.get() , 0x00 , 32 );
-
-		uint16_t temp; memcpy( &temp, &nonce, 8 );
-
-		return ret;
-};
-
+	uint16_t exponent; // 指数部 
+	memcpy( &exponent , ucnBits + 2 , sizeof(exponent) );
 	
 
+	//std::shared_ptr<unsigned char> nBitsMask = std::shared_ptr<unsigned char>( new unsigned char[32] );
+	std::array<uint8_t, 32 > nBitsMask; nBitsMask.fill(0x00);
+	std::fill( nBitsMask.begin() , nBitsMask.begin() + static_cast<int>(coefficient), 0xff );
 
 
-	std::shared_ptr<unsigned char> hashedHeader;
-	size_t noncePtrInRawHeader = sizeof( struct block::BlockHeader ) - sizeof(struct block::BlockHeader) - sizeof(uint32_t);
-	for(;;)	
+	for( auto itr : nBitsMask )
 	{
-		hash::SHAHash( rawHeader , rawHeaderLength , &hashedHeader , "sha256" );
+		printf("%02X", itr );
+	} std::cout << "\n";
 
-		if( miya_chain::mbitcmp( nonceMask , hashedHeader ) ) break;
-
-
-		//memset( rawHeader.get() + sizeof());
-		// nonceを進めた値を書き込む
-		memcpy( rawHeader.get() + noncePtrInRawHeader , &nonce , sizeof(uint32_t));
-	}
-	
-
-	return nonce;
 }
+*/
+
 
 
 
