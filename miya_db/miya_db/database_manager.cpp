@@ -119,7 +119,6 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 		nlohmann::json responseJson;
 		for(;;)
 		{
-			sleep(1);
 			responseJson.clear();
 			// 1. ポップ
 			sbSegment = popSBContainer->popOne();

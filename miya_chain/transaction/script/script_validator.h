@@ -28,7 +28,8 @@ class ValidationOptions;
 
 struct ValidationStack
 {
-private:
+//private:
+public:
 	std::vector< std::pair< OP_CODES, std::shared_ptr<unsigned char> > > _body;
 
 public:

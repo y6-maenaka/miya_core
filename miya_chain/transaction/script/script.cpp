@@ -22,17 +22,33 @@ bool OP_DUP::exe( ValidationStack *stack, ValidationOptions *optionsPtr )
 	std::shared_ptr< std::pair<OP_CODES, std::shared_ptr<unsigned char>> > popedElem = stack->popBack(); 
 	stack->pushBack( popedElem->first, popedElem->second );
 	stack->pushBack( popedElem->first, popedElem->second );
+
+	std::cout << "---------------" << "\n";
+	std::cout << "after OP_DUP -> " << stack->_body.size() << "\n";
+	for( int i=0; i<Script::OP_DATALength(popedElem->first);i++)
+	{
+		printf("%02X", popedElem->second.get()[i]);
+	} std::cout << "\n";
+	std::cout << "---------------" << "\n";
 	return true;
 }
 
 bool OP_HASH_160::exe( ValidationStack *stack , ValidationOptions *optionsPtr  )
 {
-
 	std::shared_ptr< std::pair<OP_CODES, std::shared_ptr<unsigned char>> > popedElem = stack->popBack(); 
 	std::shared_ptr<unsigned char> md; unsigned int mdLength;
-	mdLength = hash::SHAHash( popedElem->second, Script::OP_DATALength(popedElem->first) , &md , "sha256" );
+	mdLength = hash::SHAHash( popedElem->second, Script::OP_DATALength(popedElem->first) , &md , "sha1" );
 
-	OP_DATA opData(0xa0);
+
+	std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
+	std::cout << "[hashed] :: ";
+	for( int i=0; i<20; i++)
+	{
+		printf("%02X", md.get()[i]);
+	} std::cout << "\n";
+	std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
+
+	OP_DATA opData(0x14); // 固定長でいいでしょう
 	stack->pushBack( opData, md );
 
 	return true;
@@ -40,9 +56,23 @@ bool OP_HASH_160::exe( ValidationStack *stack , ValidationOptions *optionsPtr  )
 
 bool OP_EQUALVERIFY::exe( ValidationStack *stack ,ValidationOptions *optionsPtr  )
 {
-	
 	std::shared_ptr< std::pair<OP_CODES, std::shared_ptr<unsigned char>> > popedElem_1 = stack->popBack(); 
 	std::shared_ptr< std::pair<OP_CODES, std::shared_ptr<unsigned char>> > popedElem_2 = stack->popBack(); 
+
+	std::cout << "++++++++++++++++++++++++" << "\n";
+	std::cout << Script::OP_DATALength(popedElem_1->first) << "\n";
+	for( int i=0; i<Script::OP_DATALength(popedElem_1->first); i++ )
+	{
+		printf("%02X", popedElem_1->second.get()[i] );
+	} std::cout << "\n";
+	std::cout << "-----------------" << "\n";
+	std::cout << Script::OP_DATALength(popedElem_2->first) << "\n";
+	for( int i=0; i<Script::OP_DATALength(popedElem_2->first); i++ )
+	{
+		printf("%02X", popedElem_2->second.get()[i]);
+	} std::cout << "\n";
+	std::cout << "++++++++++++++++++++++++" << "\n";
+
 
 	if( memcmp( popedElem_1->second.get() , popedElem_2->second.get(), Script::OP_DATALength(popedElem_1->first) ) == 0 ) return true;
 
@@ -55,16 +85,46 @@ bool OP_CHECKSIG::exe( ValidationStack *stack , ValidationOptions *optionsPtr ) 
 	std::shared_ptr< std::pair<OP_CODES, std::shared_ptr<unsigned char>> > popedElem1 = stack->popBack(); // 正常であれば公開鍵が格納されている
 	std::shared_ptr< std::pair<OP_CODES, std::shared_ptr<unsigned char>> > popedElem2 = stack->popBack();  // 正常であれば署名が格納されている
 
+	std::cout << "........................................." << "\n";
+	std::cout << "(RawPubKey) [" << Script::OP_DATALength(popedElem1->first) << "] :: ";
+	for( int i=0; i<Script::OP_DATALength(popedElem1->first); i++)
+	{
+		printf("%02X", popedElem1->second.get()[i]);
+	} std::cout << "\n";
+	std::cout << "--------------------------------------------" << "\n";
+	std::cout << "(Signature) ["<< Script::OP_DATALength(popedElem2->first) << "] :: ";
+	for( int i=0; i<Script::OP_DATALength(popedElem2->first); i++)
+	{
+		printf("%02X", popedElem2->second.get()[i]);
+	} std::cout << "\n";
+	std::cout << "........................................." << "\n";
+
+
 	EVP_PKEY *pubKey = NULL;
 	pubKey = cipher::ECDSAManager::toPkey( popedElem1->second.get() , Script::OP_DATALength(popedElem1->first) );
+
+	cipher::ECDSAManager::printPkey( pubKey );
 	
 	return cipher::ECDSAManager::verify( popedElem2->second, Script::OP_DATALength(popedElem2->first), optionsPtr->_txHash.first , optionsPtr->_txHash.second , pubKey ,"sha256" );
 };
 
+
 bool OP_DATA::exe( ValidationStack *stack , ValidationOptions *optionsPtr  )
 {
+	OP_DATA opdata( static_cast<unsigned char>(optionsPtr->_opData.second) );
+	stack->pushBack( opdata , optionsPtr->_opData.first );
 
-	return false;
+	std::cout << "\x1b[32m";
+	std::cout << "-----------------------------" << "\n";
+	std::cout << "(data)[" << Script::OP_DATALength(opdata) << "] :: ";
+	for( int i=0; i<optionsPtr->_opData.second; i++ )
+	{
+		printf("%02X", optionsPtr->_opData.first.get()[i]);
+	} std::cout << "\n";
+	std::cout << "-----------------------------" << "\n";
+	std::cout << "\x1b[39m";
+
+	return true;
 };
 
 

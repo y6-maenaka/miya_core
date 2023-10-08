@@ -45,8 +45,9 @@ int main()
 	ControlInterface interface;
 	std::shared_ptr<tx::P2PKH> loadedP2PKH = interface.createTxFromJsonFile("../control_interface/tx_origin/payment_tx_info_0000.json");
 
-	for( auto itr : loadedP2PKH->ins() ) // 入力に対する秘密鍵の設定
+	for( auto itr : loadedP2PKH->ins() ){ // 入力に対する秘密鍵の設定	
 		itr->pkey( ecdsaManager.myPkey() );
+	}
 
 
 	loadedP2PKH->sign(); // トランザクションのTxIn用に署名を作成する
@@ -54,8 +55,17 @@ int main()
 	txIDLength = loadedP2PKH->calcTxID( &txID );
 
 
+	std::shared_ptr<unsigned char> rawTx; size_t rawTxLength;
+	rawTxLength = loadedP2PKH->exportRaw( &rawTx );
+	std::cout << "\x1b[35m" << "\n";
+	for( int i=0; i<rawTxLength; i++ )
+	{
+		printf("%02X", rawTx.get()[i]);
+	} std::cout << "\n";
+	std::cout << "\x1b[39m" << "\n";
+
+
 	miya_db::DatabaseManager dbManager;
-	//dbManager.startWithLightMode( ,"test");
 
 	/* SBコンテナのセットアップ */
 	std::shared_ptr<StreamBufferContainer> toDBSBContainer = std::make_shared<StreamBufferContainer>();
@@ -67,7 +77,7 @@ int main()
 
 
 	miya_chain::LightUTXOSet utxoSet( toDBSBContainer , fromDBSBContainer );
-	// utxoSet.store( loadedP2PKH );
+	utxoSet.store( loadedP2PKH );
 
 	std::cout << "P2PKH stored" << "\n";
 	std::cout << "\n\n\n ----------------------------------------------- \n\n\n";
@@ -107,6 +117,10 @@ int main()
 
 	std::cout << "Hello World" << "\n";
 
+
+	bool flag = loadedP2PKH->verify( std::make_shared<miya_chain::LightUTXOSet>(utxoSet) );
+	if( flag ) std::cout << "verify successfuly done" << "\n";
+	else std::cout << "verify failure" << "\n";
 
 	/* トランザクション入力の検証 */
 

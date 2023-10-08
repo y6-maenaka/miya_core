@@ -94,6 +94,15 @@ unsigned int P2PKH::formatExportedRawTxVector( std::vector< std::pair<std::share
 		memcpy( (*retRaw).get() + formatPtr , itr.first.get() , itr.second ); formatPtr += itr.second;
 	}
 
+
+	std::cout << "::::::::::::::::::::::::::::::::::::::" << "\n";
+	std::cout << "fromExportedRawTxVector :: ";
+	for( int i=0; i<formatPtr; i++ )
+	{
+		printf("%02X", (*retRaw).get()[i] );
+	} std::cout << "\n";
+	std::cout << "::::::::::::::::::::::::::::::::::::::" << "\n";
+
 	return formatPtr;
 }
 
@@ -124,9 +133,16 @@ bool P2PKH::sign()
 		
 			if( i == j ) // 公開鍵ハッシュを格納する
 				rawSignLength = _body._ins.at(j)->exportRawWithPubKeyHash( &exportexRawTx );
-			else
+			else // 署名スクリプトが格納されていないtx_inを書き出す
 				rawSignLength = _body._ins.at(j)->exportRawWithEmpty( &exportexRawTx );
 
+			std::cout << "\x1b[31m" << "\n"; 
+			std::cout << "( " << rawSignLength << " )" << "\n";
+			for( int i=0;i<rawSignLength; i++ )
+			{
+				printf("%02X", exportexRawTx.get()[i]);
+			}
+			std::cout << "\x1b[39m" << "\n";
 			exportedRawTxInVector.push_back( std::make_pair(exportexRawTx,rawSignLength) ); // 生のtx_inを全て
 		}
 
@@ -142,6 +158,28 @@ bool P2PKH::sign()
 
 		unsigned int exportedRawTxInsLength = 0; std::shared_ptr<unsigned char> exportedRawTxIns; 
 		exportedRawTxInsLength = formatExportedRawTxVector( exportedRawTxInVector, &exportedRawTxIns );
+
+
+		std::cout << "\x1b[33m" << "\n";
+		std::cout << exportedRawTxInVector.size() << "\n";
+		std::cout << "\x1b[39m" << "\n";
+		std::cout << "+++++++++++++++++++++++++++++++" << "\n";
+		for( auto itr : exportedRawTxInVector )
+		{
+			std::cout << "exportedRawTxIns :: ";
+			for( int i=0; i<itr.second; i++ )
+			{
+				printf("%02X", itr.first.get()[i]);
+			} std::cout << "\n";
+		}
+		std::cout << "------------------------------------------" << "\n";
+		for( int i=0; i<exportedRawTxInsLength; i++ )
+		{
+			printf("%02X", exportedRawTxIns.get()[i]);
+		} std::cout << "\n";
+		std::cout << "+++++++++++++++++++++++++++++++" << "\n";
+
+
 
 		unsigned int exportedRawTxOutsLength = 0; std::shared_ptr<unsigned char> exportedRawTxOuts;
 		exportedRawTxOutsLength = formatExportedRawTxVector( exportedRawTxOutVector , &exportedRawTxOuts );
@@ -188,6 +226,20 @@ bool P2PKH::sign()
 			std::cout << "\033[32m" <<  "[ TxIn(" << i << ") ] Verify Successfyly Done" << "\033[0m" << "\n";
 
 
+		std::cout << "------------------------------------------" << "\n";
+		std::cout << "ExportedRaw (" << exportedRawLength << ") :: ";
+		for( int i=0; i<exportedRawLength; i++ )
+		{
+			printf("%02X", exportedRaw.get()[i]);
+		} std::cout << "\n";
+		std::cout << "Generated Sign (" << signLength << ") :: ";
+		for( int i=0; i<signLength; i++ )
+		{
+			printf("%02X", sign.get()[i]);
+		} std::cout << "\n";
+		std::cout << "------------------------------------------" << "\n";
+
+
 		exportedRawTxInVector.clear();
 		exportedRawTxOutVector.clear();
 	}
@@ -209,14 +261,20 @@ bool P2PKH::verify( std::shared_ptr<miya_chain::LightUTXOSet> utxoSet )
 		
 		// ここでutxoからpk_scriptを取得する
 		utxo = utxoSet->get( itr->prevOut() );
+		std::cout << "Query Response UTXO geted" << "\n";
+		printf("%p\n" , utxo.get() );
+
+		if( utxo == nullptr ) return false;
 
 		std::shared_ptr<unsigned char> txHash; unsigned int txHashLength;
 		ScriptValidator validator( utxo->pkScript(), itr->signatureScript() );
 
-		txHashLength = this->txHashOnTxIn( i , &txHash );
-		validator.verifyP2PKHScript( txHash, txHashLength );
-
+		txHashLength = this->txHashOnTxIn( i , &txHash ); // 指定のインデックスにpubKeyHashをセットして書き出す
+		bool flag = validator.verifyP2PKHScript( txHash, txHashLength );
+		std::cout << "単体TxIn検証 :: " << flag << "\n";
+		i++;
 	}
+	return true;
 
 }
 
@@ -413,6 +471,15 @@ unsigned int P2PKH::txHashOnTxIn( int index , std::shared_ptr<unsigned char> *re
 	memcpy( exportedRaw.get() + formatPtr , exportedRawTxOuts.get() , exportedRawTxOutsLength ); formatPtr += exportedRawTxOutsLength;
 
 	*retRaw = exportedRaw;
+
+
+	std::cout << "\x1b[34m" << "\n";
+	std::cout << "( "<< exportedRawLength << " )" << "\n";
+	for( int i=0; i<exportedRawLength; i++ )
+	{
+		printf("%02X", exportedRaw.get()[i]);
+	} std::cout << "\n";
+	std::cout << "\x1b[39m" << "\n";
 
 	return exportedRawLength;
 }

@@ -113,6 +113,10 @@ std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<unsigned char> txID , u
 		goto re;
 	}
 
+	std::cout << "\x1b[36m" << "\n";
+	std::cout << responseJson << "\n";
+	std::cout << "\x1b[39m" << "\n";
+
 
 	if( !(responseJson.contains("status")) ) return nullptr;
 	if( (responseJson["status"]) != 0 ) return nullptr;

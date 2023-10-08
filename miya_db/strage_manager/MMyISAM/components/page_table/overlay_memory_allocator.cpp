@@ -401,7 +401,6 @@ void OverlayMemoryAllocator::printFreeBlockChain()
 
 	do
 	{
-		sleep(1);
 		std::cout << "[ " << i << " ]" << "\n";
 		i++;
 

@@ -92,6 +92,23 @@ unsigned short SignatureScript::exportRawWithPubKeyHash( std::shared_ptr<unsigne
 	*ret = std::shared_ptr<unsigned char>( new unsigned char[rawPubKeyHashLength] );
 	memcpy( (*ret).get() , rawPubKeyHash.get() , rawPubKeyHashLength );
 
+
+	std::cout << "\x1b[36m";
+	std::cout << "(raw) " << rawPubKeyLength << "::";
+	for( int i=0; i<rawPubKeyLength; i++ )
+	{
+		printf("%02X", rawPueKey.get()[i]);
+	} std::cout << "\n";
+
+
+
+	std::cout << "(hashed) :: ";
+	for( int i=0; i<20; i++ )
+	{
+		printf("%02X", rawPubKeyHash.get()[i]);
+	} std::cout << "\n";
+	std::cout <<"\x1b[39m";
+
 	return rawPubKeyHashLength;
 }
 

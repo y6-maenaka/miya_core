@@ -32,7 +32,8 @@ class PkScript;
 
 struct TxOut
 {
-private:
+//private:
+public:
 
 	struct  Body
 	{

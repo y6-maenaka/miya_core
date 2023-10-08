@@ -29,7 +29,7 @@ unsigned short TxOut::exportRaw( std::shared_ptr<unsigned char> *retRaw ) // こ
 		retRaw = nullptr; return 0;
 	}
 
-// 先ず,pkScriptを書き出す バイト長などを格納しなければならない為
+	// 先ず,pkScriptを書き出す バイト長などを格納しなければならない為
 	std::shared_ptr<unsigned char> exportedRawPkScript; unsigned int exportedRawPkScriptLength = 0;
 
 	exportedRawPkScriptLength = _body._pkScript->exportRawWithP2PKHPkScript( &exportedRawPkScript , _pubKeyHash );
@@ -117,13 +117,27 @@ void from_json( const json &from , TxOut &to )
 
 	//to._pubKeyHash = from["address"];
 	std::string sAddress = from["address"].get<std::string>();
-	const unsigned char *ccAddress = reinterpret_cast<const unsigned char*>(sAddress.c_str());
+
+	std::vector<unsigned char> hexBinaryVector;
+	for( size_t i=0; i<40; i+=2 ) // 20[bytes]*2 あとで拡張性を持たせて修正する
+	{
+		std::string subString = sAddress.substr(i,2);
+		unsigned char byte = static_cast<unsigned char>(std::stoul(subString,nullptr,16));
+		hexBinaryVector.push_back(byte);
+	}
+	std::cout << "ImportAddress Done" << "\n";
+	for( auto itr : hexBinaryVector )
+	{
+		printf("%02X", itr );
+	} std::cout << "\n";
+
+	//const unsigned char *ccAddress = reinterpret_cast<const unsigned char*>(sAddress.c_str());
 
 	//to._pubKeyHash = std::make_shared<unsigned char>(20);
 	to._pubKeyHash = std::shared_ptr<unsigned char>(new unsigned char[20] , [](unsigned char *ptr){
 			delete[] ptr;
 			});
-	std::copy( ccAddress, ccAddress + 20 , to._pubKeyHash.get() );
+	std::copy( hexBinaryVector.begin(), hexBinaryVector.end(), to._pubKeyHash.get() );
 
 }
 
