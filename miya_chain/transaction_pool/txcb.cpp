@@ -87,4 +87,20 @@ void TxCB::txID( std::shared_ptr<unsigned char> target )
 
 
 
+	
+int TxCB::priority()
+{
+	return _control._priority;
+}
+
+
+
+void TxCB::priority( int priority )
+{
+	_control._priority = priority;
+}
+
+
+
+
 };

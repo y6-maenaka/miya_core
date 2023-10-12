@@ -23,8 +23,12 @@
 
 #include "../../miya_chain/transaction/txcb_table_manager/txcb_table_manager.h"
 #include "../../miya_chain/transaction/txcb_table_manager/txcb_table/txcb_table.h"
-#include "../../miya_chain/transaction_pool/unit_test.h"
 
+#include "../../miya_chain/transaction_pool/unit_test.h"
+#include "../../miya_chain/transaction_pool/transaction_pool.h"
+#include "../../miya_chain/transaction_pool/txcb.h"
+#include "../../miya_chain/transaction_pool/txcb_bucket.h"
+#include "../../miya_chain/transaction_pool/txcb_table.h"
 
 
 #include "openssl/evp.h"
@@ -213,7 +217,7 @@ int main()
 
 
 	miya_chain::transaction_pool_whole_unit_test();
-
+	//miya_chain::TransactionPool txPool;
 
 	return 0;
 

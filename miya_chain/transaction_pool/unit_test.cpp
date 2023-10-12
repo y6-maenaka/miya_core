@@ -56,48 +56,30 @@ void transaction_pool_whole_unit_test()
 
 
 
-	txPool._rootTable->printTable();
-
-
 
 	std::cout << " ================= In TramsactinoPool Below ====================" << "\n";
 	auto layer0_table{ std::get_if<std::shared_ptr<TxCBTable>>(&((txPool._rootTable)->_containerArray[6])) };
-	(*layer0_table)->printTable();
 
 
-	std::cout << "\n =====================================" << "\n";
 
 	auto layer1_table{ std::get_if<std::shared_ptr<TxCBTable>>(&((*layer0_table))->_containerArray[1]) };
-	(*layer1_table)->printTable();
 
 
-
-	std::cout << "\n =====================================" << "\n";
 
 	auto layer2_table{ std::get_if<std::shared_ptr<TxCBTable>>(&((*layer1_table))->_containerArray[6]) };
-	(*layer2_table)->printTable();
 
 
 
-
-	std::cout << "\n =====================================" << "\n";
 	for( int i=0; i<16; i++ ){
 		auto layer_2_bucket{ std::get_if<std::shared_ptr<TxCBBucket>>( &((*layer2_table)->_containerArray[i]) ) };
-		(*layer_2_bucket)->printBucket();
 	}
-
-
-	std::shared_ptr<TxCB> ret = nullptr;
-	ret = txPool.find( txcb_tx_id_5 );
-	std::cout << "検索結果 :: ";
-	for( int i=0; i<20; i++){
-		printf("%02X", ret->txID().get()[i] );
-	} std::cout << "\n";
 
 
 	txPool.remove( txcb_1 );
 
-
+	txPool.add( txcb_1 );
+	std::cout << "-----------------" << "\n";
+	txPool.add( txcb_1 );
 
 
 

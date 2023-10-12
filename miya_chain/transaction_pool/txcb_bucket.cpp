@@ -26,7 +26,7 @@ TxCBBucket::TxCBBucket( unsigned char symbol , TxCBTable* parentTable ) : _bucke
 
 int TxCBBucket::add( std::shared_ptr<TxCB> target )
 {
-
+	/* giude message
 	std::cout << "|--------------------------------------|" << "\n";
 	printf("| TxCBBucket Symbol[ %02X ]\n", _bucketSymbol );
 	std::cout << "| [ Add ] :: ";
@@ -35,6 +35,10 @@ int TxCBBucket::add( std::shared_ptr<TxCB> target )
 		printf("%02X", target->txID().get()[i]);
 	} std::cout << "\n";
 	std::cout << "|--------------------------------------|" << "\n";
+	*/
+
+	if( this->find( target ) != nullptr ) return -1;
+	
 
 	std::shared_ptr<TxCB> tailTxCB = _txcbHead;
 
@@ -48,11 +52,6 @@ int TxCBBucket::add( std::shared_ptr<TxCB> target )
 	}
 
 	tailTxCB = _txcbHead->prev();
-	std::cout << "\x1b[32m" << "prev() :: ";
-	for( int i=0; i<20; i++ ){
-		printf("%02X", tailTxCB->txID().get()[i]);
-	}
-	std::cout << "\x1b[39m" << "\n";
 
 	target->next( tailTxCB->next() );
 	target->prev( tailTxCB );
@@ -64,18 +63,8 @@ int TxCBBucket::add( std::shared_ptr<TxCB> target )
 	_txCount += 1;
 
 
-	printf("Bucket  Pointer:: %p\n", this );
-	std::cout << "Bucket Size is -> " << _txCount << "\n";
-	printf("Bucket symbol ::  %02X\n", _bucketSymbol );
-	std::cout << "Add ID :: ";
-	for( int i=0; i<20; i++ ){
-		printf("%02X", target->txID().get()[i]);
-	} std::cout << "\n";
-
-
 	if( _txCount >= DEFAULT_SCALE_SIZE )
 		autoScaleUp( _txcbHead );
-
 	
 
 	return 0;
@@ -117,7 +106,6 @@ int TxCBBucket::add( std::shared_ptr<TxCB> target )
 
 void TxCBBucket::remove( std::shared_ptr<TxCB> target )
 {
-	std::cout << "TxCBBucket::remove() called" << "\n";
 
 	std::shared_ptr<TxCB> thisTarget = this->find( target ); // targetは検索用のTxCBなので本来のTxCBを取得する 実際にはstatusで判断した方が良い
 
@@ -163,39 +151,25 @@ std::shared_ptr<TxCB> TxCBBucket::find( std::shared_ptr<TxCB> target )
 
 void TxCBBucket::autoScaleUp( std::shared_ptr<TxCB> txcbHead )
 {
-	std::cout << "==============================================" << "\n";
-	std::cout << "\x1b[36m" << "Auto scale up started with layer -> " << _parentTable->layer() + 1<< "\x1b[39m" << "\n";
-	// TxCBTable *newTable = new TxCBTable( _parentTable->layer() + 1 );
 	std::shared_ptr<TxCBTable> newTable = std::make_shared<TxCBTable>( _parentTable->layer() + 1 );
 
 	
 	std::shared_ptr<TxCB> currentTxCB = txcbHead;
 	std::shared_ptr<TxCB> nextTxCB = currentTxCB;
 
-	std::cout << "nextTxCB::TxID ::  ";
-	printBucket();
- 
 	do
 	{
 		currentTxCB = nextTxCB;
 		nextTxCB = currentTxCB->next(); // currentTxCBが追加されたらnext情報が消失するため事前に確保しておく
 		
-		std::cout << "\x1b[33m" <<  "Auto Scale And Add target :: ";
-		for( int i=0; i<20; i++ ){
-			printf("%02X", currentTxCB->txID().get()[i] );
-		} std::cout << "\x1b[39m" << "\n";
-
 		newTable->add( currentTxCB );
-		std::cout << "## auto scale up done" << "\n";
 
 		// currentTxCB = nextTxCB;
 	}
 	while( nextTxCB != _txcbHead );
-	std::cout << "\x1b[35m" << "WhileBreaked" << "\x1b[39m" << "\n";
 
 	_parentTable->txContainer( TransactionPool::bucketSymbolToIndex(_bucketSymbol) , newTable );
 	
-	std::cout << "========================================" << "\n";
 
 	// _parentTable->bucketTableList( this , 1 , symbol );
 

@@ -15,7 +15,7 @@ TxCBTable::TxCBTable( unsigned int layer ) : _layer(layer)
 	for( int i=0; i<16; i++ )
 	{
 		_containerArray.at(i) = std::shared_ptr<TxCBBucket>( new TxCBBucket( symbol, this ) );
-		printf("Bucket Created With symbol :: %02X\n", symbol );
+		// printf("Bucket Created With symbol :: %02X\n", symbol );
 		symbol =  symbol + 0x01;
 	} // テーブルの初期化
 

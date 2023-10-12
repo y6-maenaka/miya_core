@@ -71,6 +71,10 @@ public:
 	//unsigned char* txID();
 	std::shared_ptr<unsigned char> txID();
 	void txID( std::shared_ptr<unsigned char> target ); // テスト用 基本的には外部からの変更は不可能にする
+
+
+	int priority();
+	void priority( int priority );
 };
 
 

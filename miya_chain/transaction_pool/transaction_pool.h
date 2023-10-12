@@ -15,6 +15,12 @@ namespace tx
 	struct P2PKH;
 }
 
+namespace block
+{
+	struct Block;
+}
+
+
 
 
 namespace miya_chain
@@ -50,11 +56,12 @@ public:
 	std::shared_ptr<TxCB>	find( std::shared_ptr<unsigned char> targetTxID );
 	int add( std::shared_ptr<tx::P2PKH> target ); // トランザクションプール,暫定UTXO共に追加する
 	int add( std::shared_ptr<TxCB> target );
-
+	std::vector< std::shared_ptr<TxCB> > add( std::shared_ptr<block::Block> target , int priority = 0 );
 
 	void remove( std::shared_ptr<TxCB> target ); // イテレータのeraseのようなメソッドにする
 	void remove( std::shared_ptr<tx::P2PKH> target );
 	void remove( std::shared_ptr<unsigned char> targetTxID );
+	void remove( std::shared_ptr<block::Block> target );
 
 	void batchRemove( std::vector<std::shared_ptr<TxCB>> targetVector );
 	std::vector<TxCB> autoResolveDoubleSpends( std::shared_ptr<tx::P2PKH> target );

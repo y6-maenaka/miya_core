@@ -1,5 +1,6 @@
 #include "transaction_pool.h"
 
+#include "../block/block.h"
 #include "../transaction/p2pkh/p2pkh.h"
 
 #include "./txcb.h"
@@ -76,6 +77,25 @@ int TransactionPool::add( std::shared_ptr<TxCB> target )
 
 
 
+std::vector< std::shared_ptr<TxCB> > TransactionPool::add( std::shared_ptr<block::Block> target, int priority )
+{
+	std::vector< std::shared_ptr<tx::P2PKH> > txVector = target->txVector();
+
+	std::vector< std::shared_ptr<TxCB> > addedTxCBVector;
+	int flag;
+	for( auto itr : txVector ) {
+		std::shared_ptr<TxCB> targetTxCB = std::make_shared<TxCB>( itr );
+		targetTxCB->priority( priority );
+		flag = this->add( targetTxCB );
+		if( flag == 0 )
+			addedTxCBVector.push_back( targetTxCB );
+	}
+
+	return addedTxCBVector;
+}
+
+
+
 
 void TransactionPool::remove( std::shared_ptr<TxCB> target )
 {
@@ -105,6 +125,17 @@ void TransactionPool::remove( std::shared_ptr<unsigned char> targetTxID )
 }
 
 
+
+void TransactionPool::remove( std::shared_ptr<block::Block> target )
+{
+	std::vector< std::shared_ptr<tx::P2PKH> > txVector = target->txVector();
+
+	int flag;
+	for( auto itr : txVector ){
+		std::shared_ptr<TxCB> targetTxCB = std::make_shared<TxCB>( itr );
+		this->remove( targetTxCB );
+	}
+}
 
 
 
