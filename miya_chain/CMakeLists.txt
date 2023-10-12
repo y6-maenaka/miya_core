@@ -20,12 +20,12 @@ add_library( MIYA_CHAIN STATIC
 
 							block/block.cpp
 
-
 							transaction_pool/transaction_pool.cpp
 							transaction_pool/txcb.cpp
 							transaction_pool/txcb_bucket.cpp
 							transaction_pool/txcb_table.cpp
 							transaction_pool/provisional_utxo_cache/provisional_utxo_cache.cpp
+							transaction_pool/unit_test.cpp
 
 							daemon/transaction_validator/transaction_validator.cpp
 							daemon/block_validator/block_validator.cpp
@@ -45,8 +45,10 @@ add_library( MIYA_CHAIN STATIC
 							utxo_set/utxo.cpp
 							utxo_set/utxo_set.cpp
 
-							# mining/simple_mining.cpp
-						
+							block_chain_manager/block_chain_manager.cpp
+
+							mining/simple_mining.cpp
+
 )
 
 

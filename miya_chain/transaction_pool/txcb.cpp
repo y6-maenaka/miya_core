@@ -8,15 +8,25 @@ namespace miya_chain
 
 
 
-/*
-TxCB::TxCB( std::shared_ptr<tx::Tx> target )
+TxCB::TxCB( std::shared_ptr<tx::P2PKH> target , int status )
 {
+	if( target == nullptr ) return;
 	_tx = target;
+	_meta._status = status;
+
+	
+	target->calcTxID( &(_meta._txID) );
+}
+
+
+
+/*
+TxCB::TxCB( std::shared_ptr<unsigned char> txID ,int status )
+{
+	_meta._txID = txID;
+	_meta._status = status;
 }
 */
-
-
-
 
 
 
@@ -67,6 +77,14 @@ std::shared_ptr<unsigned char> TxCB::txID()
 {
 	return _meta._txID;
 }
+
+
+
+void TxCB::txID( std::shared_ptr<unsigned char> target )
+{
+	_meta._txID = target;
+}
+
 
 
 };

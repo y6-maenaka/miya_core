@@ -86,8 +86,6 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 	// respondスレッドを用意する &(参照)でキャプチャするとスマートポインタのアドレスが変わる
 	std::thread lightMiyaDBThread([mmyisam, popSBContainer, pushSBContainer, this]() 
 	{
-		std::cout << "Started MiayDB(light) Handler Thread" << "\n";
-		
 		std::unique_ptr<SBSegment> sbSegment;
 		std::vector<uint8_t> dumpedJson;
 		std::shared_ptr<unsigned char> dumpedJsonRaw; 
@@ -139,7 +137,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 
 
 				case QUERY_ADD: // 1 add
-					std::cout << " ### \x1b[32m" << "## (HANDLE) QUERY_ADD" << "\x1b[39m" << "\n";
+					std::cout << "\x1b[32m" << "## (HANDLE) QUERY_ADD" << "\x1b[39m" << "\n";
 
 					flag = mmyisam->add( qctx ); // addの実行
 					if( !flag ){
@@ -161,11 +159,9 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 
 
 				case QUERY_SELECT: // 2 get
-					std::cout << " ### \x1b[34m" << "## (HANDLE) QUERY_SELECT"	<<"\x1b[39m" << "\n";
+					std::cout << "\x1b[34m" << "## (HANDLE) QUERY_SELECT"	<<"\x1b[39m" << "\n";
 					flag = mmyisam->get( qctx );
 
-					std::cout << "mmyisam->get() Flag -> " << flag << "\n";
-				
 					if( !flag ){
 						sbSegment = failureSB( qctx );
 						goto direct;

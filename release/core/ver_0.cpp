@@ -23,6 +23,9 @@
 
 #include "../../miya_chain/transaction/txcb_table_manager/txcb_table_manager.h"
 #include "../../miya_chain/transaction/txcb_table_manager/txcb_table/txcb_table.h"
+#include "../../miya_chain/transaction_pool/unit_test.h"
+
+
 
 #include "openssl/evp.h"
 
@@ -60,13 +63,6 @@ int main()
 
 	std::shared_ptr<unsigned char> rawTx; size_t rawTxLength;
 	rawTxLength = loadedP2PKH->exportRaw( &rawTx );
-	std::cout << "\x1b[35m" << "\n";
-	for( int i=0; i<rawTxLength; i++ )
-	{
-		printf("%02X", rawTx.get()[i]);
-	} std::cout << "\n";
-	std::cout << "\x1b[39m" << "\n";
-
 
 	miya_db::DatabaseManager dbManager;
 
@@ -80,23 +76,13 @@ int main()
 
 
 	miya_chain::LightUTXOSet utxoSet( toDBSBContainer , fromDBSBContainer );
-	utxoSet.store( loadedP2PKH );
+	// utxoSet.store( loadedP2PKH );
 
 	std::cout << "P2PKH stored" << "\n";
-	std::cout << "\n\n\n ----------------------------------------------- \n\n\n";
-
 
 
 	std::shared_ptr<unsigned char> searchTxID; size_t searchTxIDLength;
 	searchTxID = loadedP2PKH->ins().at(0)->prevOut()->txID();
-
-	std::cout << "==================================" << "\n";
-	for( int i=0; i<32; i++ )
-	{
-		printf("%02X", searchTxID.get()[i]);
-	} std::cout << "\n";
-	std::cout << "==================================" << "\n";
-
 
 
 
@@ -110,19 +96,11 @@ int main()
 		std::shared_ptr<unsigned char> exportedPkScript; size_t exportedPkScriptLength;
 		exportedPkScriptLength = utxo->_content._pkScript->_script->exportRaw( &exportedPkScript );
 
-		std::cout << "------------------------" << "\n";
-		for( int i=0; i<exportedPkScriptLength; i++)
-		{
-			printf("%02X", exportedPkScript.get()[i]);
-		} std::cout << "\n";
-		std::cout << "-------------------------" << "\n";
 	}
-
-	std::cout << "Hello World" << "\n";
 
 
 	bool flag = loadedP2PKH->verify( std::make_shared<miya_chain::LightUTXOSet>(utxoSet) );
-	if( flag ) std::cout << "verify successfuly done" << "\n";
+	if( flag ) std::cout << "verify successfully done" << "\n";
 	else std::cout << "verify failure" << "\n";
 
 	// トランザクション入力の検証 
@@ -133,7 +111,7 @@ int main()
 	*/
 
 
-	
+
 
 	cipher::ECDSAManager ecdsaManager;
 	ecdsaManager.init( (unsigned char *)"hello", 5 ); // priKeyには鍵がかかっているので
@@ -215,9 +193,26 @@ int main()
 	std::cout << "GoodNight World" << "\n";
 
 
+	uint32_t nBits = 522300001;
+	block.header()->nBits( nBits );
 
-	uint32_t nBits = 510013136;
-	miya_chain::simpleMining( nBits ,std::make_shared<block::Block>(block) );
+	uint32_t nonce = miya_chain::simpleMining( nBits , block.header() );
+	block.header()->nonce( nonce );
+	std::cout << block.header()->nonce() << "\n";
+	std::cout << nonce << "\n";
+	block.header()->print();
+
+	int headerFlag = miya_chain::verifyBlockHeader(  block.header() );
+	std::cout << "header verify flag -> " << headerFlag << "\n";
+
+
+
+
+	std::cout << "\n\n\n---------------------------------------\n\n" << "\n";
+
+
+
+	miya_chain::transaction_pool_whole_unit_test();
 
 
 	return 0;

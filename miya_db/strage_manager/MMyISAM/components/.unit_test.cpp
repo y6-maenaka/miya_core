@@ -15,9 +15,6 @@
 void optr_cache_unit_test()
 {
 
-	std::cout << "Hello World" << "\n";
-
-
 	std::string fileName = "test";
   	std::shared_ptr<miya_db::OverlayMemoryManager> OverlayMemoryManager_1 =  std::shared_ptr<miya_db::OverlayMemoryManager>( new miya_db::OverlayMemoryManager(fileName) );
 	// std::shared_ptr<miya_db::ValueStoreManager> valueStoreManager = std::make_shared<miya_db::ValueStoreManager>( OverlayMemoryManager_1 );

@@ -125,11 +125,6 @@ void from_json( const json &from , TxOut &to )
 		unsigned char byte = static_cast<unsigned char>(std::stoul(subString,nullptr,16));
 		hexBinaryVector.push_back(byte);
 	}
-	std::cout << "ImportAddress Done" << "\n";
-	for( auto itr : hexBinaryVector )
-	{
-		printf("%02X", itr );
-	} std::cout << "\n";
 
 	//const unsigned char *ccAddress = reinterpret_cast<const unsigned char*>(sAddress.c_str());
 

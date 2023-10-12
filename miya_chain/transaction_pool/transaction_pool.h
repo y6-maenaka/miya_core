@@ -29,25 +29,37 @@ class ProvisionalUTxOCache; // トランザクションプール内にストッ�
 
 
 
+// トランザクションの重複を許可しないメモリープール
 class TransactionPool
 {
 
-private:
-	TxCBTable *_rootTable;
-	ProvisionalUTxOCache *_pUTxOCache; // utxoと異なり,トランザクションプールに存在する分しか格納しないため,mapで妥協・許容する
+//private:
+public:
+	// TxCBTable *_rootTable;
+	std::shared_ptr<TxCBTable> _rootTable;
+	// ProvisionalUTxOCache *_pUTxOCache; // utxoと異なり,トランザクションプールに存在する分しか格納しないため,mapで妥協・許容する
+
+protected:
+	std::shared_ptr<TxCB> find( std::shared_ptr<TxCB> target );
 
 public:
 	TransactionPool();
 
 	//std::shared_ptr<tx::P2PKH> find( std::shared_ptr<tx::P2PKH>  );
 	std::shared_ptr<TxCB> find( std::shared_ptr<tx::P2PKH> target );
-	void store( std::shared_ptr<tx::P2PKH> target ); // トランザクションプール,暫定UTXO共に追加する
+	std::shared_ptr<TxCB>	find( std::shared_ptr<unsigned char> targetTxID );
+	int add( std::shared_ptr<tx::P2PKH> target ); // トランザクションプール,暫定UTXO共に追加する
+	int add( std::shared_ptr<TxCB> target );
 
 
 	void remove( std::shared_ptr<TxCB> target ); // イテレータのeraseのようなメソッドにする
-	void batchRemove( std::vector<std::shared_ptr<TxCB>> targetVector );
+	void remove( std::shared_ptr<tx::P2PKH> target );
+	void remove( std::shared_ptr<unsigned char> targetTxID );
 
+	void batchRemove( std::vector<std::shared_ptr<TxCB>> targetVector );
 	std::vector<TxCB> autoResolveDoubleSpends( std::shared_ptr<tx::P2PKH> target );
+
+	static size_t bucketSymbolToIndex( const unsigned char symbol );
 };
 
 

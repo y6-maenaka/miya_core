@@ -2,6 +2,7 @@
 
 #include "./txcb.h"
 #include "./txcb_table.h"
+#include "./transaction_pool.h"
 
 
 namespace miya_chain
@@ -10,14 +11,13 @@ namespace miya_chain
 
 
 
-TxCBBucket::TxCBBucket( unsigned char symbol , std::shared_ptr<TxCBTable> parentTable )
+TxCBBucket::TxCBBucket( unsigned char symbol , TxCBTable* parentTable ) : _bucketSymbol(symbol) , _txCount(0)
 {
-	_bucketSymbol = symbol;
+	//_bucketSymbol = symbol;
 	_parentTable = parentTable;
-
 	_scaleSize = DEFAULT_SCALE_SIZE;
-
 	_txcbHead = nullptr;
+	// _txCount = 0;
 }
 
 
@@ -26,9 +26,62 @@ TxCBBucket::TxCBBucket( unsigned char symbol , std::shared_ptr<TxCBTable> parent
 
 int TxCBBucket::add( std::shared_ptr<TxCB> target )
 {
-	std::shared_ptr<TxCB>	currentTxCB = _txcbHead;
-	int count = 0;
 
+	std::cout << "|--------------------------------------|" << "\n";
+	printf("| TxCBBucket Symbol[ %02X ]\n", _bucketSymbol );
+	std::cout << "| [ Add ] :: ";
+	for( int i=0; i<20; i++ )
+	{
+		printf("%02X", target->txID().get()[i]);
+	} std::cout << "\n";
+	std::cout << "|--------------------------------------|" << "\n";
+
+	std::shared_ptr<TxCB> tailTxCB = _txcbHead;
+
+	if( tailTxCB == nullptr )
+	{
+		target->prev( target );
+		target->next( target );
+		_txcbHead = target; // 先頭がセットされていない時にスケールが発生することはない
+		_txCount += 1;
+		return 0;
+	}
+
+	tailTxCB = _txcbHead->prev();
+	std::cout << "\x1b[32m" << "prev() :: ";
+	for( int i=0; i<20; i++ ){
+		printf("%02X", tailTxCB->txID().get()[i]);
+	}
+	std::cout << "\x1b[39m" << "\n";
+
+	target->next( tailTxCB->next() );
+	target->prev( tailTxCB );
+
+	tailTxCB->next()->prev( target );
+	tailTxCB->next( target );
+
+
+	_txCount += 1;
+
+
+	printf("Bucket  Pointer:: %p\n", this );
+	std::cout << "Bucket Size is -> " << _txCount << "\n";
+	printf("Bucket symbol ::  %02X\n", _bucketSymbol );
+	std::cout << "Add ID :: ";
+	for( int i=0; i<20; i++ ){
+		printf("%02X", target->txID().get()[i]);
+	} std::cout << "\n";
+
+
+	if( _txCount >= DEFAULT_SCALE_SIZE )
+		autoScaleUp( _txcbHead );
+
+	
+
+	return 0;
+	
+	/*
+	int count = 0;
 	if( currentTxCB == nullptr ) // 先頭ポインタが空の場合は対象のブロックが先頭になる
 	{
 		_txcbHead = target;
@@ -55,6 +108,7 @@ int TxCBBucket::add( std::shared_ptr<TxCB> target )
 	}
 
 	return count;
+	*/
 }
 
 
@@ -63,19 +117,21 @@ int TxCBBucket::add( std::shared_ptr<TxCB> target )
 
 void TxCBBucket::remove( std::shared_ptr<TxCB> target )
 {
-	if( find( target ) == nullptr ) return; // 必要ないかも
+	std::cout << "TxCBBucket::remove() called" << "\n";
 
-	if( _txcbHead == target	)
-	{
+	std::shared_ptr<TxCB> thisTarget = this->find( target ); // targetは検索用のTxCBなので本来のTxCBを取得する 実際にはstatusで判断した方が良い
+
+	if( thisTarget == nullptr ) return; // 対象がバケットにストアされていない場合
+
+	if( thisTarget == _txcbHead || thisTarget->next() == thisTarget || thisTarget->prev() == thisTarget ) { // 対象がバケットヘッドの場合
 		_txcbHead = nullptr;
-	}
-	else
-	{
-		target->prev()->next( target->next() );
-		target->next()->prev( target->prev() );
+		return;
 	}
 
-	// target.reset(); // ここで消してしまうと,暫定UTXOで削除できなくなる
+
+	thisTarget->prev()->next( thisTarget->next() );
+	thisTarget->next()->prev( thisTarget->prev() );
+
 	return;
 }
 
@@ -85,17 +141,18 @@ void TxCBBucket::remove( std::shared_ptr<TxCB> target )
 std::shared_ptr<TxCB> TxCBBucket::find( std::shared_ptr<TxCB> target )
 {
 	std::shared_ptr<TxCB> _currentTxCB = _txcbHead;
+	if( _currentTxCB == nullptr ) return nullptr; // 要素が存在しない
 
-	if( _currentTxCB == nullptr ) return nullptr;
 
-	do
+	do // 重複して追加されるTxCBは比較的最近プールに追加されている可能性が高いため，後方から検索する
 	{
-		if( memcmp( _currentTxCB->txID().get() , target->txID().get() , 20 ) == 0 ) return _currentTxCB;
-		_currentTxCB = _currentTxCB->next();
-	}
-	while( _currentTxCB->next() != nullptr );
+		if( memcmp( _currentTxCB->txID().get() , target->txID().get(), 20 ) == 0 )
+			return _currentTxCB;
 
-	//if( memcmp( _currentTxCB->txID() , target->txID() , 20 ) == 0 )	 return _currentTxCB; // リスト最後尾の評価
+		_currentTxCB = _currentTxCB->prev();
+
+	} while( _currentTxCB != _txcbHead );
+
 
 	return nullptr; 
 }
@@ -106,16 +163,39 @@ std::shared_ptr<TxCB> TxCBBucket::find( std::shared_ptr<TxCB> target )
 
 void TxCBBucket::autoScaleUp( std::shared_ptr<TxCB> txcbHead )
 {
-	TxCBTable *newTable = new TxCBTable( _parentTable->layer() + 1 );
+	std::cout << "==============================================" << "\n";
+	std::cout << "\x1b[36m" << "Auto scale up started with layer -> " << _parentTable->layer() + 1<< "\x1b[39m" << "\n";
+	// TxCBTable *newTable = new TxCBTable( _parentTable->layer() + 1 );
+	std::shared_ptr<TxCBTable> newTable = std::make_shared<TxCBTable>( _parentTable->layer() + 1 );
 
-	std::shared_ptr<TxCB> currentTxCB = _txcbHead;
 	
+	std::shared_ptr<TxCB> currentTxCB = txcbHead;
+	std::shared_ptr<TxCB> nextTxCB = currentTxCB;
+
+	std::cout << "nextTxCB::TxID ::  ";
+	printBucket();
+ 
 	do
 	{
+		currentTxCB = nextTxCB;
+		nextTxCB = currentTxCB->next(); // currentTxCBが追加されたらnext情報が消失するため事前に確保しておく
+		
+		std::cout << "\x1b[33m" <<  "Auto Scale And Add target :: ";
+		for( int i=0; i<20; i++ ){
+			printf("%02X", currentTxCB->txID().get()[i] );
+		} std::cout << "\x1b[39m" << "\n";
+
 		newTable->add( currentTxCB );
-		currentTxCB = currentTxCB->next();
+		std::cout << "## auto scale up done" << "\n";
+
+		// currentTxCB = nextTxCB;
 	}
-	while( currentTxCB->next() != nullptr );
+	while( nextTxCB != _txcbHead );
+	std::cout << "\x1b[35m" << "WhileBreaked" << "\x1b[39m" << "\n";
+
+	_parentTable->txContainer( TransactionPool::bucketSymbolToIndex(_bucketSymbol) , newTable );
+	
+	std::cout << "========================================" << "\n";
 
 	// _parentTable->bucketTableList( this , 1 , symbol );
 
@@ -125,6 +205,29 @@ void TxCBBucket::autoScaleUp( std::shared_ptr<TxCB> txcbHead )
 
 
 
+void TxCBBucket::printBucket()
+{
+	std::shared_ptr<TxCB> currentTxCB = _txcbHead;
+
+	int i=0;
+	std::cout << ".............................................." << "\n";
+	printf("Bucket Symbol :: %02X\n", _bucketSymbol );
+	if( _txcbHead == nullptr ){
+		std::cout << "  ## empty" << "\n";
+		return;
+	}
+	do
+	{
+		std::cout << "  - ("<< i << ")Tx :: ";
+		for( int i=0; i<20; i++)
+		{
+			printf("%02X", currentTxCB->txID().get()[i]);
+		} std::cout << "\n";
+		currentTxCB = currentTxCB->next();
+		i++;
+	} while( currentTxCB != _txcbHead );
+	std::cout << ".............................................." << "\n";
+}
 
 
 };

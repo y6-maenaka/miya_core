@@ -8,8 +8,6 @@
 
 void streamBuffer_UnitTest()
 {
-	std::cout << "Hello World" << "\n";
-
 	std::shared_ptr<StreamBufferContainer> sbContainer = std::make_shared<StreamBufferContainer>();
 
 

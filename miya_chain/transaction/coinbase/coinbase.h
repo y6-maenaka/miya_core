@@ -23,7 +23,7 @@ private:
 		{
       int32_t _version;
 			std::shared_ptr<CoinbaseTxIn> _txIn;
-	  std::shared_ptr<TxOut> _txOut;
+			std::shared_ptr<TxOut> _txOut;
     } _body;
 
 public:

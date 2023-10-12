@@ -12,6 +12,7 @@ namespace block
 
 BlockHeader::BlockHeader()
 {
+	_version = htonl(0);
 	_time = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 }
 
@@ -52,10 +53,48 @@ uint32_t BlockHeader::time()
 }
 
 
+uint32_t BlockHeader::nBits()
+{
+	return _nBits;
+}
+
+
+void BlockHeader::nBits( uint32_t target )
+{
+	_nBits = target;
+}
+
+
+void BlockHeader::nonce( uint32_t target )
+{
+	_nonce = target;
+}
 
 
 
 
+void BlockHeader::print()
+{
+	std::cout << "-------------------------------------" << "\n";
+	std::cout << "[ Block Header Information ]" << "\n";
+	std::cout << "Version :: " << _version << "\n";
+
+	std::cout << "PrevBlockID :: ";
+	for( int i=0; i<sizeof(_previousBlockHeaderHash); i++ ){
+		printf("%02X", _previousBlockHeaderHash[i] );
+	} std::cout << "\n";
+
+
+	std::cout << "MerkleRoot :: ";
+	for( int i=0; i<sizeof(_merkleRoot); i++ ){
+		printf("%02X", _merkleRoot[i]);
+	} std::cout << "\n";
+
+	std::cout << "time :: "  << _time << "\n";
+	std::cout << "nBtis :: " << _nBits << "\n";
+	std::cout << "nonce :: " << _nonce << "\n";
+	std::cout << "-------------------------------------" << "\n";
+}
 
 
 
@@ -181,6 +220,8 @@ uint32_t Block::time()
 {
 	return _header.time();
 }
+
+
 
 
 };

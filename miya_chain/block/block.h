@@ -36,6 +36,7 @@ namespace block
 
 struct BlockHeader
 {
+private:
 	int32_t _version; // 
 	unsigned char _previousBlockHeaderHash[32];
 	unsigned char _merkleRoot[32];
@@ -44,6 +45,7 @@ struct BlockHeader
 	uint32_t _nonce; // ナンス値
 
 
+public:
 	BlockHeader();
 	void merkleRoot( std::shared_ptr<unsigned char> target );
 	void updateTime();
@@ -52,6 +54,11 @@ struct BlockHeader
 	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );
 
 	uint32_t time();
+	uint32_t nBits();
+	void nBits( uint32_t target );
+	void nonce( uint32_t target );
+
+	void print();
 
 } __attribute__((packed)); 
 
@@ -72,8 +79,10 @@ private:
 
 
 public:
-	Block();
-	BlockHeader header(){ return _header; };
+	Block(); //  
+
+	//BlockHeader header(){ return _header; };
+	BlockHeader* header(){ return &_header; };
 	void header( std::shared_ptr<BlockHeader> target );
 	void header( BlockHeader target );
 
@@ -88,6 +97,7 @@ public:
 	unsigned int exportHeader( std::shared_ptr<unsigned char> *retRaw );
 
 	uint32_t time();
+
 };
 
 

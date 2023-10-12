@@ -44,7 +44,7 @@ private:
 
 
 public:
-	QueryContext( int type , uint32_t queryID ) : _type(type) , _id(queryID){ std::cout << "QueryContext Initialized -> " << queryID << "\n";};
+	QueryContext( int type , uint32_t queryID ) : _type(type) , _id(queryID){};
 
 	int type(){ return _type; };
 	void key( std::shared_ptr<unsigned char> key , size_t keyLength );

@@ -92,7 +92,7 @@ unsigned short SignatureScript::exportRawWithPubKeyHash( std::shared_ptr<unsigne
 	*ret = std::shared_ptr<unsigned char>( new unsigned char[rawPubKeyHashLength] );
 	memcpy( (*ret).get() , rawPubKeyHash.get() , rawPubKeyHashLength );
 
-
+	/*
 	std::cout << "\x1b[36m";
 	std::cout << "(raw) " << rawPubKeyLength << "::";
 	for( int i=0; i<rawPubKeyLength; i++ )
@@ -100,14 +100,14 @@ unsigned short SignatureScript::exportRawWithPubKeyHash( std::shared_ptr<unsigne
 		printf("%02X", rawPueKey.get()[i]);
 	} std::cout << "\n";
 
-
-
 	std::cout << "(hashed) :: ";
 	for( int i=0; i<20; i++ )
 	{
 		printf("%02X", rawPubKeyHash.get()[i]);
 	} std::cout << "\n";
 	std::cout <<"\x1b[39m";
+	*/
+
 
 	return rawPubKeyHashLength;
 }
@@ -121,22 +121,6 @@ unsigned short SignatureScript::exportRawWithSignatureScript( std::shared_ptr<un
 	if( _pkey == nullptr ) return 0;
 	if( _script->OPCount() > 0 ) _script->clear();
 
-	/*	
-	unsigned int rawPubKeyLength; std::shared_ptr<unsigned char> rawPueKey;
-	rawPubKeyLength = cipher::ECDSAManager::toRawPubKey( _pkey , &rawPueKey ); // 生の公開鍵を書き出す
-
-	std::cout << "RawPubKey Length -> " << rawPubKeyLength << "\n";
-	*ret = std::shared_ptr<unsigned char>( new unsigned char[_signature._signLength + rawPubKeyLength] );  
-
-	unsigned int formatPtr = 0;
-	memcpy( (*ret).get(), _signature._sign.get() , _signature._signLength ); formatPtr += _signature._signLength;
-	memcpy( (*ret).get() + formatPtr , rawPueKey.get() , rawPubKeyLength ); formatPtr += rawPubKeyLength;
-
-	std::cout << " ## formatPtr -> "  << formatPtr << "\n";
-
-	return formatPtr;
-	*/
-	
 
 
 	

@@ -15,14 +15,8 @@
 
 
 
-
+#include "../block/block.h"
 #include "../../shared_components/hash/sha_hash.h"
-
-
-namespace block
-{
-	struct Block;
-};
 
 
 
@@ -30,15 +24,68 @@ namespace miya_chain
 {
 
 
+
+
+
+
 bool mbitcmp( unsigned char* rawNBitMask , unsigned char* hash );
 
+std::array<uint8_t,32> generatenBitMask( uint32_t nBits );
+
+bool verifyBlockHeader( block::BlockHeader *target );
+
+std::array<uint8_t,32> generatenBitMask( uint32_t nBits );
+
+uint32_t simpleMining( uint32_t nBits , block::BlockHeader* blockHeader );
 
 
-uint32_t simpleMining( uint32_t nBits , std::shared_ptr<block::Block> block )
+};
+
+
+
+/*
+bool verifyBlockHeader( block::BlockHeader *target )
 {
 
-	auto generatenBitMask = []( uint32_t nBits ) -> std::array<uint8_t, 32>
+	uint32_t nonce = target->nonce();
+
+	std::shared_ptr<unsigned char> exportedRawHeader; size_t exportedRawHeaderLength;
+	exportedRawHeaderLength = target->exportRaw( &exportedRawHeader );
+
+	std::array<uint8_t,32> nBitMask = generatenBitMask(target->nBits());
+	std::shared_ptr<unsigned char> rawNBitMask = std::shared_ptr<unsigned char>( new unsigned char [32] );
+	std::copy( nBitMask.begin() , nBitMask.end() , rawNBitMask.get() );
+
+
+	std::shared_ptr<unsigned char> ret; 
+	hash::SHAHash( exportedRawHeader , exportedRawHeaderLength, &ret , "sha256" );
+
+	
+	std::cout << "------------------------------------"	 << "\n";
+	std::cout << "hash :: ";
+	for( int i=0; i<32; i++)
 	{
+		printf("%02X", ret.get()[i]);
+	} std::cout << "\n";
+
+	std::cout << "nbitmask :: ";
+	for( int i=0; i<32; i++ )
+	{
+		printf("%02X", rawNBitMask.get()[i]);
+	} std::cout << "\n";
+	std::cout << "------------------------------------"	 << "\n";
+
+
+	return mbitcmp( rawNBitMask.get() , ret.get() );
+}
+*/
+
+
+
+
+/*
+std::array<uint8_t,32> generatenBitMask( uint32_t nBits )
+{
 		nBits = htonl(nBits);
 		unsigned char ucnBits[4]; memcpy( ucnBits, &nBits, sizeof(ucnBits) );
 
@@ -53,12 +100,28 @@ uint32_t simpleMining( uint32_t nBits , std::shared_ptr<block::Block> block )
 		nBitsMask[31-shift] = coefficient[2];
 
 		return nBitsMask;
-	};
+};
+*/
 
+
+
+
+
+
+/*
+uint32_t simpleMining( uint32_t nBits , block::BlockHeader* blockHeader )
+{
+
+	
+	 //------------------------------- 
+	//nonce : 4bytes
+	//先頭1バイトが指数部(シフト部) , 後ろ3バイトが係数部
+	 //------------------------------- 
 
 	// ブロックヘッダを書き出す
 	std::shared_ptr<unsigned char> rawBlockHeader; size_t rawBlockHeaderLength;
-	rawBlockHeaderLength = block->exportHeader( &rawBlockHeader );
+	blockHeader->nBits(nBits);
+	rawBlockHeaderLength = blockHeader->exportRaw( &rawBlockHeader );
 
 	// nBitsマスクの作成 効率化のため生に変換する
 	std::array<uint8_t, 32 > nBitsMask = generatenBitMask( nBits );
@@ -77,20 +140,20 @@ uint32_t simpleMining( uint32_t nBits , std::shared_ptr<block::Block> block )
 
 		hash::SHAHash( rawBlockHeader , rawBlockHeaderLength , &hash , "sha256" );
 
-		std::cout << "(nonce) :: "  << _candidateNonce << " | ";
-		/*
-		std::cout << "(nBits) :: ";
-		for( int i=0; i<32;i++)
-		{
-			printf("%02X", rawNBitMask.get()[i]);
-		} std::cout << "\n";
-		*/
+		std::cout << "(nonce) :: "  << _candidateNonce << "  |  ";
+		
+		//std::cout << "(nBits) :: ";
+		//for( int i=0; i<32;i++)
+		//{
+			//printf("%02X", rawNBitMask.get()[i]);
+		//} std::cout << "\n";
+		
 		for( int i=0; i<32; i++)
 		{
 			printf("%02X", hash.get()[i]);
 		} std::cout << "\n";
 
-
+	
 		if( (mbitcmp( rawNBitMask.get() , hash.get())) ) break; // nonce値が見つかった場合
 		_candidateNonce++;
 		memcpy( rawBlockHeader.get() + nonceOffset , &_candidateNonce, sizeof(_candidateNonce) ); // 変更したnonceの再配置
@@ -99,34 +162,37 @@ uint32_t simpleMining( uint32_t nBits , std::shared_ptr<block::Block> block )
 
 	uint32_t miningCompletionTime = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 
-	std::cout << "╔════════════════════════════════════════════════════════════════════════════════════════╗" << "\n";
-	std::cout << " nonce :: " << _candidateNonce << "\n";
 
-	std::cout << " nBits :: ";
+	std::cout << "\n\n\n\n\n\n";
+	std::cout << "\x1b[34m" << "\n";
+	std::cout << "Block Found!!!" << "\n";
+	std::cout << "╔═════════════════════════════════════════════════════════════════════════════════╗" << "\n";
+	std::cout << "   nonce :: " << _candidateNonce << "\n";
+
+	std::cout << "   nBits :: ";
 	for( int i=0; i<32; i++)
 	{
 		printf("%02X", rawNBitMask.get()[i]);
 	} std::cout << "\n"; 
 
-	std::cout << " hash  :: ";
+	std::cout << "   hash  :: ";
 	for( int i=0; i<32; i++)
 	{
 		printf("%02X", hash.get()[i]);
 	} std::cout << "\n";
 
-	std::cout << " time  :: " << miningCompletionTime - block->time() << " [s]" << "\n";
-	std::cout << "╚════════════════════════════════════════════════════════════════════════════════════════╝" << "\n";
+	std::cout << "   time  :: " << miningCompletionTime - blockHeader->time() << " [s]" << "\n";
+	std::cout << "╚═════════════════════════════════════════════════════════════════════════════════╝" << "\n";
+	std::cout << "\x1b[39m" << "\n";
 
 	return _candidateNonce;
-	
-
 }
+*/
 
 
 
 
-
-
+/*
 // ハッシュ値の方が小さかったらtrueを返す
 bool mbitcmp( unsigned char* rawNBitMask , unsigned char* hash )
 {
@@ -136,14 +202,13 @@ bool mbitcmp( unsigned char* rawNBitMask , unsigned char* hash )
 		else if( rawNBitMask[i] == hash[i] ) continue;
 		else return true;
 	}
+
+	return true;
 }
+*/
 
 
 
-
-
-
-};
 
 #endif // 
 

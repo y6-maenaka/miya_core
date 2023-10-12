@@ -53,13 +53,6 @@ bool MMyISAM::get( std::shared_ptr<QueryContext> qctx )
 {
     std::shared_ptr<optr> dataOptr = _indexManager->find( qctx->key() ); // ここで取得されるoptrにはキャッシュテーブルがセットされていない
 
-    std::cout << "searching key with :: ";
-    for( int i=0; i<20; i++)
-    {
-      printf("%02X", qctx->key().get()[i]);
-    } std::cout << "\n";
-    printf("%p\n", dataOptr.get() );
-
 		if( dataOptr == nullptr ) return false;
 		size_t dataLength; std::shared_ptr<unsigned char> data;
 

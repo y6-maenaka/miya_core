@@ -4,6 +4,7 @@
 
 
 #include <memory>
+#include <unistd.h>
 
 
 
@@ -17,31 +18,33 @@ struct TxCB;
 
 
 
-constexpr unsigned short DEFAULT_SCALE_SIZE = 100;
+constexpr unsigned short DEFAULT_SCALE_SIZE = 3;
 
 
 
 class TxCBBucket
 {
 public: // 将来的にprivateにする
-	std::shared_ptr<TxCBTable> _parentTable; // スケール用に自身のバケットが属するテーブルを記録しておく
+	TxCBTable* _parentTable; // スケール用に自身のバケットが属するテーブルを記録しておく
 	std::shared_ptr<TxCB> _txcbHead; // 先頭TxCBポインタ
+	size_t _txCount = 0;
 
 	unsigned int _defaultCapacity; // auto scaleの基準
-	unsigned char _bucketSymbol;
+	const unsigned char _bucketSymbol;
 	unsigned short _scaleSize;
 
 
-//public:
-	TxCBBucket( unsigned char symbol , std::shared_ptr<TxCBTable> parentTable );
+public:
+	TxCBBucket( unsigned char symbol , TxCBTable* parentTable );
 
 	int add( std::shared_ptr<TxCB> target );
+	std::shared_ptr<TxCB> find( std::shared_ptr<TxCB> target ); 
 	void remove( std::shared_ptr<TxCB> target );
-	std::shared_ptr<TxCB> find( std::shared_ptr<TxCB> target );
 	
-	void autoScaleUp( std::shared_ptr<TxCB>txcbHead );
+	void autoScaleUp( std::shared_ptr<TxCB>txcbHead /* scaleHead */);
 	void autoScaleDown(); // 最悪なくても大丈夫
 
+	void printBucket();
 };
 
 
