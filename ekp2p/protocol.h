@@ -1,0 +1,28 @@
+#ifndef B4C2F46F_6E45_4FE0_A802_CB17BB0C4A1D
+#define B4C2F46F_6E45_4FE0_A802_CB17BB0C4A1D
+
+
+
+
+
+
+namespace ekp2p
+{
+
+
+
+
+constexpr int EKP2P_PROTOCOL_ROUTING = 1;
+constexpr int EKP2P_PROTOCOL_MIYA = 2;
+
+
+
+
+};
+
+
+
+
+#endif // B4C2F46F_6E45_4FE0_A802_CB17BB0C4A1D
+
+

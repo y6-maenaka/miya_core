@@ -51,6 +51,7 @@ public:
 	void updateTime();
 	uint32_t nonce();
 
+	bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );
 	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );
 
 	uint32_t time();
@@ -58,6 +59,8 @@ public:
 	void nBits( uint32_t target );
 	void nonce( uint32_t target );
 
+
+	size_t headerHash( std::shared_ptr<unsigned char> *ret );
 	void print();
 
 } __attribute__((packed)); 

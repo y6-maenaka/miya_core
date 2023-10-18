@@ -14,13 +14,14 @@ EKP2PMessageHeader::EKP2PMessageHeader()
 {
 	memcpy( _meta._token , "MIYA" , sizeof(_meta._token) );
 	_meta._version = static_cast<uint8_t>(1);
+	_sourceKNodeAddr = std::make_shared<KNodeAddr>();
 }
 
 
 
 
 
-
+/*
 unsigned int EKP2PMessageHeader::exportRaw( unsigned char** ret )
 {
 	unsigned char retLength = 0 ;
@@ -50,12 +51,52 @@ unsigned int EKP2PMessageHeader::exportRaw( unsigned char** ret )
 
 	return retLength;
 }
+*/
+
+
+
+size_t EKP2PMessageHeader::exportRaw( std::shared_ptr<unsigned char> *retRaw )
+{
+	unsigned char retLength = 0 ;
+
+	// 書き出しサイズの算出
+	retLength += sizeof( _meta ); 
+	retLength += sizeof( struct KNodeAddr ); // sourceNodeAddr
+	retLength += (_relayKNodeAddrVector.size() * sizeof( struct KNodeAddr )); // リレーノードサイズ
+
+	_meta._headerLength = htons(static_cast<uint16_t>(retLength)); // ヘッダサイズの確定
+
+
+	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[retLength] );
+	memset( (*retRaw).get() , 0x00 , retLength );
+	unsigned int formatOffset = 0; 
+
+
+	// Meta情報の書き出し
+	memcpy( (*retRaw).get() + formatOffset , &_meta , sizeof( _meta ) ); formatOffset += sizeof( _meta ); // 
+
+	// 送信元ノードアドレスの書き出し
+	if( _sourceKNodeAddr == nullptr )	{
+		memset( (*retRaw).get() + formatOffset , 0x00 , sizeof( struct KNodeAddr ) ); formatOffset += sizeof( struct KNodeAddr );
+	}
+	else{
+		memcpy( (*retRaw).get() + formatOffset , _sourceKNodeAddr.get() ,  sizeof( struct KNodeAddr) ); formatOffset += sizeof( struct KNodeAddr ); 
+	}
+
+	// 転送ノードアドレスの書き出し
+	for( auto itr : _relayKNodeAddrVector ){
+		memcpy( (*retRaw).get() + formatOffset , itr.get() , sizeof( struct KNodeAddr ) ); formatOffset += sizeof( struct KNodeAddr );
+	}
+
+	return retLength;
+
+}
 
 
 
 
-
-void EKP2PMessageHeader::importRaw( void *rawHeader , unsigned int rawHeaderSize )
+/*
+void EKP2PMessageHeader::importRaw( void *rawHeader )
 {
 	memcpy( &_meta, rawHeader , sizeof(_meta) );
 
@@ -75,9 +116,29 @@ void EKP2PMessageHeader::importRaw( void *rawHeader , unsigned int rawHeaderSize
 		_relayKNodeAddrVector.push_back( std::make_shared<KNodeAddr>(*relayKNodeAddr) );
 	}
 }
+*/
 
 
+bool EKP2PMessageHeader::importRawSequentially( std::shared_ptr<unsigned char> fromRaw )
+{
+	size_t currentPtr = 0;
 
+	// _meta領域の取り込み
+	memcpy( &_meta, fromRaw.get() , sizeof(_meta) );
+
+	// sourceNodeAddrの取り込み	
+	memcpy( _sourceKNodeAddr.get(), fromRaw.get() + currentPtr , sizeof( struct KNodeAddr) );
+	
+	size_t relayKNodeAddrCount = (headerLength() - sizeof(_meta) + sizeof(_sourceKNodeAddr)) / sizeof(struct KNodeAddr);
+	for( int i=0; i<relayKNodeAddrCount; i++ )
+	{
+		std::shared_ptr<KNodeAddr> nodeAddr = std::make_shared<KNodeAddr>();
+		memcpy( nodeAddr.get(), fromRaw.get() + currentPtr , sizeof(struct KNodeAddr)); currentPtr += sizeof(struct KNodeAddr);
+		_relayKNodeAddrVector.push_back( nodeAddr );
+	}
+
+	return true;
+}
 
 
 
@@ -87,10 +148,10 @@ void EKP2PMessageHeader::importRaw( void *rawHeader , unsigned int rawHeaderSize
 void EKP2PMessageHeader::sourceNodeAddr( std::shared_ptr<KNodeAddr> nodeAddr )
 {
 	if( nodeAddr == nullptr )
-		_sourceNodeAddr = nullptr;
+		_sourceKNodeAddr = nullptr;
 
 	else 
-		_sourceNodeAddr = nodeAddr;
+		_sourceKNodeAddr = nodeAddr;
 }
 
 
@@ -115,9 +176,10 @@ bool EKP2PMessageHeader::validate()
 
 
 /* Getter */
-unsigned short EKP2PMessageHeader::headerLength()
+size_t EKP2PMessageHeader::headerLength()
 {
-	return static_cast<unsigned short>(_meta._headerLength);
+	return static_cast<size_t>(ntohs(_meta._headerLength));
+	// return static_cast<unsigned short>(_meta._headerLength);
 }
 
 
@@ -131,6 +193,24 @@ unsigned short EKP2PMessageHeader::payloadLength()
 unsigned short EKP2PMessageHeader::protocol()
 {
 	return static_cast<unsigned short>(_meta._protocol);
+}
+
+
+
+
+
+std::shared_ptr<KNodeAddr> EKP2PMessageHeader::sourceKNodeAddr()
+{
+	return _sourceKNodeAddr;
+}
+
+
+
+
+
+std::vector< std::shared_ptr<KNodeAddr> > EKP2PMessageHeader::relayKNodeAddrVector()
+{
+	return _relayKNodeAddrVector;
 }
 
 

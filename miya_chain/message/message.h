@@ -36,15 +36,17 @@ constexpr unsigned short MIYA_CHAIN_PROTOCOL_TX = 3; // 可変長 tx区切りあ
 
 struct MiyaChainMessageHeader
 {
-
+// private:
 	uint8_t _protocol; // プロトコルタイプ 
 	uint8_t _direction; // リクエスト or レスポンス
 	uint16_t _payloadLength;
 	unsigned char _reserved[4];
 
-
+public:
 	unsigned short protocol();
 	bool isRequest();
+	bool importRawSequentially( std::shared_ptr<unsigned char> fromRaw );
+	size_t payloadLength();
 
 } __attribute__((packed));
 
@@ -54,19 +56,25 @@ struct MiyaChainMessageHeader
 
 struct MiyaChainMessage
 {
+private:
 	std::shared_ptr<MiyaChainMessageHeader> _header;
-	void *_payload;
+	// void *_payload;
+	std::shared_ptr<unsigned char> _payload;
 
-
+public:
 	MiyaChainMessage();
 
-	void payload( void *payload , unsigned short payloadLength );
+	// void payload( void *payload , unsigned short payloadLength );
 	unsigned short protocol();
 
 	unsigned int exportRaw( std::shared_ptr<unsigned char> ret );
 
-	std::shared_ptr<BlockHeaderMessage> blockHeaderMSG();
-	std::shared_ptr<BlockDataResponseMessage> blockDataResponseMSG();
+	std::shared_ptr<MiyaChainMessageHeader> header();
+
+	void payload( std::shared_ptr<unsigned char> target );
+	std::shared_ptr<unsigned char> payload();
+
+
 };
 
 

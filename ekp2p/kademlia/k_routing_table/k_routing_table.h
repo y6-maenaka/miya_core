@@ -5,6 +5,7 @@
 
 #include <array>
 #include <memory>
+#include <vector>
 
 
 
@@ -23,6 +24,7 @@ struct KBucket;
 struct KNodeAddr;
 class KClientNode;
 class KHostNode;
+class SocketManager;
 
 
 
@@ -32,18 +34,24 @@ class KHostNode;
 
 class KRoutingTable
 {
+
 private:
 	std::shared_ptr<KHostNode> _hostNode;
 	std::array< std::shared_ptr<KBucket> , K_BUCKET_SIZE > _routingTable;
 
 public:
-	KRoutingTable( std::shared_ptr<KHostNode> hostNode );
+	// KRoutingTable( std::shared_ptr<KHostNode> hostNode );
+	KRoutingTable( std::shared_ptr<SocketManager> target );
 
 	int autoAdd( KNodeAddr *target );
 
 	std::shared_ptr<KBucket> kBucket( unsigned short branch );
 	short int calcBranch( KNodeAddr *targetNodeAddr );
+
+	std::vector< const std::shared_ptr<KClientNode> > randomPick( size_t size );
 };
+
+
 
 
 
@@ -57,6 +65,8 @@ public:
 
 
 };
+
+
 
 
 #endif // DE5E77B9_E6DA_4D13_8A08_65141CCB994F

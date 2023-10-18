@@ -89,6 +89,11 @@ blockファイルを作成してそのファイルに順序立ててトランザ
 
 
 
+ -> header store 
+ -> transaction troe 
+
+
+
 
 
 

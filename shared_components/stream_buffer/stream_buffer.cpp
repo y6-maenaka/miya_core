@@ -20,7 +20,7 @@ SBSegment::SBSegment( void* body , unsigned short bodyLength )
 
 std::shared_ptr<ekp2p::KNodeAddr> SBSegment::sourceKNodeAddr()
 {
-	return _ekp2pBlock._sourceNodeAddr;
+	return _ekp2pBlock._sourceKNodeAddr;
 }
 
 
@@ -52,9 +52,9 @@ void SBSegment::body( std::shared_ptr<unsigned char> body , unsigned short bodyL
 }
 
 
-std::shared_ptr<ekp2p::KNodeAddr> SBSegment::sourceNodeAddr()
+std::shared_ptr<ekp2p::KNodeAddr> SBSegment::sourceNodeKAddr()
 {
-	return _ekp2pBlock._sourceNodeAddr;
+	return _ekp2pBlock._sourceKNodeAddr;
 }
 
 
@@ -63,6 +63,40 @@ std::vector< std::shared_ptr<ekp2p::KNodeAddr> > SBSegment::relayKNodeAddrVector
 {
 	return _ekp2pBlock._relayKNodeAddrVector;
 }
+
+
+
+void SBSegment::sourceKNodeAddr( std::shared_ptr<ekp2p::KNodeAddr> target )
+{
+	_ekp2pBlock._sourceKNodeAddr = target;
+}
+
+
+void SBSegment::relayKNodeAddrVector( std::vector< std::shared_ptr<ekp2p::KNodeAddr> > target )
+{
+	_ekp2pBlock._relayKNodeAddrVector = target;
+}
+
+
+void SBSegment::relayKNodeAddrVector( std::shared_ptr<ekp2p::KNodeAddr> target )
+{
+	_ekp2pBlock._relayKNodeAddrVector.push_back( target );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

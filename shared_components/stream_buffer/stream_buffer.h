@@ -35,7 +35,7 @@ struct SBSegment
 
 	struct EKP2PBlock
 	{
-		std::shared_ptr<ekp2p::KNodeAddr> _sourceNodeAddr; 
+		std::shared_ptr<ekp2p::KNodeAddr> _sourceKNodeAddr; 
 		std::vector< std::shared_ptr<ekp2p::KNodeAddr> > _relayKNodeAddrVector;
 	} _ekp2pBlock;
 
@@ -62,8 +62,12 @@ public:
 	void body( void* body , unsigned short bodyLength );
 	void body( std::shared_ptr<unsigned char> body , unsigned short bodyLength );
 
-	std::shared_ptr<ekp2p::KNodeAddr> sourceNodeAddr();
+	std::shared_ptr<ekp2p::KNodeAddr> sourceNodeKAddr();
 	std::vector< std::shared_ptr<ekp2p::KNodeAddr> > relayKNodeAddrVector();
+
+	void sourceKNodeAddr( std::shared_ptr<ekp2p::KNodeAddr> target );
+	void relayKNodeAddrVector( std::vector< std::shared_ptr<ekp2p::KNodeAddr> > target );
+	void relayKNodeAddrVector( std::shared_ptr<ekp2p::KNodeAddr> target );
 };
 
 

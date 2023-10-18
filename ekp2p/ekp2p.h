@@ -9,13 +9,28 @@
 
 #include <memory>
 
+// #include "./allowed_protocol_set.h"
+
+
 
 constexpr unsigned short DEFAULT_BIND_PORT = 8080;
 constexpr int DEFAULT_FIND_NODE_ROUTINE_TIMEOUT = 10;
 
 
 
+struct SBSegment;
+class StreamBuffer;
+class StreamBufferContainer;
+
+
+
+
+
+
 namespace ekp2p{
+
+
+
 
 class InbandNetworkManager;
 class KRoutingTable;
@@ -27,6 +42,10 @@ class KHostNode;
 class KClientNode;
 
 
+
+class Sender;
+class Receiver;
+class KRoutingTableUpdator;
 
 
 
@@ -41,30 +60,49 @@ class EKP2P // 基本的にNAT超え後はそのSocketManagerを使い回し続�
 
 private:
 
-	InbandNetworkManager *_inbandManager; // tcp,udp 兼用
-	
-	KRoutingTable *_kRoutingTable = nullptr;
+	//std::shared_ptr<KHostNode> _hostNode;  ホストノードを持つのはkademliaレイヤーだけでいい?
+	std::shared_ptr<KRoutingTable> _kRoutingTable;
+	std::shared_ptr<SocketManager> _hostSocketManager;
 
-	SocketManager *_mainSocketManager;
-	std::shared_ptr<KHostNode> _mainNode;
+	struct 
+	{
+		std::shared_ptr<Sender>	_sender;
+		std::shared_ptr<StreamBufferContainer> _toSenderSB;
+	} _senderDaemon;
+
+
+	struct
+	{
+		std::shared_ptr<Receiver> _receiver;
+		std::shared_ptr<StreamBufferContainer> _toReseiverSB;
+	} _receiverDaemon;
+
+	struct
+	{
+		std::shared_ptr<KRoutingTableUpdator> _updator;
+		std::shared_ptr<StreamBufferContainer> _toUpdatorSB;
+	} _updatorDaemon;
 
 
 
 public:
 	//EKP2P( KRoutingTable *baseKRoutingTable = nullptr );
-	EKP2P();
+	EKP2P( std::shared_ptr<KRoutingTable> kRoutingTable = nullptr /* バックアップから復旧する場合*/ );
 	 
-	void init(); // KRoutingTableを使うのであれば必須 自身のグローバルアドレスを取得する
 	bool collectStartUpNodes( SocketManager *baseSocketManager );
 
 	/* 複数portoを監視することも可能だが,NodeIDが変わる 初回監視ポートのみ相手に通知される -> 複数起動できるメリットはない　*/
-	void start(); 
-	void start( unsigned short port , int type ); // 通常とちらか一つのポート&一つのプロトコル)
+	int init(); // KRoutingTableを使うのであれば必須 自身のグローバルアドレスを取得する
+	int start();
 
 
 	int send( KClientNode *targetNode , void* payload , unsigned short payloadLength , unsigned short protocol );
 	//bool startMonitor( unsigned short port );
 
+
+	std::shared_ptr<StreamBufferContainer> toReseiverSB();
+	std::shared_ptr<StreamBufferContainer> toSenderSB();
+	std::shared_ptr<StreamBufferContainer> toUpdatorSB();
 };
 
 

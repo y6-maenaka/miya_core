@@ -11,8 +11,9 @@ namespace ekp2p
 
 
 
-KRoutingTable::KRoutingTable( std::shared_ptr<KHostNode> hostNode )
+KRoutingTable::KRoutingTable( std::shared_ptr<SocketManager> target )
 {
+	_hostNode = std::make_shared<KHostNode>(target);
 
 	for( int i=0; i<_routingTable.size() ; i++ )
 	{
@@ -20,8 +21,7 @@ KRoutingTable::KRoutingTable( std::shared_ptr<KHostNode> hostNode )
 		_routingTable.at(i) = std::make_shared<KBucket>( *initKBucket );
 	}
 
-	_hostNode = hostNode;
-
+	// _hostNode = hostNode;
 }
 
 
@@ -48,8 +48,6 @@ int KRoutingTable::autoAdd( KNodeAddr *target )
 
 	if( targetBucket == nullptr ) return -1;
 	return targetBucket->autoAdd( target );
-
-
 }
 
 
@@ -70,6 +68,7 @@ short int KRoutingTable::calcBranch( KNodeAddr *targetNodeAddr )
 
 	return static_cast<short int>( branch );
 }
+
 
 
 

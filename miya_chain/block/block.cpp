@@ -13,6 +13,9 @@ namespace block
 BlockHeader::BlockHeader()
 {
 	_version = htonl(0);
+	_nBits = 0;
+	_nonce = 0;
+
 	_time = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 }
 
@@ -27,6 +30,15 @@ void BlockHeader::merkleRoot( std::shared_ptr<unsigned char> target )
 void BlockHeader::updateTime()
 {	
 	_time = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+}
+
+
+
+bool BlockHeader::importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength ) // lengthは使わない
+{
+	memcpy( this , fromRaw.get() , sizeof(struct BlockHeader) ); 
+	// アクセスエラーが発生したらキャッチしてfalseをリターンする
+	return true;
 }
 
 
@@ -71,6 +83,16 @@ void BlockHeader::nonce( uint32_t target )
 }
 
 
+size_t BlockHeader::headerHash( std::shared_ptr<unsigned char> *ret )
+{
+	std::shared_ptr<unsigned char> exportedHeader;  size_t exportedHeaderLength;
+	exportedHeaderLength = this->exportRaw( &exportedHeader );
+
+	size_t hashLength;
+	hashLength = hash::SHAHash( exportedHeader , exportedHeaderLength , ret , "sha256" );
+
+	return hashLength;
+}
 
 
 void BlockHeader::print()

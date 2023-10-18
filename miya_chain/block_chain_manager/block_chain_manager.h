@@ -3,12 +3,62 @@
 
 
 
+#include <memory>
+#include <iostream>
 
 
-class BlockChainManager{
 
+
+
+struct SBSegment;
+class StreamBuffer;
+class StreamBufferContainer;
+
+
+
+
+
+
+
+
+namespace miya_chain
+{
+
+
+
+class HeaderStore;
+class TransactionStore;
+
+
+
+
+class BlockChainManager
+{
+
+private:
+	struct 
+	{
+		std::shared_ptr<HeaderStore> _headerStore;
+		std::shared_ptr<TransactionStore> _txStore;
+	} _store ;
+
+
+	std::shared_ptr<StreamBufferContainer> _toSenderSB; // ノードへのsenderパイプ
+	std::shared_ptr<StreamBufferContainer> _incomingSB; // 本ノードへのリクエストが入ってくる
+	
+
+public:
+	BlockChainManager( std::shared_ptr<HeaderStore> headerStore , std::shared_ptr<TransactionStore> txStore );
+
+	bool syncBlockHeader();
+	bool syncBlock(); // 最先端のブロックまで自身のチェーンを同期させる
+
+	bool InitialiBlockDownload(); // IBD // ノードのネットワーク参加時に最新チェーンを取得するために行われる
 };
 
+
+
+};
 
 /*
 	- ブロックの取り込み
@@ -18,6 +68,35 @@ class BlockChainManager{
 	- wrongChainに取り込んでしまっているブロックに含まれているトランザクションをmempoolに戻す
 	- utxoも戻す 
 */
+
+
+
+/* ブロックチェーンの順序はどのように保存するか */
+// >>>> chain head 
+// 最後に保存したchain headが不正チェーンヘッドだった場合は他ノードに問い合わせてもレスポンスがない
+
+
+
+// 一番初めにブロックヘッダで同期を目指す
+// ブロックインベントリ
+// ジェネシスブロックはハードコードされている
+
+
+
+
+
+/* [  IBDの簡易的なプロセス ]
+
+ 1. 接続しているノードから最先端のブロックヘッダを取得する
+ ※　ブロックヘッダはキャッシュデータベースに保存しておく
+ 2. 自身のブロックヘッダデータベースにIDで検索する
+ (ない場合)    | (ある場合)
+	prevで検索する | 検索を終了してデータベースキャッシュから本データベースへ写す
+ */
+
+
+
+
 
 
 

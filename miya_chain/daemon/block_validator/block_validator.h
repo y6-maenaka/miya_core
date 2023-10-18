@@ -81,7 +81,7 @@ struct BlockValidationControlBlock
 
 	struct
 	{
-		std::shared_ptr<ekp2p::KNodeAddr> _sourceNodeAddr;
+		std::shared_ptr<ekp2p::KNodeAddr> _sourceKNodeAddr;
 		std::vector< std::shared_ptr<ekp2p::KNodeAddr> > _relayKNodeAddrVector;
 		std::shared_ptr<StreamBufferContainer> _toSenderSBC;
 	} _networks;
@@ -95,7 +95,7 @@ public:
 	BlockValidationControlBlock( std::shared_ptr<StreamBufferContainer> senderSBC , BlockValidator *validator );
 
 	void blockHash( unsigned char* target );
-	void networks( std::shared_ptr<ekp2p::KNodeAddr> sourceNodeAddr , std::vector< std::shared_ptr<ekp2p::KNodeAddr> > relayNodeAddr );
+	void networks( std::shared_ptr<ekp2p::KNodeAddr> sourceKNodeAddr , std::vector< std::shared_ptr<ekp2p::KNodeAddr> > relayNodeAddr );
 
 	void importStrucretHeader( std::shared_ptr<BlockHeaderMessage> target );
 	void importRawHeader( unsigned char* rawHeader , unsigned int rawHeaderLength );

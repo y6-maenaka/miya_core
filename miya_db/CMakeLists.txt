@@ -30,7 +30,7 @@ add_library( MIYA_DB STATIC
 				strage_manager/MMyISAM/components/.unit_test.cpp
 
 				miya_db/database_manager.cpp
-				miya_db_client/miya_db_client.cpp
+				# miya_db_client/miya_db_client.cpp
 				miya_db/query_parser/query_parser.cpp
 				miya_db/query_context/query_context.cpp
 

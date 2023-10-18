@@ -1,7 +1,37 @@
 #include "socket_manager.h"
 
+#include "../../kademlia/k_node.h"
+
 
 namespace ekp2p{
+
+
+
+
+SocketManager::SocketManager()
+{
+	memset( &_addr , 0x00 , sizeof(_addr) );
+}
+
+
+
+SocketManager::SocketManager( std::shared_ptr<KNodeAddr> fromKNodeAddr )
+{
+	memset( &_addr , 0x00 , sizeof(_addr) );
+
+	// struct sockaddr_in nodeAddr; memset( &nodeAddr , 0x00 , sizeof(nodeAddr) );
+	_addr.sin_family = AF_INET;
+	_addr.sin_addr.s_addr = htonl( fromKNodeAddr->ipv4() );
+	_addr.sin_port = htons( fromKNodeAddr->port() );
+
+	if( (::bind(_sock, (struct sockaddr *)&_addr, sizeof(_addr))) < 0 ) return;
+
+
+	return;
+}
+
+
+
 
 
 
@@ -21,15 +51,14 @@ int SocketManager::create()
 
 int SocketManager::bind( int port )
 {
+	// struct sockaddr_in servAddr;
 
-	struct sockaddr_in servAddr;
+	memset( &_addr, 0x00 , sizeof(_addr) );
+	_addr.sin_family = AF_INET;
+	_addr.sin_addr.s_addr = htonl( INADDR_ANY ); //　引数で変更可にする
+	_addr.sin_port = htons( port );
 
-	memset( &servAddr, 0x00 , sizeof(servAddr) );
-	servAddr.sin_family = AF_INET;
-	servAddr.sin_addr.s_addr = htonl( INADDR_ANY ); //　引数で変更可にする
-	servAddr.sin_port = htons( port );
-
-	if( (::bind(_sock, (struct sockaddr *)&servAddr, sizeof(servAddr))) < 0 ) return -1;
+	if( (::bind(_sock, (struct sockaddr *)&_addr, sizeof(_addr))) < 0 ) return -1;
 
 	_port = port;
 
@@ -57,6 +86,17 @@ int SocketManager::send( unsigned char* sendBuff, unsigned int senfBuffSize )
 {
 	return ::send( _sock , sendBuff, senfBuffSize , 0 );
 }
+
+
+
+
+int SocketManager::send( std::shared_ptr<unsigned char> rawBuff, size_t rawBuffLength )
+{
+	return ::send( _sock , rawBuff.get() , rawBuffLength , 0 );
+}
+
+
+
 
 
 
@@ -95,6 +135,14 @@ int SocketManager::sockType()
 
 	return opt;
 }
+
+
+
+struct sockaddr_in SocketManager::ipv4Addr()
+{
+	return _addr;
+}
+
 
 
 

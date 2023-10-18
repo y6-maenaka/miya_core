@@ -47,8 +47,8 @@ namespace miya_chain
 
 struct UTXO;
 
-constexpr int MIYA_DB_QUERY_ADD = 1;
-constexpr int MIYA_DB_QUERY_GET = 2;
+ // constexpr int MIYA_DB_QUERY_ADD = 1;
+ // constexpr int MIYA_DB_QUERY_GET = 2;
 
 
 
@@ -60,7 +60,7 @@ private:
 
 
 protected:
-	static uint32_t generateQueryID();
+	// static uint32_t generateQueryID();
 
 public:
 	LightUTXOSet( std::shared_ptr<StreamBufferContainer> pushSBContainer , std::shared_ptr<StreamBufferContainer> popSBContainer );
@@ -69,8 +69,8 @@ public:
 	std::shared_ptr<UTXO> get( std::shared_ptr<unsigned char> txID , uint32_t index );
 	std::shared_ptr<UTXO> get( std::shared_ptr<tx::PrevOut> prevOut );
 
-	bool store( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_ptr<unsigned char> txID, uint32_t index );
-	bool store( std::shared_ptr<tx::P2PKH> targetTx ); // 一応dumpしてSBCに流す
+	bool add( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_ptr<unsigned char> txID, uint32_t index );
+	bool add( std::shared_ptr<tx::P2PKH> targetTx ); // 一応dumpしてSBCに流す
 
 
 	void testInquire( std::shared_ptr<unsigned char> data , size_t dataLength );

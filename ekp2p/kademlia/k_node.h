@@ -10,6 +10,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <sys/socket.h>
 #include <arpa/inet.h>
 
 
@@ -28,10 +29,15 @@ class SocketManager;
 
 struct KNodeAddr
 {
+// private:
 	uint64_t _IPv4Addr;
 	uint16_t _Port;
 	unsigned char _ID[20];
 
+
+
+
+public:
 	KNodeAddr(){};
 	KNodeAddr( struct sockaddr_in *addr );
 	KNodeAddr( unsigned long ipv4 , unsigned short port ); // アーキテクチャによってビット数が異なる可能性あり
@@ -42,6 +48,9 @@ struct KNodeAddr
 
 	std::shared_ptr<struct sockaddr_in> sockaddr_in();
 	unsigned char* ID();
+
+	uint64_t ipv4();
+	uint16_t port();
 
 } __attribute__((packed));
 
@@ -57,7 +66,8 @@ private:
 	std::shared_ptr<KNodeAddr> _nodeAddr;
 
 public:
-	KNode();
+	// KNode();
+	KNode( std::shared_ptr<SocketManager> target );
 	KNode( std::shared_ptr<KNodeAddr> nodeAddr );
 
 	std::shared_ptr<KNodeAddr> kNodeAddr();
@@ -74,10 +84,13 @@ class KClientNode : public KNode
 {
 
 private:
-	SocketManager *_socketManager;
+	// SocketManager *_socketManager;
+	std::shared_ptr<SocketManager> _socketManager;
 
 public:
-	KClientNode( std::shared_ptr<KNodeAddr> nodeAddr , SocketManager *socketManager ) : KNode( nodeAddr ){ _socketManager = socketManager; };
+	KClientNode( std::shared_ptr<KNodeAddr> nodeAddr , std::shared_ptr<SocketManager> socketManager ) : KNode( nodeAddr ){ _socketManager = socketManager; };
+
+	std::shared_ptr<SocketManager> socketManager();
 };
 
 
@@ -89,6 +102,9 @@ class KHostNode : public KNode
 {
 private:
 	void dummy();
+public:
+	KHostNode( std::shared_ptr<SocketManager> fromSockManager ) : KNode( fromSockManager ){} ;
+	
 };
 
 

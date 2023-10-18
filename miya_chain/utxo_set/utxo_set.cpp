@@ -5,6 +5,7 @@
 #include "../../shared_components/stream_buffer/stream_buffer_container.h"
 #include "../../shared_components/json.hpp"
 #include "../../shared_components/hash/sha_hash.h"
+#include "../../shared_components/miya_db_client/common.h"
 
 #include "../transaction/p2pkh/p2pkh.h"
 #include "../transaction/tx/tx_out.h"
@@ -27,7 +28,7 @@ LightUTXOSet::LightUTXOSet( std::shared_ptr<StreamBufferContainer> pushSBContain
 
 
 
-
+/*
 uint32_t LightUTXOSet::generateQueryID()
 {
 	std::random_device rd; // シードの初期化
@@ -36,7 +37,7 @@ uint32_t LightUTXOSet::generateQueryID()
 	std::uniform_int_distribution<uint32_t> dis; // 生成範囲の設定
 	return dis(gen);
 }
-
+*/
 
 
 
@@ -73,8 +74,8 @@ std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<unsigned char> txID , u
 
 	// json形式でクエリを作成
 	nlohmann::json queryJson;
-	queryJson["QueryID"] = LightUTXOSet::generateQueryID();
-	queryJson["query"] = MIYA_DB_QUERY_GET;
+	queryJson["QueryID"] = miya_db::generateQueryID();
+	queryJson["query"] = miya_db::MIYA_DB_QUERY_GET;
 	queryJson["key"] = nlohmann::json::binary( keyVector );
 
 	// json形式のクエリを書き出す
@@ -135,7 +136,7 @@ std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<tx::PrevOut> prevOut )
 
 
 
-bool LightUTXOSet::store( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_ptr<unsigned char> txID, uint32_t index )
+bool LightUTXOSet::add( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_ptr<unsigned char> txID, uint32_t index )
 {  // 単一のtxOutを登録する
 
 	std::shared_ptr<UTXO> valueUTXO = std::make_shared<UTXO>( targetTxOut ); // 登録するUTXOの作成
@@ -168,8 +169,8 @@ bool LightUTXOSet::store( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_pt
 
 
 	nlohmann::json queryJson;
-	queryJson["QueryID"] = LightUTXOSet::generateQueryID();
-	queryJson["query"] = MIYA_DB_QUERY_ADD;
+	queryJson["QueryID"] = miya_db::generateQueryID();
+	queryJson["query"] = miya_db::MIYA_DB_QUERY_ADD;
 	queryJson["key"] = nlohmann::json::binary( keyVector );
 	queryJson["value"] = nlohmann::json::binary( dumpedUTXO );
 
@@ -208,7 +209,7 @@ bool LightUTXOSet::store( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_pt
 
 
 
-bool LightUTXOSet::store( std::shared_ptr<tx::P2PKH> targetTx )
+bool LightUTXOSet::add( std::shared_ptr<tx::P2PKH> targetTx )
 {
 	std::shared_ptr<unsigned char> txID; size_t TxIDLength;
 	TxIDLength = targetTx->calcTxID( &txID );
@@ -217,7 +218,7 @@ bool LightUTXOSet::store( std::shared_ptr<tx::P2PKH> targetTx )
 	uint32_t index;
 	for( size_t i =0; i < targetTx->outs().size(); i++ )
 	{
-		this->store( targetTx->outs().at(i) , txID, i );
+		this->add( targetTx->outs().at(i) , txID, i );
 	}
 
 }

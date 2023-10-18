@@ -49,9 +49,9 @@ void BlockValidationControlBlock::blockHash( unsigned char* target )
 
 
 
-void BlockValidationControlBlock::networks( std::shared_ptr<ekp2p::KNodeAddr> sourceNodeAddr , std::vector< std::shared_ptr<ekp2p::KNodeAddr> > relayNodeAddr )
+void BlockValidationControlBlock::networks( std::shared_ptr<ekp2p::KNodeAddr> sourceKNodeAddr , std::vector< std::shared_ptr<ekp2p::KNodeAddr> > relayNodeAddr )
 {
-	_networks._sourceNodeAddr = sourceNodeAddr;
+	_networks._sourceKNodeAddr = sourceKNodeAddr;
 	_networks._relayKNodeAddrVector = relayNodeAddr;
 }
 
@@ -70,14 +70,14 @@ void BlockValidationControlBlock::autoStart()
 {
 
 	// ノードに問い合わせる
-	if( _networks._sourceNodeAddr == nullptr ) return;  // 初回問い合わせノードが存在しなければスレッドには入らない
+	if( _networks._sourceKNodeAddr == nullptr ) return;  // 初回問い合わせノードが存在しなければスレッドには入らない
 
 	std::thread validationTH([this]()  // 検証用スレッドとして起動する
 	{
 
 		//std::unique_ptr<SBSegment> pack = std::make_unique<SBSegment>(); // senderに送る用のSBSegmentを作成する
 		SBSegment pack;
-		pack._ekp2pBlock._sourceNodeAddr = _networks._sourceNodeAddr; // 後に送信元に書き換えられる
+		pack._ekp2pBlock._sourceKNodeAddr = _networks._sourceKNodeAddr; // 後に送信元に書き換えられる
 		pack._ekp2pBlock._relayKNodeAddrVector = _networks._relayKNodeAddrVector;
 
 
@@ -91,7 +91,7 @@ void BlockValidationControlBlock::autoStart()
 		pack.body( exportedRawMSG , exportedRawMSGLength );  // senderに送信するストリームの作成
 
 		std::vector< std::shared_ptr<ekp2p::KNodeAddr> > activePropagetedNodeVector; // 送信元ノード、中継ノードがアクティブノード候補になる　ここからランダムにピックされリクエストが送信される
-		activePropagetedNodeVector.push_back( _networks._sourceNodeAddr ); // 送信元ノードの追加:w
+		activePropagetedNodeVector.push_back( _networks._sourceKNodeAddr ); // 送信元ノードの追加:w
 		activePropagetedNodeVector.insert( activePropagetedNodeVector.end() , _networks._relayKNodeAddrVector.begin() , _networks._relayKNodeAddrVector.end() ); // 中継ノードの追加
 		std::vector< std::shared_ptr<ekp2p::KNodeAddr> >::reverse_iterator nodeItr = activePropagetedNodeVector.rbegin(); // 中継ノードの最後尾が一番アクティブである確率が高いので最後尾から問い合わせ対象とする
 
@@ -99,7 +99,7 @@ void BlockValidationControlBlock::autoStart()
 		while( !(activePropagetedNodeVector.empty()) )
 		{
 			// 1つノードを指定して送信する
-			pack._ekp2pBlock._sourceNodeAddr = (*nodeItr);
+			pack._ekp2pBlock._sourceKNodeAddr = (*nodeItr);
 			pack._ekp2pBlock._relayKNodeAddrVector  = std::vector<std::shared_ptr<ekp2p::KNodeAddr>>(); // 中継ノードは一旦空で
 			_networks._toSenderSBC->pushOne( std::move(std::make_unique<SBSegment>(pack)) ); // 送信元にリクエストメッセージを送信する
 	
@@ -114,7 +114,7 @@ void BlockValidationControlBlock::autoStart()
 		
 		while( !(activePropagetedNodeVector.empty()) && _structedBlock._block->txVector().size() < _rawBlock._txCount )
 		{
-			pack._ekp2pBlock._sourceNodeAddr = (*nodeItr); 
+			pack._ekp2pBlock._sourceKNodeAddr = (*nodeItr); 
 			pack._ekp2pBlock._relayKNodeAddrVector  = std::vector<std::shared_ptr<ekp2p::KNodeAddr>>(); // 中継ノードは一旦空で
 			
 			requestMSG.blockHash( _blockHash );
@@ -267,6 +267,7 @@ void BlockValidator::start()
 
 		switch( miyaChainMSG.protocol() )
 		{
+			/*
 			case 0:
 				blockHeaderMSG = miyaChainMSG.blockHeaderMSG(); // ブロックヘッダメッセージの書き出し // 新たなアドレスで書き出す
 				
@@ -288,7 +289,7 @@ void BlockValidator::start()
 				else
 					targetBVCB->txArrive( blockDataResponseMSG );
 				break;
-
+				*/
 		}
 	}
 

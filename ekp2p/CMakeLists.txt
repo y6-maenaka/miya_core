@@ -16,15 +16,15 @@ add_library( EKP2P STATIC
 						 #kademlia/k_bucket.cpp
 						 #kademlia/k_routing_table.cpp
 						 kademlia/k_tag.cpp
-						 kademlia/node.cpp
+						 #kademlia/node.cpp
 
 						 kademlia/k_node.cpp
-						 kademlia/message_receiver.cpp
-						 kademlia/message_sender.cpp
+						 # kademlia/message_receiver.cpp
+						 # kademlia/message_sender.cpp
 						 kademlia/connection_controller.cpp
 						 kademlia/k_routing_table/k_routing_table.cpp
 						 kademlia/k_routing_table/k_bucket.cpp
-						 kademlia/k_routing_table/k_routing_table_updator.cpp
+						 #kademlia/k_routing_table/k_routing_table_updator.cpp
 						 network/header/header.cpp
 						 
 
@@ -36,12 +36,12 @@ add_library( EKP2P STATIC
 						 kademlia/table_wrapper/table_wrapper.cpp
 
 
-						 network/inband/inband_manager.cpp
-						 network/inband/receive_handler.cpp
-						 network/inband/default_message_handler.cpp
-						 network/inband/k_tag_pack.cpp
+						 #network/inband/inband_manager.cpp
+						 #network/inband/receive_handler.cpp
+						 #network/inband/default_message_handler.cpp
+						 #network/inband/k_tag_pack.cpp
 
-						 network/message/header.cpp
+						 #network/message/header.cpp
 						 network/message/message.cpp
 
 						 network/nat/request_handler.cpp
@@ -51,11 +51,15 @@ add_library( EKP2P STATIC
 						 network/nat/stun_message_handler.cpp
 						 
 
-						 network/outband/node_outband.cpp
-						 network/outband/node_broadcaster.cpp
+						 #network/outband/node_outband.cpp
+						 #network/outband/node_broadcaster.cpp
 
 						 network/socket_manager/socket_manager.cpp
 
+						 daemon/routing_table_updator/routing_table_updator.cpp
+						 daemon/sender/sender.cpp
+						 daemon/receiver/receiver.cpp
+						 #daemon/broker/broker.cpp
 )
 
 

@@ -29,7 +29,7 @@ add_library( MIYA_CHAIN STATIC
 
 							daemon/transaction_validator/transaction_validator.cpp
 							daemon/block_validator/block_validator.cpp
-							daemon/message_broker/message_broker.cpp
+							daemon/broker/broker.cpp
 							daemon/request_responder/request_responder.cpp
 									
 							block_assemble_agent/block_accemble_agent.cpp
@@ -46,6 +46,8 @@ add_library( MIYA_CHAIN STATIC
 							utxo_set/utxo_set.cpp
 
 							block_chain_manager/block_chain_manager.cpp
+							block_chain_manager/block_local_strage_manager/header_store/header_store.cpp
+							block_chain_manager/block_local_strage_manager/transaction_store/transaction_store.cpp
 
 							mining/simple_mining.cpp
 

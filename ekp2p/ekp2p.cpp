@@ -13,10 +13,15 @@
 #include "./kademlia/k_node.h"
 #include "../shared_components/stream_buffer/stream_buffer.h"
 #include "../shared_components/stream_buffer/stream_buffer_container.h"
-#include "./kademlia/message_receiver.h"
+// #include "./kademlia/message_receiver.h"
 #include "./kademlia/connection_controller.h"
 #include "./kademlia/k_routing_table/k_routing_table.h"
-#include "./kademlia/k_routing_table/k_routing_table_updator.h"
+// #include "./kademlia/k_routing_table/k_routing_table_updator.h"
+
+
+#include "./daemon/sender/sender.h"
+#include "./daemon/receiver/receiver.h"
+#include "./daemon/routing_table_updator/routing_table_updator.h"
 
 
 namespace ekp2p{
@@ -24,9 +29,18 @@ namespace ekp2p{
 
 
 
-EKP2P::EKP2P()
+EKP2P::EKP2P( std::shared_ptr<KRoutingTable> KRoutingTable )
 {
-	_mainNode = std::make_shared<KHostNode>();
+
+	_hostSocketManager = std::shared_ptr<SocketManager>( new SocketManager{} );
+
+
+	if( KRoutingTable == nullptr ){
+		// _hostNode = std::make_shared<KHostNode>();
+		_kRoutingTable = std::make_shared<class KRoutingTable>(_hostSocketManager);
+		return;	
+	}
+	// _mainNode = std::make_shared<KHostNode>();
 	return;
 }
 
@@ -47,9 +61,9 @@ EKP2P::EKP2P( KRoutingTable *baseKRoutingTable )
 
 
 
+	/*
 void EKP2P::init()
 {
-
 	std::cout << "[ # ] MiyaCoreネットワークに接続します" << "\n";
 
 	std::cout << "[ ## ] マスターソケットマネージャーを作成します" << "\n";
@@ -130,17 +144,17 @@ void EKP2P::init()
 	std::cout << "[ IPv4 ] :: " << inet_ntoa( outsideGlobalAddr->sockaddr_in()->sin_addr ) << "\n";
 	std::cout << "[ Port ] :: " << ntohs(outsideGlobalAddr->sockaddr_in()->sin_port) << "\n";
 
-	/* ここでブートノード(NonNatNode)の情報を取得してくる*/
+	//ここでブートノード(NonNatNode)の情報を取得してくる
 
 	// RoutingTableをセットアップする
 	_kRoutingTable = new KRoutingTable( _mainNode );
 	return;
 }
+*/
 
 
 
-
-
+/*
 int EKP2P::send( KClientNode *targetNode , void *payload , unsigned short payloadLength , unsigned short protocol )
 {
 	if( payload == nullptr ) payloadLength = 0;
@@ -160,7 +174,7 @@ int EKP2P::send( KClientNode *targetNode , void *payload , unsigned short payloa
 	unsigned char* rawMsg = new unsigned char[ (rawHeaderLength + payloadLength) ]; 
 	unsigned int rawMsgLenght = (rawHeaderLength + payloadLength);
 
-	/* メッセージをフォーマットする */
+	// メッセージをフォーマットする 
 	memcpy( rawMsg ,rawHeader , rawHeaderLength );
 	if( payload != nullptr ) memcpy( rawMsg + rawHeaderLength , payload , payloadLength );
 
@@ -170,6 +184,7 @@ int EKP2P::send( KClientNode *targetNode , void *payload , unsigned short payloa
 	delete[] rawHeader; delete[] rawMsg;
 	return 0;
 }
+*/
 
 
 
@@ -213,10 +228,9 @@ bool EKP2P::collectStartUpNodes( SocketManager *baseSocketManager )
 */
 
 
-
-void EKP2P::start()
+/*
+void EKP2P::start() // 一旦daemon系を起動してflagで制御する
 {
-
 	//1. Updaterの起動
 	auto routingTableUpdator = std::make_shared<KRoutingTableUpdator>( _kRoutingTable );
 	auto routingTableUpdatorConsumerSB = std::make_shared<StreamBufferContainer>( nullptr , nullptr );
@@ -226,7 +240,6 @@ void EKP2P::start()
 		routingTableUpdator->start();
 	});
 	routingTableUpdatorTH.detach();
-
 
 
 	
@@ -255,20 +268,72 @@ void EKP2P::start()
 
 
 
-
-
 	// サードパーティーハンドラの起動
-	
 }
+*/
 
 
 
 
-
-void EKP2P::start( unsigned short port , int type )
+int EKP2P::init()
 {
-	//_inbandManager->start( port , type );
+	// 一旦全てのdaemonをセットアップする
+	// センダーのセットアップ
+	_senderDaemon._toSenderSB = std::make_shared<StreamBufferContainer>();
+	_senderDaemon._sender	= std::make_shared<Sender>( _kRoutingTable , _senderDaemon._toSenderSB );
+	//_senderDaemon._sender->start();
+
+	// レシーバーのセットアップ
+	_receiverDaemon._toReseiverSB = std::make_shared<StreamBufferContainer>();
+	_receiverDaemon._receiver = std::make_shared<Receiver>( /*_receiverDaemon._toReseiverSB */ nullptr ); // receiverにはSBは不要 reseice制限フラグ
+	//_receiverDaemon._receiver->start();
+
+	// アップデータのセットアップ
+	_updatorDaemon._toUpdatorSB = std::make_shared<StreamBufferContainer>();
+	_updatorDaemon._updator = std::make_shared<KRoutingTableUpdator>( _kRoutingTable ,_updatorDaemon._toUpdatorSB );
+	//_updatorDaemon._updator->start();
+
+	return 0;
 }
+
+
+
+
+int EKP2P::start()
+{
+
+	_senderDaemon._sender->start();
+
+	_receiverDaemon._receiver->start();
+
+	// _updatorDaemon._updator->start();
+
+	sleep(1);
+
+	return 0;
+}
+
+
+
+std::shared_ptr<StreamBufferContainer> EKP2P::toReseiverSB()
+{
+	return _receiverDaemon._toReseiverSB;
+}
+
+
+std::shared_ptr<StreamBufferContainer> EKP2P::toSenderSB()
+{
+	return _senderDaemon._toSenderSB;
+}
+
+
+std::shared_ptr<StreamBufferContainer> EKP2P::toUpdatorSB()
+{
+	return _updatorDaemon._toUpdatorSB;
+}
+
+
+
 
 
 

@@ -45,6 +45,30 @@ int main()
 {
 	std::cout << " WELCOME TO MIYA COIN CLIENT [ MIYA_CORE ] " << "\n";
 
+
+	miya_db::DatabaseManager headerDBManager;
+
+	// SBコンテナのセットアップ 
+	std::shared_ptr<StreamBufferContainer> toHeaderDBSBContainer = std::make_shared<StreamBufferContainer>();
+	std::shared_ptr<StreamBufferContainer> fromHeaderDBSBContainer = std::make_shared<StreamBufferContainer>();
+
+	std::string localHeaderDBFile = "test_headers";
+	headerDBManager.startWithLightMode( toHeaderDBSBContainer , fromHeaderDBSBContainer , localHeaderDBFile );
+
+
+
+
+	miya_db::DatabaseManager txDBManager;
+
+	std::shared_ptr<StreamBufferContainer> toTxDBSBContainer = std::make_shared<StreamBufferContainer>();
+	std::shared_ptr<StreamBufferContainer> fromTxDBSBContainer = std::make_shared<StreamBufferContainer>();
+
+	std::string localTxDBFile = "test_txs";
+	txDBManager.startWithLightMode( toTxDBSBContainer , fromTxDBSBContainer , localTxDBFile );
+
+
+
+
 	/*
 	cipher::ECDSAManager ecdsaManager;
 	ecdsaManager.init( (unsigned char *)"hello", 5 ); // priKeyには鍵がかかっているので

@@ -24,6 +24,21 @@ bool MiyaChainMessageHeader::isRequest()
 
 
 
+bool MiyaChainMessageHeader::importRawSequentially( std::shared_ptr<unsigned char> fromRaw )
+{
+	memcpy( this , fromRaw.get() , sizeof( struct MiyaChainMessageHeader ) );
+	return true;
+}
+
+
+
+size_t MiyaChainMessageHeader::payloadLength()
+{
+	return static_cast<size_t>( ntohs(_payloadLength) );
+}
+
+
+
 
 
 
@@ -41,12 +56,19 @@ MiyaChainMessage::MiyaChainMessage()
 
 
 
+void MiyaChainMessage::payload( std::shared_ptr<unsigned char> target )
+{
+	_payload = target;
+}
 
+
+/*
 void MiyaChainMessage::payload( void *payload , unsigned short payloadLength )
 {
 	_payload = payload;
 	_header->_payloadLength = static_cast<uint16_t>( payloadLength );
 }
+*/
 
 
 unsigned short MiyaChainMessage::protocol()
@@ -56,30 +78,18 @@ unsigned short MiyaChainMessage::protocol()
 
 
 
-
-std::shared_ptr<BlockHeaderMessage> MiyaChainMessage::blockHeaderMSG()
+std::shared_ptr<MiyaChainMessageHeader> MiyaChainMessage::header()
 {
-	BlockHeaderMessage *msg = new BlockHeaderMessage;
-
-	msg = static_cast<BlockHeaderMessage*>( _payload );
-
-	return std::make_shared<BlockHeaderMessage>( *msg );
+	return _header;
 }
 
 
 
 
-
-std::shared_ptr<BlockDataResponseMessage> MiyaChainMessage::blockDataResponseMSG()
+std::shared_ptr<unsigned char> MiyaChainMessage::payload()
 {
-	BlockDataResponseMessage *msg = new BlockDataResponseMessage;
 
-	msg = static_cast<BlockDataResponseMessage*>( _payload );
-
-	return std::make_shared<BlockDataResponseMessage>( *msg );
 }
-
-
 
 
 

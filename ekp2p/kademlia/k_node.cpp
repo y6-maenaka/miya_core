@@ -3,6 +3,7 @@
 #include "../../shared_components/hash/sha_hash.h"
 
 #include "../network/header/header.h"
+#include "../network/socket_manager/socket_manager.h"
 
 namespace ekp2p
 {
@@ -71,7 +72,17 @@ unsigned char* KNodeAddr::ID()
 }
 
 
+uint64_t KNodeAddr::ipv4()
+{
+	return _IPv4Addr;
+}
 
+
+
+uint16_t KNodeAddr::port()
+{
+	return _Port;
+}
 
 
 
@@ -91,12 +102,14 @@ void KNodeAddr::setNodeID()
 
 
 
-
-KNode::KNode()
+KNode::KNode( std::shared_ptr<SocketManager> target )
 {
-	KNodeAddr *initNodeAddr = new KNodeAddr;
-	_nodeAddr = std::make_shared<KNodeAddr>( *initNodeAddr );
+	sockaddr_in ipv4Addr = target->ipv4Addr();
+	// std::make_shared<KNodeAddr>( &ipv4Addr );
+	_nodeAddr = std::shared_ptr<KNodeAddr>( new KNodeAddr(&ipv4Addr) );
+	
 }
+
 
 
 KNode::KNode( std::shared_ptr<KNodeAddr> nodeAddr )
@@ -106,6 +119,12 @@ KNode::KNode( std::shared_ptr<KNodeAddr> nodeAddr )
 
 
 
+
+
+std::shared_ptr<SocketManager> KClientNode::socketManager()
+{
+	return _socketManager;
+}
 
 
 

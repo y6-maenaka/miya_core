@@ -1,4 +1,4 @@
-#include "../message/message.h"
+// #include "../message/message.h"
 
 #include "./stun_message.h"
 #include "../inband/inband_manager.h"
@@ -11,6 +11,7 @@ namespace ekp2p
 
 int StunMessageHandler( void* arg , EKP2PMSG *msg )
 {
+	/*
 	BaseInbandManager *inbandManager = (BaseInbandManager *)arg; // inbandManagerの取り出し
 	sockaddr_in* globalAddr = (sockaddr_in*)inbandManager->handlerArg(); // inbadManagerからハンドラ引数の取り出し
 
@@ -33,6 +34,7 @@ int StunMessageHandler( void* arg , EKP2PMSG *msg )
 
 	delete response;
 	return 1;
+	*/
 }
 
 

@@ -18,7 +18,10 @@ constexpr char MSG_EndString[4]   = { static_cast<char>(0xff), static_cast<char>
 
 
 
+
+
 struct MSGHeader{ // rename to EKP@PMSGHeader
+
 
 	struct HeaderBody
 	{

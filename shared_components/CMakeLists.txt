@@ -26,6 +26,9 @@ add_library( SHARED_COMPONENTS SHARED
 							stream_buffer/stream_buffer.cpp
 							stream_buffer/stream_buffer_container.cpp
 							stream_buffer/test/unit_test.cpp
+
+							miya_db_client/miya_db_client.cpp
+							miya_db_client/miya_db_sb_client.cpp
 )
 
 
@@ -38,4 +41,4 @@ target_link_libraries( SHARED_COMPONENTS PUBLIC
 
 
 
-add_definitions( -std=c++17 )
+add_definitions( -std=c++17 -w )

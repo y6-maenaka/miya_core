@@ -1,56 +1,56 @@
-#ifndef A1D5CA78_3358_48F5_AE55_E38D603B4958
-#define A1D5CA78_3358_48F5_AE55_E38D603B4958
+#ifndef AD837352_92D6_438E_96E5_662363E55A01
+#define AD837352_92D6_438E_96E5_662363E55A01
 
-#include <iostream>
-
-#include "./header.h"
-#include "../../kademlia/k_tag.h"
 
 
 
-namespace ekp2p{
+#include <iostream>
+#include <memory>
 
 
-class EKP2PMSG{
 
+namespace ekp2p
+{
+
+
+
+struct EKP2PMessageHeader;
+
+
+
+
+struct EKP2PMessage
+{
 private:
-	MSGHeader *_header;
-
-	void* _payload; // サイズは _header->payloadSize();
-	KTag *_kTag; // サイズは　_header->kTagSize():
+	std::shared_ptr<EKP2PMessageHeader> _header;
+	std::shared_ptr<unsigned char> _payload;
 
 
 public:
 
-	EKP2PMSG();
-	~EKP2PMSG();
-	
-	// EKP2PMSG( unsigned char* rawMSG , unsigned int MSGSize ); // ある程度前処理がされていることが前提のコンストラクタ
-	// ~EKP2PMSG();
-	
-	bool toStructedMSG( unsigned char* rawMSG, unsigned int MSGSize );
+	EKP2PMessage();
 
-	/* HEADER */
-	void header( MSGHeader *header ); // setter
-	MSGHeader* header(); // getter
+	void body( std::shared_ptr<unsigned char> payload , size_t payloadLength );
+	size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
 
-	/* PAYLOAD */
-	void payload( void* payload , unsigned int payloadSize ); //setter
-	void* payload(); // getter
+	void protocol( int type );
 
-	/* KTAG */
-	void kTag( KTag* kTag ); // setter
-	KTag* kTag(); // getter
-	unsigned int rawKTagSize(); // getter	
 
-	unsigned int exportRaw( unsigned char** target );
-	unsigned int exportRawSize();
+	// Getter
+	std::shared_ptr<EKP2PMessageHeader> header();
+
+
+	// Setter
+	void payload( std::shared_ptr<unsigned char> target );
+	std::shared_ptr<unsigned char> payload();
 };
 
-}; // close ekp2p namespace
 
 
+};
 
 
-#endif // A1D5CA78_3358_48F5_AE55_E38D603B4958
+#endif // AD837352_92D6_438E_96E5_662363E55A01
+
+
 
