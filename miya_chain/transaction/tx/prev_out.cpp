@@ -48,18 +48,18 @@ void PrevOut::txID( const unsigned char *target )
 
 unsigned short PrevOut::index()
 {
-	return static_cast<unsigned short>(ntohl(_body._index));
+	return static_cast<unsigned short>(be32toh(_body._index));
 }
 
 void PrevOut::index( int target )
 {
-	_body._index = htonl(target);
+	_body._index = htobe32(target);
 }
 
 
 void PrevOut::index( uint32_t target )
 {
-	_body._index = htonl(target);
+	_body._index = htobe32(target);
 }
 
 

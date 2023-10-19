@@ -9,6 +9,9 @@
 #include <functional>
 #include <chrono>
 
+#include <string.h>
+#include <endian.h>
+
 
 namespace tx
 {

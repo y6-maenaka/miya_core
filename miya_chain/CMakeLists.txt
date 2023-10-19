@@ -24,7 +24,7 @@ add_library( MIYA_CHAIN STATIC
 							transaction_pool/txcb.cpp
 							transaction_pool/txcb_bucket.cpp
 							transaction_pool/txcb_table.cpp
-							transaction_pool/provisional_utxo_cache/provisional_utxo_cache.cpp
+							#transaction_pool/provisional_utxo_cache/provisional_utxo_cache.cpp
 							transaction_pool/unit_test.cpp
 
 							daemon/transaction_validator/transaction_validator.cpp
@@ -34,8 +34,8 @@ add_library( MIYA_CHAIN STATIC
 									
 							block_assemble_agent/block_accemble_agent.cpp
 
-							message/protocol_message/block_data_msg.cpp
-							message/protocol_message/block_header_msg.cpp
+							#message/protocol_message/block_data_msg.cpp
+							#message/protocol_message/block_header_msg.cpp
 							message/message.cpp
 
 							transaction/p2pkh/p2pkh.cpp

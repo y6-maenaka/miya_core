@@ -3,7 +3,6 @@ cmake_minimum_required( VERSION 3.2 )
 
 include_directories( ${OPENSSL_INCLUDE_DIRS} )
 
-
 #add_subdirectory( kademlia )
 #add_subdirectory( network )
 
@@ -15,13 +14,13 @@ add_library( EKP2P STATIC
 						 kademlia/common.cpp
 						 #kademlia/k_bucket.cpp
 						 #kademlia/k_routing_table.cpp
-						 kademlia/k_tag.cpp
+						 #kademlia/k_tag.cpp
 						 #kademlia/node.cpp
 
 						 kademlia/k_node.cpp
 						 # kademlia/message_receiver.cpp
 						 # kademlia/message_sender.cpp
-						 kademlia/connection_controller.cpp
+						 #kademlia/connection_controller.cpp
 						 kademlia/k_routing_table/k_routing_table.cpp
 						 kademlia/k_routing_table/k_bucket.cpp
 						 #kademlia/k_routing_table/k_routing_table_updator.cpp
@@ -29,11 +28,11 @@ add_library( EKP2P STATIC
 						 
 
 
-						 kademlia/kademlia_RPC/FIND_NODE.cpp
-						 kademlia/kademlia_RPC/PING.cpp
-						 kademlia/kademlia_RPC/PONG.cpp
+						 #kademlia/kademlia_RPC/FIND_NODE.cpp
+						 #kademlia/kademlia_RPC/PING.cpp
+						 #kademlia/kademlia_RPC/PONG.cpp
 						 
-						 kademlia/table_wrapper/table_wrapper.cpp
+						 #kademlia/table_wrapper/table_wrapper.cpp
 
 
 						 #network/inband/inband_manager.cpp
@@ -44,11 +43,11 @@ add_library( EKP2P STATIC
 						 #network/message/header.cpp
 						 network/message/message.cpp
 
-						 network/nat/request_handler.cpp
-						 network/nat/response_handler.cpp
-						 network/nat/stun_message.cpp
-						 network/nat/client_nat_manager.cpp
-						 network/nat/stun_message_handler.cpp
+						 #network/nat/request_handler.cpp
+						 #network/nat/response_handler.cpp
+						 #network/nat/stun_message.cpp
+						 #network/nat/client_nat_manager.cpp
+						 #network/nat/stun_message_handler.cpp
 						 
 
 						 #network/outband/node_outband.cpp

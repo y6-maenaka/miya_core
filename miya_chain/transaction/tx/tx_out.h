@@ -4,6 +4,8 @@
 
 
 #include "openssl/evp.h"
+#include <arpa/inet.h>
+#include <endian.h>
 #include <stdlib.h>
 #include <string>
 #include <map>

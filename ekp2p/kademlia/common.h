@@ -2,6 +2,7 @@
 #define C8BB75D6_7C97_4D61_A12B_4D635ED87C64
 
 
+#include <string.h>
 #include <bitset>
 // #include "./k_routing_table.h"
 #include "../../shared_components/hash/sha_hash.h"

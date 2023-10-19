@@ -11,7 +11,7 @@
 #include "../transaction/tx/tx_out.h"
 #include "../transaction/tx/prev_out.h"
 
-#include "./UTXO.h"
+#include "./utxo.h"
 
 
 namespace miya_chain

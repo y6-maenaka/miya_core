@@ -22,7 +22,7 @@ add_library( SHARED_COMPONENTS SHARED
 
 							hash/sha_hash.cpp
 
-							middle_buffer/middle_buffer.cpp
+							#middle_buffer/middle_buffer.cpp
 							stream_buffer/stream_buffer.cpp
 							stream_buffer/stream_buffer_container.cpp
 							stream_buffer/test/unit_test.cpp

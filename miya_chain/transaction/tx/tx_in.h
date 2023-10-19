@@ -10,6 +10,7 @@
 #include "openssl/evp.h"
 #include <algorithm>
 #include <cstdint>
+#include <arpa/inet.h>
 
 
 #include "../../../shared_components/json.hpp"

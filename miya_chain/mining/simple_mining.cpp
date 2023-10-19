@@ -59,7 +59,7 @@ bool verifyBlockHeader( block::BlockHeader *target )
 
 std::array<uint8_t,32> generatenBitMask( uint32_t nBits )
 {
-		nBits = htonl(nBits);
+		nBits = htobe32(nBits);
 		unsigned char ucnBits[4]; memcpy( ucnBits, &nBits, sizeof(ucnBits) );
 
 		uint8_t exponent; memcpy( &exponent , &(ucnBits[0]) , sizeof(exponent) );

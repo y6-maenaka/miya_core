@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include <memory>
+#include <cmath>
 
 
 

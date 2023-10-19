@@ -780,8 +780,7 @@ void OBtree::add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<opt
 
 		currentONode = currentONode->child( currentONode->itemSet()->childCount()-1 );
 
-		direct:
-			void;
+		direct:;
 	}
 
 	deepestONode = currentONode;

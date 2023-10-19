@@ -5,6 +5,7 @@
 #include <vector>
 #include <array>
 #include <thread>
+#include <memory>
 
 
 struct SBSegment;

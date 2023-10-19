@@ -9,6 +9,7 @@
 #include "openssl/evp.h"
 #include <algorithm>
 #include <iostream>
+#include <endian.h>
 
 
 #include "../../../shared_components/json.hpp"

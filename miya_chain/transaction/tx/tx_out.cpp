@@ -17,7 +17,7 @@ TxOut::TxOut()
 
 void TxOut::init( unsigned int value , std::shared_ptr<unsigned char> pubKeyHash )
 {
-	_body._value = htonll(value);
+	_body._value = be64toh(value);
 	_pubKeyHash	= pubKeyHash;
 }
 
@@ -34,7 +34,7 @@ unsigned short TxOut::exportRaw( std::shared_ptr<unsigned char> *retRaw ) // こ
 
 	exportedRawPkScriptLength = _body._pkScript->exportRawWithP2PKHPkScript( &exportedRawPkScript , _pubKeyHash );
 
-	_body._pkScriptBytes = htonll(static_cast<uint64_t>(exportedRawPkScriptLength)); // 書き出しと同時に代入は怖いので
+	_body._pkScriptBytes = be64toh(static_cast<uint64_t>(exportedRawPkScriptLength)); // 書き出しと同時に代入は怖いので
 	//_body._pkScriptBytes = (exportedRawPkScriptLength); // 書き出しと同時に代入は怖いので
 
 	*retRaw = std::shared_ptr<unsigned char>( new unsigned char [sizeof(_body._value) + sizeof(_body._pkScriptBytes) + pkScriptBytes()] );
@@ -90,8 +90,8 @@ int TxOut::importRaw( unsigned char *fromRaw )
 
 unsigned short TxOut::value()
 {
-	//return static_cast<unsigned short>(_body._value);
-	return ntohll(_body._value);
+	// return ntohll(_body._value);
+	return be64toh(_body._value);
 }
 
 
@@ -99,7 +99,7 @@ unsigned short TxOut::value()
 
 unsigned int TxOut::pkScriptBytes()
 {
-	return static_cast<unsigned int >(ntohll(_body._pkScriptBytes));
+	return static_cast<unsigned int >(be64toh(_body._pkScriptBytes));
 }
 
 
@@ -113,7 +113,7 @@ void to_json( json& from , const TxOut &to )
 
 void from_json( const json &from , TxOut &to )
 {
-	to._body._value = htonll(static_cast<int64_t>(from["value"])); // ビックエディアンに変換する
+	to._body._value = be64toh(static_cast<int64_t>(from["value"])); // ビックエディアンに変換する
 
 	//to._pubKeyHash = from["address"];
 	std::string sAddress = from["address"].get<std::string>();

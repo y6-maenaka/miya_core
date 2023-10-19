@@ -2,13 +2,13 @@
 
 // #include "./kademlia/k_routing_table.h"
 #include "./network/nat/client_nat_manager.h"
-#include "./network/inband/inband_manager.h"
+//#include "./network/inband/inband_manager.h"
 #include "./network/socket_manager/socket_manager.h"
 
 #include "./network/header/header.h"
 
-#include "./kademlia/kademlia_RPC/FIND_NODE.cpp"
-#include "./network/outband/node_broadcaster.h"
+//#include "./kademlia/kademlia_RPC/FIND_NODE.cpp"
+// #include "./network/outband/node_broadcaster.h"
 
 #include "./kademlia/k_node.h"
 #include "../shared_components/stream_buffer/stream_buffer.h"

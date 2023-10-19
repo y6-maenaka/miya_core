@@ -34,7 +34,7 @@ bool MiyaChainMessageHeader::importRawSequentially( std::shared_ptr<unsigned cha
 
 size_t MiyaChainMessageHeader::payloadLength()
 {
-	return static_cast<size_t>( ntohs(_payloadLength) );
+	return static_cast<size_t>( be32toh(_payloadLength) );
 }
 
 

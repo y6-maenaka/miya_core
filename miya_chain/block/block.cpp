@@ -12,7 +12,7 @@ namespace block
 
 BlockHeader::BlockHeader()
 {
-	_version = htonl(0);
+	_version = htobe32(0);
 	_nBits = 0;
 	_nonce = 0;
 
