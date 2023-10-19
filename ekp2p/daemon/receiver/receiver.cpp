@@ -88,8 +88,10 @@ void Receiver::start()
 
 		_activeSenderThreadIDVector.push_back( std::this_thread::get_id() ); 
 
-		size_t receivedLength; 
+		size_t receivedLength = 0; 
 		std::shared_ptr<unsigned char> receiveBuffer = std::shared_ptr<unsigned char>( new unsigned char[UINT16_MAX] ); // マックスサイズでもたかが知れているので最大で
+		memset( receiveBuffer.get() , 0x00 , sizeof(UINT16_MAX) );
+
 		std::shared_ptr<EKP2PMessage> message;
 		std::shared_ptr<EKP2PMessageHeader> header;
 		
@@ -97,7 +99,12 @@ void Receiver::start()
 		{
 			std::cout << "<ekp2p::Receiver> check 1" << "\n";
 
-			receivedLength = recvfrom( _listeningSocketManager->sock() , receiveBuffer.get() , 0,UINT16_MAX, nullptr, 0 ); // セグメントの受信
+			receivedLength = recvfrom( _listeningSocketManager->sock() , receiveBuffer.get() , 0 ,UINT16_MAX, nullptr, 0 ); // セグメントの受信
+			for( int i=0; i<UINT16_MAX; i++ )
+				printf("%02X", receiveBuffer.get()[i]);
+			std::cout << "\n";
+			std::cout << "Received -> "<< receivedLength << "\n";
+
 			message = parseRawEKP2PMessage( receiveBuffer, receivedLength ); // rawから構造化
 			header = message->header();
 

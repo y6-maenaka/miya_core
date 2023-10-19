@@ -33,7 +33,7 @@ EKP2P::EKP2P( std::shared_ptr<KRoutingTable> KRoutingTable )
 {
 
 	_hostSocketManager = std::shared_ptr<SocketManager>( new SocketManager{} );
-
+	_hostSocketManager->setupUDPSock( 8080 );
 
 	if( KRoutingTable == nullptr ){
 		// _hostNode = std::make_shared<KHostNode>();
@@ -284,8 +284,8 @@ int EKP2P::init()
 	//_senderDaemon._sender->start();
 
 	// レシーバーのセットアップ
-	_receiverDaemon._toReseiverSB = std::make_shared<StreamBufferContainer>();
-	_receiverDaemon._receiver = std::make_shared<Receiver>( /*_receiverDaemon._toReseiverSB */ nullptr ); // receiverにはSBは不要 reseice制限フラグ
+	_receiverDaemon._toReseiverSB = std::make_shared<StreamBufferContainer>(); 
+	_receiverDaemon._receiver = std::make_shared<Receiver>( _hostSocketManager ); // receiverにはSBは不要 reseice制限フラグ
 	//_receiverDaemon._receiver->start();
 
 	// アップデータのセットアップ
@@ -306,9 +306,8 @@ int EKP2P::start()
 
 	_receiverDaemon._receiver->start();
 
-	// _updatorDaemon._updator->start();
+	_updatorDaemon._updator->start();
 
-	sleep(1);
 
 	return 0;
 }

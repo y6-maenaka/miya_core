@@ -21,6 +21,9 @@ KRoutingTable::KRoutingTable( std::shared_ptr<SocketManager> target )
 		_routingTable.at(i) = std::make_shared<KBucket>( *initKBucket );
 	}
 
+	std::cout << "new KRoutingTable just Initialized" << "\n";
+	_hostNode->printInfo();
+
 	// _hostNode = hostNode;
 }
 

@@ -46,15 +46,26 @@ endif()
 
 
 if( BUILD_EKP2P_TEST )
-add_executable( ekp2p_test_0 ./release/ekp2p_test/node_0.cpp )
-target_link_libraries( ekp2p_test_0 PRIVATE
+add_executable( node_0 ./release/ekp2p_test/node_0.cpp )
+target_link_libraries( node_0 PRIVATE
 												MIYA_DB
 												SHARED_COMPONENTS
 												EKP2P
 												MIYA_CHAIN
 												CONTROL_INTERFACE
 )
-target_compile_options( ekp2p_test_0 PUBLIC -Wall )
+target_compile_options( node_0 PUBLIC -Wall )
+
+add_executable( node_1 ./release/ekp2p_test/node_1.cpp )
+target_link_libraries( node_1 PRIVATE
+												MIYA_DB
+												SHARED_COMPONENTS
+												EKP2P
+												MIYA_CHAIN
+												CONTROL_INTERFACE
+)
+target_compile_options( node_1 PUBLIC -Wall )
+
 endif()
 
 

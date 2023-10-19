@@ -17,7 +17,6 @@ KNodeAddr::KNodeAddr( struct sockaddr_in *addr )
 	_IPv4Addr = addr->sin_addr.s_addr;
 	_Port = addr->sin_port;
 	setNodeID();
-
 }
 
 
@@ -88,15 +87,34 @@ uint16_t KNodeAddr::port()
 
 
 
-
 void KNodeAddr::setNodeID()
 {
-	unsigned char hashFrom[ sizeof(_IPv4Addr) + sizeof(_Port) ];
-	unsigned char* ret;
-	ret = hash::SHAHash( hashFrom , sizeof(hashFrom) , "sha1" );
-	memcpy( _ID , ret , 20 );
-	hash::FreeDigest( ret );	
+	std::shared_ptr<unsigned char> hashFrom = std::shared_ptr<unsigned char>( new unsigned char[sizeof(_IPv4Addr)+sizeof(_Port)] );
+	memcpy( hashFrom.get() , &_IPv4Addr , sizeof(_IPv4Addr) );
+	memcpy( hashFrom.get() + sizeof(_IPv4Addr) , &_Port , sizeof(_Port) );
+
+
+	std::shared_ptr<unsigned char> md; 
+	hash::SHAHash( hashFrom, sizeof(_IPv4Addr) + sizeof(_Port), &md , "sha1" );
+	memcpy( _ID , md.get() , 20 );
+
 }
+
+
+void KNodeAddr::printInfo()
+{
+	std::shared_ptr<struct sockaddr_in> addr = this->sockaddr_in();
+	std::cout << "| IPv4 :: " << inet_ntoa(addr->sin_addr) << "\n";
+	std::cout << "| port :: " << ntohs(addr->sin_port) << "\n";
+
+	std::cout << "| NodeID :: ";
+	for(int i=0; i<sizeof(_ID); i++ ){
+		printf("%02X", _ID[i] );
+	} std::cout << "\n";
+}
+
+
+
 
 
 
@@ -121,12 +139,40 @@ KNode::KNode( std::shared_ptr<KNodeAddr> nodeAddr )
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 std::shared_ptr<SocketManager> KClientNode::socketManager()
 {
 	return _socketManager;
 }
 
 
+
+
+
+
+
+
+
+
+
+
+void KHostNode::printInfo()
+{
+	std::cout << "--- [ K Client Node ] --------------------------------" << "\n";
+	_nodeAddr->printInfo();
+	std::cout << "------------------------------------------------------" << "\n";
+}
 
 
 };

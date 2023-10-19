@@ -28,7 +28,7 @@ private:
 	int _sock;
 
 	int _port;
-	int _type;
+	// int _type;
 	struct sockaddr_in _addr;
 
 
@@ -36,7 +36,7 @@ public:
 	SocketManager( std::shared_ptr<KNodeAddr> fromKNodeAddr );
 	SocketManager();
 
-	int create();
+	// int create();
 	int bind( int port );
 	int listen();
 	int accept();
@@ -48,17 +48,22 @@ public:
 	int send( std::shared_ptr<unsigned char> rawBuff, size_t rawBuffLength );
 
 	/* send() によって振り分けられる */
-	bool sendUDP();
-	bool sendTCP();
+	// bool sendUDP();
+	// bool sendTCP();
 
 	int setupUDPSock( unsigned short port );
 	
 	void toBlockingSocket();
 	void toNonBlockingSocket();
 
-	int sockType();
+	// int sockType();
 
 	struct sockaddr_in ipv4Addr();
+
+
+	/* テスト用 本番環境では極力使用しない*/
+	void sock( int bindedSock );
+	void addr( struct sockaddr_in target );
 };
 
 

@@ -15,6 +15,7 @@ SocketManager::SocketManager()
 
 
 
+
 SocketManager::SocketManager( std::shared_ptr<KNodeAddr> fromKNodeAddr )
 {
 	memset( &_addr , 0x00 , sizeof(_addr) );
@@ -24,6 +25,8 @@ SocketManager::SocketManager( std::shared_ptr<KNodeAddr> fromKNodeAddr )
 	_addr.sin_addr.s_addr = htonl( fromKNodeAddr->ipv4() );
 	_addr.sin_port = htons( fromKNodeAddr->port() );
 
+	// 一旦UDPで妥協
+	if ( (this->_sock = socket( PF_INET, SOCK_DGRAM, IPPROTO_UDP )) < 0 )  return;
 	if( (::bind(_sock, (struct sockaddr *)&_addr, sizeof(_addr))) < 0 ) return;
 
 
@@ -33,17 +36,6 @@ SocketManager::SocketManager( std::shared_ptr<KNodeAddr> fromKNodeAddr )
 
 
 
-
-
-
-int SocketManager::create() 
-{
-
-	if ( (this->_sock = socket( PF_INET, SOCK_DGRAM, IPPROTO_UDP )) < 0 )  return -1;
-
-	return _sock;
-
-}
 
 
 
@@ -102,12 +94,14 @@ int SocketManager::send( std::shared_ptr<unsigned char> rawBuff, size_t rawBuffL
 
 int SocketManager::setupUDPSock( unsigned short port )
 {
-	if( create() < 0 ) return -1;
+
+	if ( (this->_sock = socket( PF_INET, SOCK_DGRAM, IPPROTO_UDP )) < 0 )  return -1;
 
 	if( bind( port ) < 0 ) return -1;
 
 	return _sock;
 }
+
 
 
 
@@ -125,7 +119,7 @@ void SocketManager::toNonBlockingSocket()
 	
 }
 
-
+/*
 int SocketManager::sockType()
 {
 	int opt; socklen_t optLen = sizeof( opt );
@@ -135,13 +129,27 @@ int SocketManager::sockType()
 
 	return opt;
 }
-
+*/
 
 
 struct sockaddr_in SocketManager::ipv4Addr()
 {
 	return _addr;
 }
+
+
+
+void SocketManager::sock( int bindedSock )
+{
+	_sock = bindedSock;
+}
+
+
+void SocketManager::addr( struct sockaddr_in target )
+{
+	_addr = target;
+}
+
 
 
 

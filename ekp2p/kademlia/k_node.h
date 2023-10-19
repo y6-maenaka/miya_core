@@ -52,6 +52,9 @@ public:
 	uint64_t ipv4();
 	uint16_t port();
 
+
+	void printInfo();
+
 } __attribute__((packed));
 
 
@@ -62,7 +65,7 @@ public:
 class KNode
 {
 
-private:
+protected:
 	std::shared_ptr<KNodeAddr> _nodeAddr;
 
 public:
@@ -72,6 +75,7 @@ public:
 
 	std::shared_ptr<KNodeAddr> kNodeAddr();
 	void kNodeAddr( std::shared_ptr<KNodeAddr> nodeAddr );
+
 };
 
 
@@ -91,6 +95,7 @@ public:
 	KClientNode( std::shared_ptr<KNodeAddr> nodeAddr , std::shared_ptr<SocketManager> socketManager ) : KNode( nodeAddr ){ _socketManager = socketManager; };
 
 	std::shared_ptr<SocketManager> socketManager();
+
 };
 
 
@@ -104,7 +109,8 @@ private:
 	void dummy();
 public:
 	KHostNode( std::shared_ptr<SocketManager> fromSockManager ) : KNode( fromSockManager ){} ;
-	
+
+	void printInfo();
 };
 
 

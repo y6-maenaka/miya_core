@@ -16,6 +16,59 @@
 #include "../miya_chain/transaction/script/script.h"
 
 
+#include "../shared_components/stream_buffer/stream_buffer.h"
+#include "../shared_components/stream_buffer/stream_buffer_container.h"
+
+
+
+
+void ControlInterface::start()
+{
+	std::string instructionsFilePath = "../control_interface/inst/pattern1.json";
+		
+	std::ifstream input(instructionsFilePath);
+	nlohmann::json instructionsFrom;
+	input >> instructionsFrom;
+
+
+	for(int i=0;i<instructionsFrom["instructions"].size();i++)
+	{
+		std::string contentString = instructionsFrom["instructions"][i]["content"];
+		std::cout << contentString.size()  << "\n";
+		std::shared_ptr<unsigned char> content = std::shared_ptr<unsigned char>( new unsigned char[contentString.size()] ); 
+		std::copy( contentString.begin() , contentString.end(), content.get() );
+
+		command_exe( instructionsFrom["instructions"][i]["command"] , content );
+	}
+}
+
+
+
+
+void ControlInterface::command_exe( std::string command , std::shared_ptr<unsigned char> rawConetnt )
+{
+	std::unique_ptr<SBSegment> sb = std::make_unique<SBSegment>();
+	if( command == COMMAND_TO_SENDER )	
+	{
+		std::cout << "COMMAND_TO_SENDER done" << "\n";
+	}
+
+	if( command == COMMAND_TO_RECEIVER ) 
+	{
+		std::cout << "COMMAND_TO_RECEIVER done" << "\n";
+
+	}
+
+	if( command == COMMAND_TO_K_ROUTING_TABLE_UPDATOR )
+	{
+		std::cout << "COMMAND_TO_UPDATOR done" << "\n";
+	}
+
+	return;
+}
+
+
+
 
 
 
@@ -63,4 +116,12 @@ std::shared_ptr<tx::P2PKH> ControlInterface::createTxFromJsonFile( const char *f
 	std::cout  << "\033[34m" << "Loading Successfuly Done TxIn (" << loadedP2PKH.inCount() << ")" << "\033[0m" << "\n";
 
 	return std::make_shared<tx::P2PKH>( loadedP2PKH );
+}
+
+
+
+
+void ControlInterface::toSenderSB( std::shared_ptr<StreamBufferContainer> target )
+{
+	_ekp2pMainDaemons._toSenderSB = target;
 }

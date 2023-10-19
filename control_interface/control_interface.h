@@ -6,6 +6,22 @@
 #include <string>
 #include <variant>
 #include <iostream>
+#include <any>
+#include <algorithm>
+
+
+
+
+const std::string COMMAND_TO_SENDER = "ekp2p_send";
+const std::string COMMAND_TO_RECEIVER = "ekp2p_receive";
+const std::string COMMAND_TO_K_ROUTING_TABLE_UPDATOR = "ekp2p_k_routing_table_update";
+
+
+
+
+
+struct SBSegment;
+class StreamBufferContainer;
 
 
 namespace tx
@@ -18,12 +34,26 @@ namespace tx
 
 class ControlInterface
 {
+
+
+private:
+	struct
+	{
+		std::shared_ptr<StreamBufferContainer> _toSenderSB;
+		std::shared_ptr<StreamBufferContainer> _toReceiverSB;
+		std::shared_ptr<StreamBufferContainer> _toKRoutingTableUpdatorSB;
+	}	_ekp2pMainDaemons;
+
+
 public:
 
-	
+	void start();
+
+	void command_exe( std::string command , std::shared_ptr<unsigned char> rawConetnt );
 	std::shared_ptr<tx::P2PKH> createTxFromJsonFile( const char *filePath );
 
-
+	
+	void toSenderSB( std::shared_ptr<StreamBufferContainer> target );
 };
 
 

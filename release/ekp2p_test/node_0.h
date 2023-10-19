@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 
+#include <unistd.h>
 
 #include "../../ekp2p/ekp2p.h"
 
