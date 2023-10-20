@@ -48,18 +48,33 @@ void PrevOut::txID( const unsigned char *target )
 
 unsigned short PrevOut::index()
 {
-	return static_cast<unsigned short>(be32toh(_body._index));
+	#ifdef __linux__
+		return static_cast<unsigned short>(be32toh(_body._index));
+	#endif
+	#ifdef __APPLE__
+		return static_cast<unsigned short>(ntohl(_body._index));
+	#endif
 }
 
 void PrevOut::index( int target )
 {
-	_body._index = htobe32(target);
+	#ifdef __linux__
+		_body._index = htobe32(target);
+	#endif
+	#ifdef __APPLE__
+		_body._index = htonl(target);
+	#endif
 }
 
 
 void PrevOut::index( uint32_t target )
 {
-	_body._index = htobe32(target);
+	#ifdef __linux__
+		_body._index = htobe32(target);
+	#endif
+	#ifdef __APPLE__
+		_body._index = htonl(target);
+	#endif
 }
 
 

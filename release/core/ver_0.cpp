@@ -45,7 +45,7 @@ int main()
 {
 	std::cout << " WELCOME TO MIYA COIN CLIENT [ MIYA_CORE ] " << "\n";
 
-
+	
 	miya_db::DatabaseManager headerDBManager;
 
 	// SBコンテナのセットアップ 
@@ -65,11 +65,11 @@ int main()
 
 	std::string localTxDBFile = "test_txs";
 	txDBManager.startWithLightMode( toTxDBSBContainer , fromTxDBSBContainer , localTxDBFile );
+	
 
 
 
-
-	/*
+	/*	
 	cipher::ECDSAManager ecdsaManager;
 	ecdsaManager.init( (unsigned char *)"hello", 5 ); // priKeyには鍵がかかっているので
 
@@ -138,9 +138,7 @@ int main()
 	return 0;
 	*/
 
-
-
-
+	/*
 	cipher::ECDSAManager ecdsaManager;
 	ecdsaManager.init( (unsigned char *)"hello", 5 ); // priKeyには鍵がかかっているので
 	//ecdsaManager.printPkey( ecdsaManager.myPkey() );
@@ -244,7 +242,7 @@ int main()
 	//miya_chain::TransactionPool txPool;
 
 	return 0;
-
+	*/
 
 
 

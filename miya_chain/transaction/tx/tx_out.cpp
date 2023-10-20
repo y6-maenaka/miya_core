@@ -17,7 +17,12 @@ TxOut::TxOut()
 
 void TxOut::init( unsigned int value , std::shared_ptr<unsigned char> pubKeyHash )
 {
-	_body._value = be64toh(value);
+	#ifdef __linux__
+		_body._value = be64toh(value);
+	#endif
+	#ifdef __APPLE__
+		_body._value = ntohll(value);
+	#endif
 	_pubKeyHash	= pubKeyHash;
 }
 
@@ -34,7 +39,12 @@ unsigned short TxOut::exportRaw( std::shared_ptr<unsigned char> *retRaw ) // こ
 
 	exportedRawPkScriptLength = _body._pkScript->exportRawWithP2PKHPkScript( &exportedRawPkScript , _pubKeyHash );
 
+	#ifdef __linux__
 	_body._pkScriptBytes = be64toh(static_cast<uint64_t>(exportedRawPkScriptLength)); // 書き出しと同時に代入は怖いので
+	#endif
+	#ifdef __APPLE__
+	_body._pkScriptBytes = ntohll(static_cast<uint64_t>(exportedRawPkScriptLength)); // 書き出しと同時に代入は怖いので
+	#endif	
 	//_body._pkScriptBytes = (exportedRawPkScriptLength); // 書き出しと同時に代入は怖いので
 
 	*retRaw = std::shared_ptr<unsigned char>( new unsigned char [sizeof(_body._value) + sizeof(_body._pkScriptBytes) + pkScriptBytes()] );
@@ -91,7 +101,13 @@ int TxOut::importRaw( unsigned char *fromRaw )
 unsigned short TxOut::value()
 {
 	// return ntohll(_body._value);
-	return be64toh(_body._value);
+	#ifdef __linux__
+		return be64toh(_body._value);
+	#endif
+
+	#ifdef __APPLE__
+		return ntohll(_body._value);
+	#endif
 }
 
 
@@ -99,7 +115,12 @@ unsigned short TxOut::value()
 
 unsigned int TxOut::pkScriptBytes()
 {
-	return static_cast<unsigned int >(be64toh(_body._pkScriptBytes));
+	#ifdef __linux__
+		return static_cast<unsigned int >(be64toh(_body._pkScriptBytes));
+	#endif
+	#ifdef __APPLE__
+		return static_cast<unsigned int >(ntohll(_body._pkScriptBytes));
+	#endif
 }
 
 
@@ -113,7 +134,12 @@ void to_json( json& from , const TxOut &to )
 
 void from_json( const json &from , TxOut &to )
 {
-	to._body._value = be64toh(static_cast<int64_t>(from["value"])); // ビックエディアンに変換する
+	#ifdef __linux__
+		to._body._value = be64toh(static_cast<int64_t>(from["value"])); // ビックエディアンに変換する
+	#endif
+	#ifdef __APPLE__
+		to._body._value = ntohll(static_cast<int64_t>(from["value"])); // ビックエディアンに変換する
+	#endif
 
 	//to._pubKeyHash = from["address"];
 	std::string sAddress = from["address"].get<std::string>();

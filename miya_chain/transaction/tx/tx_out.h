@@ -5,12 +5,18 @@
 
 #include "openssl/evp.h"
 #include <arpa/inet.h>
-#include <endian.h>
 #include <stdlib.h>
 #include <string>
 #include <map>
 #include <algorithm>
 #include <iostream>
+
+#ifdef __linux__
+	#include <endian.h>
+#endif
+#ifdef __APPLE__
+	#include <machine/endian.h>
+#endif 
 
 
 #include "../script/signature_script.h"

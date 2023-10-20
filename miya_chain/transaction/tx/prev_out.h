@@ -9,7 +9,13 @@
 #include "openssl/evp.h"
 #include <algorithm>
 #include <iostream>
-#include <endian.h>
+
+#ifdef __linux__
+	#include <endian.h>
+#endif
+#ifdef __APPLE__
+	#include <machine/endian.h>
+#endif 
 
 
 #include "../../../shared_components/json.hpp"

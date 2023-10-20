@@ -12,7 +12,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <endian.h>
+#ifdef __linux__
+	#include <endian.h>
+#endif
+#ifdef __APPLE__
+	#include <machine/endian.h>
+#endif 
 
 
 

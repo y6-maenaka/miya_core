@@ -12,7 +12,12 @@ namespace block
 
 BlockHeader::BlockHeader()
 {
-	_version = htobe32(0);
+	#ifdef __linux__ // 普通に=0で良い
+		_version = htobe32(0);
+	#endif
+	#ifdef __APPLE__
+		_version = htonl(0);
+	#endif 
 	_nBits = 0;
 	_nonce = 0;
 
