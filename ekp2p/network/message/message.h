@@ -30,7 +30,7 @@ public:
 
 	EKP2PMessage();
 
-	void body( std::shared_ptr<unsigned char> payload , size_t payloadLength );
+	void payload( std::shared_ptr<unsigned char> payload , size_t payloadLength );
 	size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
 
 	void protocol( int type );
@@ -43,6 +43,8 @@ public:
 	// Setter
 	void payload( std::shared_ptr<unsigned char> target );
 	std::shared_ptr<unsigned char> payload();
+
+	void printRaw();
 };
 
 

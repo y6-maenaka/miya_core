@@ -5,6 +5,7 @@
 //#include "./network/inband/inband_manager.h"
 #include "./network/socket_manager/socket_manager.h"
 
+#include "./network/message/message.h"
 #include "./network/header/header.h"
 
 //#include "./kademlia/kademlia_RPC/FIND_NODE.cpp"
@@ -31,9 +32,9 @@ namespace ekp2p{
 
 EKP2P::EKP2P( std::shared_ptr<KRoutingTable> KRoutingTable )
 {
-
+	int flag;
 	_hostSocketManager = std::shared_ptr<SocketManager>( new SocketManager{} );
-	_hostSocketManager->setupUDPSock( 8080 );
+	flag = _hostSocketManager->setupUDPSock( 8080 );
 
 	if( KRoutingTable == nullptr ){
 		// _hostNode = std::make_shared<KHostNode>();
@@ -293,6 +294,11 @@ int EKP2P::init()
 	_updatorDaemon._updator = std::make_shared<KRoutingTableUpdator>( _kRoutingTable ,_updatorDaemon._toUpdatorSB );
 	//_updatorDaemon._updator->start();
 
+
+
+	// 主要フォワーディング先を設定
+	_receiverDaemon._receiver->forwardingDestination( _updatorDaemon._toUpdatorSB , 0 );
+
 	return 0;
 }
 
@@ -334,6 +340,30 @@ std::shared_ptr<StreamBufferContainer> EKP2P::toUpdatorSB()
 
 
 
+void EKP2P::sendDimmyEKP2PMSG( const char* destIP, unsigned short destPort , std::shared_ptr<unsigned char> content , size_t contentLength )
+{
+	int sock = socket( AF_INET , SOCK_DGRAM , IPPROTO_UDP );
+
+	struct sockaddr_in addr; memset( &addr , 0x00 , sizeof(addr) );
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = inet_addr( destIP );
+	addr.sin_port = htons( destPort );
+
+
+	EKP2PMessage msg;
+	msg.payload( content , contentLength );
+
+	std::shared_ptr<unsigned char> exportedMSG; size_t exportedMSGLength;
+	exportedMSGLength = msg.exportRaw( &exportedMSG );
+
+	// msg.header()->printRaw();
+	msg.printRaw();
+
+
+	size_t sendLen; 
+	sendLen = sendto( sock , exportedMSG.get() , exportedMSGLength , 0 ,(struct sockaddr *)&addr, sizeof(addr) );
+	std::cout << "sended :: " << sendLen << " [bytes]" << "\n";
+}
 
 
 

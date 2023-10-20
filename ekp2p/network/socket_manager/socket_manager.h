@@ -47,6 +47,7 @@ public:
 	int send( unsigned char* senfBuff, unsigned int senfBuffSize );
 	int send( std::shared_ptr<unsigned char> rawBuff, size_t rawBuffLength );
 
+	size_t receive( std::shared_ptr<unsigned char> *retRaw );
 	/* send() によって振り分けられる */
 	// bool sendUDP();
 	// bool sendTCP();

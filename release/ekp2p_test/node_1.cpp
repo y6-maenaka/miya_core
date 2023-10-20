@@ -8,7 +8,13 @@ int main()
 
 	std::cout << "This is Node1" << "\n";
 
+	std::shared_ptr<unsigned char> content = std::shared_ptr<unsigned char>( new unsigned char[10] ); 
+	memcpy( content.get() , "HelloWorld" , 10 );
+	
+	ekp2p::EKP2P::sendDimmyEKP2PMSG( "127.0.0.1", 8080 , content , 10 );
 
+
+	/*
 	int sock;
 	sock = socket( PF_INET, SOCK_DGRAM, IPPROTO_UDP );
 	struct sockaddr_in destAddr;
@@ -24,4 +30,5 @@ int main()
 	std::shared_ptr<unsigned char> data = std::shared_ptr<unsigned char>( new unsigned char[10] );
 	memcpy( data.get() , "HelloWorld" , 10 );
 	socketManager->send( data , 10 );
+	*/
 }

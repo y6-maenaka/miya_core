@@ -98,26 +98,45 @@ void Receiver::start()
 		for(;;)
 		{
 			std::cout << "<ekp2p::Receiver> check 1" << "\n";
+			std::cout << "socket -> " << _listeningSocketManager->sock() << "\n";
 
-			receivedLength = recvfrom( _listeningSocketManager->sock() , receiveBuffer.get() , 0 ,UINT16_MAX, nullptr, 0 ); // セグメントの受信
-			for( int i=0; i<UINT16_MAX; i++ )
-				printf("%02X", receiveBuffer.get()[i]);
-			std::cout << "\n";
-			std::cout << "Received -> "<< receivedLength << "\n";
+			// receivedLength = recvfrom( _listeningSocketManager->sock() , receiveBuffer.get() , 0 ,UINT16_MAX, nullptr, 0 ); // セグメントの受信
+			receivedLength = recvfrom( _listeningSocketManager->sock() , receiveBuffer.get() , UINT16_MAX , 0 , nullptr , 0 );
+
 
 			message = parseRawEKP2PMessage( receiveBuffer, receivedLength ); // rawから構造化
+			if( message == nullptr ) {
+				std::cout << "不正なデータセグメント" << "\n";
+				continue;
+			}
 			header = message->header();
 
 			std::cout << "<ekp2p::Receiver> check 2" << "\n";
 
 			int protocol = static_cast<int>( header->protocol() );
 
+			std::cout << "<ekp2p::Receiver> check 3" << "\n";
+
 			std::unique_ptr<SBSegment> sb = std::make_unique<SBSegment>();
 			sb->sourceKNodeAddr( header->sourceKNodeAddr() );
 			sb->relayKNodeAddrVector( header->relayKNodeAddrVector() );
 			sb->body( message->payload() , header->payloadLength() );
 
-			if( _sbHub.at(protocol) == nullptr || !(_allowedProtocolSet[protocol]) ) break;
+
+			std::cout << "-----------------------------------" << "\n";
+			std::cout << "protocol :: " << header->protocol() << "\n";
+			header->printRaw();
+			if( _sbHub.at(protocol) == nullptr ) std::cout << "_sbHub.at(ptorocol) is nullptr" << "\n";
+			if( _allowedProtocolSet[protocol] == false ) std::cout << "protocol :: " <<  protocol << " :: is not allowed" << "\n";
+			std::cout << "-----------------------------------" << "\n";
+
+
+			if( _sbHub.at(protocol) == nullptr || !(_allowedProtocolSet[protocol]) ){
+				std::cout << "Error Pack Received" << "\n";
+				continue;
+			}
+
+			std::cout << "<ekp2p::Receiver> check 5" << "\n";
 			_sbHub.at(protocol)->pushOne( std::move(sb) ); // 受信セグメントの転送
 		}
 		return;
@@ -133,14 +152,16 @@ void Receiver::start()
 
 
 
-
-
-void Receiver::setDestinationStreamBuffer( std::shared_ptr<StreamBufferContainer> target , unsigned short destination )
+int Receiver::forwardingDestination( std::shared_ptr<StreamBufferContainer> sb , unsigned short destination )
 {
-	printf("StreamBuffer seted with -> %p\n", target.get() );
-	_sbHub.at(destination) = target;
-}
+	if( destination >= MAX_PROTOCOL ) return -1;
+	if( sb == nullptr ) return -1;
 
+	std::cout << "Set forwarding destination with :: " << destination << "\n";
+	_sbHub.at(destination) = sb;
+
+	return destination;
+}
 
 
 
@@ -194,6 +215,10 @@ std::shared_ptr<EKP2PMessage> Receiver::parseRawEKP2PMessage( std::shared_ptr<un
 
 	// ヘッダーのインポート
 	ret->header()->importRawSequentially( fromRaw );
+
+	// 簡易的な検証を数項目行う
+	if( std::memcmp( ret->header()->token() , "MIYA" , 4 ) != 0 ) return nullptr; // トークン不一致
+	if( ret->header()->protocol() >= MAX_PROTOCOL ) return nullptr; // 受け付けていないプロトコル
 
 	// ペイロードのインポート
 	std::shared_ptr<unsigned char> payloadHead( fromRaw.get() + ret->header()->headerLength() );

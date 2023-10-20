@@ -101,6 +101,17 @@ void KNodeAddr::setNodeID()
 }
 
 
+
+size_t KNodeAddr::exportRaw( std::shared_ptr<unsigned char> *retRaw )
+{
+	size_t retRawLength = sizeof(struct KNodeAddr);
+	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[retRawLength] );
+	memcpy( (*retRaw).get(), this , retRawLength );
+
+	return retRawLength;
+}
+
+
 void KNodeAddr::printInfo()
 {
 	std::shared_ptr<struct sockaddr_in> addr = this->sockaddr_in();

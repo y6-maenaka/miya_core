@@ -103,6 +103,10 @@ public:
 	std::shared_ptr<StreamBufferContainer> toReseiverSB();
 	std::shared_ptr<StreamBufferContainer> toSenderSB();
 	std::shared_ptr<StreamBufferContainer> toUpdatorSB();
+
+
+
+	static void sendDimmyEKP2PMSG( const char* destIP, unsigned short destPort , std::shared_ptr<unsigned char> content , size_t contentLength );
 };
 
 

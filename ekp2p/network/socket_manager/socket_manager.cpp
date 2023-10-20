@@ -89,15 +89,26 @@ int SocketManager::send( std::shared_ptr<unsigned char> rawBuff, size_t rawBuffL
 
 
 
+size_t SocketManager::receive( std::shared_ptr<unsigned char> *retRaw )
+{
+	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[UINT16_MAX] );
+	size_t retLength;
+
+	retLength = recvfrom( _sock, (*retRaw).get() , 0 ,UINT16_MAX, nullptr, 0 ); // セグメントの受信
+	return retLength;
+}
+
+
 
 
 
 int SocketManager::setupUDPSock( unsigned short port )
 {
-
 	if ( (this->_sock = socket( PF_INET, SOCK_DGRAM, IPPROTO_UDP )) < 0 )  return -1;
 
 	if( bind( port ) < 0 ) return -1;
+
+	std::cout << "Socket Binede with port :: " << port << "\n";
 
 	return _sock;
 }

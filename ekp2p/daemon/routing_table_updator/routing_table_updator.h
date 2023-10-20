@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <memory>
-
+#include <thread>
 
 
 
@@ -35,6 +35,9 @@ private:
 	// KRoutingTable	*_routingTable;
 	std::shared_ptr<KRoutingTable> _routingTable;
 	std::shared_ptr<StreamBufferContainer> _incomingSB;
+
+
+	std::vector<std::thread::id> _activeSenderThreadIDVector; // 念の為管理しておく
 
 public:
 	KRoutingTableUpdator( std::shared_ptr<KRoutingTable> routingTable , std::shared_ptr<StreamBufferContainer> incomingSB );

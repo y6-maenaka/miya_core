@@ -16,7 +16,7 @@ EKP2PMessage::EKP2PMessage()
 
 
 
-void EKP2PMessage::body( std::shared_ptr<unsigned char> payload , size_t payloadLength )
+void EKP2PMessage::payload( std::shared_ptr<unsigned char> payload , size_t payloadLength )
 {
 	_header->payloadLength( payloadLength );
 	_payload = payload;
@@ -34,7 +34,7 @@ size_t EKP2PMessage::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 
 	size_t formatPtr = 0;
 	memcpy( (*retRaw).get() , exportedHeader.get(), exportedHeaderLength ); formatPtr += exportedHeaderLength;
-	memcpy( (*retRaw).get() , _payload.get() , _header->payloadLength() ); formatPtr += _header->payloadLength();
+	memcpy( (*retRaw).get() + formatPtr , _payload.get() , _header->payloadLength() ); formatPtr += _header->payloadLength();
 
 	return formatPtr;
 }
@@ -68,6 +68,21 @@ std::shared_ptr<unsigned char> EKP2PMessage::payload()
 }
 
 
+
+
+
+void EKP2PMessage::printRaw()
+{
+	std::cout << "\n ------------ [ Header ] ------------- " << "\n";
+	_header->printRaw();
+
+	std::cout << "\n ------------ [ Content ] ------------- " << "\n";
+	std::cout << "\x1b[33m";
+	for( int i=0; i<_header->payloadLength(); i++ )
+	{
+		printf("%02X", _payload.get()[i]);
+	} std::cout << "\x1b[39m" << "\n\n";
+}
 
 
 };

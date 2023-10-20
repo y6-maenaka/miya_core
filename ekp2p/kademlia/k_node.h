@@ -52,7 +52,7 @@ public:
 	uint64_t ipv4();
 	uint16_t port();
 
-
+	size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
 	void printInfo();
 
 } __attribute__((packed));

@@ -30,7 +30,26 @@ KRoutingTableUpdator::KRoutingTableUpdator( std::shared_ptr<KRoutingTable> routi
 
 void KRoutingTableUpdator::start()
 {
-	std::cout << "EKP2P::daemon::KRoutingTableUpdator ekp2pKRoutingTableUpdator thread started" << "\n";
+
+
+	std::thread ekp2pKRoutingTableUpdator([&]()
+	{
+		std::cout << "EKP2P::daemon::KRoutingTableUpdator ekp2pKRoutingTableUpdator thread started" << "\n";
+		_activeSenderThreadIDVector.push_back( std::this_thread::get_id() ); 
+
+		std::unique_ptr<SBSegment> popedSB ;
+		for(;;)
+		{
+			popedSB = _incomingSB->popOne();
+			std::cout << "SB Arrived" << "\n";
+		}
+	});
+
+	ekp2pKRoutingTableUpdator.detach();
+	std::cout << "ekp2pKRoutingTableUpdator thread detached" << "\n";
+
+
+
 }
 
 
