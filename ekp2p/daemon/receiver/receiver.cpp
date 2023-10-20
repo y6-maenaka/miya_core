@@ -217,7 +217,7 @@ std::shared_ptr<EKP2PMessage> Receiver::parseRawEKP2PMessage( std::shared_ptr<un
 	ret->header()->importRawSequentially( fromRaw );
 
 	// 簡易的な検証を数項目行う
-	if( std::memcmp( ret->header()->token() , "MIYA" , 4 ) != 0 ) return nullptr; // トークン不一致
+	if( memcmp( ret->header()->token() , "MIYA" , 4 ) != 0 ) return nullptr; // トークン不一致
 	if( ret->header()->protocol() >= MAX_PROTOCOL ) return nullptr; // 受け付けていないプロトコル
 
 	// ペイロードのインポート

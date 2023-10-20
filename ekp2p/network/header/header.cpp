@@ -12,7 +12,7 @@ namespace ekp2p
 
 EKP2PMessageHeader::EKP2PMessageHeader()
 {
-	std::memset( &(_meta), 0x00 , sizeof(_meta) );
+	memset( &(_meta), 0x00 , sizeof(_meta) );
 
 	memcpy( _meta._token , "MIYA" , sizeof(_meta._token) );
 	_meta._version = static_cast<uint8_t>(1);
