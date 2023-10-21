@@ -10,11 +10,10 @@ namespace ekp2p
 {
 
 
-
-
-constexpr int EKP2P_PROTOCOL_ROUTING = 1;
-constexpr int EKP2P_PROTOCOL_MIYA = 2;
-
+constexpr unsigned int KADEMLIA_RPC_IGNORE = 0;
+constexpr unsigned int KADEMLIA_RPC_PING = 1;
+constexpr unsigned int KADEMLIA_RPC_PONG = 2;
+constexpr unsigned int KADEMLIA_RPC_FIND_NODE = 3;
 
 
 

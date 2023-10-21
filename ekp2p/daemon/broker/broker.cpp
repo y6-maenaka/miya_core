@@ -12,16 +12,19 @@ namespace ekp2p
 
 
 
-EKP2PBroker::EKP2PBroker( std::shared_ptr<StreamBufferContainer> incomingSB )
+EKP2PBroker::EKP2PBroker( std::shared_ptr<StreamBufferContainer> incomingSB , std::shared_ptr<StreamBufferContainer> toRoutingTableUpdatorSBC )
 {
 	_incomingSB =	incomingSB;
+	_toRoutingTableUpdatorSBC = toRoutingTableUpdatorSBC;
 }
 
 
 
-int EKP2PBroker::start()
+int EKP2PBroker::start( bool isRouting )
 {
 	if( _incomingSB == nullptr ) return -1;
+	if( _toRoutingTableUpdatorSBC == nullptr ) return -1;
+
 
 	// 行き or 帰り はどう判断する？
 	std::thread ekp2pBroker([&]()
@@ -41,14 +44,20 @@ int EKP2PBroker::start()
 			if( _allowedProtocolSet[protocol] == false ) std::cout << "protocol :: " <<  protocol << " :: is not allowed" << "\n";
 
 
+			// KRoutingTableだけは独立して転送する
+			std::cout << sb->ekp2pIsProcessed() << "\n"; 
+			isRouting = true; // ???
+			std::cout << "isRouting :: " << isRouting << "\n";
+			if( !(sb->ekp2pIsProcessed()) && isRouting ) 
+			{
+				_toRoutingTableUpdatorSBC->pushOne( std::move(sb) );
+				continue; // skip while done ekp2p processing
+			}
+
 			if( _sbHub.at(protocol) == nullptr || !(_allowedProtocolSet[protocol]) ){
 				std::cout << "Not Allowed Pack Received" << "\n";
 				continue;
 			}
-
-			// KRoutingTableだけは独立して転送する
-
-
 
 			_sbHub.at(protocol)->pushOne( std::move(sb) ); // 受信セグメントの転送
 		}

@@ -5,6 +5,9 @@
 #include <memory>
 #include <thread>
 #include <vector>
+#include <mutex>
+#include <condition_variable>
+#include <chrono>
 
 
 
@@ -20,10 +23,41 @@ namespace ekp2p
 {
 
 
-
-
-
+class KBucket;
 class KRoutingTable;
+class KClientNode;
+
+
+
+
+
+struct SwapWaitNodePair
+{
+	std::shared_ptr<KBucket> _targetBucket;
+
+	std::shared_ptr<KClientNode> _remainingNode;
+	std::shared_ptr<KClientNode> _candidateNode;
+
+	std::chrono::seconds waitfor;
+};
+
+
+struct KClientNodeSwapWaitQueue
+{
+private:
+	std::vector<SwapWaitNodePair> _nodePairVector;
+	std::mutex _mtx;
+	std::condition_variable _cv;
+
+
+public:
+	void start(); // start with thread
+
+	void regist( std::shared_ptr<KBucket> targetBucket, std::shared_ptr<KClientNode> remainingNode , std::shared_ptr<KClientNode> candidateNode );
+};
+
+
+
 
 
 
@@ -38,6 +72,9 @@ private:
 	std::shared_ptr<StreamBufferContainer> _incomingSB;
 	std::shared_ptr<StreamBufferContainer> _toBrokerSBC;
 
+	struct KClientNodeSwapWaitQueue
+	{
+	} _kClientNodeSwapWaitQueue;
 
 	std::vector<std::thread::id> _activeSenderThreadIDVector; // 念の為管理しておく
 

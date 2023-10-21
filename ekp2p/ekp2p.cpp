@@ -281,20 +281,17 @@ int EKP2P::init()
 {
 
 	// 一旦全てのdaemonをセットアップする
-	// ブローカーのセットアップ
+	// ブローカーのセットアップ 
+	// アップデータのセットアップ
 	_brokerDaemon._toBrokerSB = std::make_shared<StreamBufferContainer>();
-	_brokerDaemon._broker = std::make_shared<EKP2PBroker>( _brokerDaemon._toBrokerSB );
+	_updatorDaemon._toUpdatorSB = std::make_shared<StreamBufferContainer>();
+	_updatorDaemon._updator = std::make_shared<EKP2PKRoutingTableUpdator>( _kRoutingTable ,_updatorDaemon._toUpdatorSB , _brokerDaemon._toBrokerSB );
+	_brokerDaemon._broker = std::make_shared<EKP2PBroker>( _brokerDaemon._toBrokerSB , _updatorDaemon._toUpdatorSB );
 
 	// センダーのセットアップ
 	_senderDaemon._toSenderSB = std::make_shared<StreamBufferContainer>();
 	_senderDaemon._sender	= std::make_shared<EKP2PSender>( _kRoutingTable , _senderDaemon._toSenderSB , _brokerDaemon._toBrokerSB );
 	//_senderDaemon._sender->start();
-
-	// アップデータのセットアップ
-	_updatorDaemon._toUpdatorSB = std::make_shared<StreamBufferContainer>();
-	_updatorDaemon._updator = std::make_shared<EKP2PKRoutingTableUpdator>( _kRoutingTable ,_updatorDaemon._toUpdatorSB , _brokerDaemon._toBrokerSB );
-	//_updatorDaemon._updator->start();
-
 
 	// レシーバーのセットアップ
 	_receiverDaemon._toReseiverSB = std::make_shared<StreamBufferContainer>(); 
@@ -315,7 +312,7 @@ int EKP2P::init()
 int EKP2P::start( bool isRouting )
 {
 	// Daemonは全てバックグラウンドで起動される
-	_brokerDaemon._broker->start(); 
+	_brokerDaemon._broker->start( isRouting ); 
 	_senderDaemon._sender->start(); 
 	_receiverDaemon._receiver->start();
 	_updatorDaemon._updator->start();

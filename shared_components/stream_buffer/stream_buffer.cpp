@@ -70,7 +70,10 @@ unsigned short SBSegment::protocol()
 	return _controlBlock._protocol;
 }
 
-
+bool SBSegment::ekp2pIsProcessed()
+{
+	return _ekp2pBlock._isProcessed;
+}
 
 
 
@@ -104,7 +107,10 @@ void SBSegment::protocol( unsigned short target )
 	_controlBlock._protocol = target;
 }
 
-
+void SBSegment::ekp2pIsProcessed( bool target )
+{
+	_ekp2pBlock._isProcessed = target;
+}
 
 
 

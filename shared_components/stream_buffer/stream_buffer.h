@@ -38,7 +38,7 @@ struct SBSegment
 	struct EKP2PBlock
 	{
 		unsigned int _rpcType;
-		bool isProcessed = false;
+		bool _isProcessed = false;
 		std::shared_ptr<ekp2p::KNodeAddr> _sourceKNodeAddr; 
 		std::vector< std::shared_ptr<ekp2p::KNodeAddr> > _relayKNodeAddrVector;
 	} _ekp2pBlock;
@@ -68,7 +68,7 @@ public:
 	std::vector< std::shared_ptr<ekp2p::KNodeAddr> > relayKNodeAddrVector();
 	unsigned short rpcType();
 	unsigned short protocol();
-
+	bool ekp2pIsProcessed();
 
 	/* Setter群 */
 	void body( void* body , unsigned short bodyLength );
@@ -78,6 +78,7 @@ public:
 	void relayKNodeAddrVector( std::shared_ptr<ekp2p::KNodeAddr> target );
 	void rpcType( unsigned short target );
 	void protocol( unsigned short target );
+	void ekp2pIsProcessed( bool target );
 	
 };
 
