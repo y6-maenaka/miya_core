@@ -158,8 +158,10 @@ KNode::KNode( std::shared_ptr<KNodeAddr> nodeAddr )
 
 
 
-
-
+KClientNode::KClientNode( std::shared_ptr<KNodeAddr> nodeAddr ) : KNode(nodeAddr) 
+{ 
+	_socketManager = std::make_shared<SocketManager>(nodeAddr);
+}
 
 
 std::shared_ptr<SocketManager> KClientNode::socketManager()

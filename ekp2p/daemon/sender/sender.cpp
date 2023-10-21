@@ -23,10 +23,11 @@ namespace ekp2p
 
 
 
-Sender::Sender( std::shared_ptr<KRoutingTable> kRoutingTable ,std::shared_ptr<StreamBufferContainer> incomingSB )
+EKP2PSender::EKP2PSender( std::shared_ptr<KRoutingTable> kRoutingTable ,std::shared_ptr<StreamBufferContainer> incomingSB , std::shared_ptr<StreamBufferContainer> toBrokerSBC )
 {
 	_kRoutingTable = kRoutingTable;
 	_incomingSB = incomingSB;
+	_toBrokerSBC = toBrokerSBC;
 
 	std::cout << "EKP2P::daemon::Sender just initialized" << "\n";
 	return;
@@ -37,12 +38,16 @@ Sender::Sender( std::shared_ptr<KRoutingTable> kRoutingTable ,std::shared_ptr<St
 
 
 
-void Sender::start()
+int EKP2PSender::start()
 {
-	std::cout << "EKP2P::daemon::Sender ekp2pSender thread started" << "\n";
+
+	if( _incomingSB == nullptr ) return -1;
+	if( _kRoutingTable == nullptr ) return -1;
+	if( _toBrokerSBC == nullptr )  return -1;
 
 	std::thread ekp2pSender([&]()
 	{
+		std::cout << "\x1b[32m" << "EKP2P::daemon::Sender ekp2pSender thread started" << "\x1b[39m" << "\n";
 		_activeSenderThreadIDVector.push_back( std::this_thread::get_id() ); // アクティブなスレッドIDを管理しておく
 
 		std::unique_ptr<SBSegment> popedSB;
@@ -89,6 +94,7 @@ void Sender::start()
 	ekp2pSender.detach();
 	std::cout << "ekp2pSender thread detached" << "\n";
 
+	return 0;
 }
 
 

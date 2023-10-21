@@ -52,17 +52,27 @@ void SBSegment::body( std::shared_ptr<unsigned char> body , unsigned short bodyL
 }
 
 
-std::shared_ptr<ekp2p::KNodeAddr> SBSegment::sourceNodeKAddr()
-{
-	return _ekp2pBlock._sourceKNodeAddr;
-}
-
 
 
 std::vector< std::shared_ptr<ekp2p::KNodeAddr> > SBSegment::relayKNodeAddrVector()
 {
 	return _ekp2pBlock._relayKNodeAddrVector;
 }
+
+
+unsigned short SBSegment::rpcType()
+{
+	return _ekp2pBlock._rpcType;
+}
+
+unsigned short SBSegment::protocol()
+{
+	return _controlBlock._protocol;
+}
+
+
+
+
 
 
 
@@ -84,11 +94,15 @@ void SBSegment::relayKNodeAddrVector( std::shared_ptr<ekp2p::KNodeAddr> target )
 }
 
 
+void SBSegment::rpcType( unsigned short target )
+{
+	_ekp2pBlock._rpcType = target;
+}
 
-
-
-
-
+void SBSegment::protocol( unsigned short target )
+{
+	_controlBlock._protocol = target;
+}
 
 
 

@@ -93,6 +93,7 @@ private:
 
 public:
 	KClientNode( std::shared_ptr<KNodeAddr> nodeAddr , std::shared_ptr<SocketManager> socketManager ) : KNode( nodeAddr ){ _socketManager = socketManager; };
+	KClientNode( std::shared_ptr<KNodeAddr> nodeAddr );
 
 	std::shared_ptr<SocketManager> socketManager();
 

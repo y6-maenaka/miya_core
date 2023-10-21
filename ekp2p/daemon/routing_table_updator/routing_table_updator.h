@@ -28,7 +28,7 @@ class KRoutingTable;
 
 
 
-class KRoutingTableUpdator
+class EKP2PKRoutingTableUpdator
 {
 
 
@@ -36,17 +36,18 @@ private:
 	// KRoutingTable	*_routingTable;
 	std::shared_ptr<KRoutingTable> _routingTable;
 	std::shared_ptr<StreamBufferContainer> _incomingSB;
+	std::shared_ptr<StreamBufferContainer> _toBrokerSBC;
 
 
 	std::vector<std::thread::id> _activeSenderThreadIDVector; // 念の為管理しておく
 
 public:
-	KRoutingTableUpdator( std::shared_ptr<KRoutingTable> routingTable , std::shared_ptr<StreamBufferContainer> incomingSB );
+	EKP2PKRoutingTableUpdator( std::shared_ptr<KRoutingTable> routingTable , std::shared_ptr<StreamBufferContainer> incomingSB , std::shared_ptr<StreamBufferContainer> toBrokerSBC );
 
 	// void setDestinationStreamBuffer( std::shared_ptr<StreamBufferContainer> target );
 	// void setSourceStreamBuffer( std::shared_ptr<StreamBufferContainer> target );
 
-	void start();
+	int start();
 };
 
 

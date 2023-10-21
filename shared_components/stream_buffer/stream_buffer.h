@@ -28,13 +28,17 @@ struct SBSegment
 	{
 		uint8_t _flag;
 		uint8_t _type;
+		uint8_t _protocol;
 		uint16_t _bodySize;
 		uint16_t _reserved;
+
 	} _controlBlock;
 
 
 	struct EKP2PBlock
 	{
+		unsigned int _rpcType;
+		bool isProcessed = false;
 		std::shared_ptr<ekp2p::KNodeAddr> _sourceKNodeAddr; 
 		std::vector< std::shared_ptr<ekp2p::KNodeAddr> > _relayKNodeAddrVector;
 	} _ekp2pBlock;
@@ -56,18 +60,25 @@ public:
 	SBSegment(){};
 	SBSegment( void* body , unsigned short bodyLength );
 
+
+	/* Getter群 */
 	std::shared_ptr<ekp2p::KNodeAddr> sourceKNodeAddr();
 	std::shared_ptr<unsigned char> body();
 	unsigned short bodyLength()	;
+	std::vector< std::shared_ptr<ekp2p::KNodeAddr> > relayKNodeAddrVector();
+	unsigned short rpcType();
+	unsigned short protocol();
+
+
+	/* Setter群 */
 	void body( void* body , unsigned short bodyLength );
 	void body( std::shared_ptr<unsigned char> body , unsigned short bodyLength );
-
-	std::shared_ptr<ekp2p::KNodeAddr> sourceNodeKAddr();
-	std::vector< std::shared_ptr<ekp2p::KNodeAddr> > relayKNodeAddrVector();
-
 	void sourceKNodeAddr( std::shared_ptr<ekp2p::KNodeAddr> target );
 	void relayKNodeAddrVector( std::vector< std::shared_ptr<ekp2p::KNodeAddr> > target );
 	void relayKNodeAddrVector( std::shared_ptr<ekp2p::KNodeAddr> target );
+	void rpcType( unsigned short target );
+	void protocol( unsigned short target );
+	
 };
 
 

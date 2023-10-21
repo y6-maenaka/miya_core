@@ -11,59 +11,109 @@ namespace ekp2p
 
 
 
-
-KClientNode* KBucket::find( KNodeAddr* target )
+std::shared_ptr<KClientNode> KBucket::find( std::shared_ptr<KClientNode> target )
 {
+	std::unique_lock<std::mutex> lock(_mtx);
 
-	std::vector< std::shared_ptr<KClientNode> >::iterator searchItr = _referenceHead;
-
-	for( int i=0; i<_kBucket.size() ; i++ )
-		if( memcmp( (*searchItr)->kNodeAddr()->ID() , target->ID() , 20 ) == 0 ) return (*searchItr).get(); 
+	for( KClientNodeVector::iterator i = _nodeVector.begin() ; i != _nodeVector.end() ; i++ )
+		if( nodeIDcmp( target , i) == 0 ) return *i;
 
 	return nullptr;
 }
 
 
 
-
-
-int KBucket::add( KClientNode* target )
-{
-	if( _kBucket.size() >= K_SIZE ) return -1; // ノード入れ替えを実行する
-
-	_kBucket.push_back( std::make_shared<KClientNode>(*target) ); // 単純追加　
-	return 0;
-}
-
-
-
-
-
-
+/*
 int KBucket::bucketRefresh( KClientNode *target )
 {
 	std::vector< std::shared_ptr<KClientNode> >::iterator searchItr = _referenceHead;
 
-	for( int i=0; i<_kBucket.size() ; i++ )
+	for( int i=0; i<_nodeVector.size() ; i++ )
 		if( memcmp( (*searchItr)->kNodeAddr()->ID() , target->kNodeAddr()->ID() , 20 ) == 0 ) break;
 
-	if( searchItr == _kBucket.end() ) return -1;
+	if( searchItr == _nodeVector.end() ) return -1;
 	
-	_kBucket.erase( searchItr );
-	_kBucket.push_back( std::make_unique<KClientNode>(*target) );
+	_nodeVector.erase( searchItr );
+	_nodeVector.push_back( std::make_unique<KClientNode>(*target) );
 
 	return 0;
+}
+*/
+
+
+bool KBucket::move_back( std::shared_ptr<KClientNode> targetInBucket )
+{
+	// std::unique_lock<std::mutex> lock(_mtx); 呼び出し元でロックするから不要かも
+
+	// 対象のイテレータを取得する
+	KClientNodeVector::iterator targetInNodeIterator = std::find( _nodeVector.begin() , _nodeVector.end() , targetInBucket );
+	if( targetInNodeIterator == _nodeVector.end() ) return false;
+
+	// eraseしてpush
+	std::shared_ptr<KClientNode> temp = *targetInNodeIterator;
+	_nodeVector.erase( targetInNodeIterator );
+	_nodeVector.push_back( temp );
+
+	return true;
 }
 
 
 
 
-int KBucket::autoAdd( KNodeAddr* target )
+
+int KBucket::nodeIDcmp( std::shared_ptr<KClientNode> n1 , KClientNodeVector::iterator n2 )
+{
+	return memcmp( n1->kNodeAddr()->ID() , (*n2)->kNodeAddr()->ID() , 20 );
+}
+
+
+
+
+int KBucket::autoAdd( std::shared_ptr<KClientNode> target )
+{
+	std::unique_lock<std::mutex> lock(_mtx);
+	
+	std::shared_ptr<KClientNode> targetInBucket = this->find( target );
+
+	// 以降はなからずtargetInBucketで操作する move_backでfindできなくなるから
+	if( targetInBucket == nullptr ) // 対象が存在しない場合
+	{
+		if( isFull() )
+		{
+			// PING
+		}
+		else
+		{
+			_nodeVector.push_back( targetInBucket ); // 最後尾に移動
+		}
+	}
+
+
+	else // 要素が存在する場合
+	{
+		this->move_back( targetInBucket );
+	}
+
+
+	return -1;
+}
+
+
+// PING機構について
+// (先頭ノードにPINGを送信する) - > 帰ってきたら::そのノードをバケット最後尾に
+//															- > 帰ってこなかったら::候補ノードをバケット最後尾に移動
+
+
+
+
+
+/*
+int KBucket::autoAdd( std::shared_ptr<KClientNode> target )
 {
 	KClientNode* existedNode;
 	existedNode = this->find( target );
 
-	/* パターン一覧 */
+	// パターン一覧 
 	// 1. 対象のノードが存在して,バケットが満杯の場合        -> 最後尾に移動する
 	// 2. 対象のノードが存在して,バケットが満杯でない場合    -> 最後尾に移動する
 	// 3. 対象のノードが素材せず,バケットが満杯の場合        -> スワップルーチンを起動する
@@ -87,7 +137,7 @@ int KBucket::autoAdd( KNodeAddr* target )
 
 	return 0;
 }
-
+*/
 
 
 
@@ -95,7 +145,7 @@ int KBucket::autoAdd( KNodeAddr* target )
 
 bool KBucket::isFull()
 {
-	return ( _kBucket.size() >= K_SIZE );
+	return ( _nodeVector.size() >= K_SIZE );
 }
 
 

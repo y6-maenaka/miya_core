@@ -32,6 +32,7 @@ namespace ekp2p{
 
 
 
+
 class InbandNetworkManager;
 class KRoutingTable;
 class SocketManager;
@@ -42,10 +43,10 @@ class KHostNode;
 class KClientNode;
 
 
-
-class Sender;
-class Receiver;
-class KRoutingTableUpdator;
+class EKP2PBroker;
+class EKP2PSender;
+class EKP2PReceiver;
+class EKP2PKRoutingTableUpdator;
 
 
 
@@ -66,20 +67,26 @@ private:
 
 	struct 
 	{
-		std::shared_ptr<Sender>	_sender;
+		std::shared_ptr<EKP2PBroker> _broker;
+		std::shared_ptr<StreamBufferContainer> _toBrokerSB;
+	} _brokerDaemon;
+
+	struct 
+	{
+		std::shared_ptr<EKP2PSender>	_sender;
 		std::shared_ptr<StreamBufferContainer> _toSenderSB;
 	} _senderDaemon;
 
 
 	struct
 	{
-		std::shared_ptr<Receiver> _receiver;
+		std::shared_ptr<EKP2PReceiver> _receiver;
 		std::shared_ptr<StreamBufferContainer> _toReseiverSB;
 	} _receiverDaemon;
 
 	struct
 	{
-		std::shared_ptr<KRoutingTableUpdator> _updator;
+		std::shared_ptr<EKP2PKRoutingTableUpdator> _updator;
 		std::shared_ptr<StreamBufferContainer> _toUpdatorSB;
 	} _updatorDaemon;
 
@@ -93,7 +100,7 @@ public:
 
 	/* 複数portoを監視することも可能だが,NodeIDが変わる 初回監視ポートのみ相手に通知される -> 複数起動できるメリットはない　*/
 	int init(); // KRoutingTableを使うのであれば必須 自身のグローバルアドレスを取得する
-	int start();
+	int start( bool isRouting = true );
 
 
 	int send( KClientNode *targetNode , void* payload , unsigned short payloadLength , unsigned short protocol );

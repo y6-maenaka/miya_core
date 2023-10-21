@@ -55,19 +55,20 @@ public:
 
 
 
-class Sender
+class EKP2PSender
 {
 
 private:
 	std::shared_ptr<StreamBufferContainer> _incomingSB;
 	std::shared_ptr<KRoutingTable> _kRoutingTable;
+	std::shared_ptr<StreamBufferContainer> _toBrokerSBC;
 
 	std::vector<std::thread::id> _activeSenderThreadIDVector; // 念の為管理しておく
 
 public:
-	Sender( std::shared_ptr<KRoutingTable> kRoutingTable ,std::shared_ptr<StreamBufferContainer> incomingSB );
+	EKP2PSender( std::shared_ptr<KRoutingTable> kRoutingTable ,std::shared_ptr<StreamBufferContainer> incomingSB , std::shared_ptr<StreamBufferContainer> toBrokerSBC );
 
-	void start(); // ノードへの送信リクエストなどは全てStreamBufferを介して行う
+	int start(); // ノードへの送信リクエストなどは全てStreamBufferを介して行う
 };
 
 

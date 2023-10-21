@@ -197,6 +197,11 @@ unsigned short EKP2PMessageHeader::protocol()
 }
 
 
+unsigned short EKP2PMessageHeader::rpcType()
+{
+	return static_cast<unsigned short>( ntohs(_meta._rpcType) );
+}
+
 
 
 
@@ -243,6 +248,13 @@ void EKP2PMessageHeader::printRaw()
 	for( int i=0; i<sizeof(cPayloadLength); i++){
 		printf("%02X", cPayloadLength[i]);
 	} std::cout << "\x1b[39m" << "\n";
+
+	std::cout << "rpcType :: ";
+	unsigned char cRPCType[sizeof(_meta._rpcType)]; memcpy( &cRPCType, &(_meta._rpcType), sizeof(_meta._rpcType) );
+	for( int i=0; i<sizeof(cRPCType); i++ ){
+		printf("%02X", cRPCType[i]);
+	} std::cout << "\n";
+
 
 	std::cout << "\x1b[34m" << "protocol :: ";
 	unsigned char cProtocol[sizeof(_meta._protocol)]; memcpy( &cProtocol, &(_meta._protocol), sizeof(_meta._protocol) );

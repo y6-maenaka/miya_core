@@ -6,6 +6,8 @@
 #include <array>
 #include <memory>
 #include <vector>
+#include <mutex>
+#include <condition_variable>
 
 
 
@@ -34,32 +36,38 @@ class SocketManager;
 
 class KRoutingTable
 {
-
 private:
 	std::shared_ptr<KHostNode> _hostNode;
-	std::array< std::shared_ptr<KBucket> , K_BUCKET_SIZE > _routingTable;
+	std::array< std::shared_ptr<KBucket> , K_BUCKET_SIZE > _bucketArray;
 
 public:
-	// KRoutingTable( std::shared_ptr<KHostNode> hostNode );
 	KRoutingTable( std::shared_ptr<SocketManager> target );
 
-	int autoAdd( KNodeAddr *target );
+	int autoAdd( std::shared_ptr<KNodeAddr> target );
 
 	std::shared_ptr<KBucket> kBucket( unsigned short branch );
-	short int calcBranch( KNodeAddr *targetNodeAddr );
+	short int calcBranch( std::shared_ptr<KNodeAddr> targetNodeAddr );
 
 	std::vector< const std::shared_ptr<KClientNode> > randomPick( size_t size );
 };
 
 
 
+/* RoutingTable Update種類
 
+	(bucket内に要素が存在する) - 最後尾に移動
 
-/*
- ルーティングテーブルに必要な機能
+	(bucket内に要素が存在しない)  (満杯) : 最後尾に移動
+							  (非満杯) : PINGの応答次第
  
- - アップデート機能( KRoutingTable Updator )
- - 
+	--------------------------------------------------------------------------
+
+	(非満杯場合)  - bucket内に対象のNodeが存在しない場合 :: バケット最後尾に移動
+				- bucket内に対象のNodeが存在しない場合 :: バケット最後尾に移動
+
+	(満杯場合)    - bucket内に対象のNodeが存在する場合  :: バケット最後尾に移動
+				 - bucket内に対象のNodeが存在しない場合  :: 先頭要素にPINGを打って応答次第で最後尾に追加
+
 */
 
 

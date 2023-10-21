@@ -15,10 +15,11 @@ KRoutingTable::KRoutingTable( std::shared_ptr<SocketManager> target )
 {
 	_hostNode = std::make_shared<KHostNode>(target);
 
-	for( int i=0; i<_routingTable.size() ; i++ )
+	for( int i=0; i<_bucketArray.size() ; i++ )
 	{
-		KBucket *initKBucket = new KBucket;
-		_routingTable.at(i) = std::make_shared<KBucket>( *initKBucket );
+		// KBucket *initKBucket = new KBucket;
+		_bucketArray.at(i) = std::make_shared<KBucket>();
+		// _routingTable.at(i) = std::make_shared<KBucket>( *initKBucket );
 	}
 
 	std::cout << "new KRoutingTable just Initialized" << "\n";
@@ -37,27 +38,27 @@ std::shared_ptr<KBucket> KRoutingTable::kBucket( unsigned short branch )
 {
 	if( branch >= 160 )	 return nullptr;
 
-	return _routingTable.at(branch);
+	return _bucketArray.at(branch);
 }
 
 	
 
 
-int KRoutingTable::autoAdd( KNodeAddr *target )
+
+int KRoutingTable::autoAdd( std::shared_ptr<KNodeAddr> target )
 {
 	short int targetBranch = calcBranch( target );
-	
-	std::shared_ptr<KBucket> targetBucket = kBucket(targetBranch);
 
-	if( targetBucket == nullptr ) return -1;
-	return targetBucket->autoAdd( target );
+	std::cout << "KRoutingTable::autoAdd branch >> " << targetBranch << "\n";
+
+	std::shared_ptr<KClientNode> targetKNode = std::make_shared<KClientNode>(target);
+	return _bucketArray.at(targetBranch)->autoAdd( targetKNode );
 }
 
 
 
 
-
-short int KRoutingTable::calcBranch( KNodeAddr *targetNodeAddr )
+short int KRoutingTable::calcBranch( std::shared_ptr<KNodeAddr> targetNodeAddr )
 {
 	unsigned char nodeXORDistance[20] = {};
 

@@ -15,10 +15,11 @@ namespace ekp2p
 
 
 
-KRoutingTableUpdator::KRoutingTableUpdator( std::shared_ptr<KRoutingTable> routingTable , std::shared_ptr<StreamBufferContainer> incomingSB )
+EKP2PKRoutingTableUpdator::EKP2PKRoutingTableUpdator( std::shared_ptr<KRoutingTable> routingTable , std::shared_ptr<StreamBufferContainer> incomingSB , std::shared_ptr<StreamBufferContainer> toBrokerSBC )
 {
 	_incomingSB = incomingSB;
 	_routingTable = routingTable;
+	_toBrokerSBC = toBrokerSBC;
 
 	std::cout << "EKP2P::daemon::KRoutingTableUpdator just initialized" << "\n";
 }
@@ -28,20 +29,21 @@ KRoutingTableUpdator::KRoutingTableUpdator( std::shared_ptr<KRoutingTable> routi
 
 
 
-void KRoutingTableUpdator::start()
+int EKP2PKRoutingTableUpdator::start()
 {
-
+	if( _routingTable == nullptr ) return -1;
+	if( _incomingSB == nullptr ) return -1;
+	if( _toBrokerSBC == nullptr ) return -1;
 
 	std::thread ekp2pKRoutingTableUpdator([&]()
 	{
-		std::cout << "EKP2P::daemon::KRoutingTableUpdator ekp2pKRoutingTableUpdator thread started" << "\n";
+		std::cout <<  "\x1b[32m" << "EKP2P::daemon::KRoutingTableUpdator ekp2pKRoutingTableUpdator thread started" << "\x1b[39m" << "\n";
 		_activeSenderThreadIDVector.push_back( std::this_thread::get_id() ); 
 
 		std::unique_ptr<SBSegment> popedSB ;
 		for(;;)
 		{
 			popedSB = _incomingSB->popOne();
-			std::cout << "SB Arrived" << "\n";
 		}
 	});
 
@@ -49,6 +51,7 @@ void KRoutingTableUpdator::start()
 	std::cout << "ekp2pKRoutingTableUpdator thread detached" << "\n";
 
 
+	return 0;
 
 }
 

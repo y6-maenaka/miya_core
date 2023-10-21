@@ -4,8 +4,9 @@
 
 #include <array>
 #include <vector>
-#include <mutex>
 #include <memory>
+#include <mutex>
+#include <condition_variable>
 
 
 
@@ -22,28 +23,32 @@ class KClientNode;
 
 
 
-
-
-
+using KClientNodeVector =  std::vector< std::shared_ptr<KClientNode> >;
 
 
 struct KBucket
 {
 private:
 	// std::mutex _mtx; 保留,std::unique_ptrで対応できないか検討する
-
-	std::vector< std::shared_ptr<KClientNode> > _kBucket;
+	// std::vector< std::shared_ptr<KClientNode> > _nodeVector;
+	KClientNodeVector _nodeVector;
 	std::vector< std::shared_ptr<KClientNode> >::iterator _referenceHead;
 
+	// 排他制御
+	std::mutex _mtx;
+	// std::condition_variable _cv;
+
 protected:
-	KClientNode* find( KNodeAddr* target );
-	int add( KClientNode* target );
-	int bucketRefresh( KClientNode* target );
+	std::shared_ptr<KClientNode> find( std::shared_ptr<KClientNode> target );
+	// std::shared_ptr<KClientNode> find( std::shared_ptr<KClientNode> target );
+	// int bucketRefresh( KClientNode* target );
+
+	bool move_back( std::shared_ptr<KClientNode> targetInBucket );
+	int nodeIDcmp( std::shared_ptr<KClientNode> n1 , KClientNodeVector::iterator n2 );
 
 public:
-	int autoAdd( KNodeAddr *target );
+	int autoAdd( std::shared_ptr<KClientNode> target );
 	bool isFull();
-
 };
 
 

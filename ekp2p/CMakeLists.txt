@@ -11,7 +11,7 @@ add_library( EKP2P STATIC
 
 						 ekp2p.cpp
 
-						 kademlia/common.cpp
+						 #kademlia/common.cpp
 						 #kademlia/k_bucket.cpp
 						 #kademlia/k_routing_table.cpp
 						 #kademlia/k_tag.cpp
@@ -58,6 +58,7 @@ add_library( EKP2P STATIC
 						 daemon/routing_table_updator/routing_table_updator.cpp
 						 daemon/sender/sender.cpp
 						 daemon/receiver/receiver.cpp
+						 daemon/broker/broker.cpp
 						 #daemon/broker/broker.cpp
 )
 
