@@ -8,6 +8,7 @@
 
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 
 #include "../../ekp2p/ekp2p.h"
 

@@ -41,7 +41,8 @@ SwapWaitNodePair::SwapWaitNodePair( std::shared_ptr<KBucket> targetBucket, std::
 
 KClientNodeSwapWaitQueue::KClientNodeSwapWaitQueue()
 {
-	_sbc = std::make_shared<StreamBufferContainer>();
+	_sbc = std::make_shared<StreamBufferContainer>();	
+	_nodePairVector.clear();
 }
 
 
@@ -55,27 +56,41 @@ void KClientNodeSwapWaitQueue::start()
 		std::unique_ptr<SBSegment> sb;
 		SwapWaitNodePair targetPair;
 
-
 		for(;;)	
 		{
 			std::unique_lock<std::mutex> lock(_mtx);
-			//sb = _sbc->popOne();
-			//targetPair = std::any_cast<SwapWaitNodePair>(sb->options.option1);
-	
+
+			std::cout << "wait_for() before" << "\n";
+
+			remainSwapPair:	
 			_cv.wait_for( lock , std::chrono::seconds(DEFAULT_WAIT_PING_TIME) , [&]{ // 第3引数が満たされたら解除
-				return (_nodePairVector.size() == 0) || 
-								(( _nodePairVector.at(0)._startTime - std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count() ) >= DEFAULT_WAIT_PING_TIME);
+					std::cout << "wait_for now now"	 << "\n";
+					return (_nodePairVector.size() == 0) || 
+								(( std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count() )  - _nodePairVector.at(0)._startTime >= DEFAULT_WAIT_PING_TIME);
 			});
+
+
+			std::cout << "-------------------------" << "\n";
+			std::cout << "wait_for() exited !! " << "\n";
+			std::cout << "-------------------------" << "\n";
 
 			for( std::vector<SwapWaitNodePair>::iterator itr = _nodePairVector.begin(); itr != _nodePairVector.end(); itr++ )
 			{
-				if((itr->_startTime	-  std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count() ) >= DEFAULT_WAIT_PING_TIME ) _nodePairVector.erase(itr);
+				if(( std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count() - itr->_startTime	) >= DEFAULT_WAIT_PING_TIME ) _nodePairVector.erase(itr);
 				else break;
 			}
+	
+			if( _nodePairVector.size() > 0 ) 
+				goto remainSwapPair;
+
+			std::cout << "_cv.wait() before" << "\n";
 			_cv.wait( lock );
 		}
 
 	});
+	
+	pingWait.detach();
+	std::cout << "pingWait thread detached" << "\n";
 	
 }
 
@@ -88,6 +103,8 @@ void KClientNodeSwapWaitQueue::regist( std::shared_ptr<KBucket> targetBucket, st
 
 	SwapWaitNodePair newPair( targetBucket , remainingNode , candidateNode );
 	_nodePairVector.push_back( newPair );
+
+	_cv.notify_all();
 }
 
 

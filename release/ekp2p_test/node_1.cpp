@@ -1,6 +1,7 @@
 #include "node_1.h"
 
 #include "../../ekp2p/network/socket_manager/socket_manager.h"
+#include "../../ekp2p/daemon/routing_table_updator/__test.cpp"
 
 
 int main()
@@ -13,6 +14,10 @@ int main()
 	
 	ekp2p::EKP2P::sendDimmyEKP2PMSG( "127.0.0.1", 8080 , content , 10 );
 
+
+	ekp2p::ping_wait_queue_unit_test();
+
+	sleep(20);
 
 	/*
 	int sock;

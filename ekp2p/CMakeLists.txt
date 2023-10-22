@@ -57,6 +57,7 @@ add_library( EKP2P STATIC
 
 						 daemon/routing_table_updator/routing_table_updator.cpp
 						 daemon/routing_table_updator/k_client_node_swap_wait_queue.cpp
+						 daemon/routing_table_updator/__test.cpp
 						 daemon/sender/sender.cpp
 						 daemon/receiver/receiver.cpp
 						 daemon/broker/broker.cpp
