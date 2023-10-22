@@ -18,7 +18,12 @@ int ping_wait_queue_unit_test()
 	ekp2p::KClientNodeSwapWaitQueue waitQueue;
 	waitQueue.start();
 	
-	
+	sleep(1);
+	waitQueue.regist( nullptr , nullptr , nullptr );
+	waitQueue.regist( nullptr , nullptr , nullptr );
+
+
+	sleep(20);
 	// waitQueue.regist( nullptr , nullptr , nullptr );
 	
 

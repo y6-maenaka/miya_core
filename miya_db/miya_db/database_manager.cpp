@@ -83,7 +83,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 	std::shared_ptr<MMyISAM> mmyisam = std::shared_ptr<MMyISAM>( new MMyISAM(fileName) ); // 簡易的に指定のストレージエンジンを使用
 
 
-	// respondスレッドを用意する &(参照)でキャプチャするとスマートポインタのアドレスが変わる
+	// respondスレッドを用意する &(参照)でキャプチャするとスマートポインタのアドレスが変わる ※ 呼び出し元スレッドが死んでいる
 	std::thread lightMiyaDBThread([mmyisam, popSBContainer, pushSBContainer, this]() 
 	{
 		std::unique_ptr<SBSegment> sbSegment;

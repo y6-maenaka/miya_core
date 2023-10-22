@@ -66,6 +66,7 @@ struct KClientNodeSwapWaitQueue
 private:
 	std::vector<SwapWaitNodePair> _nodePairVector;
 	std::shared_ptr<StreamBufferContainer> _sbc;
+
 	std::mutex _mtx;
 	std::condition_variable _cv;
 
