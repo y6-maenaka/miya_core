@@ -81,6 +81,8 @@ int KBucket::autoAdd( std::shared_ptr<KClientNode> target )
 		if( isFull() )
 		{
 			// PING
+			this->move_back( _nodeVector.at(0) ); // 一旦先頭を最後尾に移動
+			_notifyNodeSwap( shared_from_this() , _nodeVector.at(0) , target );
 		}
 		else
 		{
@@ -150,5 +152,9 @@ bool KBucket::isFull()
 
 
 
+void KBucket::notifyNodeSwap( std::function<void( std::shared_ptr<KBucket> , std::shared_ptr<KClientNode>, std::shared_ptr<KClientNode>) > target )
+{
+	_notifyNodeSwap = target;
+}
 
 };

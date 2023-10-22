@@ -1,7 +1,6 @@
 #include "routing_table_updator.h"
 
 
-
 #include "../../kademlia/k_node.h"
 #include "../../kademlia/k_routing_table/k_routing_table.h"
 
@@ -22,6 +21,15 @@ EKP2PKRoutingTableUpdator::EKP2PKRoutingTableUpdator( std::shared_ptr<KRoutingTa
 	_routingTable = routingTable;
 	_toBrokerSBC = toBrokerSBC;
 
+	_swapWaitQueue.start();
+
+
+	// 通知関数のバインドと設定
+	std::function<void( std::shared_ptr<KBucket> , std::shared_ptr<KClientNode>, std::shared_ptr<KClientNode>) > notifyMethod = std::bind(
+					&KClientNodeSwapWaitQueue::regist , std::ref(_swapWaitQueue) , std::placeholders::_1 , std::placeholders::_2, std::placeholders::_3 
+			);
+	_routingTable->notifyNodeSwap( notifyMethod );
+
 	std::cout << "EKP2P::daemon::KRoutingTableUpdator just initialized" << "\n";
 }
 
@@ -35,6 +43,7 @@ int EKP2PKRoutingTableUpdator::start()
 	if( _routingTable == nullptr ) return -1;
 	if( _incomingSB == nullptr ) return -1;
 	if( _toBrokerSBC == nullptr ) return -1;
+
 
 	std::thread ekp2pKRoutingTableUpdator([&]()
 	{
@@ -63,6 +72,9 @@ int EKP2PKRoutingTableUpdator::start()
 				case static_cast<int>(KADEMLIA_RPC_PONG): // PONG
 				{
 					std::cout << "case 2" << "\n";
+					std::shared_ptr<KClientNode> pongedNode = std::make_shared<KClientNode>( popedSB->sourceKNodeAddr() );
+					_swapWaitQueue.unregist( pongedNode );
+					if( popedSB->bodyLength() <= 0 ) discardFlag = false; // 特に下層へのデータがなければセグメントは転送せずに破棄する
 					break;
 				}
 				case static_cast<int>(KADEMLIA_RPC_FIND_NODE): // FIND_NODE

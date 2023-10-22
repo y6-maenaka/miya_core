@@ -17,9 +17,7 @@ KRoutingTable::KRoutingTable( std::shared_ptr<SocketManager> target )
 
 	for( int i=0; i<_bucketArray.size() ; i++ )
 	{
-		// KBucket *initKBucket = new KBucket;
 		_bucketArray.at(i) = std::make_shared<KBucket>();
-		// _routingTable.at(i) = std::make_shared<KBucket>( *initKBucket );
 	}
 
 	std::cout << "new KRoutingTable just Initialized" << "\n";
@@ -74,6 +72,16 @@ short int KRoutingTable::calcBranch( std::shared_ptr<KNodeAddr> targetNodeAddr )
 }
 
 
+
+
+void KRoutingTable::notifyNodeSwap( std::function<void( std::shared_ptr<KBucket> , std::shared_ptr<KClientNode>, std::shared_ptr<KClientNode>) > target )
+{
+	for( int i=0; i<_bucketArray.size() ; i++ )
+	{
+		_bucketArray.at(i)->notifyNodeSwap( target );
+	}
+
+}
 
 
 

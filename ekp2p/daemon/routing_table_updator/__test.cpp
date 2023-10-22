@@ -19,8 +19,8 @@ int ping_wait_queue_unit_test()
 	waitQueue.start();
 	
 	sleep(1);
-	waitQueue.regist( nullptr , nullptr , nullptr );
-	waitQueue.regist( nullptr , nullptr , nullptr );
+	//waitQueue.regist( nullptr , nullptr , nullptr );
+	//waitQueue.regist( nullptr , nullptr , nullptr );
 
 
 	sleep(20);

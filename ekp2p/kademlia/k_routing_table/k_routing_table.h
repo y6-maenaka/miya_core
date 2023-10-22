@@ -8,6 +8,7 @@
 #include <vector>
 #include <mutex>
 #include <condition_variable>
+#include <functional>
 
 
 
@@ -49,6 +50,9 @@ public:
 	short int calcBranch( std::shared_ptr<KNodeAddr> targetNodeAddr );
 
 	std::vector< const std::shared_ptr<KClientNode> > randomPick( size_t size );
+
+	void notifyNodeSwap( std::function<void( std::shared_ptr<KBucket> , std::shared_ptr<KClientNode>, std::shared_ptr<KClientNode>) > target );
+	
 };
 
 

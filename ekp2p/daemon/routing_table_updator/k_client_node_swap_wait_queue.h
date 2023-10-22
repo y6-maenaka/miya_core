@@ -61,7 +61,9 @@ struct SwapWaitNodePair
 
 
 
-struct KClientNodeSwapWaitQueue
+
+
+class KClientNodeSwapWaitQueue
 {
 private:
 	std::vector<SwapWaitNodePair> _nodePairVector;

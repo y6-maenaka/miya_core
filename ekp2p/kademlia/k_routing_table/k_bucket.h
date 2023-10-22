@@ -8,6 +8,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <algorithm>
+#include <functional>
 
 
 
@@ -24,10 +25,10 @@ class KClientNode;
 
 
 
-using KClientNodeVector =  std::vector< std::shared_ptr<KClientNode> >;
+using KClientNodeVector = std::vector< std::shared_ptr<KClientNode> >;
 
 
-struct KBucket
+struct KBucket : public std::enable_shared_from_this<KBucket>
 {
 private:
 	// std::mutex _mtx; 保留,std::unique_ptrで対応できないか検討する
@@ -37,7 +38,8 @@ private:
 
 	// 排他制御
 	std::mutex _mtx;
-	// std::condition_variable _cv;
+
+	std::function<void( std::shared_ptr<KBucket> , std::shared_ptr<KClientNode>, std::shared_ptr<KClientNode>) > _notifyNodeSwap;
 
 protected:
 	std::shared_ptr<KClientNode> find( std::shared_ptr<KClientNode> target );
@@ -50,6 +52,8 @@ protected:
 public:
 	int autoAdd( std::shared_ptr<KClientNode> target );
 	bool isFull();
+
+	void notifyNodeSwap( std::function<void( std::shared_ptr<KBucket> , std::shared_ptr<KClientNode>, std::shared_ptr<KClientNode>) > target );
 };
 
 

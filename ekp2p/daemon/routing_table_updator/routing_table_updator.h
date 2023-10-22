@@ -7,6 +7,7 @@
 #include <vector>
 
 
+#include "./k_client_node_swap_wait_queue.h"
 
 
 class StreamBuffer;
@@ -22,6 +23,7 @@ namespace ekp2p
 class KBucket;
 class KRoutingTable;
 class KClientNode;
+class KClientNodeSwapWaitQueue;
 
 
 
@@ -37,11 +39,10 @@ private:
 	std::shared_ptr<StreamBufferContainer> _incomingSB;
 	std::shared_ptr<StreamBufferContainer> _toBrokerSBC;
 
-	struct KClientNodeSwapWaitQueue
-	{
-	} _kClientNodeSwapWaitQueue;
 
 	std::vector<std::thread::id> _activeSenderThreadIDVector; // 念の為管理しておく
+
+	KClientNodeSwapWaitQueue _swapWaitQueue; // PING交換管理用のモジュール
 
 public:
 	EKP2PKRoutingTableUpdator( std::shared_ptr<KRoutingTable> routingTable , std::shared_ptr<StreamBufferContainer> incomingSB , std::shared_ptr<StreamBufferContainer> toBrokerSBC );
