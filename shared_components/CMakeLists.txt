@@ -36,6 +36,7 @@ add_library( SHARED_COMPONENTS SHARED
 
 target_link_libraries( SHARED_COMPONENTS PUBLIC
 												${OPENSSL_LIBRARIES}
+												EKP2P #SBSegmentをekp2p::headerから作成するために必要
 )
 
 

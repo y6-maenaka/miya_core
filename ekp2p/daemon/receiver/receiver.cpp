@@ -8,7 +8,7 @@
 #include "../../../shared_components/stream_buffer/stream_buffer.h"
 #include "../../../shared_components/stream_buffer/stream_buffer_container.h"
 
-
+#include "../../ekp2p.h"
 #include "../../protocol.h"
 // #include "./allowed_protocol_set.h"
 
@@ -71,13 +71,10 @@ int EKP2PReceiver::start()
 			int protocol = static_cast<int>( header->protocol() );
 
 			std::unique_ptr<SBSegment> sb = std::make_unique<SBSegment>();
-			sb->sourceKNodeAddr( header->sourceKNodeAddr() );
-			sb->relayKNodeAddrVector( header->relayKNodeAddrVector() );
+			sb->importFromEKP2PHeader( header );
+			sb->forwardingSBCID( header->protocol() );
 			sb->body( message->payload() , header->payloadLength() );
-			sb->protocol( header->protocol() );
-			sb->rpcType( header->rpcType() );
-
-
+	
 			std::cout << "------------------------------------------------------------------" << "\n";
 			header->printRaw();
 			std::cout << "------------------------------------------------------------------" << "\n";

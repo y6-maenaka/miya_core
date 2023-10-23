@@ -86,4 +86,13 @@ void KRoutingTable::notifyNodeSwap( std::function<void( std::shared_ptr<KBucket>
 
 
 
+const std::shared_ptr<KHostNode> KRoutingTable::hostNode()
+{
+	return _hostNode;
+}
+
+
+
+
+
 };

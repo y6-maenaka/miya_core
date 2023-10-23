@@ -8,6 +8,8 @@
 #include <condition_variable>
 #include <functional>
 #include <any>
+#include <memory>
+
 
 
 
@@ -15,6 +17,7 @@
 namespace ekp2p
 {
 	class KNodeAddr;
+	struct EKP2PMessageHeader;
 };
 
 
@@ -22,6 +25,8 @@ constexpr unsigned int DEFAULT_STREAM_BUFFER_CAPACITY = 20;
 
 
 
+
+// ekp2pに最適化されたストリームバッファセグメント
 struct SBSegment
 {
 	struct
@@ -32,6 +37,8 @@ struct SBSegment
 		uint16_t _bodySize;
 		uint16_t _reserved;
 
+		unsigned short _forwardingSBCID; // brokerで次のモジュールへの転送先を示す
+
 	} _controlBlock;
 
 
@@ -39,6 +46,7 @@ struct SBSegment
 	{
 		unsigned int _rpcType;
 		bool _isProcessed = false;
+		int _sendFlag = 0; // 0 : sendBack(sourceKNodeAddrに送信)
 		std::shared_ptr<ekp2p::KNodeAddr> _sourceKNodeAddr; 
 		std::vector< std::shared_ptr<ekp2p::KNodeAddr> > _relayKNodeAddrVector;
 	} _ekp2pBlock;
@@ -69,6 +77,8 @@ public:
 	unsigned short rpcType();
 	unsigned short protocol();
 	bool ekp2pIsProcessed();
+	int sendFlag();
+	unsigned short forwardingSBCID();
 
 	/* Setter群 */
 	void body( void* body , unsigned short bodyLength );
@@ -79,7 +89,12 @@ public:
 	void rpcType( unsigned short target );
 	void protocol( unsigned short target );
 	void ekp2pIsProcessed( bool target );
-	
+	void sendFlag( int target );
+	void forwardingSBCID( unsigned short target );
+
+
+	// Import関係
+	void importFromEKP2PHeader( std::shared_ptr<ekp2p::EKP2PMessageHeader> fromHeader );
 };
 
 

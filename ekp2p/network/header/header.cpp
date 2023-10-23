@@ -146,7 +146,7 @@ bool EKP2PMessageHeader::importRawSequentially( std::shared_ptr<unsigned char> f
 
 
 
-void EKP2PMessageHeader::sourceNodeAddr( std::shared_ptr<KNodeAddr> nodeAddr )
+void EKP2PMessageHeader::sourceKNodeAddr( std::shared_ptr<KNodeAddr> nodeAddr )
 {
 	if( nodeAddr == nullptr )
 		_sourceKNodeAddr = nullptr;

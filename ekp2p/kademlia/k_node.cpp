@@ -22,13 +22,14 @@ KNodeAddr::KNodeAddr( struct sockaddr_in *addr )
 
 
 
-
+/*
 KNodeAddr::KNodeAddr( unsigned long ipv4 , unsigned short port )
 {
 	_IPv4Addr = ipv4;
 	_Port = port;
 	setNodeID();
 }
+*/
 
 
 
@@ -65,13 +66,15 @@ std::shared_ptr<struct sockaddr_in> KNodeAddr::sockaddr_in()
 
 
 
+
+
 unsigned char* KNodeAddr::ID()
 {
 	return _ID;
 }
 
 
-uint64_t KNodeAddr::ipv4()
+uint32_t KNodeAddr::ipv4()
 {
 	return _IPv4Addr;
 }

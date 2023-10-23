@@ -30,26 +30,23 @@ class SocketManager;
 struct KNodeAddr
 {
 // private:
-	uint64_t _IPv4Addr;
+	uint32_t _IPv4Addr;
 	uint16_t _Port;
 	unsigned char _ID[20];
-
-
 
 
 public:
 	KNodeAddr(){};
 	KNodeAddr( struct sockaddr_in *addr );
-	KNodeAddr( unsigned long ipv4 , unsigned short port ); // アーキテクチャによってビット数が異なる可能性あり
+	// KNodeAddr( unsigned long ipv4 , unsigned short port ); // アーキテクチャによってビット数が異なる可能性あり
 
 	void setNodeID();
-
 
 
 	std::shared_ptr<struct sockaddr_in> sockaddr_in();
 	unsigned char* ID();
 
-	uint64_t ipv4();
+	uint32_t ipv4();
 	uint16_t port();
 
 	size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );

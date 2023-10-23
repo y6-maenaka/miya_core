@@ -13,12 +13,15 @@
 #include <errno.h>
 #include <fcntl.h>
 
+#include <errno.h>
+
 
 namespace ekp2p{
 
 
 
-class KNodeAddr;
+struct KNodeAddr;
+struct EKP2PMessage;
 
 
 
@@ -30,7 +33,6 @@ private:
 	int _port;
 	// int _type;
 	struct sockaddr_in _addr;
-
 
 public:
 	SocketManager( std::shared_ptr<KNodeAddr> fromKNodeAddr );
@@ -46,6 +48,7 @@ public:
 
 	int send( unsigned char* senfBuff, unsigned int senfBuffSize );
 	int send( std::shared_ptr<unsigned char> rawBuff, size_t rawBuffLength );
+	int send( std::shared_ptr<EKP2PMessage> msg );
 
 	size_t receive( std::shared_ptr<unsigned char> *retRaw );
 	/* send() によって振り分けられる */
@@ -60,7 +63,6 @@ public:
 	// int sockType();
 
 	struct sockaddr_in ipv4Addr();
-
 
 	/* テスト用 本番環境では極力使用しない*/
 	void sock( int bindedSock );

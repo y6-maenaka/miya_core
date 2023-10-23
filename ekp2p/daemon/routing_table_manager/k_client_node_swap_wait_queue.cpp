@@ -4,6 +4,7 @@
 
 
 #include "../../kademlia/k_node.h"
+#include "../../kademlia/k_routing_table/k_bucket.h"
 #include "../../kademlia/k_routing_table/k_routing_table.h"
 
 #include "../../../shared_components/stream_buffer/stream_buffer.h"
@@ -71,6 +72,7 @@ void KClientNodeSwapWaitQueue::start()
 			for( std::vector<SwapWaitNodePair>::iterator itr = _nodePairVector.begin(); itr != _nodePairVector.end();)
 			{
 				if(( std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count() - itr->_startTime	) >= DEFAULT_WAIT_PING_TIME ){
+					itr->_targetBucket->swapForce( itr->_remainingNode , itr->_candidateNode ); // 指定時間が経過したので交換する
 					itr = _nodePairVector.erase(itr);
 					std::cout << "erased !!!!" << "\n";
 				}
@@ -118,6 +120,7 @@ void KClientNodeSwapWaitQueue::unregist( std::shared_ptr<KClientNode> target )
 
 	std::vector<SwapWaitNodePair>::iterator targetItr = std::find_if( _nodePairVector.begin(), _nodePairVector.end(), customCompare );
 	_nodePairVector.erase( targetItr );
+	
 	_cv.notify_all();
 }
 

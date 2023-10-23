@@ -46,25 +46,28 @@ namespace ekp2p
 
 
 
-class KNodeAddr;
+struct KNodeAddr;
 
 
 
 struct EKP2PMessageHeader
 {
 //private:
-	struct __attribute__((packed))
+	struct Meta 
  	{
 		unsigned char _token[4]; // startString
 		uint16_t _headerLength ; // 2 [ bytes ] // 書き出しの時に値が挿入されるので基本的に気にしなくて良い
 		uint16_t _payloadLength; // 2 [ bytes [
-		uint8_t	 _rpcType; // 1 [bytes] ※ kademliaレベルでのptorocol
-		uint8_t _protocol; // 1 [ bytes ] ※ 下層モジュールへのプロトコル
+		uint16_t	 _rpcType; // 1 [bytes] ※ kademliaレベルでのptorocol
+		uint16_t _protocol; // 1 [ bytes ] ※ 下層モジュールへのプロトコル
 		uint8_t _version; // 1 [ bytes ]
 		
 		uint16_t	_relayKNodeAddrCount = 0;
-		unsigned char reserved[7];
-	} _meta;
+		unsigned char reserved[5];
+
+		size_t headerLength(){ return static_cast<size_t>(ntohs(_headerLength)); };
+		size_t payloadLength(){ return static_cast<size_t>(ntohs(_payloadLength)); };
+	} _meta __attribute__((packed));
 
 
 	std::shared_ptr<KNodeAddr> _sourceKNodeAddr = nullptr ;
@@ -77,7 +80,7 @@ public:
 	void rpcType( unsigned short type ){ _meta._rpcType = htons(type); };
 	void protocol( unsigned short type ){ _meta._protocol = static_cast<uint8_t>(type); };
 	void payloadLength( unsigned short length ){ _meta._payloadLength = htons(length); };
-	void sourceNodeAddr( std::shared_ptr<KNodeAddr> nodeAddr );
+	void sourceKNodeAddr( std::shared_ptr<KNodeAddr> nodeAddr );
 		
 
 	/* Getter */

@@ -45,6 +45,10 @@
 - kademliaでは満杯時に溢れたノードは交換用キャッシュに保存しておく
 
 
+- listenSocketとhostNodeは分ける
+
+
+
 [ Task ]
 ・二重支払いチェック
 ・マイニング

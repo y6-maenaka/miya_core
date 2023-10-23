@@ -18,6 +18,13 @@ EKP2PMessage::EKP2PMessage()
 
 void EKP2PMessage::payload( std::shared_ptr<unsigned char> payload , size_t payloadLength )
 {
+	if( payload == nullptr || payloadLength == 0)
+	{
+		_header->payloadLength(0);
+		_payload = nullptr;
+		return;
+	}
+
 	_header->payloadLength( payloadLength );
 	_payload = payload;
 }

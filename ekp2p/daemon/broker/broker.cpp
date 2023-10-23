@@ -1,5 +1,6 @@
 #include "broker.h"
 
+#include "../../ekp2p.h"
 
 
 #include "../../../shared_components/stream_buffer/stream_buffer.h"
@@ -15,15 +16,17 @@ namespace ekp2p
 EKP2PBroker::EKP2PBroker( std::shared_ptr<StreamBufferContainer> incomingSB , std::shared_ptr<StreamBufferContainer> toRoutingTableUpdatorSBC )
 {
 	_incomingSB =	incomingSB;
-	_toRoutingTableUpdatorSBC = toRoutingTableUpdatorSBC;
+	_toRoutingTableManagerSBC = toRoutingTableUpdatorSBC;
 }
 
 
 
-int EKP2PBroker::start( bool isRouting )
+int EKP2PBroker::start( bool requiresRouting )
 {
 	if( _incomingSB == nullptr ) return -1;
-	if( _toRoutingTableUpdatorSBC == nullptr ) return -1;
+	if( _toRoutingTableManagerSBC == nullptr ) return -1;
+	printf(">>>>>> %p\n", _toRoutingTableManagerSBC.get() );
+	printf("<<<<< isRouting :: %p - %d\n", &requiresRouting , requiresRouting );
 
 
 	// 行き or 帰り はどう判断する？
@@ -37,29 +40,27 @@ int EKP2PBroker::start( bool isRouting )
 		for(;;)
 		{
 			sb = _incomingSB->popOne();
-			unsigned short protocol = sb->protocol();
-			if( protocol >= MAX_PROTOCOL ) return nullptr; // 受け付けていないプロトコル
+			unsigned short forwardingProtocol = sb->forwardingSBCID();
+			if( forwardingProtocol >= MAX_PROTOCOL ) return nullptr; // 受け付けていないプロトコル
 
-			if( _sbHub.at(protocol) == nullptr ) std::cout << "_sbHub.at(ptorocol) is nullptr" << "\n";
-			if( _allowedProtocolSet[protocol] == false ) std::cout << "protocol :: " <<  protocol << " :: is not allowed" << "\n";
-
+			std::cout << "forwarding protocol :: " << forwardingProtocol << "\n";
 
 			// KRoutingTableだけは独立して転送する
 			std::cout << sb->ekp2pIsProcessed() << "\n"; 
-			isRouting = true; // ???
-			std::cout << "isRouting :: " << isRouting << "\n";
-			if( !(sb->ekp2pIsProcessed()) && isRouting ) 
+			requiresRouting = true; // ???
+			if( !(sb->ekp2pIsProcessed()) && requiresRouting ) 
 			{
-				_toRoutingTableUpdatorSBC->pushOne( std::move(sb) );
+				_toRoutingTableManagerSBC->pushOne( std::move(sb) );
+				std::cout << "forwarding to RoutingTableManagerSBB ===== >> " << "\n";
 				continue; // skip while done ekp2p processing
 			}
 
-			if( _sbHub.at(protocol) == nullptr || !(_allowedProtocolSet[protocol]) ){
+			if( _sbHub.at(forwardingProtocol) == nullptr || !(_allowedProtocolSet[forwardingProtocol]) ){
 				std::cout << "Not Allowed Pack Received" << "\n";
 				continue;
 			}
 
-			_sbHub.at(protocol)->pushOne( std::move(sb) ); // 受信セグメントの転送
+			_sbHub.at(forwardingProtocol)->pushOne( std::move(sb) ); // 受信セグメントの転送
 		}
 	});
 

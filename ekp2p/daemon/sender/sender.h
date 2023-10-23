@@ -18,8 +18,9 @@ namespace ekp2p
 
 
 
-constexpr int EKP2P_SEND_UNICAST = 0;
-constexpr int EKP2P_SEND_BROADCAST = 1;
+constexpr int EKP2P_SENDBACK = 1;
+constexpr int EKP2P_SEND_UNICAST = 2;
+constexpr int EKP2P_SEND_BROADCAST = 4;
 
 
 
@@ -33,7 +34,6 @@ class KNodeAddr;
 struct EKP2PSenderOptions
 {
 public:
-	int castType;
 	size_t castSize = 0;
 	std::vector< std::shared_ptr<ekp2p::KNodeAddr> > destinationNodeAddr;
 };

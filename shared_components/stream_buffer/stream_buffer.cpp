@@ -1,6 +1,7 @@
 #include "stream_buffer.h"
 
 #include "../../ekp2p/kademlia/k_node.h"
+#include "../../ekp2p/network/header/header.h"
 
 
 
@@ -75,6 +76,17 @@ bool SBSegment::ekp2pIsProcessed()
 	return _ekp2pBlock._isProcessed;
 }
 
+int SBSegment::sendFlag()
+{
+	return _ekp2pBlock._sendFlag;
+}
+
+unsigned short SBSegment::forwardingSBCID()
+{
+	return _controlBlock._forwardingSBCID;
+}
+
+
 
 
 
@@ -113,6 +125,27 @@ void SBSegment::ekp2pIsProcessed( bool target )
 }
 
 
+void SBSegment::sendFlag( int target )
+{
+	_ekp2pBlock._sendFlag = target;
+}
+
+void SBSegment::forwardingSBCID( unsigned short target )
+{
+	_controlBlock._forwardingSBCID = target;
+}
+
+
+
+
+
+void SBSegment::importFromEKP2PHeader( std::shared_ptr<ekp2p::EKP2PMessageHeader> fromHeader )
+{
+	this->sourceKNodeAddr(fromHeader->sourceKNodeAddr() );
+	this->relayKNodeAddrVector( fromHeader->relayKNodeAddrVector() );
+	this->protocol( fromHeader->protocol() );
+	this->rpcType( fromHeader->rpcType() );
+}
 
 
 
@@ -171,6 +204,7 @@ std::unique_ptr<SBSegment> StreamBuffer::dequeue()
 	
 	return std::move( ret );
 }
+
 
 
 

@@ -33,14 +33,14 @@ class EKP2PBroker
 	std::shared_ptr<StreamBufferContainer> _incomingSB;
 	std::vector<std::thread::id> _activeSenderThreadIDVector; // 念の為管理しておく
 
-	std::shared_ptr<StreamBufferContainer> _toRoutingTableUpdatorSBC;
+	std::shared_ptr<StreamBufferContainer> _toRoutingTableManagerSBC;
 	std::array< std::shared_ptr<StreamBufferContainer> , MAX_PROTOCOL > _sbHub = {nullptr}; // メッセージプロトコルに合致したSBにメッセージを流す
 	bool _allowedProtocolSet[MAX_PROTOCOL] = {true};
 
 
 public:
 	EKP2PBroker( std::shared_ptr<StreamBufferContainer> incomingSB , std::shared_ptr<StreamBufferContainer> _toRoutingTableUpdatorSBC );
-	int start( bool isRouting = true );
+	int start( bool requiresRouting = true );
 	int forwardingDestination( std::shared_ptr<StreamBufferContainer> sbc , unsigned short destination );
 };
 

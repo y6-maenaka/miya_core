@@ -152,6 +152,20 @@ bool KBucket::isFull()
 
 
 
+void KBucket::swapForce( std::shared_ptr<KClientNode> swapFromInBucket , std::shared_ptr<KClientNode> swapTo )
+{
+	std::unique_lock<std::mutex> lock(_mtx);
+
+	KClientNodeVector::iterator targetInNodeIterator = std::find( _nodeVector.begin() , _nodeVector.end() , swapFromInBucket );
+	if( targetInNodeIterator == _nodeVector.end() ) return;
+
+	auto erasedItr = _nodeVector.erase( targetInNodeIterator );
+	_nodeVector.insert(  erasedItr , swapTo	);
+
+
+}
+
+
 void KBucket::notifyNodeSwap( std::function<void( std::shared_ptr<KBucket> , std::shared_ptr<KClientNode>, std::shared_ptr<KClientNode>) > target )
 {
 	_notifyNodeSwap = target;

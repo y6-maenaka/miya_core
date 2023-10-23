@@ -30,7 +30,7 @@ namespace ekp2p
 
 
 
-constexpr unsigned int DEFAULT_WAIT_PING_TIME = 3;
+constexpr unsigned int DEFAULT_WAIT_PING_TIME = 5;
 
 
 

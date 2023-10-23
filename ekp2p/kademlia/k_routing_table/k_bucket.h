@@ -53,6 +53,8 @@ public:
 	int autoAdd( std::shared_ptr<KClientNode> target );
 	bool isFull();
 
+	void swapForce( std::shared_ptr<KClientNode> swapFromInBucket , std::shared_ptr<KClientNode> swapTo );
+
 	void notifyNodeSwap( std::function<void( std::shared_ptr<KBucket> , std::shared_ptr<KClientNode>, std::shared_ptr<KClientNode>) > target );
 };
 

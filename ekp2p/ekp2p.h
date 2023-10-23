@@ -38,9 +38,12 @@ class KRoutingTable;
 class SocketManager;
 class SmartMiddleBuffer;
 
-class KNodeAddr;
+struct KNodeAddr;
 class KHostNode;
 class KClientNode;
+
+struct EKP2PMessage;
+struct EKP2PMessageHeader;
 
 
 class EKP2PBroker;
@@ -52,6 +55,7 @@ class EKP2PKRoutingTableUpdator;
 
 constexpr unsigned short _PROTOCOL_NAT_ = 3;
 
+constexpr unsigned short DEFAULT_DAEMON_FORWARDING_SBC_ID_SENDER = 0;
 
 
 
@@ -86,9 +90,9 @@ private:
 
 	struct
 	{
-		std::shared_ptr<EKP2PKRoutingTableUpdator> _updator;
-		std::shared_ptr<StreamBufferContainer> _toUpdatorSB;
-	} _updatorDaemon;
+		std::shared_ptr<EKP2PKRoutingTableUpdator> _manager;
+		std::shared_ptr<StreamBufferContainer> _toManagerSB;
+	} _routingTableManagerDaemon;
 
 
 
@@ -100,7 +104,7 @@ public:
 
 	/* 複数portoを監視することも可能だが,NodeIDが変わる 初回監視ポートのみ相手に通知される -> 複数起動できるメリットはない　*/
 	int init(); // KRoutingTableを使うのであれば必須 自身のグローバルアドレスを取得する
-	int start( bool isRouting = true );
+	int start( bool requiresRouting = true );
 
 
 	int send( KClientNode *targetNode , void* payload , unsigned short payloadLength , unsigned short protocol );
@@ -109,11 +113,11 @@ public:
 
 	std::shared_ptr<StreamBufferContainer> toReseiverSB();
 	std::shared_ptr<StreamBufferContainer> toSenderSB();
-	std::shared_ptr<StreamBufferContainer> toUpdatorSB();
+	std::shared_ptr<StreamBufferContainer> toRoutingTableManagerSB();
 
 
-
-	static void sendDimmyEKP2PMSG( const char* destIP, unsigned short destPort , std::shared_ptr<unsigned char> content , size_t contentLength );
+	static void sendDimmyEKP2PMSG( const char* destIP, unsigned short destPort , std::shared_ptr<unsigned char> content , size_t contentLength , struct sockaddr_in sourceAddr ,unsigned short rpcType = 0 );
+	static std::shared_ptr<EKP2PMessage> receiveSingleEKP2PMSG( unsigned short listenPort );
 };
 
 

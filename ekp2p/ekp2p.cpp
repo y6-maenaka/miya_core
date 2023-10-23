@@ -23,7 +23,7 @@
 #include "./daemon/broker/broker.h"
 #include "./daemon/sender/sender.h"
 #include "./daemon/receiver/receiver.h"
-#include "./daemon/routing_table_updator/routing_table_updator.h"
+#include "./daemon/routing_table_manager/routing_table_manager.h"
 
 
 namespace ekp2p{
@@ -45,6 +45,162 @@ EKP2P::EKP2P( std::shared_ptr<KRoutingTable> KRoutingTable )
 	// _mainNode = std::make_shared<KHostNode>();
 	return;
 }
+
+
+
+
+
+int EKP2P::init()
+{
+
+	// 一旦全てのdaemonをセットアップする
+	// ブローカーのセットアップ 
+	// アップデータのセットアップ
+	_brokerDaemon._toBrokerSB = std::make_shared<StreamBufferContainer>();
+	_routingTableManagerDaemon._toManagerSB = std::make_shared<StreamBufferContainer>();
+	_routingTableManagerDaemon._manager = std::make_shared<EKP2PKRoutingTableUpdator>( _kRoutingTable ,_routingTableManagerDaemon._toManagerSB , _brokerDaemon._toBrokerSB );
+	_brokerDaemon._broker = std::make_shared<EKP2PBroker>( _brokerDaemon._toBrokerSB , _routingTableManagerDaemon._toManagerSB );
+
+	// センダーのセットアップ
+	_senderDaemon._toSenderSB = std::make_shared<StreamBufferContainer>();
+	_senderDaemon._sender	= std::make_shared<EKP2PSender>( _kRoutingTable , _senderDaemon._toSenderSB , _brokerDaemon._toBrokerSB );
+	//_senderDaemon._sender->start();
+
+	// レシーバーのセットアップ
+	_receiverDaemon._toReseiverSB = std::make_shared<StreamBufferContainer>(); 
+	_receiverDaemon._receiver = std::make_shared<EKP2PReceiver>( _hostSocketManager , _brokerDaemon._toBrokerSB ); // receiverにはSBは不要 reseice制限フラグ
+	_receiverDaemon._receiver->toRoutingTableUpdatorSB( _routingTableManagerDaemon._toManagerSB );
+	//_receiverDaemon._receiver->start();
+
+
+
+	// 主要フォワーディング先を設定
+	_brokerDaemon._broker->forwardingDestination( _senderDaemon._toSenderSB , DEFAULT_DAEMON_FORWARDING_SBC_ID_SENDER );
+
+	return 0;
+}
+
+
+
+
+int EKP2P::start( bool requiresRouting )
+{
+	// Daemonは全てバックグラウンドで起動される
+	_brokerDaemon._broker->start( requiresRouting ); 
+	_senderDaemon._sender->start(); 
+	_receiverDaemon._receiver->start();
+	_routingTableManagerDaemon._manager->start();
+
+
+	return 0;
+}
+
+
+
+std::shared_ptr<StreamBufferContainer> EKP2P::toReseiverSB()
+{
+	return _receiverDaemon._toReseiverSB;
+}
+
+
+std::shared_ptr<StreamBufferContainer> EKP2P::toSenderSB()
+{
+	return _senderDaemon._toSenderSB;
+}
+
+
+std::shared_ptr<StreamBufferContainer> EKP2P::toRoutingTableManagerSB()
+{
+	return _routingTableManagerDaemon._toManagerSB;
+}
+
+
+
+
+
+void EKP2P::sendDimmyEKP2PMSG( const char* destIP, unsigned short destPort , std::shared_ptr<unsigned char> content , size_t contentLength , struct sockaddr_in sourceAddr ,unsigned short rpcType )
+{
+	int sock = socket( AF_INET , SOCK_DGRAM , IPPROTO_UDP );
+
+	struct sockaddr_in addr; memset( &addr , 0x00 , sizeof(addr) );
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = inet_addr( destIP );
+	addr.sin_port = htons( destPort );
+
+	std::shared_ptr<KNodeAddr> sourceKNodeAddr = std::make_shared<KNodeAddr>( &sourceAddr ); // sourceKNodeAddrの作成
+
+	EKP2PMessage msg;
+	msg.payload( content , contentLength );
+	msg.header()->rpcType( rpcType );
+	msg.header()->sourceKNodeAddr( sourceKNodeAddr );
+
+	std::shared_ptr<unsigned char> exportedMSG; size_t exportedMSGLength;
+	exportedMSGLength = msg.exportRaw( &exportedMSG );
+
+	// msg.header()->printRaw();
+	msg.printRaw();
+
+	size_t sendLen; 
+	sendLen = sendto( sock , exportedMSG.get() , exportedMSGLength , 0 ,(struct sockaddr *)&addr, sizeof(addr) );
+	std::cout << "sended dummy msg :: " << sendLen << " [bytes]" << "\n";
+}
+
+
+
+
+std::shared_ptr<EKP2PMessage> EKP2P::receiveSingleEKP2PMSG( unsigned short listenPort )
+{
+	std::shared_ptr<EKP2PMessage> retMSG;
+	
+	std::shared_ptr<SocketManager> sockManager = std::make_shared<SocketManager>();
+	sockManager->setupUDPSock( listenPort );
+
+	printf("SocketManager's Pointere :: %p\n", sockManager.get() );
+
+	std::shared_ptr<unsigned char> rawMSG; size_t rawMSGLength;
+	rawMSGLength = sockManager->receive(  &rawMSG );
+
+	std::cout << "!!!! -> " << rawMSGLength << "\n";
+
+	std::cout << "unknown datd segment received" << "\n";
+
+	auto parseRawMSG = ([]( std::shared_ptr<unsigned char> fromRawMSG , size_t fromRawMSGLength ) -> std::shared_ptr<EKP2PMessage>
+	{
+		std::cout << "--- 1 ---" << "\n";
+
+		std::shared_ptr<EKP2PMessage> ret = std::make_shared<EKP2PMessage>();
+		ret->header()->importRawSequentially( fromRawMSG );
+
+		std::cout << "--- 2 ---" << "\n";
+							
+		if( memcmp( ret->header()->token() , "MIYA" , 4 ) != 0 ) return nullptr; // トークン不一致
+
+		std::cout << "--- 3 ---" << "\n";
+
+		//std::shared_ptr<unsigned char> payloadHead( fromRawMSG.get() + ret->header()->headerLength() );
+		//printf("payloadHeader : %p\n", payloadHead.get() );
+
+		// この定義は違和感があるが..うごく
+		std::shared_ptr<unsigned char> payloadHead = std::make_shared<unsigned char>(*( fromRawMSG.get() + ret->header()->headerLength() ));
+
+		std::cout << "--- 4 ---" << "\n";
+
+		ret->payload( payloadHead );
+
+		std::cout << "--- 5 ---" << "\n";
+		return ret;
+	});
+
+	std::cout << "--- 6 ---" << "\n";
+	
+	retMSG = parseRawMSG( rawMSG , rawMSGLength );
+
+	std::cout << "--- 7 ---" << "\n";
+
+	return retMSG;
+}
+
+
 
 
 
@@ -273,100 +429,6 @@ void EKP2P::start() // 一旦daemon系を起動してflagで制御する
 	// サードパーティーハンドラの起動
 }
 */
-
-
-
-
-int EKP2P::init()
-{
-
-	// 一旦全てのdaemonをセットアップする
-	// ブローカーのセットアップ 
-	// アップデータのセットアップ
-	_brokerDaemon._toBrokerSB = std::make_shared<StreamBufferContainer>();
-	_updatorDaemon._toUpdatorSB = std::make_shared<StreamBufferContainer>();
-	_updatorDaemon._updator = std::make_shared<EKP2PKRoutingTableUpdator>( _kRoutingTable ,_updatorDaemon._toUpdatorSB , _brokerDaemon._toBrokerSB );
-	_brokerDaemon._broker = std::make_shared<EKP2PBroker>( _brokerDaemon._toBrokerSB , _updatorDaemon._toUpdatorSB );
-
-	// センダーのセットアップ
-	_senderDaemon._toSenderSB = std::make_shared<StreamBufferContainer>();
-	_senderDaemon._sender	= std::make_shared<EKP2PSender>( _kRoutingTable , _senderDaemon._toSenderSB , _brokerDaemon._toBrokerSB );
-	//_senderDaemon._sender->start();
-
-	// レシーバーのセットアップ
-	_receiverDaemon._toReseiverSB = std::make_shared<StreamBufferContainer>(); 
-	_receiverDaemon._receiver = std::make_shared<EKP2PReceiver>( _hostSocketManager , _brokerDaemon._toBrokerSB ); // receiverにはSBは不要 reseice制限フラグ
-	_receiverDaemon._receiver->toRoutingTableUpdatorSB( _updatorDaemon._toUpdatorSB );
-	//_receiverDaemon._receiver->start();
-
-
-
-	// 主要フォワーディング先を設定
-
-	return 0;
-}
-
-
-
-
-int EKP2P::start( bool isRouting )
-{
-	// Daemonは全てバックグラウンドで起動される
-	_brokerDaemon._broker->start( isRouting ); 
-	_senderDaemon._sender->start(); 
-	_receiverDaemon._receiver->start();
-	_updatorDaemon._updator->start();
-
-
-	return 0;
-}
-
-
-
-std::shared_ptr<StreamBufferContainer> EKP2P::toReseiverSB()
-{
-	return _receiverDaemon._toReseiverSB;
-}
-
-
-std::shared_ptr<StreamBufferContainer> EKP2P::toSenderSB()
-{
-	return _senderDaemon._toSenderSB;
-}
-
-
-std::shared_ptr<StreamBufferContainer> EKP2P::toUpdatorSB()
-{
-	return _updatorDaemon._toUpdatorSB;
-}
-
-
-
-
-void EKP2P::sendDimmyEKP2PMSG( const char* destIP, unsigned short destPort , std::shared_ptr<unsigned char> content , size_t contentLength )
-{
-	int sock = socket( AF_INET , SOCK_DGRAM , IPPROTO_UDP );
-
-	struct sockaddr_in addr; memset( &addr , 0x00 , sizeof(addr) );
-	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = inet_addr( destIP );
-	addr.sin_port = htons( destPort );
-
-
-	EKP2PMessage msg;
-	msg.payload( content , contentLength );
-
-	std::shared_ptr<unsigned char> exportedMSG; size_t exportedMSGLength;
-	exportedMSGLength = msg.exportRaw( &exportedMSG );
-
-	// msg.header()->printRaw();
-	msg.printRaw();
-
-
-	size_t sendLen; 
-	sendLen = sendto( sock , exportedMSG.get() , exportedMSGLength , 0 ,(struct sockaddr *)&addr, sizeof(addr) );
-	std::cout << "sended dummy msg :: " << sendLen << " [bytes]" << "\n";
-}
 
 
 
