@@ -5,6 +5,8 @@ include_directories( ${OPENSSL_INCLUDE_DIRS} )
 
 
 add_library( MIYA_CHAIN STATIC
+							
+							chain_manager.cpp
 
 							transaction/tx_manager.cpp
 

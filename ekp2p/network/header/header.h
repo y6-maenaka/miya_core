@@ -78,9 +78,10 @@ public:
 
 	/* Setter */
 	void rpcType( unsigned short type ){ _meta._rpcType = htons(type); };
-	void protocol( unsigned short type ){ _meta._protocol = static_cast<uint8_t>(type); };
+	void protocol( unsigned short type ){ _meta._protocol = htons(type); };
 	void payloadLength( unsigned short length ){ _meta._payloadLength = htons(length); };
 	void sourceKNodeAddr( std::shared_ptr<KNodeAddr> nodeAddr );
+	void relayKNodeAddrVector( std::vector<std::shared_ptr<KNodeAddr>> targetVector );
 		
 
 	/* Getter */

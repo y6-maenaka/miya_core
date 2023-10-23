@@ -50,18 +50,18 @@ int EKP2PReceiver::start()
 		_activeSenderThreadIDVector.push_back( std::this_thread::get_id() ); 
 
 		size_t receivedLength = 0; 
-		std::shared_ptr<unsigned char> receiveBuffer = std::shared_ptr<unsigned char>( new unsigned char[UINT16_MAX] ); // マックスサイズでもたかが知れているので最大で
-		memset( receiveBuffer.get() , 0x00 , sizeof(UINT16_MAX) );
 
+		std::shared_ptr<unsigned char> rawMessage;
 		std::shared_ptr<EKP2PMessage> message;
 		std::shared_ptr<EKP2PMessageHeader> header;
 		
 		for(;;)
 		{
-			receivedLength = recvfrom( _listeningSocketManager->sock() , receiveBuffer.get() , UINT16_MAX , 0 , nullptr , 0 );
+			receivedLength = _listeningSocketManager->receive( &rawMessage );
+			if( receivedLength <= 0 ) continue;
+			// receivedLength = recvfrom( _listeningSocketManager->sock() , receiveBuffer.get() , UINT16_MAX , 0 , nullptr , 0 );
 
-
-			if( (message = parseRawEKP2PMessage( receiveBuffer, receivedLength )) == nullptr )
+			if( (message = parseRawEKP2PMessage( rawMessage , receivedLength )) == nullptr )
 			{
 				std::cout << "不正なデータセグメントを受信" << "\n";
 				continue;
@@ -77,6 +77,8 @@ int EKP2PReceiver::start()
 	
 			std::cout << "------------------------------------------------------------------" << "\n";
 			header->printRaw();
+			std::cout << "header->protocol() :: " << header->protocol() << "\n";
+			std::cout << "forwardingSBCID :: " << sb->forwardingSBCID() << "\n";
 			std::cout << "------------------------------------------------------------------" << "\n";
 
 			_toBrokerSBC->pushOne( std::move(sb) );
@@ -155,7 +157,8 @@ std::shared_ptr<EKP2PMessage> EKP2PReceiver::parseRawEKP2PMessage( std::shared_p
 	if( memcmp( ret->header()->token() , "MIYA" , 4 ) != 0 ) return nullptr; // トークン不一致
 
 	// ペイロードのインポート
-	std::shared_ptr<unsigned char> payloadHead( fromRaw.get() + ret->header()->headerLength() );
+	// std::shared_ptr<unsigned char> payloadHead( fromRaw.get() + ret->header()->headerLength() );
+	std::shared_ptr<unsigned char> payloadHead = std::make_shared<unsigned char>( *(fromRaw.get() + ret->header()->headerLength()) );
 	ret->payload( payloadHead );
 
 

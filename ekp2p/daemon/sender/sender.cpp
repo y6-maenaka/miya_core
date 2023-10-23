@@ -60,15 +60,7 @@ int EKP2PSender::start()
 
 		for(;;)
 		{		
-			std::cout << "<ekp2p::Sender> check 1" << "\n";
-
 			popedSB = _incomingSB->popOne();
-
-			sleep(1);
-
-			std::cout << "<ekp2p::Sender> check 2" << "\n";
-
-			std::cout << "sendFlag =>> " << popedSB->sendFlag() << "\n";
 
 			switch( popedSB->sendFlag() )
 			{
@@ -82,31 +74,13 @@ int EKP2PSender::start()
 					msg->payload( nullptr , 0 );
 					msg->header()->rpcType( KADEMLIA_RPC_PONG );
 					msg->header()->sourceKNodeAddr( _kRoutingTable->hostNode()->kNodeAddr() ); // 自身のアドレスをセット
-
-					std::cout << "------------------------------" << "\n";
-					msg->header()->printRaw();
-
-					std::shared_ptr<unsigned char> exportedMSGHeader; size_t exportedMSGHeaderLength;
-					exportedMSGHeaderLength = msg->header()->exportRaw( &exportedMSGHeader );
-					std::cout << "exportedMSGHeaderLength >> " << exportedMSGHeaderLength << "\n";
-
-					std::shared_ptr<unsigned char> exportedMSG; size_t exportedMSGLength;
-					exportedMSGLength = msg->exportRaw( &exportedMSG );
-					std::cout << "exportedMSGLength >> " << exportedMSGLength << "\n";
-
-
-					struct sockaddr_in inAddr = sockManager->ipv4Addr();
-
-					std::cout << "ip :: " << inet_ntoa( inAddr.sin_addr ) << "\n";
-					std::cout << "port :: " << ntohs(popedSB->sourceKNodeAddr()->port()) << "\n";
-
+					
 					std::cout << "------------------------------" << "\n";
 
 					size_t sendLength;
 					//sendLength = sockManager->send( popedSB->body() , popedSB->bodyLength() );
 					sendLength = sockManager->send( msg );
 
-										
 					std::cout << "sended message :: " << sendLength << " (bytes)" << "\n";
 					break;
 				}
@@ -115,6 +89,28 @@ int EKP2PSender::start()
 				case static_cast<int>( EKP2P_SENDBACK | EKP2P_SEND_BROADCAST ): // 返信 | ブロードキャスト = sourceKNode + relayKNodeに送信
 				{
 					std::cout << "SourceKNodeAddr + RelayKNodeAddr に返信" << "\n";
+		
+					size_t sendLength;
+					std::shared_ptr<SocketManager> sockManager;
+					
+					std::shared_ptr<EKP2PMessage> msg = std::make_shared<EKP2PMessage>();
+					msg->payload( nullptr , 0 );
+					msg->header()->rpcType( KADEMLIA_RPC_PONG );
+					msg->header()->sourceKNodeAddr( _kRoutingTable->hostNode()->kNodeAddr() ); // 自身のアドレスをセット
+
+					// 1. sourceKNodeに送信					
+					sockManager = std::make_shared<SocketManager>(popedSB->sourceKNodeAddr());
+					sendLength = sockManager->send( msg );
+					std::cout << "[ send ] :: ( " << sendLength << " ) bytes" << "\n";
+				
+
+					// 2. relayKNodeに送信
+					for( auto itr : popedSB->relayKNodeAddrVector() )	{
+						sockManager = std::make_shared<SocketManager>(itr);
+						sendLength = sockManager->send( msg );
+						std::cout << "[ send ] :: ( " << sendLength << " ) bytes" << "\n";
+					}
+
 					break;
 				}
 					

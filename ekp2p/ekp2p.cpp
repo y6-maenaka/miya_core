@@ -115,10 +115,17 @@ std::shared_ptr<StreamBufferContainer> EKP2P::toRoutingTableManagerSB()
 }
 
 
+int EKP2P::assignBrokerDestination( std::shared_ptr<StreamBufferContainer> forwardingSBC , unsigned short destination )
+{
+	return _brokerDaemon._broker->forwardingDestination( forwardingSBC , destination );
+}
 
 
 
-void EKP2P::sendDimmyEKP2PMSG( const char* destIP, unsigned short destPort , std::shared_ptr<unsigned char> content , size_t contentLength , struct sockaddr_in sourceAddr ,unsigned short rpcType )
+
+
+
+void EKP2P::sendDimmyEKP2PMSG( const char* destIP, unsigned short destPort , std::shared_ptr<unsigned char> content , size_t contentLength , struct sockaddr_in sourceAddr ,unsigned short rpcType , unsigned short protocol )
 {
 	int sock = socket( AF_INET , SOCK_DGRAM , IPPROTO_UDP );
 
@@ -131,13 +138,13 @@ void EKP2P::sendDimmyEKP2PMSG( const char* destIP, unsigned short destPort , std
 
 	EKP2PMessage msg;
 	msg.payload( content , contentLength );
+	msg.header()->protocol( protocol );
 	msg.header()->rpcType( rpcType );
 	msg.header()->sourceKNodeAddr( sourceKNodeAddr );
 
 	std::shared_ptr<unsigned char> exportedMSG; size_t exportedMSGLength;
 	exportedMSGLength = msg.exportRaw( &exportedMSG );
 
-	// msg.header()->printRaw();
 	msg.printRaw();
 
 	size_t sendLen; 
@@ -155,47 +162,27 @@ std::shared_ptr<EKP2PMessage> EKP2P::receiveSingleEKP2PMSG( unsigned short liste
 	std::shared_ptr<SocketManager> sockManager = std::make_shared<SocketManager>();
 	sockManager->setupUDPSock( listenPort );
 
-	printf("SocketManager's Pointere :: %p\n", sockManager.get() );
-
 	std::shared_ptr<unsigned char> rawMSG; size_t rawMSGLength;
 	rawMSGLength = sockManager->receive(  &rawMSG );
 
-	std::cout << "!!!! -> " << rawMSGLength << "\n";
-
-	std::cout << "unknown datd segment received" << "\n";
-
 	auto parseRawMSG = ([]( std::shared_ptr<unsigned char> fromRawMSG , size_t fromRawMSGLength ) -> std::shared_ptr<EKP2PMessage>
 	{
-		std::cout << "--- 1 ---" << "\n";
 
 		std::shared_ptr<EKP2PMessage> ret = std::make_shared<EKP2PMessage>();
 		ret->header()->importRawSequentially( fromRawMSG );
 
-		std::cout << "--- 2 ---" << "\n";
-							
 		if( memcmp( ret->header()->token() , "MIYA" , 4 ) != 0 ) return nullptr; // トークン不一致
-
-		std::cout << "--- 3 ---" << "\n";
-
-		//std::shared_ptr<unsigned char> payloadHead( fromRawMSG.get() + ret->header()->headerLength() );
-		//printf("payloadHeader : %p\n", payloadHead.get() );
 
 		// この定義は違和感があるが..うごく
 		std::shared_ptr<unsigned char> payloadHead = std::make_shared<unsigned char>(*( fromRawMSG.get() + ret->header()->headerLength() ));
 
-		std::cout << "--- 4 ---" << "\n";
-
 		ret->payload( payloadHead );
 
-		std::cout << "--- 5 ---" << "\n";
 		return ret;
 	});
 
-	std::cout << "--- 6 ---" << "\n";
 	
 	retMSG = parseRawMSG( rawMSG , rawMSGLength );
-
-	std::cout << "--- 7 ---" << "\n";
 
 	return retMSG;
 }

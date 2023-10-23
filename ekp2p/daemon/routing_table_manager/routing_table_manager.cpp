@@ -64,32 +64,36 @@ int EKP2PKRoutingTableUpdator::start()
 			{
 				case static_cast<int>(KADEMLIA_RPC_IGNORE): // IGNORE
 				{
-					std::cout << "case 0" << "\n";
+					std::cout << "[ IGNORE ] KADEMLIA " << "\n";
 					break;
 				} 
 
 				case static_cast<int>(KADEMLIA_RPC_PING): // PING
 				{
-					std::cout << "case 1" << "\n";
+					std::cout << "[ PING ] KADEMLIA " << "\n";
 					popedSB->sendFlag( EKP2P_SENDBACK | EKP2P_SEND_UNICAST ); // 送信フラグを単一センドバックに
-					popedSB->forwardingSBCID( DEFAULT_DAEMON_FORWARDING_SBC_ID_SENDER );
+					std::cout << "destinoation :: " << popedSB->forwardingSBCID() << "\n";
+
+					if( popedSB->body() == nullptr || popedSB->bodyLength() <= 0 ) // 仮想へのデータが特になければsenderへ転送する
+						popedSB->forwardingSBCID( DEFAULT_DAEMON_FORWARDING_SBC_ID_SENDER );
+					std::cout << "discardFlag :: " << discardFlag << "\n";
 					// 単純にPONGをレスポンスする
 					break;
 				}	
 
 				case static_cast<int>(KADEMLIA_RPC_PONG): // PONG
 				{
+					std::cout << "[ PONG ] KADEMLIA " << "\n";
 					std::shared_ptr<KClientNode> pongedNode = std::make_shared<KClientNode>( popedSB->sourceKNodeAddr() );
 					_swapWaitQueue.unregist( pongedNode );
 
-					std::cout << "case 2" << "\n";
 					if( popedSB->bodyLength() <= 0 ) discardFlag = false; // 特に下層へのデータがなければセグメントは転送せずに破棄する
 					break;
 				}
 
 				case static_cast<int>(KADEMLIA_RPC_FIND_NODE): // FIND_NODE
 				{
-					std::cout << "case 3" << "\n";
+					std::cout << "[ FIND_NODE ] KADEMLIA " << "\n";
 					break;
 				}
 
@@ -97,8 +101,10 @@ int EKP2PKRoutingTableUpdator::start()
 			
 			popedSB->ekp2pIsProcessed( true );  // 処理済みか否か 必ず書く
 
-			if( !discardFlag ) // if not need discard
+			if( !discardFlag ){ // if not need discard
+				std::cout << "departure from KRoutingTableManager to Broker" << "\n";
 				_toBrokerSBC->pushOne( std::move(popedSB) );
+			}
 		}
 	});
 

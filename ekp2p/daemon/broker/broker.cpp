@@ -17,6 +17,9 @@ EKP2PBroker::EKP2PBroker( std::shared_ptr<StreamBufferContainer> incomingSB , st
 {
 	_incomingSB =	incomingSB;
 	_toRoutingTableManagerSBC = toRoutingTableUpdatorSBC;
+
+	for( int i=0; i< MAX_PROTOCOL; i++ )  // 一旦全ての転送は許可することとする
+		_allowedProtocolSet[i] = true;
 }
 
 
@@ -25,8 +28,6 @@ int EKP2PBroker::start( bool requiresRouting )
 {
 	if( _incomingSB == nullptr ) return -1;
 	if( _toRoutingTableManagerSBC == nullptr ) return -1;
-	printf(">>>>>> %p\n", _toRoutingTableManagerSBC.get() );
-	printf("<<<<< isRouting :: %p - %d\n", &requiresRouting , requiresRouting );
 
 
 	// 行き or 帰り はどう判断する？
@@ -43,17 +44,15 @@ int EKP2PBroker::start( bool requiresRouting )
 			unsigned short forwardingProtocol = sb->forwardingSBCID();
 			if( forwardingProtocol >= MAX_PROTOCOL ) return nullptr; // 受け付けていないプロトコル
 
-			std::cout << "forwarding protocol :: " << forwardingProtocol << "\n";
-
 			// KRoutingTableだけは独立して転送する
 			std::cout << sb->ekp2pIsProcessed() << "\n"; 
 			requiresRouting = true; // ???
 			if( !(sb->ekp2pIsProcessed()) && requiresRouting ) 
 			{
 				_toRoutingTableManagerSBC->pushOne( std::move(sb) );
-				std::cout << "forwarding to RoutingTableManagerSBB ===== >> " << "\n";
 				continue; // skip while done ekp2p processing
 			}
+
 
 			if( _sbHub.at(forwardingProtocol) == nullptr || !(_allowedProtocolSet[forwardingProtocol]) ){
 				std::cout << "Not Allowed Pack Received" << "\n";
@@ -78,7 +77,7 @@ int EKP2PBroker::forwardingDestination( std::shared_ptr<StreamBufferContainer> s
 	if( destination >= MAX_PROTOCOL ) return -1;
 	if( sbc == nullptr ) return -1;
 
-	std::cout << "Set forwarding destination with :: " << destination << "\n";
+	std::cout << "\x1b[31m" <<"Set forwarding destination with :: " << destination << "\x1b[39m" << "\n";
 	_sbHub.at(destination) = sbc;
 
 	return destination;

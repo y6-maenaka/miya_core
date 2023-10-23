@@ -156,6 +156,13 @@ void EKP2PMessageHeader::sourceKNodeAddr( std::shared_ptr<KNodeAddr> nodeAddr )
 }
 
 
+void EKP2PMessageHeader::relayKNodeAddrVector( std::vector<std::shared_ptr<KNodeAddr>> targetVector )
+{
+	for( auto itr : targetVector ){
+		_relayKNodeAddrVector.push_back(itr);
+	}
+}
+
 
 
 bool EKP2PMessageHeader::validate()
@@ -193,7 +200,7 @@ unsigned short EKP2PMessageHeader::payloadLength()
 
 unsigned short EKP2PMessageHeader::protocol()
 {
-	return static_cast<unsigned short>(_meta._protocol);
+	return static_cast<unsigned short>(ntohs(_meta._protocol));
 }
 
 

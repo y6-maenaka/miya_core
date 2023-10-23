@@ -22,13 +22,19 @@ int main()
 	sourceAddr.sin_family = AF_INET;
 
 	std::cout << "KADEMLIA_RPC_PING :: " << ekp2p::KADEMLIA_RPC_PING << "\n";
-	ekp2p::EKP2P::sendDimmyEKP2PMSG( "127.0.0.1", 8080 , content , 10 , sourceAddr , ekp2p::KADEMLIA_RPC_PING );
+	ekp2p::EKP2P::sendDimmyEKP2PMSG( "127.0.0.1", 8080 , content , 10 , sourceAddr , ekp2p::KADEMLIA_RPC_PING , 1);
 
 
 	std::shared_ptr<ekp2p::EKP2PMessage> msg;
 	msg = ekp2p::EKP2P::receiveSingleEKP2PMSG( 8070 );
 	msg->header()->printRaw();
-	std::cout << "msg received" << "\n";
+
+	/*
+	sleep(1);
+	std::cout << "KADEMLIA_RPC_PING :: " << ekp2p::KADEMLIA_RPC_PING << "\n";
+	ekp2p::EKP2P::sendDimmyEKP2PMSG( "127.0.0.1", 8080 , content , 10 , sourceAddr ,ekp2p::KADEMLIA_RPC_PING , 1 );
+	*/
+
 	//ekp2p::ping_wait_queue_unit_test();
 
 	return 0;

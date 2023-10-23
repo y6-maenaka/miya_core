@@ -7,6 +7,8 @@
 #include <thread>
 #include <memory>
 
+#include <unistd.h>
+
 
 struct SBSegment;
 class StreamBuffer;
@@ -31,18 +33,21 @@ class MiyaChainMessageBrocker
 
 
 private:
-	std::shared_ptr<StreamBufferContainer> _sourceSBC;
+	std::shared_ptr<StreamBufferContainer> _incomingSBC;
 	// std::shared_ptr<StreamBufferContainer> _destinationSBC;
 
+	std::vector< std::thread::id > _activeSenderThreadIDVector;
 	std::array< std::shared_ptr<StreamBufferContainer> , MAX_PROTOCOL > _sbHub = {};
 
 
 public:
-	void start();
+	MiyaChainMessageBrocker( std::shared_ptr<StreamBufferContainer> incomingSBC );
+
+	int start();
 	void setDestinationStreamBuffer( std::shared_ptr<StreamBufferContainer> target , unsigned short destination );
 
 	std::shared_ptr<MiyaChainMessage> parseRawMiyaChainMessage( std::shared_ptr<SBSegment> fromSB );
-
+	std::shared_ptr<StreamBufferContainer> incomingSBC();
 };
 
 

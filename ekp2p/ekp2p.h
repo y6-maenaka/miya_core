@@ -115,8 +115,10 @@ public:
 	std::shared_ptr<StreamBufferContainer> toSenderSB();
 	std::shared_ptr<StreamBufferContainer> toRoutingTableManagerSB();
 
+	int assignBrokerDestination( std::shared_ptr<StreamBufferContainer> forwardingSBC , unsigned short destination );
 
-	static void sendDimmyEKP2PMSG( const char* destIP, unsigned short destPort , std::shared_ptr<unsigned char> content , size_t contentLength , struct sockaddr_in sourceAddr ,unsigned short rpcType = 0 );
+
+	static void sendDimmyEKP2PMSG( const char* destIP, unsigned short destPort , std::shared_ptr<unsigned char> content , size_t contentLength , struct sockaddr_in sourceAddr  , unsigned short rpcType = 0 , unsigned short protocol = 0 );
 	static std::shared_ptr<EKP2PMessage> receiveSingleEKP2PMSG( unsigned short listenPort );
 };
 

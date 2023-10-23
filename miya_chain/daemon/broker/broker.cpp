@@ -11,20 +11,37 @@ namespace miya_chain
 
 
 
-void MiyaChainMessageBrocker::start()
-{
 
-	if( _sourceSBC == nullptr ) return;
+MiyaChainMessageBrocker::MiyaChainMessageBrocker( std::shared_ptr<StreamBufferContainer> incomingSBC )
+{
+	_incomingSBC = incomingSBC;
+}
+
+
+int MiyaChainMessageBrocker::start()
+{
+	if( _incomingSBC == nullptr ) return -1;
+	std::cout << "Hello" << "\n";
+	sleep(1);
 
 	std::thread miyaChainBroker([&]()
 	{
+		std::cout << "MiyaChain::Daemon::Broker Thread Started" << "\n";
+		_activeSenderThreadIDVector.push_back( std::this_thread::get_id() );
 
 		std::shared_ptr<SBSegment> popedSB;
 		for(;;)
 		{
-			popedSB = _sourceSBC->popOne();
+			popedSB = _incomingSBC->popOne();
+
+			std::cout << "SB Poped"	<< "\n";
 		}
 	});
+	
+	miyaChainBroker.detach();
+	std::cout << "MiyaChainMessageBrocker thread detached" << "\n";
+
+	return 0;
 
 };
 
@@ -62,6 +79,13 @@ std::shared_ptr<MiyaChainMessage> MiyaChainMessageBrocker::parseRawMiyaChainMess
 
 
 	return ret;
+}
+
+
+
+std::shared_ptr<StreamBufferContainer> MiyaChainMessageBrocker::incomingSBC()
+{
+	return _incomingSBC;
 }
 
 
