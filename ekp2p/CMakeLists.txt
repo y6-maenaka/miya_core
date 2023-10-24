@@ -45,8 +45,8 @@ add_library( EKP2P STATIC
 
 						 #network/nat/request_handler.cpp
 						 #network/nat/response_handler.cpp
-						 #network/nat/stun_message.cpp
-						 #network/nat/client_nat_manager.cpp
+						 network/nat/stun_message.cpp
+						 network/nat/client_nat_manager.cpp
 						 #network/nat/stun_message_handler.cpp
 						 
 

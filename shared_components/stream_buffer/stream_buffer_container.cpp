@@ -6,10 +6,10 @@
 
 
 
-void StreamBufferContainer::pushOne( std::unique_ptr<SBSegment> target )
+void StreamBufferContainer::pushOne( std::unique_ptr<SBSegment> target , size_t timeout )
 {
 	// 複数のstreamBufferが追加される
-	_sbs.at(0)->enqueue( std::move(target) );
+	_sbs.at(0)->enqueue( std::move(target) , timeout );
 }
 
 
@@ -18,9 +18,9 @@ void StreamBufferContainer::pushOne( std::unique_ptr<SBSegment> target )
 
 
 
-std::unique_ptr<SBSegment> StreamBufferContainer::popOne()
+std::unique_ptr<SBSegment> StreamBufferContainer::popOne( size_t timeout )
 {
-	return _sbs.at(0)->dequeue();
+	return _sbs.at(0)->dequeue( timeout );
 }
 
 

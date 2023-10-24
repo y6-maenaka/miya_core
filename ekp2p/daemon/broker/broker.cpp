@@ -24,6 +24,10 @@ EKP2PBroker::EKP2PBroker( std::shared_ptr<StreamBufferContainer> incomingSB , st
 
 
 
+
+
+
+
 int EKP2PBroker::start( bool requiresRouting )
 {
 	if( _incomingSB == nullptr ) return -1;
@@ -41,8 +45,13 @@ int EKP2PBroker::start( bool requiresRouting )
 		for(;;)
 		{
 			sb = _incomingSB->popOne();
+			if( sb->flag() == SB_FLAG_MODULE_EXIT ){
+				std::cout << "exit flag received" << "\n";
+				return;
+			}
+
 			unsigned short forwardingProtocol = sb->forwardingSBCID();
-			if( forwardingProtocol >= MAX_PROTOCOL ) return nullptr; // 受け付けていないプロトコル
+			if( forwardingProtocol >= MAX_PROTOCOL ) continue; // 受け付けていないプロトコルメッセージ
 
 			// KRoutingTableだけは独立して転送する
 			std::cout << sb->ekp2pIsProcessed() << "\n"; 

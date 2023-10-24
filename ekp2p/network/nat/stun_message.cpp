@@ -5,6 +5,14 @@ namespace ekp2p{
 
 
 
+size_t StunRequest::exportRaw( std::shared_ptr<unsigned char> *retRaw )
+{
+	(*retRaw) = std::shared_ptr<unsigned char>( new unsigned char[sizeof(struct StunRequest)] );
+	memcpy( (*retRaw).get(), this , sizeof(struct StunResponse) );
+}
+
+
+
 
 void StunResponse::sockaddr( sockaddr_in *ret )
 {

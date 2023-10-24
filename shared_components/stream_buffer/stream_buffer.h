@@ -9,6 +9,7 @@
 #include <functional>
 #include <any>
 #include <memory>
+#include <chrono>
 
 
 
@@ -22,6 +23,9 @@ namespace ekp2p
 
 
 constexpr unsigned int DEFAULT_STREAM_BUFFER_CAPACITY = 20;
+
+
+constexpr unsigned char SB_FLAG_MODULE_EXIT = 0x01;
 
 
 
@@ -79,6 +83,7 @@ public:
 	bool ekp2pIsProcessed();
 	int sendFlag();
 	unsigned short forwardingSBCID();
+	unsigned char flag();
 
 	/* Setter群 */
 	void body( void* body , unsigned short bodyLength );
@@ -91,6 +96,7 @@ public:
 	void ekp2pIsProcessed( bool target );
 	void sendFlag( int target );
 	void forwardingSBCID( unsigned short target );
+	void flag( unsigned char target );
 
 
 	// Import関係
@@ -133,8 +139,8 @@ public:
 public:
 	StreamBuffer();
 
-	void enqueue( std::unique_ptr<SBSegment> target );
-	std::unique_ptr<SBSegment> dequeue();
+	void enqueue( std::unique_ptr<SBSegment> target , size_t timeout = 0 );
+	std::unique_ptr<SBSegment> dequeue( size_t timeout = 0 );
 };
 
 

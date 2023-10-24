@@ -25,6 +25,8 @@
 #include "./daemon/receiver/receiver.h"
 #include "./daemon/routing_table_manager/routing_table_manager.h"
 
+#include "./network/nat/client_nat_manager.h"
+
 
 namespace ekp2p{
 
@@ -50,9 +52,8 @@ EKP2P::EKP2P( std::shared_ptr<KRoutingTable> KRoutingTable )
 
 
 
-int EKP2P::init()
+int EKP2P::init( std::string stunServerAdddrListPath )
 {
-
 	// 一旦全てのdaemonをセットアップする
 	// ブローカーのセットアップ 
 	// アップデータのセットアップ
@@ -73,12 +74,30 @@ int EKP2P::init()
 	//_receiverDaemon._receiver->start();
 
 
-
 	// 主要フォワーディング先を設定
 	_brokerDaemon._broker->forwardingDestination( _senderDaemon._toSenderSB , DEFAULT_DAEMON_FORWARDING_SBC_ID_SENDER );
 
+
+
+
+	// Nat超えをしてグローバルIPを得る
+	
+	std::shared_ptr<StreamBufferContainer> _toNaterSBC = std::make_shared<StreamBufferContainer>(); // naterへのSBC
+	_brokerDaemon._broker->forwardingDestination( _toNaterSBC , DEFAULT_DAEMON_FORWARDING_SBC_ID_NATER ); // 転送先の設定
+
+	_brokerDaemon._broker->start( false ); 
+
+	ClientNatManager natManager;
+	std::shared_ptr<KNodeAddr> globalKNodeAddr;
+	globalKNodeAddr = natManager.natTraversal( stunServerAdddrListPath , _toNaterSBC );
+
+	std::cout << "NatTraversal Successfuly Done" << "\n";
+
 	return 0;
 }
+
+
+
 
 
 

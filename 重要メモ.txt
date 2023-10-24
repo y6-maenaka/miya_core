@@ -48,6 +48,9 @@
 - listenSocketとhostNodeは分ける
 
 
+- STUNサーバリストの作成と並列問い合わせの実装
+
+
 
 [ Task ]
 ・二重支払いチェック

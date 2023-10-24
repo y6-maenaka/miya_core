@@ -21,8 +21,6 @@ MiyaChainMessageBrocker::MiyaChainMessageBrocker( std::shared_ptr<StreamBufferCo
 int MiyaChainMessageBrocker::start()
 {
 	if( _incomingSBC == nullptr ) return -1;
-	std::cout << "Hello" << "\n";
-	sleep(1);
 
 	std::thread miyaChainBroker([&]()
 	{

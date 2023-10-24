@@ -6,6 +6,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <memory>
+
 
 
 namespace ekp2p{
@@ -36,6 +38,7 @@ struct StunRequest{
 	const int16_t _message_type = htons( BINDING_REQUEST );
 	const int16_t _message_length = htons( 0x0000 );
 
+	size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
 } __attribute__((__packed__));
 
 

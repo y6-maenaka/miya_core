@@ -59,7 +59,7 @@ int EKP2PSender::start()
 		EKP2PSenderOptions options;
 
 		for(;;)
-		{		
+		{
 			popedSB = _incomingSB->popOne();
 
 			switch( popedSB->sendFlag() )
@@ -74,7 +74,7 @@ int EKP2PSender::start()
 					msg->payload( nullptr , 0 );
 					msg->header()->rpcType( KADEMLIA_RPC_PONG );
 					msg->header()->sourceKNodeAddr( _kRoutingTable->hostNode()->kNodeAddr() ); // 自身のアドレスをセット
-					
+
 					std::cout << "------------------------------" << "\n";
 
 					size_t sendLength;
@@ -89,20 +89,20 @@ int EKP2PSender::start()
 				case static_cast<int>( EKP2P_SENDBACK | EKP2P_SEND_BROADCAST ): // 返信 | ブロードキャスト = sourceKNode + relayKNodeに送信
 				{
 					std::cout << "SourceKNodeAddr + RelayKNodeAddr に返信" << "\n";
-		
+
 					size_t sendLength;
 					std::shared_ptr<SocketManager> sockManager;
-					
+
 					std::shared_ptr<EKP2PMessage> msg = std::make_shared<EKP2PMessage>();
 					msg->payload( nullptr , 0 );
 					msg->header()->rpcType( KADEMLIA_RPC_PONG );
 					msg->header()->sourceKNodeAddr( _kRoutingTable->hostNode()->kNodeAddr() ); // 自身のアドレスをセット
 
-					// 1. sourceKNodeに送信					
+					// 1. sourceKNodeに送信
 					sockManager = std::make_shared<SocketManager>(popedSB->sourceKNodeAddr());
 					sendLength = sockManager->send( msg );
 					std::cout << "[ send ] :: ( " << sendLength << " ) bytes" << "\n";
-				
+
 
 					// 2. relayKNodeに送信
 					for( auto itr : popedSB->relayKNodeAddrVector() )	{
@@ -113,7 +113,7 @@ int EKP2PSender::start()
 
 					break;
 				}
-					
+
 				default:
 				{
 					std::cout << "一致する送信タイプが存在しません" << "\n";
@@ -137,4 +137,3 @@ int EKP2PSender::start()
 
 
 }
-

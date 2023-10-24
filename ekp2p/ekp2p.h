@@ -56,6 +56,7 @@ class EKP2PKRoutingTableUpdator;
 constexpr unsigned short _PROTOCOL_NAT_ = 3;
 
 constexpr unsigned short DEFAULT_DAEMON_FORWARDING_SBC_ID_SENDER = 0;
+constexpr unsigned short DEFAULT_DAEMON_FORWARDING_SBC_ID_NATER = 1; // Nat超え用モジュールも一応デフォルトモジュールとする
 
 
 
@@ -103,7 +104,7 @@ public:
 	bool collectStartUpNodes( SocketManager *baseSocketManager );
 
 	/* 複数portoを監視することも可能だが,NodeIDが変わる 初回監視ポートのみ相手に通知される -> 複数起動できるメリットはない　*/
-	int init(); // KRoutingTableを使うのであれば必須 自身のグローバルアドレスを取得する
+	int init( std::string stunServerAdddrListPath ); // KRoutingTableを使うのであれば必須 自身のグローバルアドレスを取得する
 	int start( bool requiresRouting = true );
 
 

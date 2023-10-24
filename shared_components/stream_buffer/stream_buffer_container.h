@@ -37,8 +37,8 @@ public:
 //public:
 
 
-	void pushOne( std::unique_ptr<SBSegment> target );
-	std::unique_ptr<SBSegment> popOne();
+	void pushOne( std::unique_ptr<SBSegment> target, size_t timeout = 0 );
+	std::unique_ptr<SBSegment> popOne( size_t timeout = 0 );
 
 
 	StreamBufferContainer( std::function<void()> scaleOutHandler = nullptr , std::function<void()> scaleDownHandler = nullptr );

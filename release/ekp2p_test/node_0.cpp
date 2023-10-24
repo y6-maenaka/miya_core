@@ -11,7 +11,7 @@ int main()
 	std::condition_variable cv;
 
 	std::shared_ptr<ekp2p::EKP2P> ekp2p = std::make_shared<ekp2p::EKP2P>();
-	ekp2p->init();
+	ekp2p->init( "../.config/stun_servers.json" );
 
 
 	sleep(1);

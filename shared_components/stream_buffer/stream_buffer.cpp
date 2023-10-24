@@ -86,6 +86,11 @@ unsigned short SBSegment::forwardingSBCID()
 	return _controlBlock._forwardingSBCID;
 }
 
+unsigned char SBSegment::flag()
+{
+	return _controlBlock._flag;
+}
+
 
 
 
@@ -135,6 +140,10 @@ void SBSegment::forwardingSBCID( unsigned short target )
 	_controlBlock._forwardingSBCID = target;
 }
 
+void SBSegment::flag( unsigned char target )
+{
+	_controlBlock._flag = target;
+}
 
 
 
@@ -165,17 +174,23 @@ StreamBuffer::StreamBuffer()
 
 
 
-void StreamBuffer::enqueue( std::unique_ptr<SBSegment> target )
+void StreamBuffer::enqueue( std::unique_ptr<SBSegment> target , size_t timeout )
 {
 	// ロックの獲得
 	std::unique_lock<std::mutex> lock(_mtx);  // 他が使用中だとブロッキングする. 他プロセスが解放するとそこからスタート
 
+	if( timeout > 0 ) // タイムアウト付き呼び出しだった場合
+	{
+		_pushContributer._pushCV.wait_for( lock , std::chrono::seconds(timeout) );
+		if( _sb._queue.size() < _sb._capacity ) return;
+	}
 
-	_pushContributer._pushCV.wait( lock , [&]{
+	else
+	{
+		_pushContributer._pushCV.wait( lock , [&]{
 			return (_sb._queue.size() < _sb._capacity);
-		});
-		// 評価される度に第二引数がtrueであることを確認する
-		// 第２引数がtrueだったらwaitを抜ける
+		}); // 評価される度に第二引数がtrueであることを確認する
+	}
 
 	_sb._queue.push_back( std::move(target) );
 
@@ -187,13 +202,25 @@ void StreamBuffer::enqueue( std::unique_ptr<SBSegment> target )
 
 
 
-std::unique_ptr<SBSegment> StreamBuffer::dequeue()
+
+
+
+std::unique_ptr<SBSegment> StreamBuffer::dequeue( size_t timeout )
 {
 	std::unique_lock<std::mutex> lock(_mtx);
 
-	_popContributer._popCV.wait( lock , [&]{
-		return !(_sb._queue.empty()); // emptyでなければ待機状態を解除する
-	});
+	if( timeout > 0 ) 
+	{
+		_popContributer._popCV.wait_for( lock , std::chrono::seconds(timeout) );
+		if( _sb._queue.empty() ) return nullptr;
+	}
+
+	else
+	{
+		_popContributer._popCV.wait( lock , [&]{
+			return !(_sb._queue.empty()); // emptyでなければ待機状態を解除する
+		});
+	}
 
 
 	std::unique_ptr<SBSegment> ret = std::move( _sb._queue.front() );
