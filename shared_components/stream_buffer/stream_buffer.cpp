@@ -91,7 +91,10 @@ unsigned char SBSegment::flag()
 	return _controlBlock._flag;
 }
 
-
+struct sockaddr_in SBSegment::rawClientAddr()
+{
+	return _ekp2pBlock._rawClientAddr;
+}
 
 
 
@@ -144,6 +147,13 @@ void SBSegment::flag( unsigned char target )
 {
 	_controlBlock._flag = target;
 }
+
+void SBSegment::rawClientAddr( struct sockaddr_in target )
+{
+	_ekp2pBlock._rawClientAddr = target; //copy
+}
+
+
 
 
 
@@ -209,7 +219,7 @@ std::unique_ptr<SBSegment> StreamBuffer::dequeue( size_t timeout )
 {
 	std::unique_lock<std::mutex> lock(_mtx);
 
-	if( timeout > 0 ) 
+	if( timeout > 0 )
 	{
 		_popContributer._popCV.wait_for( lock , std::chrono::seconds(timeout) );
 		if( _sb._queue.empty() ) return nullptr;
@@ -228,7 +238,7 @@ std::unique_ptr<SBSegment> StreamBuffer::dequeue( size_t timeout )
 	_sb._queue.erase( _sb._queue.cbegin() );
 
 	_pushContributer._pushCV.notify_all();
-	
+
 	return std::move( ret );
 }
 

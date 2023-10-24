@@ -34,6 +34,7 @@ class MiyaChainMessageBrocker
 
 private:
 	std::shared_ptr<StreamBufferContainer> _incomingSBC;
+	std::shared_ptr<StreamBufferContainer> _toEKP2PBrokerSBC;
 	// std::shared_ptr<StreamBufferContainer> _destinationSBC;
 
 	std::vector< std::thread::id > _activeSenderThreadIDVector;
@@ -41,7 +42,7 @@ private:
 
 
 public:
-	MiyaChainMessageBrocker( std::shared_ptr<StreamBufferContainer> incomingSBC );
+	MiyaChainMessageBrocker( std::shared_ptr<StreamBufferContainer> incomingSBC , std::shared_ptr<StreamBufferContainer> toEKP2PBrokerSBC );
 
 	int start();
 	void setDestinationStreamBuffer( std::shared_ptr<StreamBufferContainer> target , unsigned short destination );

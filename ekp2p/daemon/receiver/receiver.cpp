@@ -40,7 +40,7 @@ EKP2PReceiver::EKP2PReceiver( std::shared_ptr<SocketManager> target , std::share
 int EKP2PReceiver::start()
 {
 	if( _listeningSocketManager == nullptr ) return -1;
-	if( _toRoutingTableUpdatorSB == nullptr ) return -1;
+	if( _toRoutingTableUpdatorSBC == nullptr ) return -1;
 	if( _toBrokerSBC == nullptr ) return -1;
 
 	std::thread ekp2pReceiver([&]()
@@ -54,10 +54,11 @@ int EKP2PReceiver::start()
 		std::shared_ptr<unsigned char> rawMessage;
 		std::shared_ptr<EKP2PMessage> message;
 		std::shared_ptr<EKP2PMessageHeader> header;
+		struct sockaddr_in fromAddr;
 		
 		for(;;)
 		{
-			receivedLength = _listeningSocketManager->receive( &rawMessage );
+			receivedLength = _listeningSocketManager->receive( &rawMessage, fromAddr );
 			if( receivedLength <= 0 ) continue;
 			// receivedLength = recvfrom( _listeningSocketManager->sock() , receiveBuffer.get() , UINT16_MAX , 0 , nullptr , 0 );
 
@@ -74,6 +75,7 @@ int EKP2PReceiver::start()
 			sb->importFromEKP2PHeader( header );
 			sb->forwardingSBCID( header->protocol() );
 			sb->body( message->payload() , header->payloadLength() );
+			sb->rawClientAddr( fromAddr );
 	
 			std::cout << "------------------------------------------------------------------" << "\n";
 			header->printRaw();
@@ -98,9 +100,9 @@ int EKP2PReceiver::start()
 
 
 
-void EKP2PReceiver::toRoutingTableUpdatorSB( std::shared_ptr<StreamBufferContainer> sbc )
+void EKP2PReceiver::toRoutingTableUpdatorSBC( std::shared_ptr<StreamBufferContainer> sbc )
 {
-	_toRoutingTableUpdatorSB = sbc;
+	_toRoutingTableUpdatorSBC = sbc;
 }
 
 

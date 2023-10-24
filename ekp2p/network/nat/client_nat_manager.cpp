@@ -1,6 +1,5 @@
 #include "client_nat_manager.h"
 
-#include "../inband/inband_manager.h"
 #include "../socket_manager/socket_manager.h"
 
 #include "./stun_message.h"
@@ -21,19 +20,6 @@ namespace ekp2p{
 
 
 
-
-/*
-ClientNatManager::ClientNatManager( SocketManager *setupedSocketManager )
-{
-	if( setupedSocketManager == nullptr )
-	{
-		_socketManager = new SocketManager;
-		_socketManager->setupUDPSock( 8080 );
-	}
-
-	_socketManager = setupedSocketManager; // messageHandlerの設定
-}
-*/
 
 
 std::shared_ptr<KNodeAddr> ClientNatManager::natTraversal( std::string stunServerAddrListPath ,std::shared_ptr<StreamBufferContainer> incomingSBC  )
@@ -58,6 +44,7 @@ std::shared_ptr<KNodeAddr> ClientNatManager::natTraversal( std::string stunServe
 	struct sockaddr_in	 stunServerAddr;
 	std::string ipv4; unsigned short port;
 	std::unique_ptr<SBSegment> popedSB;
+	struct StunResponse response;
 	for( int i=0 ;i < DEFAULT_GLOBAL_ADDR_INQUIRE_COUNT ; i++ )
 	{
 		for( int j=0; j<stunServerAddrListJson.size(); j++ )
@@ -67,22 +54,23 @@ std::shared_ptr<KNodeAddr> ClientNatManager::natTraversal( std::string stunServe
 			ipv4 = stunServerAddrListJson[j]["ipv4"]; port = stunServerAddrListJson[j]["port"];
 			stunServerAddr.sin_addr.s_addr = inet_addr( ipv4.c_str() );
 			stunServerAddr.sin_port = htons( port );
-			std::shared_ptr<SocketManager> inquireSocketManager = std::make_shared<SocketManager>( std::make_shared<KNodeAddr>(&stunServerAddr) );
-			std::shared_ptr<KNodeAddr> temp = std::make_shared<KNodeAddr>(&stunServerAddr);
-			temp->printInfo();
+			std::shared_ptr<KNodeAddr> stunServerKNodeAddr = std::make_shared<KNodeAddr>( &stunServerAddr );
+			std::shared_ptr<SocketManager> inquireSocketManager = std::make_shared<SocketManager>( stunServerKNodeAddr );
+			std::cout << "Inquired to ... " << "\n";
+			stunServerKNodeAddr->printInfo();
+
 
 			inquireSocketManager->send(msg); // リクエストの送信
 			popedSB = incomingSBC->popOne( 5 ); // タイムアウト付きレスポンスの受信
-			
+		
+			if( popedSB == nullptr ) continue;
+			response.importRaw( popedSB->body() , popedSB->bodyLength() );
+
+			struct sockaddr_in globalAddr = response.toSockaddr_in();
+			return std::make_shared<KNodeAddr>( &globalAddr );
 		}
-
-
-
-		// inquireSocketManager->send( msg );
 	}
 	return nullptr;
-
-
 }
 
 
@@ -159,6 +147,8 @@ bool ClientNatManager::validateSockaddrIn( sockaddr_in *targetAddr )
 
 	return true;
 }
+
+
 
 
 

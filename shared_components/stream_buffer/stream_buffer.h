@@ -11,6 +11,8 @@
 #include <memory>
 #include <chrono>
 
+#include <arpa/inet.h>
+
 
 
 
@@ -51,8 +53,10 @@ struct SBSegment
 		unsigned int _rpcType;
 		bool _isProcessed = false;
 		int _sendFlag = 0; // 0 : sendBack(sourceKNodeAddrに送信)
-		std::shared_ptr<ekp2p::KNodeAddr> _sourceKNodeAddr; 
+		std::shared_ptr<ekp2p::KNodeAddr> _sourceKNodeAddr;
 		std::vector< std::shared_ptr<ekp2p::KNodeAddr> > _relayKNodeAddrVector;
+
+		struct sockaddr_in _rawClientAddr;
 	} _ekp2pBlock;
 
 
@@ -84,6 +88,7 @@ public:
 	int sendFlag();
 	unsigned short forwardingSBCID();
 	unsigned char flag();
+	struct sockaddr_in rawClientAddr();
 
 	/* Setter群 */
 	void body( void* body , unsigned short bodyLength );
@@ -97,6 +102,7 @@ public:
 	void sendFlag( int target );
 	void forwardingSBCID( unsigned short target );
 	void flag( unsigned char target );
+	void rawClientAddr( struct sockaddr_in target );
 
 
 	// Import関係
@@ -116,7 +122,7 @@ class StreamBuffer
 public:
 	std::mutex _mtx;
 
-	struct 
+	struct
 	{
 		std::condition_variable _popCV;
 		std::vector< std::condition_variable > _contributers;
@@ -129,7 +135,7 @@ public:
 	} _pushContributer;
 
 
-	struct 
+	struct
 	{
 		unsigned int _capacity;
 		std::vector< std::unique_ptr<SBSegment> > _queue;
@@ -146,6 +152,3 @@ public:
 
 
 #endif // F99BC652_963D_45EF_8377_CE50E2B01AC2
-
-
-

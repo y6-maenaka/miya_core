@@ -37,7 +37,15 @@ SocketManager::SocketManager( std::shared_ptr<KNodeAddr> fromKNodeAddr )
 }
 
 
+SocketManager::SocketManager( struct sockaddr_in fromAddr )
+{
+	memset( &_addr , 0x00 , sizeof(_addr) );
+	_addr = fromAddr;
 
+	if ( (this->_sock = socket( PF_INET, SOCK_DGRAM, IPPROTO_UDP )) < 0 )  return;
+
+	return;
+}
 
 
 
@@ -102,12 +110,20 @@ int SocketManager::send( std::shared_ptr<EKP2PMessage> msg )
 
 
 
-size_t SocketManager::receive( std::shared_ptr<unsigned char> *retRaw )
+size_t SocketManager::receive( std::shared_ptr<unsigned char> *retRaw , struct sockaddr_in &fromAddr )
 {
+	unsigned int fromAddrLength = sizeof( fromAddr );
+	memset( &fromAddr , 0x00 , sizeof(fromAddr) );
 	struct EKP2PMessageHeader::Meta _headerMeta; // なぜかEKP2PMessageHeaderを宣言するとエラー落ちする
-	recvfrom( _sock, &_headerMeta , sizeof(struct EKP2PMessageHeader::Meta), MSG_PEEK, nullptr, 0 ); // セグメントの受信
+	recvfrom( _sock, &_headerMeta , sizeof(struct EKP2PMessageHeader::Meta), MSG_PEEK, (struct sockaddr *)&fromAddr, &fromAddrLength ); // セグメントの受信
 	
 	size_t rawMSGLength = _headerMeta.headerLength() + _headerMeta.payloadLength();
+
+	std::cout << "++++++++++++++++++++++++++++++" << "\n";
+	std::cout << "This is SocketManager::receive" << "\n";
+	std::cout << "received from ip :: " << inet_ntoa(fromAddr.sin_addr) << "\n";
+	std::cout << "received from port :: " << ntohs(fromAddr.sin_port) << "\n";
+	std::cout << "++++++++++++++++++++++++++++++" << "\n";
 	
 	size_t retLength;
 	(*retRaw) = std::shared_ptr<unsigned char>( new unsigned char[rawMSGLength] );

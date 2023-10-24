@@ -73,26 +73,26 @@ private:
 	struct 
 	{
 		std::shared_ptr<EKP2PBroker> _broker;
-		std::shared_ptr<StreamBufferContainer> _toBrokerSB;
+		std::shared_ptr<StreamBufferContainer> _toBrokerSBC;
 	} _brokerDaemon;
 
 	struct 
 	{
 		std::shared_ptr<EKP2PSender>	_sender;
-		std::shared_ptr<StreamBufferContainer> _toSenderSB;
+		std::shared_ptr<StreamBufferContainer> _toSenderSBC;
 	} _senderDaemon;
 
 
 	struct
 	{
 		std::shared_ptr<EKP2PReceiver> _receiver;
-		std::shared_ptr<StreamBufferContainer> _toReseiverSB;
+		std::shared_ptr<StreamBufferContainer> _toReseiverSBC;
 	} _receiverDaemon;
 
 	struct
 	{
 		std::shared_ptr<EKP2PKRoutingTableUpdator> _manager;
-		std::shared_ptr<StreamBufferContainer> _toManagerSB;
+		std::shared_ptr<StreamBufferContainer> _toManagerSBC;
 	} _routingTableManagerDaemon;
 
 
@@ -105,6 +105,7 @@ public:
 
 	/* 複数portoを監視することも可能だが,NodeIDが変わる 初回監視ポートのみ相手に通知される -> 複数起動できるメリットはない　*/
 	int init( std::string stunServerAdddrListPath ); // KRoutingTableを使うのであれば必須 自身のグローバルアドレスを取得する
+	int initCustom();
 	int start( bool requiresRouting = true );
 
 
@@ -112,9 +113,10 @@ public:
 	//bool startMonitor( unsigned short port );
 
 
-	std::shared_ptr<StreamBufferContainer> toReseiverSB();
-	std::shared_ptr<StreamBufferContainer> toSenderSB();
-	std::shared_ptr<StreamBufferContainer> toRoutingTableManagerSB();
+	std::shared_ptr<StreamBufferContainer> toBrokerSBC();
+	std::shared_ptr<StreamBufferContainer> toReseiverSBC();
+	std::shared_ptr<StreamBufferContainer> toSenderSBC();
+	std::shared_ptr<StreamBufferContainer> toRoutingTableManagerSBC();
 
 	int assignBrokerDestination( std::shared_ptr<StreamBufferContainer> forwardingSBC , unsigned short destination );
 

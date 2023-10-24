@@ -26,7 +26,7 @@ int main()
 
 
 	std::shared_ptr<ekp2p::EKP2PMessage> msg;
-	msg = ekp2p::EKP2P::receiveSingleEKP2PMSG( 8070 );
+	msg = ekp2p::EKP2P::receiveSingleEKP2PMSG( 8080 );
 	msg->header()->printRaw();
 
 	/*

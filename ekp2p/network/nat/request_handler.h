@@ -3,32 +3,34 @@
 
 
 #include <iostream>
+#include <memory>
+#include <thread>
+
+
+struct SBSegment;
+class StreamBuffer;
+class StreamBufferContainer;
 
 
 namespace ekp2p{
 
-struct ReceiveThreadArgs;
+
+struct StunResponse;
 
 
-
-
-void stunRequestHandler( void* payload, unsigned int payloadSize ,void* free  , ReceiveThreadArgs *receiveThreadArgs , struct sockaddr* peerAddr ){
-
-};
-
-
-
-
-
-/*
-class StunRequestHandler{
+class StunRequestHandlerDaemon
+{
+private:
+	std::shared_ptr<StreamBufferContainer> _incomingSBC;
+	std::shared_ptr<StreamBufferContainer> _toBrokerSBC;
 
 public:
-
-	bool Respond(){ return false;};
-
+	StunRequestHandlerDaemon( std::shared_ptr<StreamBufferContainer> incomingSBC , 
+							  std::shared_ptr<StreamBufferContainer> toBrokerSBC
+							);
+	int start();
 };
-*/
+
 
 
 

@@ -24,6 +24,9 @@ struct RequesterAddr
 	//u_char _ipv4[4];
 	uint32_t _ipv4;
 	uint16_t _port;
+
+	void sockaddr_in( struct sockaddr_in from );
+	struct sockaddr_in toSockaddr_in();
 } __attribute__((__packed__));
 
 
@@ -34,7 +37,7 @@ struct RequesterAddr
 
 
 struct StunRequest{
-	
+
 	const int16_t _message_type = htons( BINDING_REQUEST );
 	const int16_t _message_length = htons( 0x0000 );
 
@@ -47,27 +50,28 @@ struct StunRequest{
 
 
 
-struct StunResponse{
-	
+struct StunResponse
+{
+
+private:
 	uint16_t _message_type;
 	uint16_t _message_size;
+
 	struct RequesterAddr _requesterAddr;
 
+public:
 	unsigned int messageType(){ return ntohs(_message_type); };
 	unsigned int message_size(){ return htons(_message_size); };
 
-	void setAddr( struct sockaddr_in *peerAddr )
-	{
-		//memcpy( (_requesterAddr._ipv4) , &(((struct sockaddr_in *)peerAddr)->sin_addr) , 4 );
-		_requesterAddr._ipv4 = peerAddr->sin_addr.s_addr;
-		_requesterAddr._port = peerAddr->sin_port;
-	};
-
-	void sockaddr( sockaddr_in *ret ); // getter
-	bool validate();
+	void sockaddr_in( sockaddr_in from ); // setter
 
 	unsigned int exportRaw( unsigned char **ret );
+	size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
+
+	int importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );
 	unsigned int importRaw( unsigned char *from , unsigned int fromSize );
+
+	struct sockaddr_in toSockaddr_in();
 
 
 } __attribute__ ((__packed__));

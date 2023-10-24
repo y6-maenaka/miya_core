@@ -42,7 +42,7 @@ private:
 
 	// SocketManager *_socketManager;
 	std::shared_ptr<SocketManager> _listeningSocketManager;
-	std::shared_ptr<StreamBufferContainer> _toRoutingTableUpdatorSB; // これはsbHubとは分けておく
+	std::shared_ptr<StreamBufferContainer> _toRoutingTableUpdatorSBC; // これはsbHubとは分けておく
 	std::shared_ptr<StreamBufferContainer> _toBrokerSBC; // 念の為
 	// std::array< std::shared_ptr<StreamBufferContainer> , MAX_PROTOCOL > _sbHub = {nullptr}; // メッセージプロトコルに合致したSBにメッセージを流す
 	
@@ -53,7 +53,7 @@ public:
 	EKP2PReceiver( std::shared_ptr<SocketManager> target , std::shared_ptr<StreamBufferContainer> toBrokerSBC );
 
 	int start();
-	void toRoutingTableUpdatorSB( std::shared_ptr<StreamBufferContainer> sbc );
+	void toRoutingTableUpdatorSBC( std::shared_ptr<StreamBufferContainer> sbc );
 
 	std::shared_ptr<EKP2PMessage> parseRawEKP2PMessage( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength ); 
 	// static unsigned int payload( void *rawEKP2PMSG , unsigned char** ret );

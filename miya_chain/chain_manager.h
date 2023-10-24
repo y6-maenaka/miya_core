@@ -29,6 +29,8 @@ class MiyaChainManager
 
 private:
 
+	std::shared_ptr<StreamBufferContainer> _toEKP2PBrokerSBC;
+
 	struct 
 	{
 		std::shared_ptr<StreamBufferContainer> _toBrokerSBC;
@@ -37,7 +39,7 @@ private:
 
 
 public:
-	int init();
+	int init( std::shared_ptr<StreamBufferContainer> toEKP2PBrokerSBC );
 	int start();
 
 	std::shared_ptr<StreamBufferContainer> toBrokerSBC();
