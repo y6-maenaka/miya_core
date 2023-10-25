@@ -33,7 +33,7 @@ private:
 
 public:
 
-	std::shared_ptr<KNodeAddr> natTraversal( std::string stunServerAddrListPath ,std::shared_ptr<StreamBufferContainer> incomingSBC );
+	std::shared_ptr<KNodeAddr> natTraversal( std::string stunServerAddrListPath ,std::shared_ptr<StreamBufferContainer> incomingSBC , std::shared_ptr<StreamBufferContainer> toBrokerSBC );
 	// bool natTraversal( struct sockaddr_in *globalAddr );
 
 	bool validateSockaddrIn( sockaddr_in *targetAddr );

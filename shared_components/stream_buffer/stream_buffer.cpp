@@ -91,9 +91,14 @@ unsigned char SBSegment::flag()
 	return _controlBlock._flag;
 }
 
-struct sockaddr_in SBSegment::rawClientAddr()
+struct sockaddr_in SBSegment::rawSenderAddr()
 {
-	return _ekp2pBlock._rawClientAddr;
+	return _ekp2pBlock._rawSenderAddr;
+}
+
+struct sockaddr_in SBSegment::destinationAddr()
+{
+	return _ekp2pBlock._destinationAddr;
 }
 
 
@@ -148,12 +153,15 @@ void SBSegment::flag( unsigned char target )
 	_controlBlock._flag = target;
 }
 
-void SBSegment::rawClientAddr( struct sockaddr_in target )
+void SBSegment::rawSenderAddr( struct sockaddr_in target )
 {
-	_ekp2pBlock._rawClientAddr = target; //copy
+	_ekp2pBlock._rawSenderAddr = target; //copy
 }
 
-
+void SBSegment::destinationAddr( struct sockaddr_in target ) 
+{
+	_ekp2pBlock._destinationAddr = target;
+}
 
 
 

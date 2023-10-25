@@ -20,19 +20,6 @@ KNodeAddr::KNodeAddr( struct sockaddr_in *addr )
 }
 
 
-
-
-/*
-KNodeAddr::KNodeAddr( unsigned long ipv4 , unsigned short port )
-{
-	_IPv4Addr = ipv4;
-	_Port = port;
-	setNodeID();
-}
-*/
-
-
-
 	
 std::shared_ptr<KNodeAddr> KNode::kNodeAddr()
 {
@@ -44,9 +31,6 @@ std::shared_ptr<KNodeAddr> KNode::kNodeAddr()
 void KNode::kNodeAddr( std::shared_ptr<KNodeAddr> nodeAddr )
 {
 	this->_nodeAddr = nodeAddr; // なぜかエラーが発生する
-	//this->_nodeAddr->_IPv4Addr = nodeAddr->_IPv4Addr;
-	//this->_nodeAddr->_Port = nodeAddr->_Port;
-
 	_nodeAddr->setNodeID();
 }
 
@@ -63,7 +47,6 @@ std::shared_ptr<struct sockaddr_in> KNodeAddr::sockaddr_in()
 
 	return std::make_shared<struct sockaddr_in>( ret );
 }
-
 
 
 
@@ -133,13 +116,11 @@ void KNodeAddr::printInfo()
 
 
 
-
 KNode::KNode( std::shared_ptr<SocketManager> target )
 {
-	sockaddr_in ipv4Addr = target->ipv4Addr();
+	sockaddr_in ipv4Addr = target->sockaddr_in();
 	// std::make_shared<KNodeAddr>( &ipv4Addr );
 	_nodeAddr = std::shared_ptr<KNodeAddr>( new KNodeAddr(&ipv4Addr) );
-	
 }
 
 
@@ -148,34 +129,6 @@ KNode::KNode( std::shared_ptr<KNodeAddr> nodeAddr )
 {
 	_nodeAddr = nodeAddr;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-KClientNode::KClientNode( std::shared_ptr<KNodeAddr> nodeAddr ) : KNode(nodeAddr) 
-{ 
-	_socketManager = std::make_shared<SocketManager>(nodeAddr);
-}
-
-
-std::shared_ptr<SocketManager> KClientNode::socketManager()
-{
-	return _socketManager;
-}
-
-
-
-
-
 
 
 

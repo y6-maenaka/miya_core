@@ -54,8 +54,8 @@ int EKP2PBroker::start( bool requiresRouting )
 			if( forwardingProtocol >= MAX_PROTOCOL ) continue; // 受け付けていないプロトコルメッセージ
 
 			// KRoutingTableだけは独立して転送する
-			std::cout << sb->ekp2pIsProcessed() << "\n"; 
-			requiresRouting = true; // ???
+			std::cout << "ekp2pIsProcessed :: " << sb->ekp2pIsProcessed() << "\n"; 
+			std::cout << "requiresRouting :: " << requiresRouting << "\n";
 			if( !(sb->ekp2pIsProcessed()) && requiresRouting ) 
 			{
 				_toRoutingTableManagerSBC->pushOne( std::move(sb) );

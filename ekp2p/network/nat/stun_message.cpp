@@ -46,6 +46,20 @@ int StunResponse::importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fro
 {
 	if( fromRawLength < sizeof(struct StunResponse) || fromRaw == nullptr ) return 0;
 	memcpy( this , fromRaw.get() , sizeof( struct StunResponse ) );
+
+	std::cout << "#########################" << "\n";
+	std::cout << "StunResponse imported" << "\n";
+	std::cout << "fromRawLength :: " << fromRawLength << "\n";
+	unsigned char temp[sizeof(struct StunResponse)];
+	memcpy( temp , this , sizeof(struct StunResponse));
+	for( int i=0; i<sizeof(temp); i++){
+		printf("%02X", temp[i]);
+	} std::cout << "\n";
+	for( int i=0; i<sizeof(temp); i++ ){
+		printf("%02X", fromRaw.get()[i]);
+	} std::cout << "\n";
+	std::cout << "#########################" << "\n";
+
 	return sizeof(struct StunResponse);
 }
 

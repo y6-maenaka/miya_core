@@ -35,9 +35,10 @@ namespace ekp2p{
 
 EKP2P::EKP2P( std::shared_ptr<KRoutingTable> KRoutingTable )
 {
-	int flag;
-	_hostSocketManager = std::shared_ptr<SocketManager>( new SocketManager{} );
-	flag = _hostSocketManager->setupUDPSock( 8080 );
+	int createdSock;
+	_hostSocketManager = std::shared_ptr<SocketManager>( new SocketManager{} ); // ホストソケットの作成
+	createdSock = _hostSocketManager->setupUDPSock( 8080 ); // ホストソケットのセットアップ
+	std::cout << "SocketCreated at :: " << createdSock << "\n";
 
 	if( KRoutingTable == nullptr ){
 		// _hostNode = std::make_shared<KHostNode>();
@@ -64,7 +65,7 @@ int EKP2P::init( std::string stunServerAdddrListPath )
 
 	// センダーのセットアップ
 	_senderDaemon._toSenderSBC = std::make_shared<StreamBufferContainer>();
-	_senderDaemon._sender	= std::make_shared<EKP2PSender>( _kRoutingTable , _senderDaemon._toSenderSBC , _brokerDaemon._toBrokerSBC );
+	_senderDaemon._sender	= std::make_shared<EKP2PSender>( _hostSocketManager->sock() ,_kRoutingTable , _senderDaemon._toSenderSBC , _brokerDaemon._toBrokerSBC );
 	//_senderDaemon._sender->start();
 
 	// レシーバーのセットアップ
@@ -78,20 +79,23 @@ int EKP2P::init( std::string stunServerAdddrListPath )
 	_brokerDaemon._broker->forwardingDestination( _senderDaemon._toSenderSBC , DEFAULT_DAEMON_FORWARDING_SBC_ID_SENDER );
 
 
-
 	
 	// Nat超えをしてグローバルIPを得る
 	std::shared_ptr<StreamBufferContainer> _toNaterSBC = std::make_shared<StreamBufferContainer>(); // naterへのSBC
-	_brokerDaemon._broker->forwardingDestination( _toNaterSBC , DEFAULT_DAEMON_FORWARDING_SBC_ID_NATER ); // 転送先の設定
-
+	_brokerDaemon._broker->forwardingDestination( _toNaterSBC , DEFAULT_DAEMON_FORWARDING_SBC_ID_NATER ); // 転送先の設定 Natterは1番へ
+	
 	_brokerDaemon._broker->start( false ); 
+	_receiverDaemon._receiver->start();
+	_senderDaemon._sender->start();
+	sleep(1);
 
 	ClientNatManager natManager;
 	std::shared_ptr<KNodeAddr> globalKNodeAddr;
-	globalKNodeAddr = natManager.natTraversal( stunServerAdddrListPath , _toNaterSBC );
+	globalKNodeAddr = natManager.natTraversal( stunServerAdddrListPath , _toNaterSBC , _brokerDaemon._toBrokerSBC );
 	// グローバルアドレスを取得できたら,_hostNodeのKNodeAddrを変更する
 	_kRoutingTable->hostNode()->kNodeAddr( globalKNodeAddr );
 
+	_kRoutingTable->hostNode()->printInfo();
 	std::cout << "NatTraversal Successfuly Done" << "\n";
 	
 
@@ -112,7 +116,7 @@ int EKP2P::initCustom()
 	_brokerDaemon._broker = std::make_shared<EKP2PBroker>( _brokerDaemon._toBrokerSBC , _routingTableManagerDaemon._toManagerSBC );
 
 	_senderDaemon._toSenderSBC = std::make_shared<StreamBufferContainer>();
-	_senderDaemon._sender	= std::make_shared<EKP2PSender>( _kRoutingTable , _senderDaemon._toSenderSBC , _brokerDaemon._toBrokerSBC );
+	_senderDaemon._sender	= std::make_shared<EKP2PSender>( _hostSocketManager->sock() ,_kRoutingTable , _senderDaemon._toSenderSBC , _brokerDaemon._toBrokerSBC );
 
 	_receiverDaemon._toReseiverSBC = std::make_shared<StreamBufferContainer>(); 
 	_receiverDaemon._receiver = std::make_shared<EKP2PReceiver>( _hostSocketManager , _brokerDaemon._toBrokerSBC ); // receiverにはSBは不要 reseice制限フラグ
@@ -222,7 +226,6 @@ std::shared_ptr<EKP2PMessage> EKP2P::receiveSingleEKP2PMSG( unsigned short liste
 
 	auto parseRawMSG = ([]( std::shared_ptr<unsigned char> fromRawMSG , size_t fromRawMSGLength ) -> std::shared_ptr<EKP2PMessage>
 	{
-
 		std::shared_ptr<EKP2PMessage> ret = std::make_shared<EKP2PMessage>();
 		ret->header()->importRawSequentially( fromRawMSG );
 
@@ -241,8 +244,6 @@ std::shared_ptr<EKP2PMessage> EKP2P::receiveSingleEKP2PMSG( unsigned short liste
 
 	return retMSG;
 }
-
-
 
 
 

@@ -28,15 +28,12 @@ struct EKP2PMessage;
 class SocketManager{
 
 private:
-	int _sock;
-
-	int _port;
-	// int _type;
+	int _sock = -1;
 	struct sockaddr_in _addr;
 
 public:
-	SocketManager( std::shared_ptr<KNodeAddr> fromKNodeAddr );
-	SocketManager( struct sockaddr_in fromAddr );
+	SocketManager( std::shared_ptr<KNodeAddr> fromKNodeAddr , int sock );
+	SocketManager( struct sockaddr_in fromAddr , int sock );
 	SocketManager();
 
 	// int create();
@@ -46,8 +43,8 @@ public:
 
 	int sock(); // getter
 	int port();
+	void sock( int target );
 
-	int send( unsigned char* senfBuff, unsigned int senfBuffSize );
 	int send( std::shared_ptr<unsigned char> rawBuff, size_t rawBuffLength );
 	int send( std::shared_ptr<EKP2PMessage> msg );
 
@@ -63,11 +60,11 @@ public:
 
 	// int sockType();
 
-	struct sockaddr_in ipv4Addr();
+	struct sockaddr_in sockaddr_in();
 
 	/* テスト用 本番環境では極力使用しない*/
-	void sock( int bindedSock );
-	void addr( struct sockaddr_in target );
+	// void sock( int bindedSock );
+	void sockaddr_in( struct sockaddr_in target );
 };
 
 

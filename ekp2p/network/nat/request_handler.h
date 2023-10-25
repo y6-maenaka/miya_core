@@ -18,6 +18,8 @@ namespace ekp2p{
 struct StunResponse;
 
 
+
+
 class StunRequestHandlerDaemon
 {
 private:
@@ -25,9 +27,7 @@ private:
 	std::shared_ptr<StreamBufferContainer> _toBrokerSBC;
 
 public:
-	StunRequestHandlerDaemon( std::shared_ptr<StreamBufferContainer> incomingSBC , 
-							  std::shared_ptr<StreamBufferContainer> toBrokerSBC
-							);
+	StunRequestHandlerDaemon( std::shared_ptr<StreamBufferContainer> incomingSBC , std::shared_ptr<StreamBufferContainer> toBrokerSBC );
 	int start();
 };
 

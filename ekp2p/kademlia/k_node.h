@@ -86,13 +86,13 @@ class KClientNode : public KNode
 
 private:
 	// SocketManager *_socketManager;
-	std::shared_ptr<SocketManager> _socketManager;
+	// std::shared_ptr<SocketManager> _socketManager;
 
 public:
-	KClientNode( std::shared_ptr<KNodeAddr> nodeAddr , std::shared_ptr<SocketManager> socketManager ) : KNode( nodeAddr ){ _socketManager = socketManager; };
-	KClientNode( std::shared_ptr<KNodeAddr> nodeAddr );
+	KClientNode( std::shared_ptr<KNodeAddr> nodeAddr ) : KNode( nodeAddr ){};
+	
 
-	std::shared_ptr<SocketManager> socketManager();
+	// std::shared_ptr<SocketManager> socketManager();
 
 };
 

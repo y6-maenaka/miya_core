@@ -39,9 +39,9 @@ class EKP2PReceiver // 基本的にスレッドで起動されう
 {
 
 private:
-
+	std::shared_ptr<SocketManager> _hostSocketManager;
 	// SocketManager *_socketManager;
-	std::shared_ptr<SocketManager> _listeningSocketManager;
+	//std::shared_ptr<SocketManager> _listeningSocketManager;
 	std::shared_ptr<StreamBufferContainer> _toRoutingTableUpdatorSBC; // これはsbHubとは分けておく
 	std::shared_ptr<StreamBufferContainer> _toBrokerSBC; // 念の為
 	// std::array< std::shared_ptr<StreamBufferContainer> , MAX_PROTOCOL > _sbHub = {nullptr}; // メッセージプロトコルに合致したSBにメッセージを流す

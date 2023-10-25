@@ -10,43 +10,28 @@ namespace ekp2p{
 
 
 
-SocketManager::SocketManager()
-{
-	memset( &_addr , 0x00 , sizeof(_addr) );
-}
-
-
-
-
-SocketManager::SocketManager( std::shared_ptr<KNodeAddr> fromKNodeAddr )
+SocketManager::SocketManager( std::shared_ptr<KNodeAddr> fromKNodeAddr, int sock )
 {
 	memset( &_addr , 0x00 , sizeof(_addr) );
 
-	// struct sockaddr_in nodeAddr; memset( &nodeAddr , 0x00 , sizeof(nodeAddr) );
 	_addr.sin_family = AF_INET;
 	_addr.sin_addr.s_addr =  fromKNodeAddr->ipv4();
 	_addr.sin_port = fromKNodeAddr->port();
 
-
-	// 一旦UDPで妥協
-	if ( (this->_sock = socket( PF_INET, SOCK_DGRAM, IPPROTO_UDP )) < 0 )  return;
-	// if( (::bind(_sock, (struct sockaddr *)&_addr, sizeof(_addr))) < 0 ) return;
-
+	_sock = sock;
 
 	return;
 }
 
-
-SocketManager::SocketManager( struct sockaddr_in fromAddr )
+SocketManager::SocketManager( struct sockaddr_in fromAddr , int sock )
 {
-	memset( &_addr , 0x00 , sizeof(_addr) );
 	_addr = fromAddr;
-
-	if ( (this->_sock = socket( PF_INET, SOCK_DGRAM, IPPROTO_UDP )) < 0 )  return;
-
-	return;
+	_sock = sock;
 }
 
+SocketManager::SocketManager(){
+	memset( &_addr , 0x00 , sizeof(_addr) );
+}
 
 
 
@@ -62,11 +47,20 @@ int SocketManager::bind( int port )
 
 	if( (::bind(_sock, (struct sockaddr *)&_addr, sizeof(_addr))) < 0 ) return -1;
 
-	_port = port;
-
 	return port;
 }
 
+
+
+int SocketManager::setupUDPSock( unsigned short port )
+{
+	if ( (this->_sock = socket( PF_INET, SOCK_DGRAM, IPPROTO_UDP )) < 0 )  return -1;
+
+	if( this->bind( port ) < 0 ) return -1;
+	std::cout << "Socket successfully binede" << "\n";
+
+	return _sock;
+}
 
 
 
@@ -76,17 +70,9 @@ int SocketManager::sock()
 }
 
 
-
-int SocketManager::port()
-{
-	return _port;
-}
-
-
-
-int SocketManager::send( unsigned char* sendBuff, unsigned int senfBuffSize )
-{
-	return ::sendto( _sock , sendBuff, senfBuffSize , 0 , (struct sockaddr*)&_addr , sizeof(_addr) );
+void SocketManager::sock( int target )
+{	
+	_sock = target;
 }
 
 
@@ -99,11 +85,15 @@ int SocketManager::send( std::shared_ptr<unsigned char> rawBuff, size_t rawBuffL
 }
 
 
-
 int SocketManager::send( std::shared_ptr<EKP2PMessage> msg )
 {
 	std::shared_ptr<unsigned char> rawMSG; size_t rawMSGLength;
 	rawMSGLength = msg->exportRaw( &rawMSG );
+
+	std::cout << "sended with socket >> " << _sock << "\n";
+	std::cout << "rawMSGLength :: " << rawMSGLength << "\n";
+	std::cout << "ip :: " << inet_ntoa( _addr.sin_addr ) << "\n";
+	std::cout << "port :: " << ntohs(_addr.sin_port)  << "\n";
 
 	return ::sendto( _sock , rawMSG.get() , rawMSGLength , 0 , (struct sockaddr *)&_addr , sizeof(_addr) );
 }
@@ -113,35 +103,33 @@ int SocketManager::send( std::shared_ptr<EKP2PMessage> msg )
 size_t SocketManager::receive( std::shared_ptr<unsigned char> *retRaw , struct sockaddr_in &fromAddr )
 {
 	unsigned int fromAddrLength = sizeof( fromAddr );
-	memset( &fromAddr , 0x00 , sizeof(fromAddr) );
+	memset( &fromAddr , 0x00 , sizeof(fromAddr) ); 
+
 	struct EKP2PMessageHeader::Meta _headerMeta; // なぜかEKP2PMessageHeaderを宣言するとエラー落ちする
-	recvfrom( _sock, &_headerMeta , sizeof(struct EKP2PMessageHeader::Meta), MSG_PEEK, (struct sockaddr *)&fromAddr, &fromAddrLength ); // セグメントの受信
+	recvfrom( _sock, &_headerMeta , sizeof(struct EKP2PMessageHeader::Meta), MSG_PEEK, nullptr, 0 ); // セグメントの受信
 	
-	size_t rawMSGLength = _headerMeta.headerLength() + _headerMeta.payloadLength();
+	size_t rawMSGLength = _headerMeta.headerLength() + _headerMeta.payloadLength(); // ヘッダより取得したデータ長
+	if( rawMSGLength >= UINT16_MAX ){
+		*retRaw = nullptr; return 0;
+	}
+
+	size_t retLength;
+	(*retRaw) = std::shared_ptr<unsigned char>( new unsigned char[rawMSGLength] );
+	retLength = recvfrom( _sock, (*retRaw).get() , rawMSGLength , 0, (struct sockaddr *)&fromAddr, &fromAddrLength ); // セグメントの受信
 
 	std::cout << "++++++++++++++++++++++++++++++" << "\n";
 	std::cout << "This is SocketManager::receive" << "\n";
 	std::cout << "received from ip :: " << inet_ntoa(fromAddr.sin_addr) << "\n";
 	std::cout << "received from port :: " << ntohs(fromAddr.sin_port) << "\n";
+	std::cout << "received MSG Length :: " << rawMSGLength << "\n";
+	for( int i=0; i<rawMSGLength; i++ ){
+		printf("%02X", (*retRaw).get()[i] );
+	} std::cout << "\n";
 	std::cout << "++++++++++++++++++++++++++++++" << "\n";
-	
-	size_t retLength;
-	(*retRaw) = std::shared_ptr<unsigned char>( new unsigned char[rawMSGLength] );
-	retLength = recvfrom( _sock, (*retRaw).get() , rawMSGLength , 0, nullptr, 0 ); // セグメントの受信
 
 	return retLength;
 }
 
-
-
-int SocketManager::setupUDPSock( unsigned short port )
-{
-	if ( (this->_sock = socket( PF_INET, SOCK_DGRAM, IPPROTO_UDP )) < 0 )  return -1;
-
-	if( this->bind( port ) < 0 ) return -1;
-
-	return _sock;
-}
 
 
 
@@ -160,32 +148,15 @@ void SocketManager::toNonBlockingSocket()
 	
 }
 
-/*
-int SocketManager::sockType()
-{
-	int opt; socklen_t optLen = sizeof( opt );
 
-	getsockopt( _sock , SOL_SOCKET , SO_TYPE , &opt , &optLen );
-	if( opt == -1 ) return -1;
-
-	return opt;
-}
-*/
-
-
-struct sockaddr_in SocketManager::ipv4Addr()
+struct sockaddr_in SocketManager::sockaddr_in()
 {
 	return _addr;
 }
 
 
-void SocketManager::sock( int bindedSock )
-{
-	_sock = bindedSock;
-}
 
-
-void SocketManager::addr( struct sockaddr_in target )
+void SocketManager::sockaddr_in( struct sockaddr_in target )
 {
 	_addr = target;
 }

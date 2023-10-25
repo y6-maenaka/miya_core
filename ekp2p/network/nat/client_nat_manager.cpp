@@ -15,6 +15,9 @@
 #include "../../../shared_components/stream_buffer/stream_buffer.h"
 #include "../../../shared_components/stream_buffer/stream_buffer_container.h"
 
+#include "../../ekp2p.h"
+#include "../../daemon/sender/sender.h"
+
 namespace ekp2p{
 
 
@@ -22,7 +25,7 @@ namespace ekp2p{
 
 
 
-std::shared_ptr<KNodeAddr> ClientNatManager::natTraversal( std::string stunServerAddrListPath ,std::shared_ptr<StreamBufferContainer> incomingSBC  )
+std::shared_ptr<KNodeAddr> ClientNatManager::natTraversal( std::string stunServerAddrListPath ,std::shared_ptr<StreamBufferContainer> incomingSBC , std::shared_ptr<StreamBufferContainer> toBrokerSBC )
 {
 	std::cout << "StunServerAddrList open with :: " << stunServerAddrListPath << "\n";
 	std::ifstream stunServerAddrFile(stunServerAddrListPath);
@@ -35,36 +38,43 @@ std::shared_ptr<KNodeAddr> ClientNatManager::natTraversal( std::string stunServe
 	stunServerAddrFile >> stunServerAddrListJson; // 例外処理する
 	stunServerAddrListJson = stunServerAddrListJson["servers"];
 
-	std::shared_ptr<EKP2PMessage> msg = std::make_shared<EKP2PMessage>();
-	std::shared_ptr<unsigned char> rawStunRequestMSG;  size_t rawStunRequestMSGLength;
-	struct StunRequest stunRequestMSG; rawStunRequestMSGLength = stunRequestMSG.exportRaw( &rawStunRequestMSG );
-	msg->payload( rawStunRequestMSG , rawStunRequestMSGLength );
-
-	
-	struct sockaddr_in	 stunServerAddr;
-	std::string ipv4; unsigned short port;
-	std::unique_ptr<SBSegment> popedSB;
 	struct StunResponse response;
+	struct StunRequest stunRequestMSG; 
+	std::shared_ptr<unsigned char> rawStunRequestMSG;
+	size_t rawStunRequestMSGLength = stunRequestMSG.exportRaw( &rawStunRequestMSG );
+
+	struct sockaddr_in stunServerAddr;
+	std::string ipv4; unsigned short port;
 	for( int i=0 ;i < DEFAULT_GLOBAL_ADDR_INQUIRE_COUNT ; i++ )
 	{
 		for( int j=0; j<stunServerAddrListJson.size(); j++ )
 		{
+			std::unique_ptr<SBSegment> sb = std::make_unique<SBSegment>();
+			sb->body( rawStunRequestMSG , rawStunRequestMSGLength );
+			sb->protocol( DEFAULT_DAEMON_FORWARDING_SBC_ID_NATER );
+
+			// サーバアドレスのセットアップ
 			memset( &stunServerAddr , 0x00 , sizeof(stunServerAddr) );
 			stunServerAddr.sin_family = AF_INET;
 			ipv4 = stunServerAddrListJson[j]["ipv4"]; port = stunServerAddrListJson[j]["port"];
 			stunServerAddr.sin_addr.s_addr = inet_addr( ipv4.c_str() );
 			stunServerAddr.sin_port = htons( port );
-			std::shared_ptr<KNodeAddr> stunServerKNodeAddr = std::make_shared<KNodeAddr>( &stunServerAddr );
-			std::shared_ptr<SocketManager> inquireSocketManager = std::make_shared<SocketManager>( stunServerKNodeAddr );
+
+			sb->sendFlag( EKP2P_SEND_UNICAST );
+			sb->forwardingSBCID( DEFAULT_DAEMON_FORWARDING_SBC_ID_SENDER );
+			sb->destinationAddr( stunServerAddr );
+
 			std::cout << "Inquired to ... " << "\n";
-			stunServerKNodeAddr->printInfo();
+			toBrokerSBC->pushOne( std::move(sb) );
 
-
-			inquireSocketManager->send(msg); // リクエストの送信
-			popedSB = incomingSBC->popOne( 5 ); // タイムアウト付きレスポンスの受信
+			//inquireSocketManager->send(msg); // リクエストの送信
+			sb = incomingSBC->popOne( 5 ); // タイムアウト付きレスポンスの受信
 		
-			if( popedSB == nullptr ) continue;
-			response.importRaw( popedSB->body() , popedSB->bodyLength() );
+			if( sb == nullptr ){
+				std::cout << "Inquireing GlobalAddr timeouted" << "\n";
+				continue;
+			} 
+			response.importRaw( sb->body() , sb->bodyLength() );
 
 			struct sockaddr_in globalAddr = response.toSockaddr_in();
 			return std::make_shared<KNodeAddr>( &globalAddr );

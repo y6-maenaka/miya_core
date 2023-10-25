@@ -4,11 +4,7 @@
             "name": "stun_server_0",
             "ipv4": "13.231.16.25",
             "port": 8080
-        },
-        {
-            "id": "local_test_stun_server",
-            "ipv4": "127.0.0.1",
-            "port": 8080
         }
+        
     ]
 }
