@@ -1,7 +1,6 @@
 #include "ver_0.h"
 
 #include "../../shared_components/cipher/ecdsa_manager.h"
-#include "../../shared_components/middle_buffer/middle_buffer.h"
 #include "../../shared_components/stream_buffer/test/unit_test.h"
 #include "../../shared_components/json.hpp"
 #include "../../shared_components/stream_buffer/stream_buffer.h"
@@ -30,6 +29,8 @@
 #include "../../miya_chain/transaction_pool/txcb_bucket.h"
 #include "../../miya_chain/transaction_pool/txcb_table.h"
 
+#include "../../miya_chain/miya_core_manager.h"
+
 
 #include "openssl/evp.h"
 
@@ -41,11 +42,24 @@
 
 #include "../../miya_db/miya_db/database_manager.h"
 
+
 int main()
 {
 	std::cout << " WELCOME TO MIYA COIN CLIENT [ MIYA_CORE ] " << "\n";
 
-	
+
+	miya_chain::MiyaChainState chainState;
+	std::shared_ptr<unsigned char> temp = std::shared_ptr<unsigned char>( new unsigned char[32] );
+	memcpy( temp.get(), "BBBAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 32 );
+	chainState.update( temp , 8 );
+
+
+
+
+	return 0;
+
+
+
 	miya_db::DatabaseManager headerDBManager;
 
 	// SBコンテナのセットアップ 

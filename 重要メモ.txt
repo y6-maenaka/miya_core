@@ -55,6 +55,9 @@
 - SenderDaemonを終了させることができない
 
 
+- namespace miya_chain::block / miya_chain::tx に変更する
+
+
 
 [ Task ]
 ・二重支払いチェック

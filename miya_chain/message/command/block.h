@@ -13,12 +13,17 @@ namespace miya_chain
 /*
  １つのSiriアライズしたブロックデータを送信する
  ※ ブロックに格納されている全トランザクションのRawデータを含む
+ つまり,指定したブロックデータを丸ごとバイナリで送信する
 */
 
 
 
 struct MiyaChainMSG_BLOCK : public MiyaChainPayloadFunction
 {
+private:
+	// ※生のブロックデータを送信する
+		
+
 public:
     static constexpr unsigned char command[12] = "block";
 

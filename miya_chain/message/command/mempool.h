@@ -13,11 +13,15 @@ namespace miya_chain
 /*
     リモートノードのメモリープールにあるトランザクションTxIDを要求するメッセージ
     ※ 返答するのはTxID !!! 本データはgetdataを用いる
+		リモートノードの全てのmempool内のトランザクションを要求する
 */
 
 
 struct MiyaChainMSG_MEMPOOL
 {
+private:
+	unsigned char _blank[4] = {0x00, 0x00, 0x00, 0x00}; // mempoolメッセージは全てのtxIDを要求するためデータは空で良い
+
 public:
     static constexpr unsigned char command[12] = "mempool";
 

@@ -1,3 +1,5 @@
 
 ブロックのバイナリデータをランダムにシーケンシャルに保存する
 ブロックの格納ポインタやメタデータの保存・管理にはmiya_dbを使用する(この際のdb関連ファイルはindexサブディレクトリ内に保存する)
+
+https://learnmeabitcoin.com/technical/blkdat

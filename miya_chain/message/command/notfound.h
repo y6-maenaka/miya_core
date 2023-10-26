@@ -3,6 +3,7 @@
 
 
 #include "./base_command.h"
+#include "./inv/inv.h"
 
 
 namespace miya_chain
@@ -10,12 +11,16 @@ namespace miya_chain
 
 /*
     見つからなかった場合
+		getdataに対する応答
 */
 
 
 
 struct MiyaChainMSG_NOTFOUND
 {
+private:
+		MiyaChainMSG_INV _inv; // 中身は空だが,公式リファレンスでは宣言してあった
+
 public:
     static constexpr unsigned char command[12] = "notfound";
 

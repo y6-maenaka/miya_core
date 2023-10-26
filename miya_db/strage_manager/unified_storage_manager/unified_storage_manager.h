@@ -19,6 +19,7 @@ public:
 	// virtual void update() = 0;
 	virtual bool get( std::shared_ptr<QueryContext> qctx ) = 0;
 	virtual bool add( std::shared_ptr<QueryContext> qctx ) = 0;
+	virtual bool exists( std::shared_ptr<QueryContext> qctx ) = 0;
 
 	virtual void hello() = 0;
 };

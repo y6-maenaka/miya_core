@@ -6,7 +6,7 @@ include_directories( ${OPENSSL_INCLUDE_DIRS} )
 
 add_library( MIYA_CHAIN STATIC
 							
-							chain_manager.cpp
+							miya_core_manager.cpp
 
 							transaction/tx_manager.cpp
 
@@ -32,7 +32,6 @@ add_library( MIYA_CHAIN STATIC
 							daemon/transaction_validator/transaction_validator.cpp
 							daemon/block_validator/block_validator.cpp
 							daemon/broker/broker.cpp
-							daemon/request_responder/request_responder.cpp
 									
 							block_assemble_agent/block_accemble_agent.cpp
 

@@ -24,7 +24,21 @@ constexpr unsigned short MAX_PROTOCOL = 10;
 
 
 struct MiyaChainMessage;
-struct MiyaChainMessageHeader;
+
+
+
+
+
+class MiyaChainMSGRouter
+{
+public:
+	unsigned short fowardingSBCTo(); // メッセージを解析して転送するSBCIDを得る
+};
+
+
+
+
+
 
 
 
@@ -49,6 +63,8 @@ public:
 
 	std::shared_ptr<MiyaChainMessage> parseRawMiyaChainMessage( std::shared_ptr<SBSegment> fromSB );
 	std::shared_ptr<StreamBufferContainer> incomingSBC();
+
+	std::shared_ptr<MiyaChainMessage> parseRawMiyaChainMSG( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );
 };
 
 

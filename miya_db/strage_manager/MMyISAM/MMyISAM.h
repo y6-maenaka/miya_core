@@ -33,6 +33,7 @@ public:
 
 	bool add( std::shared_ptr<QueryContext> qctx );
 	bool get( std::shared_ptr<QueryContext> qctx );
+	bool exists( std::shared_ptr<QueryContext> qctx );
 
 	void hello();
 

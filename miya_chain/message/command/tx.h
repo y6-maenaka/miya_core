@@ -12,6 +12,10 @@ namespace miya_chain
 
 struct MiyaCHainMSG_TX
 {
+
+private:
+	// 生のブロックデータを送信する
+
 public:
     static constexpr unsigned char command[12] = "tx";
 

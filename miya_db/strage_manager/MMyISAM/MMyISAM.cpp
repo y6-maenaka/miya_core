@@ -66,6 +66,18 @@ bool MMyISAM::get( std::shared_ptr<QueryContext> qctx )
 
 
 
+bool MMyISAM::exists( std::shared_ptr<QueryContext> qctx )
+{
+	std::shared_ptr<optr> dataOptr = nullptr;
+	dataOptr = _indexManager->find( qctx->key() );
+
+	// 簡易的にキーが存在するか否かでデータの存在有無を判別することとする
+	if( dataOptr == nullptr ) return false; // キーが存在しない : false
+	return true; // キーが存在しない : true
+}
+
+
+
 
 void MMyISAM::hello()
 {

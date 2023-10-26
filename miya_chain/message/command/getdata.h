@@ -2,6 +2,7 @@
 #define BE75CE29_95AE_41A8_A9D7_39C43A973FC0
 
 #include "./base_command.h"
+#include "./inv/inv.h"
 
 
 namespace miya_chain
@@ -9,6 +10,7 @@ namespace miya_chain
 
 
 /*
+		[ 要求 ](複数)
     invメッセージで受信したオブジェクトのリストの中から特定のデータオブジェクトをリモートノードに要求する
     要求可能なデータはメモリープールまたはリレーセットにあるデータのみ
     ※ブロックに格納されたトランザクションデータにはアクセスできない
@@ -17,6 +19,9 @@ namespace miya_chain
 
 struct MiyaChainMSG_GETDATA : public MiyaChainPayloadFunction
 {
+private:
+	MiyaChainMSG_INV _inv;
+
 public:
     static constexpr unsigned char command[12] = "getdata";
 

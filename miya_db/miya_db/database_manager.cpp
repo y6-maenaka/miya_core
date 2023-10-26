@@ -137,6 +137,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 
 
 				case QUERY_ADD: // 1 add
+				{
 					std::cout << "\x1b[32m" << "## (HANDLE) QUERY_ADD" << "\x1b[39m" << "\n";
 
 					flag = mmyisam->add( qctx ); // addの実行
@@ -153,15 +154,17 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 					std::copy( dumpedJson.begin() , dumpedJson.begin() + dumpedJson.size() , dumpedJsonRaw.get() );
 					sbSegment->body( dumpedJsonRaw , dumpedJson.size() );
 					break;
+				}
 			
 
 
 
 
 				case QUERY_SELECT: // 2 get
+				{
 					std::cout << "\x1b[34m" << "## (HANDLE) QUERY_SELECT"	<<"\x1b[39m" << "\n";
-					flag = mmyisam->get( qctx );
 
+					flag = mmyisam->get( qctx );
 					if( !flag ){
 						sbSegment = failureSB( qctx );
 						goto direct;
@@ -179,6 +182,25 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 					sbSegment->body( dumpedJsonRaw , dumpedJson.size() );
 					
 					break;
+				}
+
+
+				case QUERY_EXISTS: // 3 exists
+				{
+					std::cout <<  "## (HANDLE) QUERY_EXISTS"	<< "\n";
+
+					flag = mmyisam->exists( qctx );
+
+					responseJson["QueryID"] = qctx->id();
+					responseJson["status"] = 0; // 成功
+					responseJson["value"] = flag;
+
+					dumpedJson = nlohmann::json::to_bson( responseJson );
+					dumpedJsonRaw = std::shared_ptr<unsigned char>( new unsigned char[dumpedJson.size()] );
+					std::copy( dumpedJson.begin() , dumpedJson.begin() + dumpedJson.size() , dumpedJsonRaw.get() );
+					sbSegment->body( dumpedJsonRaw , dumpedJson.size() );
+					break;
+				}
 			}
 	
 			direct:
