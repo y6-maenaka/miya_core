@@ -57,8 +57,11 @@ int EKP2PKRoutingTableUpdator::start()
 		for(;;)
 		{
 			popedSB = _incomingSB->popOne();
-			std::cout << "rpc Type :: " << popedSB->rpcType() << "\n";
-			
+			if( popedSB->flag() == SB_FLAG_MODULE_EXIT ){
+				std::cout << "exit flag received module at EKP2PKRoutingTableUpdator" << "\n";
+				return;
+			}
+
 			// handle ekp2p msg		
 			switch( popedSB->rpcType() )
 			{
@@ -72,11 +75,9 @@ int EKP2PKRoutingTableUpdator::start()
 				{
 					std::cout << "[ PING ] KADEMLIA " << "\n";
 					popedSB->sendFlag( EKP2P_SENDBACK | EKP2P_SEND_UNICAST ); // 送信フラグを単一センドバックに
-					std::cout << "destinoation :: " << popedSB->forwardingSBCID() << "\n";
 
 					if( popedSB->body() == nullptr || popedSB->bodyLength() <= 0 ) // 仮想へのデータが特になければsenderへ転送する
 						popedSB->forwardingSBCID( DEFAULT_DAEMON_FORWARDING_SBC_ID_SENDER );
-					std::cout << "discardFlag :: " << discardFlag << "\n";
 					// 単純にPONGをレスポンスする
 					break;
 				}	

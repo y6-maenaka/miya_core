@@ -40,7 +40,6 @@ int EKP2PBroker::start( bool requiresRouting )
 		std::cout << "\x1b[32m" << "EKP2P::daemon::Broker ekp2pBroker thread started" << "\x1b[39m" << "\n";
 		_activeSenderThreadIDVector.push_back( std::this_thread::get_id() ); 
 
-
 		std::unique_ptr<SBSegment> sb;
 		for(;;)
 		{
@@ -54,14 +53,11 @@ int EKP2PBroker::start( bool requiresRouting )
 			if( forwardingProtocol >= MAX_PROTOCOL ) continue; // 受け付けていないプロトコルメッセージ
 
 			// KRoutingTableだけは独立して転送する
-			std::cout << "ekp2pIsProcessed :: " << sb->ekp2pIsProcessed() << "\n"; 
-			std::cout << "requiresRouting :: " << requiresRouting << "\n";
 			if( !(sb->ekp2pIsProcessed()) && requiresRouting ) 
 			{
 				_toRoutingTableManagerSBC->pushOne( std::move(sb) );
 				continue; // skip while done ekp2p processing
 			}
-
 
 			if( _sbHub.at(forwardingProtocol) == nullptr || !(_allowedProtocolSet[forwardingProtocol]) ){
 				std::cout << "Not Allowed Pack Received" << "\n";

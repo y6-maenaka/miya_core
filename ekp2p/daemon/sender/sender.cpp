@@ -58,11 +58,13 @@ int EKP2PSender::start()
 		std::unique_ptr<SBSegment> popedSB;
 		EKP2PSenderOptions options;
 
-		std::cout << "sender socket -> " << _hostSock << "\n";
-
 		for(;;)
 		{
 			popedSB = _incomingSB->popOne();
+			if( popedSB->flag() == SB_FLAG_MODULE_EXIT ){
+				std::cout << "exit flag received at EKP2PSender" << "\n";
+				return;
+			}
 
 			switch( popedSB->sendFlag() )
 			{
@@ -77,13 +79,6 @@ int EKP2PSender::start()
 					msg->header()->protocol( popedSB->protocol() );
 					msg->header()->rpcType( popedSB->rpcType() );
 					msg->header()->sourceKNodeAddr( _kRoutingTable->hostNode()->kNodeAddr() ); // 自身のアドレスのセット
-
-					std::cout << "------------------------------" << "\n";
-					std::cout << "send  to " << "\n";
-					std::cout << "host Sock :: " << _hostSock << "\n";
-					std::cout << "ip :: " << inet_ntoa(popedSB->rawSenderAddr().sin_addr) << "\n";
-					std::cout << "port :: " << ntohs(popedSB->rawSenderAddr().sin_port) << "\n";
-					std::cout << "------------------------------" << "\n";	
 
 					size_t sendLength;
 					sendLength = sockManager->send( msg );
@@ -103,12 +98,6 @@ int EKP2PSender::start()
 					msg->header()->protocol( popedSB->protocol() );
 					msg->header()->rpcType( KADEMLIA_RPC_PONG );
 					msg->header()->sourceKNodeAddr( _kRoutingTable->hostNode()->kNodeAddr() ); // 自身のアドレスをセット
-
-					std::cout << "------------------------------" << "\n";
-					std::cout << "send back to " << "\n";
-					std::cout << "ip :: " << inet_ntoa(popedSB->rawSenderAddr().sin_addr) << "\n";
-					std::cout << "port :: " << ntohs(popedSB->rawSenderAddr().sin_port) << "\n";
-					std::cout << "------------------------------" << "\n";
 
 					size_t sendLength;
 					//sendLength = sockManager->send( popedSB->body() , popedSB->bodyLength() );
@@ -136,8 +125,6 @@ int EKP2PSender::start()
 					sockManager = std::make_shared<SocketManager>( popedSB->rawSenderAddr(), _hostSock ); // rawがいいかSourceがいいか
 
 					sendLength = sockManager->send( msg );
-					std::cout << "[ send ] :: ( " << sendLength << " ) bytes" << "\n";
-
 
 					// 2. relayKNodeに送信
 					for( auto itr : popedSB->relayKNodeAddrVector() )	{

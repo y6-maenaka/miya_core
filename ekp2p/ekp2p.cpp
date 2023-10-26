@@ -78,16 +78,18 @@ int EKP2P::init( std::string stunServerAdddrListPath )
 	// 主要フォワーディング先を設定
 	_brokerDaemon._broker->forwardingDestination( _senderDaemon._toSenderSBC , DEFAULT_DAEMON_FORWARDING_SBC_ID_SENDER );
 
+	_receiverDaemon._receiver->start(); // receiverは終了させることができないのであらかじめ起動しておく
 
-	
+
+
+
 	// Nat超えをしてグローバルIPを得る
+	std::cout << "本ノードのグローバルアドレスを取得しています" << "\n";
 	std::shared_ptr<StreamBufferContainer> _toNaterSBC = std::make_shared<StreamBufferContainer>(); // naterへのSBC
 	_brokerDaemon._broker->forwardingDestination( _toNaterSBC , DEFAULT_DAEMON_FORWARDING_SBC_ID_NATER ); // 転送先の設定 Natterは1番へ
 	
 	_brokerDaemon._broker->start( false ); 
-	_receiverDaemon._receiver->start();
 	_senderDaemon._sender->start();
-	sleep(1);
 
 	ClientNatManager natManager;
 	std::shared_ptr<KNodeAddr> globalKNodeAddr;
@@ -95,10 +97,19 @@ int EKP2P::init( std::string stunServerAdddrListPath )
 	// グローバルアドレスを取得できたら,_hostNodeのKNodeAddrを変更する
 	_kRoutingTable->hostNode()->kNodeAddr( globalKNodeAddr );
 
+	std::cout << "Global Address Getted with " << "\n";
 	_kRoutingTable->hostNode()->printInfo();
 	std::cout << "NatTraversal Successfuly Done" << "\n";
-	
 
+
+	/* 終了フラグの送信 */
+	std::unique_ptr<SBSegment> exitBrokerSB = std::make_unique<SBSegment>();
+	exitBrokerSB->flag(SB_FLAG_MODULE_EXIT);
+	_brokerDaemon._toBrokerSBC->pushOne( std::move(exitBrokerSB) );
+
+	std::unique_ptr<SBSegment> exitSenderSB = std::make_unique<SBSegment>();
+	exitSenderSB->flag(SB_FLAG_MODULE_EXIT);
+	_senderDaemon._toSenderSBC->pushOne( std::move(exitSenderSB));
 	return 0;
 }
 
@@ -122,7 +133,6 @@ int EKP2P::initCustom()
 	_receiverDaemon._receiver = std::make_shared<EKP2PReceiver>( _hostSocketManager , _brokerDaemon._toBrokerSBC ); // receiverにはSBは不要 reseice制限フラグ
 	_receiverDaemon._receiver->toRoutingTableUpdatorSBC( _routingTableManagerDaemon._toManagerSBC );
 
-
 	_brokerDaemon._broker->forwardingDestination( _senderDaemon._toSenderSBC , DEFAULT_DAEMON_FORWARDING_SBC_ID_SENDER );
 
 	return 0;
@@ -136,7 +146,7 @@ int EKP2P::start( bool requiresRouting )
 	// Daemonは全てバックグラウンドで起動される
 	_brokerDaemon._broker->start( requiresRouting ); 
 	_senderDaemon._sender->start(); 
-	_receiverDaemon._receiver->start();
+	// _receiverDaemon._receiver->start(); // すでに起動している
 	_routingTableManagerDaemon._manager->start();
 
 	return 0;

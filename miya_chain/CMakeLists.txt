@@ -39,6 +39,8 @@ add_library( MIYA_CHAIN STATIC
 							#message/protocol_message/block_data_msg.cpp
 							#message/protocol_message/block_header_msg.cpp
 							message/message.cpp
+							message/command/inv/inv.cpp
+							message/command/getblocks.cpp
 
 							transaction/p2pkh/p2pkh.cpp
 							transaction/coinbase/coinbase.cpp
@@ -48,10 +50,12 @@ add_library( MIYA_CHAIN STATIC
 							utxo_set/utxo_set.cpp
 
 							block_chain_manager/block_chain_manager.cpp
-							block_chain_manager/block_local_strage_manager/header_store/header_store.cpp
-							block_chain_manager/block_local_strage_manager/transaction_store/transaction_store.cpp
+							#block_chain_manager/block_local_strage_manager/header_store/header_store.cpp
+							#block_chain_manager/block_local_strage_manager/transaction_store/transaction_store.cpp
 
 							mining/simple_mining.cpp
+							
+							miya_coin/local_strage_manager.cpp
 
 )
 

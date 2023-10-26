@@ -10,7 +10,19 @@
 	#include <machine/endian.h>
 #endif 
 
+#include <iostream>
+#include <memory>
+#include <variant>
 
+#include "./command/inv/inv.h"
+#include "./command/block.h"
+#include "./command/getblocks.h"
+#include "./command/getdata.h"
+#include "./command/getheaders.h"
+#include "./command/headers.h"
+#include "./command/mempool.h"
+#include "./command/block.h"
+#include "./command/notfound.h"
 
 namespace miya_chain
 {
@@ -19,6 +31,9 @@ namespace miya_chain
 struct BlockHeaderMessage;
 struct BlockDataRequestMessage;
 struct BlockDataResponseMessage;
+
+
+
 
 
 
@@ -39,49 +54,45 @@ constexpr unsigned short MIYA_CHAIN_PROTOCOL_TX = 3; // 可変長 tx区切りあ
 */
 
 
-
-struct MiyaChainMessageHeader
-{
-// private:
-	uint8_t _protocol; // プロトコルタイプ 
-	uint8_t _direction; // リクエスト or レスポンス
-	uint16_t _payloadLength;
-	unsigned char _reserved[4];
-
-public:
-	unsigned short protocol();
-	bool isRequest();
-	bool importRawSequentially( std::shared_ptr<unsigned char> fromRaw );
-	size_t payloadLength();
-
-} __attribute__((packed));
-
-
+using MiyaChainCommand = std::variant<
+								MiyaChainMSG_INV,
+								MiyaChainMSG_BLOCK,
+								MiyaChainMSG_GETBLOCKS,
+								MiyaChainMSG_GETDATA,
+								MiyaChainMSG_GETHEADERS,
+								MiyaChainMSG_HEADERS,
+								MiyaChainMSG_MEMPOOL,
+								MiyaChainMSG_BLOCK,
+								MiyaChainMSG_NOTFOUND
+							>;
 
 
 
 struct MiyaChainMessage
 {
-private:
-	std::shared_ptr<MiyaChainMessageHeader> _header;
-	// void *_payload;
-	std::shared_ptr<unsigned char> _payload;
+// private:
+	struct 
+	{
+		unsigned char _token[4];
+		unsigned char _command[12]; // プロトコルタイプ  with ASCII
+		uint32_t _payloadLength;
+	} _header;
+
+	MiyaChainCommand _payload;
 
 public:
-	MiyaChainMessage();
 
-	// void payload( void *payload , unsigned short payloadLength );
-	unsigned short protocol();
+	/* Getter */
+	size_t payloadLength();
+	const unsigned char *command();
 
-	unsigned int exportRaw( std::shared_ptr<unsigned char> ret );
+	/* Setter */
+	void payload( MiyaChainCommand targetPayload , unsigned char *command );
 
-	std::shared_ptr<MiyaChainMessageHeader> header();
-
-	void payload( std::shared_ptr<unsigned char> target );
-	std::shared_ptr<unsigned char> payload();
+	bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );
 
 
-};
+} __attribute__((packed));
 
 
 

@@ -8,8 +8,6 @@
 
 #include "../../message/message.h"
 
-#include "../../message/protocol_message/block_header_msg.h"
-#include "../../message/protocol_message/block_data_msg.h"
 
 #include "../../block/block.h"
 #include "../../transaction/p2pkh/p2pkh.h"
@@ -36,10 +34,12 @@ BlockValidationControlBlock::BlockValidationControlBlock( std::shared_ptr<Stream
 
 void BlockValidationControlBlock::importStrucretHeader( std::shared_ptr<BlockHeaderMessage> target )
 {
+	/*
 	_blockHash = std::shared_ptr<unsigned char>(target->_blockHash);
 	_rawBlock._txCount = target->_txCount;
 	_structedBlock._block->header( target->_blockHeader );
 	//_structedBlock._block->header( target->_blockHeader );
+	*/
 }
 
 void BlockValidationControlBlock::blockHash( unsigned char* target )
@@ -68,7 +68,7 @@ void BlockValidationControlBlock::networks( std::shared_ptr<ekp2p::KNodeAddr> so
  */
 void BlockValidationControlBlock::autoStart()
 {
-
+	/*
 	// ノードに問い合わせる
 	if( _networks._sourceKNodeAddr == nullptr ) return;  // 初回問い合わせノードが存在しなければスレッドには入らない
 
@@ -81,7 +81,7 @@ void BlockValidationControlBlock::autoStart()
 		pack._ekp2pBlock._relayKNodeAddrVector = _networks._relayKNodeAddrVector;
 
 
-		/*　リクエスト初回 ブロックの送信元に問い合わせる */
+		//　リクエスト初回 ブロックの送信元に問い合わせる 
 		BlockDataRequestMessage requestMSG; // データ(トランザクション)リクエスト用のメッセージを作成する
 		requestMSG.blockHash( _blockHash ); // ブロックハッシュのセット
 		requestMSG._txSequenceFrom = 0; // 内包トランザクションリクエストのシーケンス番号は先頭(0)から
@@ -123,10 +123,10 @@ void BlockValidationControlBlock::autoStart()
 
 
 		// 収取したトランザクションに対してバリデーションを実施する
-		/*
-		 1. トランザクション自体に不整合がないか検証
-		 2. 入出力に不整合が生じていないか検証
-		 */
+		
+		 //1. トランザクション自体に不整合がないか検証
+		 //2. 入出力に不整合が生じていないか検証
+		
 	
 		
 
@@ -134,7 +134,7 @@ void BlockValidationControlBlock::autoStart()
 	});
 	validationTH.detach();
 
-
+	*/
 
  return;
 }
@@ -246,7 +246,7 @@ std::shared_ptr<BlockValidationControlBlock> PendingResponseQueue::dequeue( std:
 
 void BlockValidator::start()
 {
-
+	/*
 	if( _sourceSBC == nullptr ) return;
 	std::unique_ptr<SBSegment> popedSB;
 
@@ -267,7 +267,7 @@ void BlockValidator::start()
 
 		switch( miyaChainMSG.protocol() )
 		{
-			/*
+			
 			case 0:
 				blockHeaderMSG = miyaChainMSG.blockHeaderMSG(); // ブロックヘッダメッセージの書き出し // 新たなアドレスで書き出す
 				
@@ -289,10 +289,10 @@ void BlockValidator::start()
 				else
 					targetBVCB->txArrive( blockDataResponseMSG );
 				break;
-				*/
+				
 		}
 	}
-
+	*/
 }
 
 

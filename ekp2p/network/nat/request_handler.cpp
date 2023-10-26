@@ -25,14 +25,9 @@ StunRequestHandlerDaemon::StunRequestHandlerDaemon( std::shared_ptr<StreamBuffer
 
 int StunRequestHandlerDaemon::start()
 {
-	std::cout << "--- 1 ---" << "\n";
-
     if( _incomingSBC == nullptr ) return -1;
 
-		std::cout << "--- 2 --- " << "\n";
     if( _toBrokerSBC == nullptr ) return -1;
-
-		std::cout << "passed here" << "\n";
 
     std::thread stunRequestHandler([&]()
     {
@@ -43,23 +38,10 @@ int StunRequestHandlerDaemon::start()
         std::shared_ptr<unsigned char> rawStunResponse; size_t rawStunResponseLength;
         for(;;)
         {
-	    std::cout << "pop befoer" << "\n";
             popedSB = _incomingSBC->popOne();
-	    std::cout << "StunRequest Received" << "\n";
 
             response.sockaddr_in( popedSB->rawSenderAddr() );
             rawStunResponseLength = response.exportRaw( &rawStunResponse );
-
-	    std::cout << "..........................................." << "\n";
-	    std::cout << "response rawClientAddr()" << "\n";
-	    std::cout << inet_ntoa(response.toSockaddr_in().sin_addr) << "\n";
-	    std::cout << ntohs( response.toSockaddr_in().sin_port) << "\n";
-	    std::cout << "raw "<< rawStunResponseLength  << " :: ";
-	    for( int i=0; i<rawStunResponseLength; i++){
-		printf("%02X", rawStunResponse.get()[i]);
-	    } std::cout << "\n";
-	    std::cout << "..........................................." << "\n";
-
 
         popedSB->body( rawStunResponse, rawStunResponseLength );
 	    popedSB->protocol( DEFAULT_DAEMON_FORWARDING_SBC_ID_NATER  );

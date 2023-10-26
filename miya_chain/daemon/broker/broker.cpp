@@ -76,6 +76,7 @@ void MiyaChainMessageBrocker::setDestinationStreamBuffer( std::shared_ptr<Stream
 
 std::shared_ptr<MiyaChainMessage> MiyaChainMessageBrocker::parseRawMiyaChainMessage( std::shared_ptr<SBSegment> fromSB )
 {
+	/*
 	std::shared_ptr<unsigned char> rawMSG; size_t rawMSGLength;
 	rawMSG = fromSB->body(); 
 	rawMSGLength = fromSB->bodyLength();
@@ -86,8 +87,8 @@ std::shared_ptr<MiyaChainMessage> MiyaChainMessageBrocker::parseRawMiyaChainMess
 	std::shared_ptr<unsigned char> payloadHead( rawMSG.get() + sizeof( struct MiyaChainMessageHeader) );
 	ret->payload( payloadHead );
 
-
 	return ret;
+	*/
 }
 
 

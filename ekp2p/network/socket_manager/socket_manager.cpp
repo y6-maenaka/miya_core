@@ -55,10 +55,7 @@ int SocketManager::bind( int port )
 int SocketManager::setupUDPSock( unsigned short port )
 {
 	if ( (this->_sock = socket( PF_INET, SOCK_DGRAM, IPPROTO_UDP )) < 0 )  return -1;
-
 	if( this->bind( port ) < 0 ) return -1;
-	std::cout << "Socket successfully binede" << "\n";
-
 	return _sock;
 }
 
@@ -90,11 +87,6 @@ int SocketManager::send( std::shared_ptr<EKP2PMessage> msg )
 	std::shared_ptr<unsigned char> rawMSG; size_t rawMSGLength;
 	rawMSGLength = msg->exportRaw( &rawMSG );
 
-	std::cout << "sended with socket >> " << _sock << "\n";
-	std::cout << "rawMSGLength :: " << rawMSGLength << "\n";
-	std::cout << "ip :: " << inet_ntoa( _addr.sin_addr ) << "\n";
-	std::cout << "port :: " << ntohs(_addr.sin_port)  << "\n";
-
 	return ::sendto( _sock , rawMSG.get() , rawMSGLength , 0 , (struct sockaddr *)&_addr , sizeof(_addr) );
 }
 
@@ -116,16 +108,6 @@ size_t SocketManager::receive( std::shared_ptr<unsigned char> *retRaw , struct s
 	size_t retLength;
 	(*retRaw) = std::shared_ptr<unsigned char>( new unsigned char[rawMSGLength] );
 	retLength = recvfrom( _sock, (*retRaw).get() , rawMSGLength , 0, (struct sockaddr *)&fromAddr, &fromAddrLength ); // セグメントの受信
-
-	std::cout << "++++++++++++++++++++++++++++++" << "\n";
-	std::cout << "This is SocketManager::receive" << "\n";
-	std::cout << "received from ip :: " << inet_ntoa(fromAddr.sin_addr) << "\n";
-	std::cout << "received from port :: " << ntohs(fromAddr.sin_port) << "\n";
-	std::cout << "received MSG Length :: " << rawMSGLength << "\n";
-	for( int i=0; i<rawMSGLength; i++ ){
-		printf("%02X", (*retRaw).get()[i] );
-	} std::cout << "\n";
-	std::cout << "++++++++++++++++++++++++++++++" << "\n";
 
 	return retLength;
 }

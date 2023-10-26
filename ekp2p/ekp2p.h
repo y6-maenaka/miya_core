@@ -78,7 +78,7 @@ private:
 
 	struct 
 	{
-		std::shared_ptr<EKP2PSender>	_sender;
+		std::shared_ptr<EKP2PSender> _sender;
 		std::shared_ptr<StreamBufferContainer> _toSenderSBC;
 	} _senderDaemon;
 

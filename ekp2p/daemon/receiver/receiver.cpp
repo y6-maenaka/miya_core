@@ -46,11 +46,9 @@ int EKP2PReceiver::start()
 	std::thread ekp2pReceiver([&]()
 	{
 		std::cout << "\x1b[32m" << "EKP2P::daemon::Receiver ekp2pReceiver thread started" << "\x1b[39m" << "\n";
-
 		_activeSenderThreadIDVector.push_back( std::this_thread::get_id() ); 
 
 		size_t receivedLength = 0; 
-
 		std::shared_ptr<unsigned char> rawMessage;
 		std::shared_ptr<EKP2PMessage> message;
 		std::shared_ptr<EKP2PMessageHeader> header;
@@ -58,8 +56,9 @@ int EKP2PReceiver::start()
 		
 		for(;;)
 		{
-			std::cout << "stand by receiveing with socket -> " << _hostSocketManager->sock() << "\n";
 			receivedLength = _hostSocketManager->receive( &rawMessage, fromAddr );
+			std::cout << "[notify] Message Received" << "\n";
+
 			if( receivedLength <= 0 ) continue;
 			// receivedLength = recvfrom( _listeningSocketManager->sock() , receiveBuffer.get() , UINT16_MAX , 0 , nullptr , 0 );
 
@@ -71,24 +70,12 @@ int EKP2PReceiver::start()
 			header = message->header();
 
 			int protocol = static_cast<int>( header->protocol() );
-
 			std::unique_ptr<SBSegment> sb = std::make_unique<SBSegment>();
 			sb->importFromEKP2PHeader( header );
 			sb->forwardingSBCID( header->protocol() );
 			sb->body( message->payload() , header->payloadLength() );
 			sb->rawSenderAddr( fromAddr );
 	
-			std::cout << "------------------------------------------------------------------" << "\n";
-			header->printRaw();
-			std::cout << "header->protocol() :: " << header->protocol() << "\n";
-			std::cout << "forwardingSBCID :: " << sb->forwardingSBCID() << "\n";
-			std::cout << "ip :: " << inet_ntoa(fromAddr.sin_addr) << "\n";
-			unsigned char intIP[4]; memcpy( &intIP , &(fromAddr.sin_addr.s_addr), sizeof(intIP) );
-			for( int i=0; i<sizeof(intIP); i++){
-				printf("%02X", intIP[i]);
-			} std::cout << "\n";
-			std::cout << "------------------------------------------------------------------" << "\n";
-
 			_toBrokerSBC->pushOne( std::move(sb) );
 		}
 		return;
@@ -112,41 +99,6 @@ void EKP2PReceiver::toRoutingTableUpdatorSBC( std::shared_ptr<StreamBufferContai
 }
 
 
-/*
-unsigned int Receiver::payload( void *rawEKP2PMSG ,unsigned char** ret )
-{
-	EKP2PMessageHeader header;
-	memcpy( &(header._meta) , rawEKP2PMSG , sizeof(header._meta) );
-
-	bool flag = header.validate();
-
-	std::cout << "+++++++++++++" << "\n";
-	std::cout << header.headerLength() << "\n";
-	std::cout << header.payloadLength() << "\n";
-
-	for( int i=0; i<header.payloadLength() + header.headerLength(); i++ )
-	{
-		printf("%02X", static_cast<unsigned char*>(rawEKP2PMSG)[i] );
-	}std::cout << "\n";
-	std::cout << "+++++++++++++" << "\n";
-
-	std::cout << "flag " << flag << "\n";
-	if( flag )
-	{
-		if( header.payloadLength() <= 0 ) return 0;
-
-		*ret = new unsigned char[ header.payloadLength() ];
-		std::cout << "header length -> " << header.headerLength() << "\n";
-		std::cout << "payload length -> " << header.payloadLength() << "\n";
-		memcpy( *ret , static_cast<unsigned char*>(rawEKP2PMSG) + header.headerLength(), header.payloadLength() );
-		
-		return header.payloadLength();
-	}
-
-	return 0;
-};
-*/
-
 
 
 
@@ -164,19 +116,13 @@ std::shared_ptr<EKP2PMessage> EKP2PReceiver::parseRawEKP2PMessage( std::shared_p
 	// 簡易的な検証を数項目行う
 	if( memcmp( ret->header()->token() , "MIYA" , 4 ) != 0 ) return nullptr; // トークン不一致
 
-	// ペイロードのインポート
-	std::shared_ptr<unsigned char> payloadHead( fromRaw.get() + ret->header()->headerLength() );
-	//std::shared_ptr<unsigned char> payloadHead = std::make_shared<unsigned char>( *(fromRaw.get() + ret->header()->headerLength()) );
-	ret->payload( payloadHead );
+	// ペイロードのインポート 二重で領域確保する為効率が悪い
+	std::shared_ptr<unsigned char> payload = std::shared_ptr<unsigned char>( new unsigned char[ret->header()->payloadLength()] );
+	memcpy( payload.get() , fromRaw.get() + ret->header()->headerLength(), ret->header()->payloadLength() );
 
-	std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
-	for(int i=0; i<ret->header()->payloadLength(); i++ ){
-		printf("%02X", *(fromRaw.get() + ret->header()->headerLength() + i) );
-	} std::cout << "\n";
-	for(int i=0; i<ret->header()->payloadLength();i++){
-		printf("%02X", payloadHead.get()[i]);
-	} std::cout << "\n";
-	std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
+	//std::shared_ptr<unsigned char> payloadHead = std::shared_ptr<unsigned char>( fromRaw.get() + ret->header()->headerLength() );
+	//std::shared_ptr<unsigned char> payloadHead = std::make_shared<unsigned char>( *(fromRaw.get() + ret->header()->headerLength()) );
+	ret->payload( payload );
 
 	return ret;
 	return nullptr;
