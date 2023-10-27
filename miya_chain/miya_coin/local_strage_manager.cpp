@@ -74,6 +74,7 @@ size_t BlockContainer::exportRawFormated( std::shared_ptr<unsigned char> *retRaw
 		rawTxLength = itr->exportRaw( &rawTx );
 		rawTxVector.push_back( std::make_pair( rawTx , rawTxLength ) );
 		rawTxsLength += rawTxLength;
+		std::cout << "exportedTx Length :: " << rawTxLength << "\n";
 	}
 	
 	_meta._txCount = static_cast<uint32_t>(rawTxVector.size());
@@ -123,40 +124,28 @@ BlockLocalStrageManager::BlockLocalStrageManager( std::shared_ptr<StreamBufferCo
 void BlockLocalStrageManager::writeBlock( std::shared_ptr<block::Block> targetBlock )
 {
 	std::shared_ptr<BlockContainer> container = std::make_shared<BlockContainer>(targetBlock); // pack block to blockContainer
-	std::cout << "--- 1 --- " << "\n";
 
 	std::string filePath = "../miya_chain/miya_coin/blocks/" + std::string("blk") + std::to_string(000000) + ".dat";
 	std::cout << "write to >> " << filePath << "\n";
-
-	std::cout << "--- 2 --- " << "\n";
 
 		// キャッシュの確認
 	long offset;	
 	if( _blkFileManager->file() == filePath ) // 前回使用した(キャッシュ)ファイルマネージャーの管理ファイルが異なる場合
 	{
-		std::cout << "--- 3 ---" << "\n";
 		offset = _blkFileManager->write( container );
 	}
 	else // 前回使用した(キャッシュ)ファイルマネージャーの管理ファイルが異なる場合
 	{
-		std::cout << "--- 4 ---" << "\n";
 		_blkFileManager = std::shared_ptr<BlkFileManager>( new BlkFileManager(filePath) );
-		std::cout << "--- 4.1 ---" << "\n";
 		offset = _blkFileManager->write( container );
 	}
 
-	std::cout << "--- 5 ---" << "\n";
-
 	if( offset == -1  ) // 新規にblkファイルを作成する必要がある
 	{
-		std::cout << "--- 6 ---" << "\n";
 		filePath = "../miya_chain/miya_coin/blocks/" + std::string("blk") + std::to_string(000000 + 1) + ".dat";
 		_blkFileManager = std::shared_ptr<BlkFileManager>( new BlkFileManager(filePath) );
 		offset = _blkFileManager->write( container );
 	}
-
-	std::cout << "--- 7 ---" << "\n";
-
 	
 	// インデックスの登録 
 	std::shared_ptr<unsigned char> blockHash = std::shared_ptr<unsigned char>( new unsigned char[32] ); 
@@ -187,16 +176,25 @@ void BlockLocalStrageManager::writeBlock( std::shared_ptr<block::Block> targetBl
 
 std::shared_ptr<block::Block> BlockLocalStrageManager::readBlock( std::shared_ptr<unsigned char> blockHash )
 {
+	std::cout << "--- 0 ---" << "\n";
 
 	std::shared_ptr<unsigned char> queryRetRaw; size_t queryRetRawLength;
 	queryRetRawLength = _miyaDBClient->get( blockHash , &queryRetRaw );
 
+	std::cout << "--- 1 ---" << "\n";
 
 	if( queryRetRaw == nullptr || queryRetRawLength <= 0 ) return nullptr;
+
+	std::cout << "--- 2 ---" << "\n";
 
 	// queryRetRawをBlockIndexに変換する
 	struct BlockIndex blockIndex;
 	memcpy( &blockIndex , queryRetRaw.get() , sizeof(blockIndex) );
+
+	std::cout << "RawBlockIndex("<< queryRetRawLength<< ") :: "; 
+	for( int i=0; i<queryRetRawLength; i++ ){
+		printf("%02X", queryRetRaw.get()[i] );
+	} std::cout << "\n";
 
 	std::string filePath = "../miya_chain/miya_coin/blocks/" + std::string("blk") + std::to_string(blockIndex.fileIndex) + ".dat";
 	std::cout << "read from" << filePath << "\n";
@@ -204,14 +202,22 @@ std::shared_ptr<block::Block> BlockLocalStrageManager::readBlock( std::shared_pt
 
 	std::shared_ptr<BlockContainer> container;
 	off_t offset = blockIndex.blockOffset;
+	std::cout << "offset :: " << offset << "\n";
 	if( _blkFileManager->file() == filePath ) // 前回使用した(キャッシュ)ファイルマネージャーの管理ファイルが異なる場合
 	{
+		std::cout << "--- 3 ---" << "\n";
 		container = _blkFileManager->read( offset );
+		std::cout << "--- 3.1 --- " << "\n";
 	}
 	else // 前回使用した(キャッシュ)ファイルマネージャーの管理ファイルが異なる場合
 	{
+		std::cout << "--- 4 ---" << "\n";
+		std::string filePath = "../miya_chain/miya_coin/blocks/" + std::string("blk") + std::to_string(blockIndex.fileIndex) + ".dat";
 		_blkFileManager = std::shared_ptr<BlkFileManager>( new BlkFileManager(filePath) );
+		std::cout << "--- 5 ---" << "\n";
+		std::cout << "offset :: " << offset << "\n";
 		container = _blkFileManager->read( offset );
+		std::cout << "--- 6 --- " << "\n";
 	}
 
 	if( container == nullptr ) return nullptr;

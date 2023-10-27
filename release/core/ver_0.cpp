@@ -101,11 +101,20 @@ int main()
 
 	loadedP2PKH->sign(); // トランザクションのTxIn用に署名を作成する
 
+
 	std::shared_ptr<unsigned char> rawTx; unsigned int rawTxLength; // データを増やす為これをコピーする
 	rawTxLength = loadedP2PKH->exportRaw( &rawTx );
 	std::shared_ptr<tx::P2PKH> importP2PKH = std::make_shared<tx::P2PKH>();
 	importP2PKH->importRawSequentially( rawTx );
 	importP2PKH->verify( std::make_shared<miya_chain::LightUTXOSet>(utxoSet) ); // 一応検証する
+	importP2PKH->sign();
+
+	std::cout << "-------------------------------------------" << "\n";
+	std::cout << "loadedP2PKH length :: " << rawTxLength << "\n";
+	std::shared_ptr<unsigned char> rawImportedP2PKH; size_t rawImportedP2PKHLength;
+	rawImportedP2PKHLength = importP2PKH->exportRaw( &rawImportedP2PKH );
+	std::cout << "rawImportedTx Length :: " << rawImportedP2PKHLength << "\n";
+	std::cout << "-------------------------------------------" << "\n";
 
 	// ブロックの作成
 	block::Block block;
@@ -129,11 +138,53 @@ int main()
 
 
 
+	std::shared_ptr<unsigned char> blockHash;  block.blockHash( &blockHash );
 	// ローカルファイルへのブロック書き込みテスト
-	std::make_shared<block::Block>(block);
 	blockLocalStrageManager.writeBlock( std::make_shared<block::Block>(block) );
 
+	sleep(1);
 
+	std::shared_ptr<block::Block> readedBlock;
+	readedBlock = blockLocalStrageManager.readBlock( blockHash );
+
+	std::cout << "------------------------------" << "\n";
+	std::shared_ptr<unsigned char> _blockHash; 
+	readedBlock->blockHash( &_blockHash );
+	std::cout << "Original BlockHash :: ";
+	for( int i=0; i<32; i++ ){
+		printf("%02X", blockHash.get()[i]);
+	} std::cout << "\n";
+	std::cout << "readed blockHash :: ";
+	for( int i=0; i<32; i++){
+		printf("%02X", _blockHash.get()[i]);
+	} std::cout << "\n";
+	std::cout << "------------------------------" << "\n";
+	std::shared_ptr<unsigned char> rawCoinbase1; size_t rawCoinbase1Length;
+	std::shared_ptr<unsigned char> rawCoinbase2; size_t rawCoinbase2Length;
+	rawCoinbase1Length = block.coinbase()->exportRaw( &rawCoinbase1 );
+	rawCoinbase2Length = readedBlock->coinbase()->exportRaw( &rawCoinbase2 );
+	for( int i=0; i<rawCoinbase1Length; i++ ){
+		printf("%02X", rawCoinbase1.get()[i]);
+	} std::cout << "\n";
+	for( int i=0; i<rawCoinbase2Length; i++){
+		printf("%02X", rawCoinbase2.get()[i]);
+	} std::cout << "\n";
+	std::cout << "------------------------------" << "\n";
+	std::shared_ptr<unsigned char> rawTx1; size_t rawTx1Length;
+	std::shared_ptr<unsigned char> rawTx2; size_t rawTx2Length;
+	rawTx1Length = block.txVector().at(0)->exportRaw( &rawTx1 );
+	readedBlock->txVector().at(0)->sign();
+	rawTx2Length = readedBlock->txVector().at(0)->exportRaw( &rawTx2 );
+	for( int i=0; i<rawTx1Length; i++ ){
+		printf("%02X", rawTx1.get()[i]);
+	} 
+	std::cout << "===============================" << "\n";
+	for( int i=0; i<rawTx2Length; i++){
+		printf("%02X", rawTx2.get()[i]);
+	} std::cout << "\n";
+	std::cout << "------------------------------" << "\n";
+
+	
 	std::mutex mtx;
 	std::condition_variable cv;
 	std::unique_lock<std::mutex> lock(mtx);

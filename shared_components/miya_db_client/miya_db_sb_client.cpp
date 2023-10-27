@@ -63,6 +63,9 @@ size_t MiyaDBSBClient::get( std::shared_ptr<unsigned char> rawKey ,std::shared_p
 	nlohmann::json responseJson;
 	for(;;){
 		responseSB = _popSBContainer->popOne();
+
+		std::cout << "[MiyaDBClient] Query poped" << "\n";
+		
 		responseVector.clear(); responseJson.clear();
 		responseVector.assign( responseSB->body().get() , responseSB->body().get() + responseSB->bodyLength() );
 		responseJson = nlohmann::json::from_bson( responseVector );
@@ -70,15 +73,19 @@ size_t MiyaDBSBClient::get( std::shared_ptr<unsigned char> rawKey ,std::shared_p
 		if( responseJson.contains("QueryID") &&  (responseJson["QueryID"] == queryJson["QueryID"]) ) break;
 		_popSBContainer->pushOne( std::move(responseSB) );  // 違うSBセグメントは一旦キュー最後尾に送っておく
 	}
+	if( !(responseJson.contains("status")) ) return 0;
 	if( responseJson["status"] != miya_db::MIYA_DB_STATUS_OK ){
 		*retRaw = nullptr;
 		return 0;
 	}
 
-	(*retRaw) = std::shared_ptr<unsigned char>( new unsigned char[responseVector.size()] );
-	std::copy( responseVector.begin(), responseVector.end(), (*retRaw).get() );
-	
-	return responseVector.size();
+	std::vector<uint8_t> valueVector = responseJson["value"].get_binary();
+	//nlohmann::json valueJson = nlohmann::json::from_bson( responseJson["value"].get_binary() );
+	std::cout << "[MiyaDBClient] responseSB->valueVector.size() :: " << valueVector.size() << "\n";
+	(*retRaw) = std::shared_ptr<unsigned char>( new unsigned char[valueVector.size()] );
+	std::copy( valueVector.begin(), valueVector.end(), (*retRaw).get() );
+
+	return valueVector.size();
 }
 
 
@@ -125,7 +132,7 @@ bool MiyaDBSBClient::add( std::shared_ptr<unsigned char> rawKey , std::shared_pt
 		responseVector.assign( responseSB->body().get() , responseSB->body().get() + responseSB->bodyLength() );
 		responseJson = nlohmann::json::from_bson( responseVector );
 
-		if( responseJson.contains("QueryID") &&  (responseJson["QueryID"] == queryJson["QueryID"]) ) break;
+		if( responseJson.contains("QueryID") && (responseJson["QueryID"] == queryJson["QueryID"]) ) break;
 		_popSBContainer->pushOne( std::move(responseSB) );  // 違うSBセグメントは一旦キュー最後尾に送っておく
 	}
 

@@ -80,11 +80,9 @@ size_t Coinbase::importRawSequentially( void *from )
 	memcpy( &tx_in_count, _from + currentPtr , sizeof(tx_in_count) ); currentPtr += sizeof(tx_in_count);
 	currentPtr += _body._txIn->importRaw( _from + currentPtr );
 
-
 	uint32_t tx_out_count;
 	memcpy( &tx_out_count, _from + currentPtr , sizeof(tx_out_count) ); currentPtr += sizeof(tx_out_count);
 	currentPtr += _body._txOut->importRaw( _from + currentPtr );
-
 
 	return currentPtr;
 }

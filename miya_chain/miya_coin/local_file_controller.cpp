@@ -56,35 +56,55 @@ size_t LocalFileController::Meta::actualDataSize()
 
 std::shared_ptr<BlockContainer> LocalFileController::read( off_t offset ) // サイズを指定してもらう
 {
-	std::shared_ptr<BlockContainer> ret;
-	_mapping._addr = mmap( NULL , sizeof( struct BlockContainer::Meta ) , PROT_READ | PROT_WRITE , MAP_SHARED , _fd , 0 ); 
+	std::cout << "< 1 >" << "\n";
+	std::shared_ptr<BlockContainer> ret = std::make_shared<BlockContainer>();
+	off_t offsetByPageSize = offset / _systemPageSize; // ページサイズ何個分見送るか
+	off_t mappingInOffset = offset % _systemPageSize; 
+
+	std::cout << "OffsetByPageSize :: " << offsetByPageSize << "\n";
+	std::cout << "MappingInOffset :: " << mappingInOffset << "\n";
+
+	size_t currentPtr = 0;
+	_mapping._addr = mmap( NULL , sizeof( struct BlockContainer::Meta ) , PROT_READ | PROT_WRITE , MAP_SHARED , _fd , offsetByPageSize * _systemPageSize  ); 
 	_mapping._size = sizeof( struct BlockContainer::Meta );
+	memcpy( &(ret->_meta) , static_cast<unsigned char*>(_mapping._addr) + mappingInOffset , sizeof(struct BlockContainer::Meta) ); // Metaの取り込み
+	currentPtr += mappingInOffset + sizeof(struct BlockContainer::Meta);
+	munmap( _mapping._addr , _mapping._size ); // 一旦アンマップする
 
-	memcpy( &(ret->_meta) , _mapping._addr , sizeof(struct BlockContainer::Meta) );
-	munmap( _mapping._addr , _mapping._size );
+	std::cout << "< 2 >" << "\n";
+	std::cout << "ret->size() :: " << ret->size() << "\n";
 
-	std::shared_ptr<unsigned char> rawBlock; size_t rawBlockLength;
-	rawBlockLength = ret->size();
-	
-	_mapping._addr = mmap( NULL , rawBlockLength , PROT_READ | PROT_WRITE , MAP_SHARED , _fd , 0 ); // ブロック全体をマッピングする
-	_mapping._size = rawBlockLength;
+	_mapping._addr = mmap( NULL , ret->size() , PROT_READ | PROT_WRITE , MAP_SHARED , _fd , offsetByPageSize * _systemPageSize  );  // マッピングする
+	_mapping._size = sizeof( ret->size() );
 
+	std::cout << "< 3 >" << currentPtr << "\n";
 
 	// ブロックヘッダの取り込み
-	size_t currentPtr = 0;
-	currentPtr += ret->_block->header()->importRawSequentially( _mapping._addr );
-	
-	// coinbaseの取り込み
-	currentPtr += ret->_block->coinbase()->importRawSequentially( static_cast<unsigned char*>(_mapping._addr) + currentPtr );
+	currentPtr += ret->_block->header()->importRawSequentially( static_cast<unsigned char*>(_mapping._addr) + currentPtr );
 
+	std::cout << "< 4 >" << currentPtr << "\n";
+	// coinbaseの取り込み
+	std::shared_ptr<tx::Coinbase> readedCoinbase = std::make_shared<tx::Coinbase>();
+	currentPtr += readedCoinbase->importRawSequentially( static_cast<unsigned char*>(_mapping._addr) + currentPtr );
+	ret->_block->coinbase( readedCoinbase );
+
+	std::cout << "< 5 >" << currentPtr << "\n";
 	// トランザクションの取り込み
+	std::cout << ret->txCount()	 << "\n";
 	for( int i=0; i<ret->txCount(); i++ ){
+		std::cout << "TxIn importCount :: " << i << "\n";
 		std::shared_ptr<tx::P2PKH> readedTx = std::make_shared<tx::P2PKH>();
-		currentPtr += readedTx->importRawSequentially( static_cast<unsigned char*>(_mapping._addr) + currentPtr );
+		size_t temSize;
+		temSize = currentPtr += readedTx->importRawSequentially( static_cast<unsigned char*>(_mapping._addr) + currentPtr );
+		std::cout << "importedTx Length :: " << temSize << "\n";
 		ret->_block->add( readedTx );
 	}
 
+	std::cout << "< 8 >" << currentPtr << "\n";
+
 	munmap( _mapping._addr , _mapping._size );
+
+	return ret;
 }
 
 

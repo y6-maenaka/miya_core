@@ -181,6 +181,8 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 					responseJson["QueryID"] = qctx->id();
 					responseJson["status"] = 0;
 
+					std::cout << "(MiyaDB) qctx->valueLength() :: " << qctx->valueLength() << "\n";
+
 					std::vector<uint8_t> valueVector; valueVector.assign( qctx->value().get(), qctx->value().get() + qctx->valueLength() );
 					responseJson["value"] = nlohmann::json::binary( valueVector );
 
