@@ -49,11 +49,10 @@ unsigned int Coinbase::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 
 
 
-void Coinbase::importRaw( std::shared_ptr<unsigned char> from , unsigned int fromLength )
+size_t Coinbase::importRawSequentially( std::shared_ptr<unsigned char> from )
 {
 	unsigned int currentPtr = 0;
 	memcpy( &(_body._version) , from.get() , sizeof(_body._version) ); currentPtr += sizeof(_body._version);
-
 
 	uint32_t tx_in_count;
 	memcpy( &tx_in_count, from.get() + currentPtr , sizeof(tx_in_count) ); currentPtr += sizeof(tx_in_count);
@@ -67,8 +66,29 @@ void Coinbase::importRaw( std::shared_ptr<unsigned char> from , unsigned int fro
 	// std::cout << _body._txIn->scriptBytes() << "\n";
 	// std::cout << _body._txOut->pkScriptBytes() << "\n";
 
-	return;
+	return currentPtr;
 }
+
+
+size_t Coinbase::importRawSequentially( void *from )
+{
+	unsigned char* _from = static_cast<unsigned char *>(from);
+	unsigned int currentPtr = 0;
+	memcpy( &(_body._version) , _from , sizeof(_body._version) ); currentPtr += sizeof(_body._version);
+
+	uint32_t tx_in_count;
+	memcpy( &tx_in_count, _from + currentPtr , sizeof(tx_in_count) ); currentPtr += sizeof(tx_in_count);
+	currentPtr += _body._txIn->importRaw( _from + currentPtr );
+
+
+	uint32_t tx_out_count;
+	memcpy( &tx_out_count, _from + currentPtr , sizeof(tx_out_count) ); currentPtr += sizeof(tx_out_count);
+	currentPtr += _body._txOut->importRaw( _from + currentPtr );
+
+
+	return currentPtr;
+}
+
 
 
 

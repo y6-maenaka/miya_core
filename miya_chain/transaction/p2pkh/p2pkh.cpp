@@ -308,28 +308,18 @@ unsigned int P2PKH::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 
 
 
-unsigned int P2PKH::importRaw( std::shared_ptr<unsigned char> fromRaw, unsigned int fromRawLength )
+size_t P2PKH::importRawSequentially( std::shared_ptr<unsigned char> fromRaw ) // 本来はちゃんとエラーハンドリングする
 {
-	if( fromRawLength <= 0 ) return 0;
-
 	unsigned int currentPtr = 0;
 
-
 	/* versionの取り込み */
-	if( sizeof(_body._version) + currentPtr <= fromRawLength )
-	{
-		memcpy( &(_body._version) , fromRaw.get() , sizeof(_body._version) ); // _versionの取り出し
-		currentPtr += sizeof(_body._version);
-	}
-
+	memcpy( &(_body._version) , fromRaw.get() , sizeof(_body._version) ); // _versionの取り出し
+	currentPtr += sizeof(_body._version);
 
 	/* tx_in_countの取り込み*/
 	uint32_t tx_in_count;
-	if( sizeof(tx_in_count) + currentPtr <= fromRawLength )
-	{
-		memcpy( &tx_in_count, fromRaw.get() + currentPtr , sizeof(tx_in_count) );
-		currentPtr += sizeof(tx_in_count);
-	}
+	memcpy( &tx_in_count, fromRaw.get() + currentPtr , sizeof(tx_in_count) );
+	currentPtr += sizeof(tx_in_count);
 
 	/* tx_inの取り込み */ // 本来は種類によって取り込みを分ける
 	unsigned int importedTxInLength = 0; 
@@ -344,11 +334,8 @@ unsigned int P2PKH::importRaw( std::shared_ptr<unsigned char> fromRaw, unsigned 
 
 	/*tx_out_countの取り込み*/
 	uint32_t tx_out_count;
-	if( sizeof(tx_out_count) + currentPtr <= fromRawLength )
-	{
-		memcpy( &tx_out_count, fromRaw.get() + currentPtr , sizeof(tx_out_count) );
-		currentPtr += sizeof(tx_out_count);
-	}
+	memcpy( &tx_out_count, fromRaw.get() + currentPtr , sizeof(tx_out_count) );
+	currentPtr += sizeof(tx_out_count);
 
 	
 	/* tx_outの取り込み */ // 本来は種類によって取り込みを分ける
@@ -360,10 +347,55 @@ unsigned int P2PKH::importRaw( std::shared_ptr<unsigned char> fromRaw, unsigned 
 		importedTxOutLength = importedTxOut->importRaw( fromRaw.get() + currentPtr );
 		currentPtr += importedTxOutLength;
 		_body._outs.push_back( importedTxOut );
-
 	}
 
-	return 0;
+	return currentPtr; // 何bytesインポートしたか
+}
+
+
+size_t P2PKH::importRawSequentially( void *fromRaw ) // 本来はちゃんとエラーハンドリングする
+{
+	unsigned char *_fromRaw = static_cast<unsigned char*>(fromRaw); // ポインタインクリメントの為キャストしておく
+	unsigned int currentPtr = 0;
+
+	/* versionの取り込み */
+	memcpy( &(_body._version) , _fromRaw , sizeof(_body._version) ); // _versionの取り出し
+	currentPtr += sizeof(_body._version);
+
+	/* tx_in_countの取り込み*/
+	uint32_t tx_in_count;
+	memcpy( &tx_in_count, _fromRaw + currentPtr , sizeof(tx_in_count) );
+	currentPtr += sizeof(tx_in_count);
+
+	/* tx_inの取り込み */ // 本来は種類によって取り込みを分ける
+	unsigned int importedTxInLength = 0; 
+	for( int i=0; i< ntohl(tx_in_count); i++ )
+	{
+		std::shared_ptr<TxIn> importedTxIn = std::shared_ptr<TxIn>( new TxIn );
+		importedTxInLength = importedTxIn->importRaw( _fromRaw + currentPtr ); // ここだけunsigned char*だと不自然だけど..
+		currentPtr += importedTxInLength;	
+		_body._ins.push_back( importedTxIn );
+	}
+
+
+	/*tx_out_countの取り込み*/
+	uint32_t tx_out_count;
+	memcpy( &tx_out_count, _fromRaw + currentPtr , sizeof(tx_out_count) );
+	currentPtr += sizeof(tx_out_count);
+
+	
+	/* tx_outの取り込み */ // 本来は種類によって取り込みを分ける
+	unsigned int importedTxOutLength = 0;
+	for( int i=0; i<ntohl(tx_out_count); i++ )
+	{
+		std::shared_ptr<TxOut> importedTxOut = std::shared_ptr<TxOut>( new TxOut );
+		
+		importedTxOutLength = importedTxOut->importRaw( _fromRaw + currentPtr );
+		currentPtr += importedTxOutLength;
+		_body._outs.push_back( importedTxOut );
+	}
+
+	return currentPtr; // 何bytesインポートしたか
 }
 
 

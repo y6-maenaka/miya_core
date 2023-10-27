@@ -59,7 +59,8 @@ public:
 	void updateTime();
 	uint32_t nonce();
 
-	bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );
+	size_t importRawSequentially( std::shared_ptr<unsigned char> fromRaw );
+	size_t importRawSequentially( void *fromRaw );
 	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );
 
 	uint32_t time();
@@ -97,7 +98,9 @@ public:
 	void header( std::shared_ptr<BlockHeader> target );
 	void header( BlockHeader target );
 
+	std::shared_ptr<tx::Coinbase> coinbase();
 	std::vector< std::shared_ptr<tx::P2PKH> > txVector();
+	size_t txCount(); // coinbaseを含まない
 
 	void coinbase( std::shared_ptr<tx::Coinbase> coinbase ); // setter
 	void add( std::shared_ptr<tx::P2PKH> p2pkh ); // getter
@@ -106,6 +109,7 @@ public:
 	void merkleRoot( std::shared_ptr<unsigned char> target );
 
 	unsigned int exportHeader( std::shared_ptr<unsigned char> *retRaw );
+	//size_t exportRaw( std::shared_ptr<unsigned char> *retRaw ); // ヘッダとトランザクション部まとめて書き出すようなことはしない
 
 	uint32_t time();
 

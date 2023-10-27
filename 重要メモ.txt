@@ -57,6 +57,8 @@
 
 - namespace miya_chain::block / miya_chain::tx に変更する
 
+- 特にimportRawSequentially系はエラーハンドリングするようにする
+
 
 
 [ Task ]

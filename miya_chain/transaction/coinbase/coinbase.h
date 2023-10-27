@@ -31,7 +31,8 @@ public:
 	Coinbase();
 
 	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );
-	void importRaw( std::shared_ptr<unsigned char> from , unsigned int fromLength );
+	size_t importRawSequentially( std::shared_ptr<unsigned char> from );
+	size_t importRawSequentially( void *from );
 
 	void add( std::shared_ptr<tx::TxOut> target );
 

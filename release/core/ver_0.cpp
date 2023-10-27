@@ -47,7 +47,7 @@ int main()
 {
 	std::cout << " WELCOME TO MIYA COIN CLIENT [ MIYA_CORE ] " << "\n";
 
-
+	
 	miya_chain::MiyaChainState chainState;
 	std::shared_ptr<unsigned char> temp = std::shared_ptr<unsigned char>( new unsigned char[32] );
 	memcpy( temp.get(), "BBBAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 32 );
@@ -59,7 +59,7 @@ int main()
 	return 0;
 
 
-
+	/*
 	miya_db::DatabaseManager headerDBManager;
 
 	// SBコンテナのセットアップ 
@@ -83,7 +83,7 @@ int main()
 
 
 
-	/*	
+	
 	cipher::ECDSAManager ecdsaManager;
 	ecdsaManager.init( (unsigned char *)"hello", 5 ); // priKeyには鍵がかかっているので
 
@@ -152,6 +152,7 @@ int main()
 	return 0;
 	*/
 
+
 	/*
 	cipher::ECDSAManager ecdsaManager;
 	ecdsaManager.init( (unsigned char *)"hello", 5 ); // priKeyには鍵がかかっているので
@@ -193,7 +194,7 @@ int main()
 
 	
 	std::shared_ptr<tx::Coinbase> loadedCoinbase = std::shared_ptr<tx::Coinbase>( new tx::Coinbase );
-	loadedCoinbase->importRaw( rawCoinbase, rawCoinbaseLength  );
+	loadedCoinbase->importRawSequentially( rawCoinbase );
 
 
 
@@ -215,7 +216,7 @@ int main()
 	// インポート 
 
 	std::shared_ptr<tx::P2PKH> importP2PKH = std::make_shared<tx::P2PKH>();
-	importP2PKH->importRaw( rawTx , rawTxLength);
+	importP2PKH->importRawSequentially( rawTx );
 
 	importP2PKH->verify( std::make_shared<miya_chain::LightUTXOSet>(utxoSet) );
 
@@ -256,7 +257,7 @@ int main()
 	//miya_chain::TransactionPool txPool;
 
 	return 0;
-	*/
+	*/	
 
 
 

@@ -49,7 +49,6 @@ add_library( MIYA_CHAIN STATIC
 							utxo_set/utxo_set.cpp
 
 							block_chain_manager/block_chain_manager.cpp
-							#block_chain_manager/block_local_strage_manager/header_store/header_store.cpp
 							#block_chain_manager/block_local_strage_manager/transaction_store/transaction_store.cpp
 
 							mining/simple_mining.cpp

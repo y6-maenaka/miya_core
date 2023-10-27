@@ -39,11 +39,19 @@ void BlockHeader::updateTime()
 
 
 
-bool BlockHeader::importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength ) // lengthは使わない
+size_t BlockHeader::importRawSequentially( std::shared_ptr<unsigned char> fromRaw )
 {
 	memcpy( this , fromRaw.get() , sizeof(struct BlockHeader) ); 
 	// アクセスエラーが発生したらキャッチしてfalseをリターンする
-	return true;
+	return sizeof(struct BlockHeader);
+}
+
+size_t BlockHeader::importRawSequentially( void *fromRaw )
+{
+	unsigned char* _fromRaw = static_cast<unsigned char *>(fromRaw);
+	memcpy( this , _fromRaw , sizeof(struct BlockHeader) ); 
+	// アクセスエラーが発生したらキャッチしてfalseをリターンする
+	return sizeof(struct BlockHeader);
 }
 
 
@@ -148,6 +156,11 @@ void Block::header( BlockHeader target )
 }
 
 
+std::shared_ptr<tx::Coinbase> Block::coinbase()
+{
+	return _coinbase;
+}
+
 
 std::vector< std::shared_ptr<tx::P2PKH> > Block::txVector()
 {
@@ -241,6 +254,8 @@ unsigned int Block::exportHeader( std::shared_ptr<unsigned char> *retRaw )
 {
 	return _header.exportRaw( retRaw );
 }
+
+
 
 
 uint32_t Block::time()
