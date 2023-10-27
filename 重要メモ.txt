@@ -60,6 +60,10 @@
 - 特にimportRawSequentially系はエラーハンドリングするようにする
 
 
+- miya_db_clientの機能をもっと充実させる　
+
+- utxo_set でmiya_db_clientを使用する　
+
 
 [ Task ]
 ・二重支払いチェック

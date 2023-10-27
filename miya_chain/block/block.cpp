@@ -256,6 +256,11 @@ unsigned int Block::exportHeader( std::shared_ptr<unsigned char> *retRaw )
 }
 
 
+size_t Block::blockHash( std::shared_ptr<unsigned char> *ret )
+{
+	return _header.headerHash( ret );
+}
+
 
 
 uint32_t Block::time()

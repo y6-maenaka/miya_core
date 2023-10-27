@@ -77,14 +77,14 @@ void DatabaseManager::hello()
 }
 
 
-void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer> popSBContainer, std::shared_ptr<StreamBufferContainer> pushSBContainer ,std::string fileName )
+void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer> incomingSBC, std::shared_ptr<StreamBufferContainer> outgoingSBC ,std::string filePath )
 {
 	std::cout << "Launching MiyaDB [ Light Mode ]" << "\n";
-	std::shared_ptr<MMyISAM> mmyisam = std::shared_ptr<MMyISAM>( new MMyISAM(fileName) ); // 簡易的に指定のストレージエンジンを使用
+	std::shared_ptr<MMyISAM> mmyisam = std::shared_ptr<MMyISAM>( new MMyISAM(filePath) ); // 簡易的に指定のストレージエンジンを使用
 
 
 	// respondスレッドを用意する &(参照)でキャプチャするとスマートポインタのアドレスが変わる ※ 呼び出し元スレッドが死んでいる
-	std::thread lightMiyaDBThread([mmyisam, popSBContainer, pushSBContainer, this]() 
+	std::thread lightMiyaDBThread([mmyisam, incomingSBC, outgoingSBC, this]() 
 	{
 		std::unique_ptr<SBSegment> sbSegment;
 		std::vector<uint8_t> dumpedJson;
@@ -119,7 +119,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 		{
 			responseJson.clear();
 			// 1. ポップ
-			sbSegment = popSBContainer->popOne();
+			sbSegment = incomingSBC->popOne();
 
 			// クエリの取り出し
 			//  クエリの解析と対応する操作メソッドの呼び出し
@@ -204,7 +204,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 			}
 	
 			direct:
-			pushSBContainer->pushOne( std::move(sbSegment) );
+			outgoingSBC->pushOne( std::move(sbSegment) );
 			
 		}
 		

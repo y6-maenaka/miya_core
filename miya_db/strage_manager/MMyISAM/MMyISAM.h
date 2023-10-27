@@ -29,7 +29,7 @@ public:
 	std::shared_ptr<IndexManager> _indexManager; // インデックスが保存されているマネージャーを渡す
 
 //public:
-	MMyISAM( std::string fileName );
+	MMyISAM( std::string filePath );
 
 	bool add( std::shared_ptr<QueryContext> qctx );
 	bool get( std::shared_ptr<QueryContext> qctx );

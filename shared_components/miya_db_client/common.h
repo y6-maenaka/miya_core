@@ -11,7 +11,8 @@ constexpr int MIYA_DB_QUERY_ADD = 1;
 constexpr int MIYA_DB_QUERY_GET = 2;
 constexpr int MIYA_DB_KEY_LENGTH = 20;
 
-
+constexpr int MIYA_DB_STATUS_OK = 0;
+constexpr int MIYA_DB_STATUS_BAD = -1;
 
 
 static uint32_t generateQueryID()

@@ -16,19 +16,19 @@ namespace miya_db
 {
 
 
-MMyISAM::MMyISAM( std::string fileName )
+MMyISAM::MMyISAM( std::string filePath )
 {   
     // 初期化の順番は
     // 1. memoryManager
     // 2. indexManager
 
     // データストアの初期化
-    std::shared_ptr<OverlayMemoryManager> dataOverlayMemoryManager = std::shared_ptr<OverlayMemoryManager>( new OverlayMemoryManager(fileName) );
+    std::shared_ptr<OverlayMemoryManager> dataOverlayMemoryManager = std::shared_ptr<OverlayMemoryManager>( new OverlayMemoryManager(filePath) );
 		_valueStoreManager = std::shared_ptr<ValueStoreManager>( new ValueStoreManager(dataOverlayMemoryManager) );
 
     // インデックスの初期化
-    fileName += "_index";
-    std::shared_ptr<OverlayMemoryManager> indexOverlayMemoryManager = std::shared_ptr<OverlayMemoryManager>( new OverlayMemoryManager(fileName) );
+    filePath += "_index";
+    std::shared_ptr<OverlayMemoryManager> indexOverlayMemoryManager = std::shared_ptr<OverlayMemoryManager>( new OverlayMemoryManager(filePath) );
     _indexManager = std::shared_ptr<IndexManager>( new IndexManager(indexOverlayMemoryManager) );
 
 }

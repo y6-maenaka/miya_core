@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "../miya_db/miya_db/database_manager.h"
 
 
 struct SBSegment;
@@ -18,7 +19,14 @@ class StreamBuffer;
 class StreamBufferContainer;
 
 
+
+
+
+
 constexpr char* CHAINSTATE_FILE_PATH = "../miya_chain/miya_coin/chainstate/chainstate.st";
+
+
+
 
 
 namespace miya_chain
@@ -56,8 +64,12 @@ public:
 	MiyaChainState(); // 寄贈時にchain_stateファイルを読み込む
 	void update( std::shared_ptr<unsigned char> blockHash , unsigned short height ); // ファイルにも書き込む
 
+	const unsigned char* chainHead();
+	unsigned int height();
 	~MiyaChainState();
 };
+
+
 
 
 
@@ -67,14 +79,22 @@ class MiyaChainManager
 {
 
 private:
-
 	std::shared_ptr<StreamBufferContainer> _toEKP2PBrokerSBC;
+	miya_db::DatabaseManager _dbManager;
 
 	struct 
 	{
 		std::shared_ptr<StreamBufferContainer> _toBrokerSBC;
 		std::shared_ptr<MiyaChainMessageBrocker> _broker;
 	} _brokerDaemon;
+
+
+
+	struct 
+	{
+		std::shared_ptr<StreamBufferContainer> _toBlockIndexDBSBC;
+		std::shared_ptr<StreamBufferContainer> _fromBlockIndexDBSBC;
+	} _blockIndexDB;
 
 
 public:
@@ -85,6 +105,9 @@ public:
 	bool IBD(); // Initial Block Download
 
 };
+
+
+
 
 
 

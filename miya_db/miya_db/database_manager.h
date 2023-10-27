@@ -60,7 +60,7 @@ public:
 	void hello();
 
 	// 本来はstreamBuffer内のbufferではなく生のバイナリフォーマットbsonでメッセージ交換する
-	void startWithLightMode( std::shared_ptr<StreamBufferContainer> popSBContainer, std::shared_ptr<StreamBufferContainer> pushSBContainer ,std::string fileName ); // 簡易的に起動する場合
+	void startWithLightMode( std::shared_ptr<StreamBufferContainer> incomingSBC , std::shared_ptr<StreamBufferContainer> outgoingSBC ,std::string filePath ); // 簡易的に起動する場合
 	/* パイプの役割はStreamBufferで代替する */
 };
 

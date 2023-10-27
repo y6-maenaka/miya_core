@@ -67,6 +67,10 @@ size_t MiyaDBSBClient::get( std::shared_ptr<unsigned char> rawKey ,std::shared_p
 		if( responseJson.contains("QueryID") &&  (responseJson["QueryID"] == queryJson["QueryID"]) ) break;
 		_popSBContainer->pushOne( std::move(responseSB) );  // 違うSBセグメントは一旦キュー最後尾に送っておく
 	}
+	if( responseJson["status"] != miya_db::MIYA_DB_STATUS_OK ){
+		*retRaw = nullptr;
+		return 0;
+	}
 
 	(*retRaw) = std::shared_ptr<unsigned char>( new unsigned char[responseVector.size()] );
 	std::copy( responseVector.begin(), responseVector.end(), (*retRaw).get() );
@@ -118,7 +122,7 @@ bool MiyaDBSBClient::add( std::shared_ptr<unsigned char> rawKey , std::shared_pt
 	}
 
 	if( !(responseJson.contains("status")) ) return false;
-	return (responseJson["status"] == 0);
+	return (responseJson["status"] == miya_db::MIYA_DB_STATUS_OK );
 }
 
 

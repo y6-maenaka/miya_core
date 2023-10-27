@@ -28,21 +28,6 @@ LightUTXOSet::LightUTXOSet( std::shared_ptr<StreamBufferContainer> pushSBContain
 
 
 
-/*
-uint32_t LightUTXOSet::generateQueryID()
-{
-	std::random_device rd; // シードの初期化
-	std::mt19937 gen(rd());  // 乱数生成機の初期化
-
-	std::uniform_int_distribution<uint32_t> dis; // 生成範囲の設定
-	return dis(gen);
-}
-*/
-
-
-
-
-
 std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<unsigned char> txID , uint32_t index )
 {
 	//  キーを作成する

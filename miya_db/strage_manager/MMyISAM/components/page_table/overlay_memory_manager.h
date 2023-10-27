@@ -32,7 +32,7 @@ private:
 public:
 	OverlayMemoryManager( int dataFileFD , int freeListFileFD );
 	OverlayMemoryManager( const char* targetFilePath );
-	OverlayMemoryManager( std::string fileName );
+	OverlayMemoryManager( std::string filePath );
 
 	OverlayMemoryAllocator* memoryAllocator(){ return _memoryAllocator; };
 

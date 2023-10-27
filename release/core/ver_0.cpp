@@ -30,6 +30,7 @@
 #include "../../miya_chain/transaction_pool/txcb_table.h"
 
 #include "../../miya_chain/miya_core_manager.h"
+#include "../../miya_chain/miya_coin/local_strage_manager.h"
 
 
 #include "openssl/evp.h"
@@ -48,16 +49,14 @@ int main()
 	std::cout << " WELCOME TO MIYA COIN CLIENT [ MIYA_CORE ] " << "\n";
 
 	
-	miya_chain::MiyaChainState chainState;
-	std::shared_ptr<unsigned char> temp = std::shared_ptr<unsigned char>( new unsigned char[32] );
-	memcpy( temp.get(), "BBBAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 32 );
-	chainState.update( temp , 8 );
+	miya_chain::MiyaChainManager miyaChainManager;
+	miyaChainManager.init( nullptr );
 
 
-
+	miya_chain::BlockLocalStrageManager blockLocalStrageManager(nullptr, nullptr );
 
 	return 0;
-
+	
 
 	/*
 	miya_db::DatabaseManager headerDBManager;
@@ -153,6 +152,7 @@ int main()
 	*/
 
 
+
 	/*
 	cipher::ECDSAManager ecdsaManager;
 	ecdsaManager.init( (unsigned char *)"hello", 5 ); // priKeyには鍵がかかっているので
@@ -167,7 +167,8 @@ int main()
 	std::shared_ptr<StreamBufferContainer> fromDBSBContainer = std::make_shared<StreamBufferContainer>();
 
 
-	std::string localFile = "test";
+	//std::string localFile = "test";
+	std::string localFile = "../miya_db/table_files/test/test";
 	dbManager.startWithLightMode( toDBSBContainer , fromDBSBContainer , localFile );
 
 

@@ -7,6 +7,7 @@ include_directories( ${OPENSSL_INCLUDE_DIRS} )
 add_library( MIYA_CHAIN STATIC
 							
 							miya_core_manager.cpp
+							miya_chain_state.cpp
 
 							transaction/tx_manager.cpp
 
@@ -54,6 +55,7 @@ add_library( MIYA_CHAIN STATIC
 							mining/simple_mining.cpp
 							
 							miya_coin/local_strage_manager.cpp
+							miya_coin/local_file_controller.cpp
 
 )
 
