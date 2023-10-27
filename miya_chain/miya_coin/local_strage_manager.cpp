@@ -87,12 +87,13 @@ size_t BlockContainer::exportRawFormated( std::shared_ptr<unsigned char> *retRaw
 	size_t formatPtr = 0;
 	memcpy( (*retRaw).get() + formatPtr , &_meta , sizeof(_meta) );  formatPtr += sizeof(_meta); // metaの書き出し
 	memcpy( (*retRaw).get() + formatPtr , rawBlockHeader.get() , rawBlockHeaderLength ); formatPtr += rawBlockHeaderLength; // ブロックヘッダの書き出し
+	memcpy( (*retRaw).get() + formatPtr , rawCoinbase.get() , rawCoinbaseLength ); formatPtr += rawCoinbaseLength;
 	for( auto itr : rawTxVector ) {  // トランザクションの書き出し
 		memcpy( (*retRaw).get() + formatPtr, (itr.first).get() , itr.second );  
 		formatPtr += itr.second;
 	}
 
-	
+	return formatPtr;
 }
 
 
@@ -108,6 +109,8 @@ size_t BlockContainer::exportRawFormated( std::shared_ptr<unsigned char> *retRaw
 BlockLocalStrageManager::BlockLocalStrageManager( std::shared_ptr<StreamBufferContainer> toIndexDBSBC , std::shared_ptr<StreamBufferContainer> fromIndexDBSBC )
 {
 	_miyaDBClient = std::make_shared<MiyaDBSBClient>( toIndexDBSBC , fromIndexDBSBC );
+	_blkFileManager = std::make_shared<BlkFileManager>( "" );
+	_revFileManager = std::make_shared<RevFileManager>( "" );
 }
 
 
@@ -119,31 +122,41 @@ BlockLocalStrageManager::BlockLocalStrageManager( std::shared_ptr<StreamBufferCo
 
 void BlockLocalStrageManager::writeBlock( std::shared_ptr<block::Block> targetBlock )
 {
-	std::shared_ptr<BlockContainer> container; // pack block to blockContainer
-	container->_block = targetBlock;
+	std::shared_ptr<BlockContainer> container = std::make_shared<BlockContainer>(targetBlock); // pack block to blockContainer
 
+	std::cout << "--- 1 --- " << "\n";
 
 	std::string filePath = "../miya_chain/miya_coin/blocks/" + std::string("blk") + std::to_string(000000) + ".dat";
-	std::cout << "write to" << filePath << "\n";
+	std::cout << "write to >> " << filePath << "\n";
+
+	std::cout << "--- 2 --- " << "\n";
 
 		// キャッシュの確認
 	long flag = 0;
 	if( _blkFileManager->file() == filePath ) // 前回使用した(キャッシュ)ファイルマネージャーの管理ファイルが異なる場合
 	{
+		std::cout << "--- 3 ---" << "\n";
 		flag = _blkFileManager->write( container );
 	}
 	else // 前回使用した(キャッシュ)ファイルマネージャーの管理ファイルが異なる場合
 	{
+		std::cout << "--- 4 ---" << "\n";
 		_blkFileManager = std::shared_ptr<BlkFileManager>( new BlkFileManager(filePath) );
+		std::cout << "--- 4.1 ---" << "\n";
 		flag = _blkFileManager->write( container );
 	}
 
+	std::cout << "--- 5 ---" << "\n";
+
 	if( flag == -1  ) // 新規にblkファイルを作成する必要がある
 	{
+		std::cout << "--- 6 ---" << "\n";
 		filePath = "../miya_chain/miya_coin/blocks/" + std::string("blk") + std::to_string(000000 + 1) + ".dat";
 		_blkFileManager = std::shared_ptr<BlkFileManager>( new BlkFileManager(filePath) );
 		_blkFileManager->write( container );
 	}
+
+	std::cout << "--- 7 ---" << "\n";
 
 	return;
 }

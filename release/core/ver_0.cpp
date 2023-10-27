@@ -80,6 +80,19 @@ int main()
 	coinbaseOutput->init( 1000, pubKeyHash );
 	_coinbase.add( coinbaseOutput );
 
+	std::shared_ptr<unsigned char> rawCoinbase; size_t rawCoinbaseLength;
+	rawCoinbaseLength = _coinbase.exportRaw( &rawCoinbase );
+	std::cout << "Raw Coinbase(Hex) :: ";
+	for( int i=0; i<rawCoinbaseLength; i++ ){
+		printf("%02X", rawCoinbase.get()[i]);
+	} std::cout << "\n";
+
+	std::cout << "Raw Coinbase(Binary) :: ";
+	for( int i=0; i<rawCoinbaseLength; i++ ){
+		printf("%c", rawCoinbase.get()[i]);
+	} std::cout << "\n";
+
+
 
 	ControlInterface interface; // ローカルファイルからトランザクションを作成するコンポーネントのセットアップ
 	std::shared_ptr<tx::P2PKH> loadedP2PKH = interface.createTxFromJsonFile("../control_interface/tx_origin/payment_tx_info_0000.json");
@@ -103,7 +116,7 @@ int main()
 	std::shared_ptr<unsigned char> mRoot; unsigned int mRootLength; // マークルルートの設定
 	mRootLength = block.calcMerkleRoot( &mRoot );
 
-	uint32_t nBits = 522390001; // 簡易的にマイニングの実行
+	uint32_t nBits = 532390001; // 簡易的にマイニングの実行
 	block.header()->nBits( nBits ); 
 
 	uint32_t nonce = miya_chain::simpleMining( nBits , block.header() );
@@ -117,7 +130,7 @@ int main()
 
 
 	// ローカルファイルへのブロック書き込みテスト
-
+	std::make_shared<block::Block>(block);
 	blockLocalStrageManager.writeBlock( std::make_shared<block::Block>(block) );
 
 	return 0;

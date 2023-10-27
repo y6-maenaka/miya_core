@@ -15,6 +15,8 @@ namespace miya_chain
 
 MiyaChainState::MiyaChainState()
 {
+	std::cout << "This is MiyaChainState コンストラクタ" << "\n";
+
 	_systemPageSize = sysconf (_SC_PAGESIZE); // 本アーキテクチャのページサイズを取得
 
 	_stateFileFD = open( CHAINSTATE_FILE_PATH , O_RDWR | O_CREAT, (mode_t)(0600) );
@@ -34,6 +36,7 @@ MiyaChainState::MiyaChainState()
 
 
 	std::cout << "\n --- [ Chain State ] --- " << "\n";
+	printf( "ChainState File Mapped with :: %p\n", _chainMeta );
 	std::cout << "Chain Heade Block :: ";
 	for( int i=0; i<32; i++ ){
 		printf("%02X", chainHead()[i] );

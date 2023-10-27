@@ -106,12 +106,13 @@ private:
 	{
 		uint32_t _actualDataSize;
 		uint32_t _timestamp; // latest update
-
+		
 		void actualDataSize( size_t target );
 		size_t actualDataSize();
 			
-	};
-	struct Meta* _meta; // メタ情報はここにマッピングされる
+	} __attribute__((packed));
+
+	Meta* _meta; // メタ情報はここにマッピングされる
 
 	int _fd;
 	struct stat _st;
@@ -128,11 +129,13 @@ private:
 
 public:
 	LocalFileController( std::string filePath ); // 管理するファイルパスを渡す
+	~LocalFileController();
+	
 	std::shared_ptr<BlockContainer> read( off_t offset ); 
 	long write( std::shared_ptr<BlockContainer> container ); // -1 : このファイルは満杯次のファイルパスを要求する
+	
 
 	std::string file();
-	~LocalFileController();
 };
 
 

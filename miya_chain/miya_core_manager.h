@@ -51,7 +51,8 @@ private:
 		unsigned char _chainHead[32];
 		uint32_t _heigth = 0;
 		uint32_t _timestamp;
-	} ;
+		
+	} __attribute__((packed));
 
 	ChainMeta *_chainMeta; // ここにマッピングしたアドレスをキャストする
 
@@ -104,6 +105,7 @@ private:
 		std::shared_ptr<StreamBufferContainer> _fromUTXOSetDBSBC;
 	} _utxoSetDB; 
 
+	MiyaChainState _chainState;
 
 public:
 	int init( std::shared_ptr<StreamBufferContainer> toEKP2PBrokerSBC );
