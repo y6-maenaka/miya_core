@@ -156,39 +156,31 @@ public:
 // アクセスフリー
 struct BlockIndex
 {
-	// key
-	unsigned char blockHash[32];
-
-
-	// value of blk & rev
-	uint16_t fileIndex; 
-
-	// value of blk
-	uint32_t blockOffset;
-	uint32_t blockSize; // 一応
-
-	// value of rev
-	uint32_t reversalOffset;
-	uint32_t reversalSize; // 一応
+	uint16_t fileIndex;  // value of blk & rev
+	uint32_t blockOffset; // value of blk
+	uint32_t reversalOffset; // value of rev
 
 	uint32_t timestamp;
 
 	unsigned char reserved[20]; // 予約領域
 
 	/*
-	(key) : blockHash
 	(value) : 
 					- blockFile ( blkxxxxx.dat )
 					- blockOffset
-					- blockSize
 
 					- revFile ( revxxxxx.dat )
 					- revOffset
-					- revSize
 
 					- timestamp
 	*/
 
+	BlockIndex(){ memset(this, 0x00 , sizeof(struct BlockIndex)) ;};
+	size_t exportRaw( std::shared_ptr<unsigned char> *retRaw ){
+		*retRaw = std::shared_ptr<unsigned char>( new unsigned char[sizeof(struct BlockIndex)] );
+		memcpy( (*retRaw).get() , this , sizeof(struct BlockIndex) );
+		return sizeof(struct BlockIndex);
+	};
 };
 
 

@@ -123,7 +123,6 @@ BlockLocalStrageManager::BlockLocalStrageManager( std::shared_ptr<StreamBufferCo
 void BlockLocalStrageManager::writeBlock( std::shared_ptr<block::Block> targetBlock )
 {
 	std::shared_ptr<BlockContainer> container = std::make_shared<BlockContainer>(targetBlock); // pack block to blockContainer
-
 	std::cout << "--- 1 --- " << "\n";
 
 	std::string filePath = "../miya_chain/miya_coin/blocks/" + std::string("blk") + std::to_string(000000) + ".dat";
@@ -132,31 +131,54 @@ void BlockLocalStrageManager::writeBlock( std::shared_ptr<block::Block> targetBl
 	std::cout << "--- 2 --- " << "\n";
 
 		// キャッシュの確認
-	long flag = 0;
+	long offset;	
 	if( _blkFileManager->file() == filePath ) // 前回使用した(キャッシュ)ファイルマネージャーの管理ファイルが異なる場合
 	{
 		std::cout << "--- 3 ---" << "\n";
-		flag = _blkFileManager->write( container );
+		offset = _blkFileManager->write( container );
 	}
 	else // 前回使用した(キャッシュ)ファイルマネージャーの管理ファイルが異なる場合
 	{
 		std::cout << "--- 4 ---" << "\n";
 		_blkFileManager = std::shared_ptr<BlkFileManager>( new BlkFileManager(filePath) );
 		std::cout << "--- 4.1 ---" << "\n";
-		flag = _blkFileManager->write( container );
+		offset = _blkFileManager->write( container );
 	}
 
 	std::cout << "--- 5 ---" << "\n";
 
-	if( flag == -1  ) // 新規にblkファイルを作成する必要がある
+	if( offset == -1  ) // 新規にblkファイルを作成する必要がある
 	{
 		std::cout << "--- 6 ---" << "\n";
 		filePath = "../miya_chain/miya_coin/blocks/" + std::string("blk") + std::to_string(000000 + 1) + ".dat";
 		_blkFileManager = std::shared_ptr<BlkFileManager>( new BlkFileManager(filePath) );
-		_blkFileManager->write( container );
+		offset = _blkFileManager->write( container );
 	}
 
 	std::cout << "--- 7 ---" << "\n";
+
+	
+	// インデックスの登録 
+	std::shared_ptr<unsigned char> blockHash = std::shared_ptr<unsigned char>( new unsigned char[32] ); 
+	targetBlock->blockHash( &blockHash );
+
+	BlockIndex blockIndex; 
+	blockIndex.fileIndex = static_cast<uint16_t>(0); // あとで修正
+	blockIndex.blockOffset = static_cast<uint32_t>(offset);
+	blockIndex.timestamp = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+	std::shared_ptr<unsigned char> rawBlockIndex; size_t rawBlockIndexLength;
+	rawBlockIndexLength = blockIndex.exportRaw( &rawBlockIndex );
+
+	std::cout << "Raw BlockIndex :: ";
+	for( int i=0; i<rawBlockIndexLength; i++)
+	{
+		printf("%02X", rawBlockIndex.get()[i] );
+	} std::cout << "\n";
+	std::cout << "Raw BlockIndex Length :: " << rawBlockIndexLength << "\n";
+
+	_miyaDBClient->add( blockHash , rawBlockIndex , rawBlockIndexLength );
+
+	std::cout << "Block Writed" << "\n";
 
 	return;
 }

@@ -120,15 +120,23 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 			responseJson.clear();
 			// 1. ポップ
 			sbSegment = incomingSBC->popOne();
+			std::cout << "(MiyaDB) Query Poped" << "\n";
+			printf("%p\n", sbSegment.get() );
+			printf("%p - %d\n", sbSegment->body().get(), sbSegment->bodyLength() );
 
 			// クエリの取り出し
 			//  クエリの解析と対応する操作メソッドの呼び出し
 			qctx = parseQuery( sbSegment->body() , sbSegment->bodyLength() ); // ここで定義するのはオーバーフローが大きい
 
+			std::cout << "(MiyaDB) Query Parsed" << "\n";
+
 			if( qctx == nullptr ) { // クエリメッセージの解析に失敗した場合
 				sbSegment = failureSB( qctx );
+				std::cout << "(MiyaDB) Handle query failure" << "\n";
 				goto direct;
 			}
+
+			std::cout << "(MiyaDB) QueryType :: " << qctx->type() << "\n";
 
 			// 2. 処理
 			switch( qctx->type() )

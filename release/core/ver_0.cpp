@@ -133,6 +133,13 @@ int main()
 	std::make_shared<block::Block>(block);
 	blockLocalStrageManager.writeBlock( std::make_shared<block::Block>(block) );
 
+
+	std::mutex mtx;
+	std::condition_variable cv;
+	std::unique_lock<std::mutex> lock(mtx);
+	cv.wait( lock );
+
+
 	return 0;
 	
 

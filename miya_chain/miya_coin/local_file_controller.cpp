@@ -93,36 +93,25 @@ std::shared_ptr<BlockContainer> LocalFileController::read( off_t offset ) // サ
 // どのファイル//Offsetを返却する
 long LocalFileController::write( std::shared_ptr<BlockContainer> container )
 {
-	std::cout << "... 1 " << "\n";
 	// データの最後尾はどこか
 	size_t dataEnd = _meta->actualDataSize(); // データ最後尾までのバイト数を取得する
-
-	std::cout << "dataEnd" << _meta->actualDataSize() << "\n";
-	std::cout << "... 2" << "\n";
 
 	std::shared_ptr<unsigned char> rawBlockContainer; size_t rawBlockContainerLength;
 	rawBlockContainerLength = container->exportRawFormated( &rawBlockContainer );  // ブロックコンテナの書き出し
 
-	std::cout << "... 3" << "\n";
-	std::cout << "DEFAULT_BLK_PEV_MAX_BYTES :: " << DEFAULT_BLK_REV_MAX_BYTES << "\n";
-	std::cout << rawBlockContainerLength << "\n";
-
 	if( dataEnd + rawBlockContainerLength >= DEFAULT_BLK_REV_MAX_BYTES ) return -1; // 次のファイルに書き込め命令
-
-	std::cout << "... 4" << "\n";
 
 	ftruncate( _fd , dataEnd + rawBlockContainerLength ); // ファイルサイズの拡張
 	off_t offset = ( dataEnd / _systemPageSize ) /* ページサイズ何個分見送るか*/;
-	std::cout << "offset :: " << offset << "\n";
 	off_t mappingInOffset = dataEnd % _systemPageSize; 
-	std::cout << "mappingInOffset :: " << mappingInOffset << "\n";
 	
 	_mapping._addr = mmap( NULL , rawBlockContainerLength , PROT_READ | PROT_WRITE , MAP_SHARED , _fd , (offset * _systemPageSize) );
 	_mapping._size = rawBlockContainerLength;
 	memcpy( static_cast<unsigned char *>(_mapping._addr) + mappingInOffset , rawBlockContainer.get() , rawBlockContainerLength );
 
 	munmap( _mapping._addr , _mapping._size ); // 簡単にマップ・アンマップしないほうがいいのかは不明
-	_meta->actualDataSize( dataEnd + rawBlockContainerLength );
+	_meta->actualDataSize( dataEnd + rawBlockContainerLength ); // 最後尾を設定
+
 	return dataEnd;
 }
 

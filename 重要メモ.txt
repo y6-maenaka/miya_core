@@ -62,7 +62,7 @@
 
 - miya_db_clientの機能をもっと充実させる　
 
-- utxo_set でmiya_db_clientを使用する　
+- utxo_setのdbやりとりをmiya_db_clientに換装する
 
 
 [ Task ]
