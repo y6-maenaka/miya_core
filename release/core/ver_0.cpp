@@ -50,13 +50,82 @@ int main()
 
 	
 	miya_chain::MiyaChainManager miyaChainManager;
-	miyaChainManager.init( nullptr );
+	std::shared_ptr<StreamBufferContainer> toEKP2PBrokerDummySBC = std::make_shared<StreamBufferContainer>();
+	miyaChainManager.init( toEKP2PBrokerDummySBC );
+
+	std::pair< std::shared_ptr<StreamBufferContainer> , std::shared_ptr<StreamBufferContainer> > blockIndexDBSBCPair;
+	blockIndexDBSBCPair = miyaChainManager.blockIndexDBSBCPair();
+	miya_chain::BlockLocalStrageManager blockLocalStrageManager( blockIndexDBSBCPair.first, blockIndexDBSBCPair.second );
 
 
-	miya_chain::BlockLocalStrageManager blockLocalStrageManager(nullptr, nullptr );
+
+	// ------- ブロックの作成 ----------
+
+	cipher::ECDSAManager ecdsaManager; // 暗号関係マネージャーの起動
+	ecdsaManager.init( (unsigned char *)"hello", 5 ); // priKeyには鍵がかかっているので
+
+
+	std::pair< std::shared_ptr<StreamBufferContainer> , std::shared_ptr<StreamBufferContainer> > utxoSetDBSBCPair;
+	utxoSetDBSBCPair = miyaChainManager.utxoSetDBSBCPair();
+	miya_chain::LightUTXOSet utxoSet( utxoSetDBSBCPair.first , utxoSetDBSBCPair.second );
+
+	// CoinBaseの作成
+	std::shared_ptr<unsigned char> text = std::shared_ptr<unsigned char>( new unsigned char[10] ); memcpy( text.get(), "HelloWorld", 10 );
+	tx::Coinbase _coinbase( 10 , text, 10 );
+
+	// coinbase報酬先アドレスの設定
+	std::shared_ptr<unsigned char> pubKeyHash = std::shared_ptr<unsigned char>( new unsigned char[20] ); 
+	memcpy( pubKeyHash.get() , "aaaaaaaaaaaaaaaaaaaa", 20 );
+	std::shared_ptr<tx::TxOut> coinbaseOutput = std::shared_ptr<tx::TxOut>( new tx::TxOut );
+	coinbaseOutput->init( 1000, pubKeyHash );
+	_coinbase.add( coinbaseOutput );
+
+
+	ControlInterface interface; // ローカルファイルからトランザクションを作成するコンポーネントのセットアップ
+	std::shared_ptr<tx::P2PKH> loadedP2PKH = interface.createTxFromJsonFile("../control_interface/tx_origin/payment_tx_info_0000.json");
+	for( auto itr : loadedP2PKH->ins() ) // 入力に対する秘密鍵の設定
+		itr->pkey( ecdsaManager.myPkey() );
+
+	loadedP2PKH->sign(); // トランザクションのTxIn用に署名を作成する
+
+	std::shared_ptr<unsigned char> rawTx; unsigned int rawTxLength; // データを増やす為これをコピーする
+	rawTxLength = loadedP2PKH->exportRaw( &rawTx );
+	std::shared_ptr<tx::P2PKH> importP2PKH = std::make_shared<tx::P2PKH>();
+	importP2PKH->importRawSequentially( rawTx );
+	importP2PKH->verify( std::make_shared<miya_chain::LightUTXOSet>(utxoSet) ); // 一応検証する
+
+	// ブロックの作成
+	block::Block block;
+	block.coinbase( std::make_shared<tx::Coinbase>(_coinbase) );
+	block.add( loadedP2PKH ); // ファイルから読み込んだトランザクションを追加
+	block.add( importP2PKH ); // コピーしたトランザクションを追加
+
+	std::shared_ptr<unsigned char> mRoot; unsigned int mRootLength; // マークルルートの設定
+	mRootLength = block.calcMerkleRoot( &mRoot );
+
+	uint32_t nBits = 522390001; // 簡易的にマイニングの実行
+	block.header()->nBits( nBits ); 
+
+	uint32_t nonce = miya_chain::simpleMining( nBits , block.header() );
+	block.header()->nonce( nonce );
+	block.header()->print();
+
+	int headerFlag = miya_chain::verifyBlockHeader(  block.header() );
+	std::cout << "header verify flag -> " << headerFlag << "\n";
+
+
+
+
+	// ローカルファイルへのブロック書き込みテスト
+
+	blockLocalStrageManager.writeBlock( std::make_shared<block::Block>(block) );
 
 	return 0;
 	
+
+
+
+
 
 	/*
 	miya_db::DatabaseManager headerDBManager;
@@ -258,7 +327,7 @@ int main()
 	//miya_chain::TransactionPool txPool;
 
 	return 0;
-	*/	
+	*/
 
 
 

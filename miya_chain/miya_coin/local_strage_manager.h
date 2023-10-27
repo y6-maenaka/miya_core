@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <filesystem>
+#include <cmath>
 
 
 #include <fcntl.h>
@@ -44,7 +45,7 @@ namespace miya_chain
 	
 
 
-constexpr long long DEFAULT_BLK_REV_MAX_BYTES = 2^27; // 128MB
+constexpr long long DEFAULT_BLK_REV_MAX_BYTES = 128 * 1024 * 1024; // std::pow(2,27); // 128MB
 constexpr unsigned short BLK_REV_META_BLOCK_SIZE = 100; // メタ情報の領域(先頭から)
 
 

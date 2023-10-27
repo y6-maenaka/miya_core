@@ -21,15 +21,18 @@ int MiyaChainManager::init( std::shared_ptr<StreamBufferContainer> toEKP2PBroker
 
 	// はじめに全てのデータベースを起動する
 	
+
 	// BlockIndexDBの簡易起動
-	// _dbManager.startWithLightMode( , "../miya_chain/miya_coin/blocks/index/");
-
-
 	_blockIndexDB._toBlockIndexDBSBC = std::make_shared<StreamBufferContainer>();
 	_blockIndexDB._fromBlockIndexDBSBC = std::make_shared<StreamBufferContainer>();
-	// _dbManager.startWithLightMode();
-
 	_dbManager.startWithLightMode( _blockIndexDB._toBlockIndexDBSBC , _blockIndexDB._fromBlockIndexDBSBC  , "../miya_chain/miya_coin/blocks/index/block_index" );
+
+	// UTxOSetDBの簡易起動
+	_utxoSetDB._toUTXOSetDBSBC = std::make_shared<StreamBufferContainer>();
+	_utxoSetDB._fromUTXOSetDBSBC = std::make_shared<StreamBufferContainer>();
+	_dbManager.startWithLightMode( _utxoSetDB._toUTXOSetDBSBC, _utxoSetDB._fromUTXOSetDBSBC , "../miya_db/table_files/test/test" );
+
+
 
 
 
@@ -61,6 +64,14 @@ std::shared_ptr<StreamBufferContainer> MiyaChainManager::toBrokerSBC()
 
 
 
+std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferContainer> > MiyaChainManager::blockIndexDBSBCPair()
+{
+	return std::make_pair( _blockIndexDB._toBlockIndexDBSBC , _blockIndexDB._fromBlockIndexDBSBC );
+}
 
+std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferContainer>> MiyaChainManager::utxoSetDBSBCPair()
+{
+	return std::make_pair( _utxoSetDB._toUTXOSetDBSBC , _utxoSetDB._fromUTXOSetDBSBC );
+}
 
 };

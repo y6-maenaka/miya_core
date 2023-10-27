@@ -12,11 +12,14 @@
 
 MiyaDBSBClient::MiyaDBSBClient( std::shared_ptr<StreamBufferContainer> pushSBContainer , std::shared_ptr<StreamBufferContainer> popSBContainer )
 {
-	if( _popSBContainer == nullptr ) return;
-	if( _pushSBContainer == nullptr ) return;
+
+	if( popSBContainer == nullptr ) return;
+	if( pushSBContainer == nullptr ) return;
 
 	_popSBContainer = popSBContainer;
 	_pushSBContainer = pushSBContainer;
+
+	std::cout << "MiyaDB Client setup done" << "\n";
 
 	return;
 }

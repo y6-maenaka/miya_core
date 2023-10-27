@@ -82,6 +82,7 @@ private:
 	std::shared_ptr<StreamBufferContainer> _toEKP2PBrokerSBC;
 	miya_db::DatabaseManager _dbManager;
 
+	/* SBSegment ルーティング設定 */
 	struct 
 	{
 		std::shared_ptr<StreamBufferContainer> _toBrokerSBC;
@@ -90,11 +91,18 @@ private:
 
 
 
+	/* データベース関連 */
 	struct 
 	{
 		std::shared_ptr<StreamBufferContainer> _toBlockIndexDBSBC;
 		std::shared_ptr<StreamBufferContainer> _fromBlockIndexDBSBC;
 	} _blockIndexDB;
+
+	struct 
+	{
+		std::shared_ptr<StreamBufferContainer> _toUTXOSetDBSBC;
+		std::shared_ptr<StreamBufferContainer> _fromUTXOSetDBSBC;
+	} _utxoSetDB; 
 
 
 public:
@@ -104,6 +112,9 @@ public:
 	std::shared_ptr<StreamBufferContainer> toBrokerSBC();
 	bool IBD(); // Initial Block Download
 
+	// first : toBlockIndexDBSBC ,  second : fromBlockIndexDBSBC
+	std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferContainer>> blockIndexDBSBCPair();
+	std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferContainer>> utxoSetDBSBCPair();
 };
 
 
