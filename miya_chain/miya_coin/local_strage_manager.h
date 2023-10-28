@@ -8,6 +8,10 @@
 #include <vector>
 #include <filesystem>
 #include <cmath>
+#include <regex>
+#include <algorithm>
+#include <set>
+#include <cassert>
 
 
 #include <fcntl.h>
@@ -206,26 +210,26 @@ public:
 
 
 
-class BlockLocalStrageManager
+class BlockLocalStrageManager 
 {
 private:
-
 	//std::shared_ptr<StreamBufferContainer> _toIndexDBSBC;
 	std::shared_ptr<MiyaDBSBClient> _miyaDBClient;
 
 	std::shared_ptr<BlkFileManager> _blkFileManager; // 直近でアクセスしたファイルマネージャーをキャッシュしておく
 	std::shared_ptr<RevFileManager> _revFileManager; // 直近でアクセスしたファイルマネージャーをキャッシュしておく
 
+	unsigned int _lastIndex = 0;
 public:
 	BlockLocalStrageManager( std::shared_ptr<StreamBufferContainer> toIndexDBSBC , std::shared_ptr<StreamBufferContainer> fromIndexDBSBC );
-	
+
+	// ブロック操作	
 	void writeBlock( std::shared_ptr<block::Block> targetBlock ); // 保存はブロック単位
 	std::shared_ptr<block::Block> readBlock( std::shared_ptr<unsigned char> blockHash );
 
+	// トランザクション操作
 	std::shared_ptr<tx::P2PKH> readTx( std::shared_ptr<unsigned char> txHash );
 };
-
-
 
 
 
