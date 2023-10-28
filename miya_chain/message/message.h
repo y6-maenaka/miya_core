@@ -13,6 +13,9 @@
 #include <iostream>
 #include <memory>
 #include <variant>
+#include <unordered_map>
+#include <map>
+#include <string>
 
 #include "./command/inv/inv.h"
 #include "./command/block.h"
@@ -41,6 +44,7 @@ constexpr unsigned short MIYA_CHAIN_PROTOCOL_BLOCK_HEADER = 1; // 固定長
 constexpr unsigned short MIYA_CHAIN_PROTOCOL_BLOCK_DATA = 2; // 可変長
 constexpr unsigned short MIYA_CHAIN_PROTOCOL_TX = 3; // 可変長 tx区切りあり
 
+constexpr unsigned short MIYA_CHAIN_MSG_COMMAND_LENGTH = 12;
 
 
 
@@ -68,13 +72,17 @@ using MiyaChainCommand = std::variant<
 
 
 
+
+
+
+
 struct MiyaChainMessage
 {
 // private:
 	struct 
 	{
 		unsigned char _token[4];
-		unsigned char _command[12]; // プロトコルタイプ  with ASCII
+		char _command[12]; // プロトコルタイプ  with ASCII
 		uint32_t _payloadLength;
 	} _header;
 
@@ -84,12 +92,20 @@ public:
 
 	/* Getter */
 	size_t payloadLength();
-	const unsigned char *command();
+	const char *command();
+	MiyaChainCommand payload();
 
 	/* Setter */
-	void payload( MiyaChainCommand targetPayload , unsigned char *command );
+	void payload( MiyaChainCommand targetPayload , const char *command );
+	void payloadLength( size_t target );
+
 
 	bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );
+	size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
+  
+	
+	size_t exportRawCommand( const char* command , MiyaChainCommand commandBody , std::shared_ptr<unsigned char> *retRaw );
+	static int commandIndex( const char* command );
 
 
 } __attribute__((packed));

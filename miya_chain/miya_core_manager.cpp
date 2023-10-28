@@ -5,6 +5,9 @@
 #include "../shared_components/stream_buffer/stream_buffer_container.h"
 
 #include "./daemon/broker/broker.h"
+#include "./daemon/requester/requester.h"
+
+#include "./block_chain_manager/IBD.h"
 
 namespace miya_chain
 {
@@ -41,9 +44,12 @@ int MiyaChainManager::init( std::shared_ptr<StreamBufferContainer> toEKP2PBroker
 
 	// ブローカーの起動
 	_brokerDaemon._toBrokerSBC = std::make_shared<StreamBufferContainer>();
+	_requesterDaemon._toRequesterSBC = std::make_shared<StreamBufferContainer>();
 
   
-	_brokerDaemon._broker = std::make_shared<MiyaChainMessageBrocker>( _brokerDaemon._toBrokerSBC , _toEKP2PBrokerSBC );
+	_brokerDaemon._broker = std::make_shared<MiyaChainBrocker>( _brokerDaemon._toBrokerSBC , _toEKP2PBrokerSBC );
+	_requesterDaemon._requester = std::make_shared<MiyaChainRequester>( _requesterDaemon._toRequesterSBC , _brokerDaemon._toBrokerSBC );
+
 
 	std::cout << "MiyaChainManager initialize successfully done" << "\n";
 }
@@ -53,7 +59,21 @@ int MiyaChainManager::init( std::shared_ptr<StreamBufferContainer> toEKP2PBroker
 int MiyaChainManager::start()
 {
 	_brokerDaemon._broker->start();
+	_requesterDaemon._requester->start();
+
+	std::cout << "MiyaChainManager Started" << "\n";
 }
+
+
+
+bool MiyaChainManager::startIBD()
+{
+
+	IBDManager manager;
+	manager.start( this->chainState() , _requesterDaemon._toRequesterSBC  );
+}
+
+
 
 
 
@@ -72,6 +92,12 @@ std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferCo
 std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferContainer>> MiyaChainManager::utxoSetDBSBCPair()
 {
 	return std::make_pair( _utxoSetDB._toUTXOSetDBSBC , _utxoSetDB._fromUTXOSetDBSBC );
+}
+
+
+const std::shared_ptr<MiyaChainState> MiyaChainManager::chainState()
+{
+	return std::make_shared<MiyaChainState>(_chainState);
 }
 
 };

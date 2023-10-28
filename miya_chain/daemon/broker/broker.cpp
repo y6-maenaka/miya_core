@@ -15,14 +15,14 @@ namespace miya_chain
 
 
 
-MiyaChainMessageBrocker::MiyaChainMessageBrocker( std::shared_ptr<StreamBufferContainer> incomingSBC , std::shared_ptr<StreamBufferContainer> toEKP2PBrokerSBC )
+MiyaChainBrocker::MiyaChainBrocker( std::shared_ptr<StreamBufferContainer> incomingSBC , std::shared_ptr<StreamBufferContainer> toEKP2PBrokerSBC )
 {
 	_incomingSBC = incomingSBC;
 	_toEKP2PBrokerSBC = toEKP2PBrokerSBC;
 }
 
 
-int MiyaChainMessageBrocker::start()
+int MiyaChainBrocker::start()
 {
 	if( _incomingSBC == nullptr ) return -1;
 	if( _toEKP2PBrokerSBC == nullptr ) return -1;
@@ -48,7 +48,7 @@ int MiyaChainMessageBrocker::start()
 	});
 	
 	miyaChainBroker.detach();
-	std::cout << "MiyaChainMessageBrocker thread detached" << "\n";
+	std::cout << "MiyaChainBrocker thread detached" << "\n";
 
 	return 0;
 
@@ -63,7 +63,7 @@ int MiyaChainMessageBrocker::start()
 
 
 
-void MiyaChainMessageBrocker::setDestinationStreamBuffer( std::shared_ptr<StreamBufferContainer> target , unsigned short destination )
+void MiyaChainBrocker::setDestinationStreamBuffer( std::shared_ptr<StreamBufferContainer> target , unsigned short destination )
 {
 	printf("StreamBuffer seted with -> %p\n", target.get() );
 	_sbHub.at(destination) = target;
@@ -74,7 +74,7 @@ void MiyaChainMessageBrocker::setDestinationStreamBuffer( std::shared_ptr<Stream
 
 
 
-std::shared_ptr<MiyaChainMessage> MiyaChainMessageBrocker::parseRawMiyaChainMessage( std::shared_ptr<SBSegment> fromSB )
+std::shared_ptr<MiyaChainMessage> MiyaChainBrocker::parseRawMiyaChainMessage( std::shared_ptr<SBSegment> fromSB )
 {
 	/*
 	std::shared_ptr<unsigned char> rawMSG; size_t rawMSGLength;
@@ -93,7 +93,7 @@ std::shared_ptr<MiyaChainMessage> MiyaChainMessageBrocker::parseRawMiyaChainMess
 
 
 
-std::shared_ptr<StreamBufferContainer> MiyaChainMessageBrocker::incomingSBC()
+std::shared_ptr<StreamBufferContainer> MiyaChainBrocker::incomingSBC()
 {
 	return _incomingSBC;
 }

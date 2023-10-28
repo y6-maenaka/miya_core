@@ -23,7 +23,7 @@ private:
 	unsigned char _blank[4] = {0x00, 0x00, 0x00, 0x00}; // mempoolメッセージは全てのtxIDを要求するためデータは空で良い
 
 public:
-    static constexpr unsigned char command[12] = "mempool";
+    static constexpr char command[12] = "mempool";
 
 
 

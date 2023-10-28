@@ -17,7 +17,7 @@ namespace miya_chain
 
 struct MiyaChainMSG_GETHEADERS
 {
-  static constexpr unsigned char command[12] = "getheaders";
+  static constexpr char command[12] = "getheaders";
 
 	size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
 	bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );

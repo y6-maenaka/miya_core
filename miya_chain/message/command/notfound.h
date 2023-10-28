@@ -22,7 +22,7 @@ private:
 		MiyaChainMSG_INV _inv; // 中身は空だが,公式リファレンスでは宣言してあった
 
 public:
-    static constexpr unsigned char command[12] = "notfound";
+    static constexpr char command[12] = "notfound";
 
 
 		size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );

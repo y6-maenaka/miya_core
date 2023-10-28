@@ -25,10 +25,10 @@ private:
 		
 
 public:
-    static constexpr unsigned char command[12] = "block";
+    static constexpr char command[12] = "block";
 
-		size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
-		bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );
+		size_t exportRaw( std::shared_ptr<unsigned char> *retRaw ){};
+		bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength ){};
 
 };
 

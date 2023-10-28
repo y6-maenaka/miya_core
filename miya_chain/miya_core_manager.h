@@ -5,6 +5,7 @@
 #include <memory>
 #include <iostream>
 #include <chrono>
+#include <vector>
 
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -33,7 +34,8 @@ namespace miya_chain
 {
 
 
-class MiyaChainMessageBrocker;
+class MiyaChainBrocker;
+class MiyaChainRequester;
 
 
 
@@ -51,6 +53,7 @@ private:
 		unsigned char _chainHead[32];
 		uint32_t _heigth = 0;
 		uint32_t _timestamp;
+		unsigned char _version[4];  // ここではないかも
 		
 	} __attribute__((packed));
 
@@ -87,8 +90,14 @@ private:
 	struct 
 	{
 		std::shared_ptr<StreamBufferContainer> _toBrokerSBC;
-		std::shared_ptr<MiyaChainMessageBrocker> _broker;
+		std::shared_ptr<MiyaChainBrocker> _broker;
 	} _brokerDaemon;
+
+	struct 
+	{
+		std::shared_ptr<StreamBufferContainer> _toRequesterSBC;
+		std::shared_ptr<MiyaChainRequester> _requester;
+	} _requesterDaemon;
 
 
 
@@ -112,11 +121,13 @@ public:
 	int start();
 
 	std::shared_ptr<StreamBufferContainer> toBrokerSBC();
-	bool IBD(); // Initial Block Download
+	bool startIBD(); // Initial Block Download
 
+	/* Getter */
 	// first : toBlockIndexDBSBC ,  second : fromBlockIndexDBSBC
 	std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferContainer>> blockIndexDBSBCPair();
 	std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferContainer>> utxoSetDBSBCPair();
+	const std::shared_ptr<MiyaChainState> chainState();
 };
 
 

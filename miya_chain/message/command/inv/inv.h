@@ -38,7 +38,7 @@ struct MiyaChainMSG_INV
 	std::vector<struct inv> _invVector;
 
 public:
-	static constexpr unsigned char command[12] = "inv";
+	static constexpr char command[12] = "inv";
 };
 
 

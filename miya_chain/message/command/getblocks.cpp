@@ -7,11 +7,20 @@ namespace miya_chain
 
 
 
+MiyaChainMSG_GETBLOCKS::MiyaChainMSG_GETBLOCKS( size_t hashCount )
+{
+	memset( this , 0x00 , sizeof(struct MiyaChainMSG_GETBLOCKS) );
+	this->hashCount( hashCount );
+}
+
+
+
+
 
 /* Getter */
 size_t MiyaChainMSG_GETBLOCKS::hashCount()
 {
-	return static_cast<size_t>( ntohs(_hashCount) );
+	return static_cast<size_t>( _body._hashCount );
 }
 
 
@@ -20,27 +29,32 @@ size_t MiyaChainMSG_GETBLOCKS::hashCount()
 /* Setter */
 void MiyaChainMSG_GETBLOCKS::hashCount( size_t hashCount )
 {
-	_hashCount = htons( hashCount );
+	_body._hashCount =  static_cast<uint32_t>(hashCount);
 }
 
 
 
-
-
-
-MiyaChainMSG_GETBLOCKS::MiyaChainMSG_GETBLOCKS()
+void MiyaChainMSG_GETBLOCKS::startHash( const void* blockHash )
 {
-	memset( this , 0x00 , sizeof(struct MiyaChainMSG_GETBLOCKS) );
+	memcpy( _body._blockHeaderHash , blockHash , sizeof(_body._blockHeaderHash) );
 }
+
+void MiyaChainMSG_GETBLOCKS::startHash( std::shared_ptr<unsigned char> blockHash )
+{
+	this->startHash( blockHash.get() );
+}
+
+
+
 
 
 
 size_t MiyaChainMSG_GETBLOCKS::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 {
-	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[sizeof(struct MiyaChainMSG_GETBLOCKS)] );
-	memcpy( (*retRaw).get() , this,  sizeof(struct MiyaChainMSG_GETBLOCKS) );
+	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[sizeof(_body)] );
+	memcpy( (*retRaw).get() , &_body,  sizeof(_body) );
 
-	return sizeof(struct MiyaChainMSG_GETBLOCKS);
+	return sizeof(_body);
 }
 
 
@@ -52,7 +66,31 @@ bool MiyaChainMSG_GETBLOCKS::importRaw( std::shared_ptr<unsigned char> fromRaw ,
 }
 
 
+void MiyaChainMSG_GETBLOCKS::print()
+{
+	std::cout << "version :: ";
+	for(int i=0; i<sizeof(_body._version); i++)
+		printf("%02X", _body._version[i] );
+	std::cout << "\n";
 
+	std::cout << "hashCount :: ";
+	unsigned char hashCountBuff[sizeof(_body._hashCount)];
+	memcpy( hashCountBuff, &(_body._hashCount) , sizeof(_body._hashCount) );
+	for( int i=0; i<sizeof(hashCountBuff); i++ ){
+		printf("%02X", hashCountBuff[i] );
+	} std::cout << "\n";
+	
+	std::cout << "startHash :: ";
+	for( int i=0; i<sizeof(_body._blockHeaderHash); i++ ){
+		printf("%02X", _body._blockHeaderHash[i]);
+	} std::cout << "\n";
+
+	std::cout << "endHash :: ";
+	for( int i=0; i<sizeof(_body._stopHash); i++ ){
+		printf("%02X", _body._stopHash[i]);
+	} std::cout << "\n";
+
+}
 
 
 

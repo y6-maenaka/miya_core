@@ -78,6 +78,7 @@ int EKP2PSender::start()
 					msg->payload( popedSB->body() , popedSB->bodyLength() ); // コンテンツのセット
 					msg->header()->protocol( popedSB->protocol() );
 					msg->header()->rpcType( popedSB->rpcType() );
+					// ソースがない場合は,kademliaContextを用いてランダムに送信する
 					msg->header()->sourceKNodeAddr( _kRoutingTable->hostNode()->kNodeAddr() ); // 自身のアドレスのセット
 
 					size_t sendLength;
@@ -134,6 +135,11 @@ int EKP2PSender::start()
 						std::cout << "[ send ] :: ( " << sendLength << " ) bytes" << "\n";
 					}
 					break;
+				}
+
+				case static_cast<int>( EKP2P_SEND_BROADCAST ):
+				{
+					std::cout << "kademlia context を取得してブロードキャストする" << "\n";
 				}
 
 				default:

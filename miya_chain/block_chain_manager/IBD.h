@@ -5,7 +5,13 @@
 
 #include <memory>
 #include <vector>
+#include <any>
 
+
+
+
+struct SBSegment;
+class StreamBufferContainer;
 
 
 namespace block
@@ -18,8 +24,12 @@ struct BlockHeader;
 
 
 
+namespace miya_chain
+{
 
 
+
+class MiyaChainState;
 
 
 struct IBDBCB // (Initial Block Donwload Block Control Block)
@@ -30,7 +40,8 @@ struct IBDBCB // (Initial Block Donwload Block Control Block)
 			
 	 */
 
-	std::shared_ptr<unsigned char> blockHash;
+	// std::shared_ptr<unsigned char> blockHash;
+	unsigned char _blockHash[32];
 	std::shared_ptr<block::BlockHeader> _blockHeader;
 	uint32_t _height; // いらないかも
 	int status; 
@@ -54,6 +65,10 @@ class IBDManager
 private:
 	std::vector<IBDBCB> _IBDBCBVector;
 
+
+public:
+	bool start( std::shared_ptr<MiyaChainState> chainState , std::shared_ptr<StreamBufferContainer> toRequesterSBC );
+
 };
 
 
@@ -61,7 +76,7 @@ private:
 /*
  初回のブロックヘッダーダウンロードはメモリ上で行う
 */
-
+};
 
 
 

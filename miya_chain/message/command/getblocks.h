@@ -4,6 +4,7 @@
 
 #include "./base_command.h"
 
+#include <iostream>
 #include <string.h> // for use memset() on LinuxOS
 
 namespace miya_chain
@@ -20,25 +21,31 @@ struct MiyaChainMSG_GETBLOCKS : public MiyaChainPayloadFunction
 {
 
 private:
-	unsigned char _version[4];
-	uint32_t _hashCount; // 基本的に1-200
-	unsigned char _blockHeaderHash[32]; // スタートハッシュ // 初回ネットワーク参加であればジェネシスブロックハッシュとなる
-	unsigned char _stopHash[32]; // ストップハッシュを0埋めすることで，後続のブロックヘッダを個数分要求する
-
+	struct __attribute__((packed))
+	{
+		unsigned char _version[4];
+		uint32_t _hashCount; // 基本的に1-200
+		unsigned char _blockHeaderHash[32]; // スタートハッシュ // 初回ネットワーク参加であればジェネシスブロックハッシュとなる
+		unsigned char _stopHash[32]; // ストップハッシュを0埋めすることで，後続のブロックヘッダを個数分要求する
+	} _body ; 
 
 public:
-    static constexpr unsigned char command[12] = "getblocks";
+    static constexpr char command[12] = "getblocks";
 
-		MiyaChainMSG_GETBLOCKS();
+		MiyaChainMSG_GETBLOCKS( size_t hashCount = 200 );
 
 		/* Getter*/
 		size_t hashCount();
 
 		/* Setter */ 
 		void hashCount( size_t hashCount );
+		void startHash( std::shared_ptr<unsigned char> blockHash ); // blocHeaderHash
+		void startHash( const void* blockHash );
 
 		size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
 		bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );
+
+		void print();
 };
 
 

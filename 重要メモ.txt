@@ -64,6 +64,7 @@
 
 - utxo_setのdbやりとりをmiya_db_clientに換装する
 
+- miya_chain_MSGのコマンド書き出し系が冗長
 
 [ Task ]
 ・二重支払いチェック

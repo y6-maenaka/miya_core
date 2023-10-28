@@ -71,6 +71,7 @@ public:
 	{
 		//std::shared_ptr<std::any> option1;
 		std::any option1;
+		std::any option2;
 	} options;
 
 

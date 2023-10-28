@@ -130,7 +130,6 @@ int main()
 
 
 
-
 	std::shared_ptr<unsigned char> blockHash;  block.blockHash( &blockHash );
 	// ローカルファイルへのブロック書き込みテスト
 	//blockLocalStrageManager.writeBlock( std::make_shared<block::Block>(block) );
@@ -139,7 +138,11 @@ int main()
 	std::shared_ptr<block::Block> readedBlock;
 	//readedBlock = blockLocalStrageManager.readBlock( blockHash );
 
-	
+
+	miyaChainManager.start();
+	sleep(1);
+	miyaChainManager.startIBD();
+
 	std::mutex mtx;
 	std::condition_variable cv;
 	std::unique_lock<std::mutex> lock(mtx);

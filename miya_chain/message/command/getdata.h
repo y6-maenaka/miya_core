@@ -23,10 +23,10 @@ private:
 	MiyaChainMSG_INV _inv;
 
 public:
-    static constexpr unsigned char command[12] = "getdata";
+    static constexpr char command[12] = "getdata";
 
-		size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
-		bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );
+		size_t exportRaw( std::shared_ptr<unsigned char> *retRaw ){};
+		bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength ){};
 
 
 };

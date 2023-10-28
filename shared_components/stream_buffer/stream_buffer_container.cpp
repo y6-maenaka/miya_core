@@ -9,6 +9,7 @@
 void StreamBufferContainer::pushOne( std::unique_ptr<SBSegment> target , size_t timeout )
 {
 	// 複数のstreamBufferが追加される
+	if( target == nullptr )	return;
 	_sbs.at(0)->enqueue( std::move(target) , timeout );
 }
 

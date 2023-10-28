@@ -42,7 +42,7 @@ public:
 
 
 
-class MiyaChainMessageBrocker
+class MiyaChainBrocker
 {
 
 
@@ -56,7 +56,7 @@ private:
 
 
 public:
-	MiyaChainMessageBrocker( std::shared_ptr<StreamBufferContainer> incomingSBC , std::shared_ptr<StreamBufferContainer> toEKP2PBrokerSBC );
+	MiyaChainBrocker( std::shared_ptr<StreamBufferContainer> incomingSBC , std::shared_ptr<StreamBufferContainer> toEKP2PBrokerSBC );
 
 	int start();
 	void setDestinationStreamBuffer( std::shared_ptr<StreamBufferContainer> target , unsigned short destination );

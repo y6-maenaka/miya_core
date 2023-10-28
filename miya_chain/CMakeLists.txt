@@ -33,6 +33,7 @@ add_library( MIYA_CHAIN STATIC
 							daemon/transaction_validator/transaction_validator.cpp
 							daemon/block_validator/block_validator.cpp
 							daemon/broker/broker.cpp
+							daemon/requester/requester.cpp
 									
 							block_assemble_agent/block_accemble_agent.cpp
 
@@ -41,6 +42,7 @@ add_library( MIYA_CHAIN STATIC
 							message/message.cpp
 							message/command/inv/inv.cpp
 							message/command/getblocks.cpp
+							message/command/headers.cpp
 
 							transaction/p2pkh/p2pkh.cpp
 							transaction/coinbase/coinbase.cpp
@@ -50,6 +52,7 @@ add_library( MIYA_CHAIN STATIC
 							utxo_set/utxo_set.cpp
 
 							block_chain_manager/block_chain_manager.cpp
+							block_chain_manager/IBD.cpp
 							#block_chain_manager/block_local_strage_manager/transaction_store/transaction_store.cpp
 
 							mining/simple_mining.cpp
