@@ -24,8 +24,18 @@ MiyaChainRequester::MiyaChainRequester( std::shared_ptr<StreamBufferContainer> i
 int MiyaChainRequester::start()
 {
 
-	if( _incomingSBC == nullptr ) return -1;
-	if( _toMiyaChainBrokerSBC = nullptr ) return -1;
+	if( _incomingSBC == nullptr ){
+		std::cerr << "(MiyaChainRequester) 有効なIncomingSBCがセットされていません" << "\n";
+		return -1;
+	}
+	if( _toMiyaChainBrokerSBC == nullptr ){
+		std::cerr << "(MiyaChainRequester) 有効なToMiyaChainBrokerSBCがセットされていません" << "\n";
+		return -1;
+	}
+
+
+
+	printf("(MiyaChainRequester) ToMiyaChainBrokerSBC :: %p\n", _toMiyaChainBrokerSBC.get() );
 
 	std::thread miyaChainRequester([&]()
 	{
@@ -50,8 +60,18 @@ int MiyaChainRequester::start()
 			std::shared_ptr<unsigned char> rawMiyaChainMSG; size_t rawMiyaChainMSGLength;
 			rawMiyaChainMSGLength = message.exportRaw( &rawMiyaChainMSG );
 
+			std::cout << "Raw MiyaChainMSG(" << rawMiyaChainMSGLength << ") :: ";
+			for( int i=0; i<rawMiyaChainMSGLength ; i++){
+				printf("%02X", rawMiyaChainMSG.get()[i]);
+			} std::cout << "\n";
+
 			popedSB->body( rawMiyaChainMSG , rawMiyaChainMSGLength );
+			popedSB->sendFlag( ekp2p::EKP2P_SENDBACK | ekp2p::EKP2P_SEND_UNICAST );
+			
+
 			_toMiyaChainBrokerSBC->pushOne( std::move(popedSB) );
+
+			std::cout << "(MiyaChainRequester) :: Forwarding to Broker" << "\n";
 		}
 	});
 	miyaChainRequester.detach();

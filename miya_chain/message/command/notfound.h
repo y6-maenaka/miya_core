@@ -19,17 +19,17 @@ namespace miya_chain
 struct MiyaChainMSG_NOTFOUND
 {
 private:
-		MiyaChainMSG_INV _inv; // 中身は空だが,公式リファレンスでは宣言してあった
+		MiyaChainMSG_INV _inv; // 中身はTypeIDのみ有効値を格納
 
 public:
     static constexpr char command[12] = "notfound";
 
-
-		size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
-		bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );
-
+	size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
+	bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );
 
 };
+
+
 
 }
 

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <chrono>
 #include <vector>
+#include <unordered_map>  
 
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -13,6 +14,7 @@
 #include <unistd.h>
 
 #include "../miya_db/miya_db/database_manager.h"
+#include "./IBD.h"
 
 
 struct SBSegment;
@@ -24,18 +26,28 @@ class StreamBufferContainer;
 
 
 
-constexpr char* CHAINSTATE_FILE_PATH = "../miya_chain/miya_coin/chainstate/chainstate.st";
 
 
+namespace bloc
+{
+struct Block;
+struct BlockHeader;
+}
 
 
 
 namespace miya_chain
 {
 
+constexpr char* CHAINSTATE_FILE_PATH = "../miya_chain/miya_coin/chainstate/chainstate.st";
+constexpr unsigned short DEFAULT_DAEMON_FORWARDING_SBC_ID_REQUESTER = 0;
+constexpr unsigned short DEFAULT_DAEMON_FORWARDING_SBC_ID_RESPONDER = 1;
+
 
 class MiyaChainBrocker;
 class MiyaChainRequester;
+class BlockLocalStrageManager;
+
 
 
 
@@ -47,7 +59,6 @@ struct MiyaChainState // 最先端のブロックハッシュなどをローカ�
 											// 常に読み書きを伴うのでいっそのことマッピングしてしまう
 {
 private:
-
 	struct  ChainMeta
 	{
 		unsigned char _chainHead[32];
@@ -68,7 +79,7 @@ public:
 	MiyaChainState(); // 寄贈時にchain_stateファイルを読み込む
 	void update( std::shared_ptr<unsigned char> blockHash , unsigned short height ); // ファイルにも書き込む
 
-	const unsigned char* chainHead();
+	std::shared_ptr<unsigned char> chainHead();
 	unsigned int height();
 	~MiyaChainState();
 };
@@ -114,6 +125,12 @@ private:
 		std::shared_ptr<StreamBufferContainer> _fromUTXOSetDBSBC;
 	} _utxoSetDB; 
 
+	struct  // ローカルストレージマネージャーへの呼び出しは現在の実装では同期的に行われる
+	{ 
+		std::shared_ptr<BlockLocalStrageManager> _strageManager;
+	} _localStrageManager;
+
+
 	MiyaChainState _chainState;
 
 public:
@@ -128,6 +145,8 @@ public:
 	std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferContainer>> blockIndexDBSBCPair();
 	std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferContainer>> utxoSetDBSBCPair();
 	const std::shared_ptr<MiyaChainState> chainState();
+
+	static void __unitTest();
 };
 
 

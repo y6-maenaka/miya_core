@@ -15,6 +15,14 @@ void MiyaChainMSG_HEADERS::count( size_t target )
 
 
 
+std::vector< std::shared_ptr<block::BlockHeader> > MiyaChainMSG_HEADERS::headersVector()
+{
+	return _body._headers;
+}
+
+
+
+
 size_t MiyaChainMSG_HEADERS::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 {
 	size_t rawTxsLength = 0;

@@ -43,4 +43,4 @@ target_link_libraries( SHARED_COMPONENTS PUBLIC
 
 
 
-add_definitions( -std=c++17 -w )
+add_definitions( -std=c++20 -w )

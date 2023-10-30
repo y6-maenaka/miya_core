@@ -8,6 +8,7 @@
 #include "../../shared_components/hash/sha_hash.h"
 
 #include "../../miya_chain/block/block.h"
+#include "../../miya_chain/message/__test.h"
 
 #include "../../miya_chain/mining/simple_mining.h"
 
@@ -132,16 +133,35 @@ int main()
 
 	std::shared_ptr<unsigned char> blockHash;  block.blockHash( &blockHash );
 	// ローカルファイルへのブロック書き込みテスト
-	//blockLocalStrageManager.writeBlock( std::make_shared<block::Block>(block) );
+	blockLocalStrageManager.writeBlock( std::make_shared<block::Block>(block) );
 
 
 	std::shared_ptr<block::Block> readedBlock;
 	//readedBlock = blockLocalStrageManager.readBlock( blockHash );
 
 
-	miyaChainManager.start();
-	sleep(1);
-	miyaChainManager.startIBD();
+	// miyaChainManager.start();
+	// MiyaChainMessageTest();
+	// miyaChainManager.startIBD();
+
+	std::unordered_map< miya_chain::BlockHashAsKey , struct miya_chain::IBDBCB , miya_chain::BlockHashAsKey::Hash > IBDBCBMap;
+	miya_chain::BlockHashAsKey blockKey( blockHash );
+	struct miya_chain::IBDBCB ibdbcb; ibdbcb.status = 1;
+	IBDBCBMap[blockKey] = ibdbcb;
+
+	std::shared_ptr<unsigned char> blockHash_2 = std::shared_ptr<unsigned char>( new unsigned char[32] );
+	memcpy( blockHash_2.get() , "aaaaaaaaaabbbbbbbbbbccccccccccdd", 32 );
+	miya_chain::BlockHashAsKey blockKey_2( blockHash_2 );
+	struct miya_chain::IBDBCB ibdbcb_2; ibdbcb_2.status = 2;
+	IBDBCBMap[blockKey_2] = ibdbcb_2;
+
+
+	for( auto itr : IBDBCBMap ){
+		itr.first.printHash();
+		std::cout << itr.second.status << "\n";
+	}
+	std::cout << IBDBCBMap.size() << "\n";
+
 
 	std::mutex mtx;
 	std::condition_variable cv;

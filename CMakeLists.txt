@@ -74,4 +74,4 @@ endif()
 
 
 
-add_definitions( -std=c++17 )
+add_definitions( -std=c++20 )

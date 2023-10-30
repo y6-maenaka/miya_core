@@ -7,7 +7,14 @@
 #include "./daemon/broker/broker.h"
 #include "./daemon/requester/requester.h"
 
-#include "./block_chain_manager/IBD.h"
+#include "./block/block.h"
+
+#include "./message/message.h"
+#include "./message/command/command_set.h"
+
+#include "../ekp2p/daemon/sender/sender.h"
+
+#include "./miya_coin/local_strage_manager.h"
 
 namespace miya_chain
 {
@@ -36,8 +43,8 @@ int MiyaChainManager::init( std::shared_ptr<StreamBufferContainer> toEKP2PBroker
 	_dbManager.startWithLightMode( _utxoSetDB._toUTXOSetDBSBC, _utxoSetDB._fromUTXOSetDBSBC , "../miya_db/table_files/test/test" );
 
 
-
-
+	// ローカルデータストア(生ブロックを直接ファイルに保存している)
+	_localStrageManager._strageManager = std::make_shared<BlockLocalStrageManager>( _blockIndexDB._toBlockIndexDBSBC , _blockIndexDB._fromBlockIndexDBSBC );
 
 
 	_toEKP2PBrokerSBC = toEKP2PBrokerSBC;
@@ -66,14 +73,6 @@ int MiyaChainManager::start()
 
 
 
-bool MiyaChainManager::startIBD()
-{
-
-	IBDManager manager;
-	manager.start( this->chainState() , _requesterDaemon._toRequesterSBC  );
-}
-
-
 
 
 
@@ -81,7 +80,6 @@ std::shared_ptr<StreamBufferContainer> MiyaChainManager::toBrokerSBC()
 {
 	return _brokerDaemon._toBrokerSBC;
 }
-
 
 
 std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferContainer> > MiyaChainManager::blockIndexDBSBCPair()
@@ -94,10 +92,17 @@ std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferCo
 	return std::make_pair( _utxoSetDB._toUTXOSetDBSBC , _utxoSetDB._fromUTXOSetDBSBC );
 }
 
-
 const std::shared_ptr<MiyaChainState> MiyaChainManager::chainState()
 {
 	return std::make_shared<MiyaChainState>(_chainState);
 }
+
+void MiyaChainManager::__unitTest()
+{
+	std::cout << "Hello" << "\n";
+}
+
+
+
 
 };

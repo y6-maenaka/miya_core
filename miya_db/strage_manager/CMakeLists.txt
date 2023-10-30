@@ -13,4 +13,4 @@ add_library( STRAGE_MANAGER STATIC
 )
 
 
-add_definitions( -std=c++14 )
+add_definitions( -std=c++20 )

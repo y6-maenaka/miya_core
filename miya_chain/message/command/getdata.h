@@ -28,6 +28,7 @@ public:
 		size_t exportRaw( std::shared_ptr<unsigned char> *retRaw ){};
 		bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength ){};
 
+    void inv( struct MiyaChainMSG_INV target );
 
 };
 

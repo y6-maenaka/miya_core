@@ -7,5 +7,5 @@ add_library( CONTROL_INTERFACE STATIC
 )
 
 
-add_definitions( -std=c++17 )
+add_definitions( -std=c++20 )
 

@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <vector>
+#include <memory>
 
 
 // https://en.bitcoin.it/wiki/Protocol_documentation#inv
@@ -15,7 +16,7 @@ namespace miya_chain
 
 
 
-enum class TypeID
+enum class TypeID 
 {
 	MSG_TX = 1,
 	MSG_BLOCK,
@@ -24,21 +25,49 @@ enum class TypeID
 
 
 
-struct inv
+
+
+
+// アクセスフリー
+struct inv 
 {
-	struct _typeID; 
+	unsigned short _typeID = 0; 
 	unsigned char _hash[32];
+
+	void hash( std::shared_ptr<unsigned char> target );
+	unsigned char* hash();
 };
+
+
+
 
 
 
 struct MiyaChainMSG_INV
 {
-	uint32_t _count;
-	std::vector<struct inv> _invVector;
+	struct 
+	{
+		uint32_t _count;
+		std::vector<struct inv> _invVector;
+	} _body;
+
+protected:
+	void add( struct inv target );
 
 public:
 	static constexpr char command[12] = "inv";
+
+	size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
+
+	/* Getter */ 
+	size_t count();
+	
+	/* Setter */
+	void count( size_t count );
+	void addTx( std::shared_ptr<unsigned char> hash );
+	void addBlock( std::shared_ptr<unsigned char> hash );
+
+	std::vector<struct inv> invVector();
 };
 
 

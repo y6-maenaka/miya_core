@@ -8,6 +8,7 @@
 #include <string>
 #include <mutex>
 #include <condition_variable>
+#include <unordered_map>
 
 //#include "../../miya_core/transaction/script/pk_script.h"
 

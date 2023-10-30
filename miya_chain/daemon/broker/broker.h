@@ -56,15 +56,23 @@ private:
 
 
 public:
+	// これはアクセス可能とする
+	std::array< bool , MAX_PROTOCOL > allowedForwardingFilter; // 転送するSBCのフィルター trueで許可
+	void allowAll();
+	void blockAll();
+
+
 	MiyaChainBrocker( std::shared_ptr<StreamBufferContainer> incomingSBC , std::shared_ptr<StreamBufferContainer> toEKP2PBrokerSBC );
 
 	int start();
 	void setDestinationStreamBuffer( std::shared_ptr<StreamBufferContainer> target , unsigned short destination );
 
-	std::shared_ptr<MiyaChainMessage> parseRawMiyaChainMessage( std::shared_ptr<SBSegment> fromSB );
+	static std::shared_ptr<MiyaChainMessage> parseRawMiyaChainMessage( std::shared_ptr<SBSegment> fromSB );
+
+	/* Getter */
 	std::shared_ptr<StreamBufferContainer> incomingSBC();
 
-	std::shared_ptr<MiyaChainMessage> parseRawMiyaChainMSG( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );
+	int forwardingDestination( std::shared_ptr<StreamBufferContainer> sbc , unsigned short destination );
 };
 
 

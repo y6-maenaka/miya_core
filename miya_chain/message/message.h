@@ -24,7 +24,6 @@
 #include "./command/getheaders.h"
 #include "./command/headers.h"
 #include "./command/mempool.h"
-#include "./command/block.h"
 #include "./command/notfound.h"
 
 namespace miya_chain
@@ -59,24 +58,34 @@ constexpr unsigned short MIYA_CHAIN_MSG_COMMAND_LENGTH = 12;
 
 
 using MiyaChainCommand = std::variant<
-								MiyaChainMSG_INV,
-								MiyaChainMSG_BLOCK,
-								MiyaChainMSG_GETBLOCKS,
-								MiyaChainMSG_GETDATA,
-								MiyaChainMSG_GETHEADERS,
-								MiyaChainMSG_HEADERS,
-								MiyaChainMSG_MEMPOOL,
-								MiyaChainMSG_BLOCK,
-								MiyaChainMSG_NOTFOUND
+								MiyaChainMSG_INV, // (0)
+								MiyaChainMSG_BLOCK, // (1)
+								MiyaChainMSG_GETBLOCKS, // (2)
+								MiyaChainMSG_GETDATA, // (3)
+								MiyaChainMSG_GETHEADERS, // (4)
+								MiyaChainMSG_HEADERS, // (5)
+								MiyaChainMSG_MEMPOOL, // (6)
+								MiyaChainMSG_NOTFOUND // (7)
 							>;
 
 
 
+enum class MiyaChainCommandIndex 
+{
+	MiyaChainMSG_INV, // (0)
+	MiyaChainMSG_BLOCK, // (1)
+	MiyaChainMSG_GETBLOCKS, // (2)
+	MiyaChainMSG_GETDATA, // (3)
+	MiyaChainMSG_GETHEADERS, // (4)
+	MiyaChainMSG_HEADERS, // (5)
+	MiyaChainMSG_MEMPOOL, // (6)
+	MiyaChainMSG_NOTFOUND // (7)
+};
 
 
 
 
-struct MiyaChainMessage
+struct MiyaChainMessage 
 {
 // private:
 	struct 
@@ -84,15 +93,19 @@ struct MiyaChainMessage
 		unsigned char _token[4];
 		char _command[12]; // プロトコルタイプ  with ASCII
 		uint32_t _payloadLength;
-	} _header;
+
+	} _header; // 20 [bytse]
 
 	MiyaChainCommand _payload;
 
 public:
+	MiyaChainMessage();
 
 	/* Getter */
 	size_t payloadLength();
 	const char *command();
+	unsigned short commandIndex();
+	static int commandIndex( const char* command );
 	MiyaChainCommand payload();
 
 	/* Setter */
@@ -103,9 +116,7 @@ public:
 	bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );
 	size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
   
-	
 	size_t exportRawCommand( const char* command , MiyaChainCommand commandBody , std::shared_ptr<unsigned char> *retRaw );
-	static int commandIndex( const char* command );
 
 
 } __attribute__((packed));

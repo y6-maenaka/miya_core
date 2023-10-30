@@ -39,7 +39,7 @@ MiyaChainState::MiyaChainState()
 	printf( "ChainState File Mapped with :: %p\n", _chainMeta );
 	std::cout << "Chain Heade Block :: ";
 	for( int i=0; i<32; i++ ){
-		printf("%02X", chainHead()[i] );
+		printf("%02X", chainHead().get()[i] );
 	} std::cout << "\n";
 	std::cout << "Heigth :: " << height() << "\n\n";
 
@@ -64,9 +64,9 @@ MiyaChainState::~MiyaChainState()
 }
 
 
-const unsigned char* MiyaChainState::chainHead()
+std::shared_ptr<unsigned char> MiyaChainState::chainHead()
 {
-	return _chainMeta->_chainHead;
+	return std::make_shared<unsigned char>( *(_chainMeta->_chainHead) );
 }
 
 

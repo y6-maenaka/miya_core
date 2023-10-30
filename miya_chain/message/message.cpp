@@ -7,6 +7,10 @@ namespace miya_chain
 
 
 
+MiyaChainMessage::MiyaChainMessage()
+{
+	memset( &_header , 0x00 , sizeof(_header) );
+}
 
 
 
@@ -20,6 +24,44 @@ const char *MiyaChainMessage::command()
 {
 	return _header._command;
 }
+
+
+unsigned short MiyaChainMessage::commandIndex()
+{
+	return MiyaChainMessage::commandIndex( _header._command );
+}
+
+int MiyaChainMessage::commandIndex( const char* command )
+{
+	if( memcmp( command , MiyaChainMSG_INV::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0 )
+		return static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_INV);
+
+	else if( memcmp( command , MiyaChainMSG_BLOCK::command , MIYA_CHAIN_MSG_COMMAND_LENGTH )  == 0 )
+		return static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_BLOCK);
+
+	else if( memcmp( command, MiyaChainMSG_GETBLOCKS::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0 )
+		return static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_GETBLOCKS);
+
+	else if( memcmp( command, MiyaChainMSG_GETDATA::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0 )
+		return static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_GETDATA);
+
+	else if( memcmp( command, MiyaChainMSG_GETHEADERS::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0 )
+		return static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_GETHEADERS);
+
+	else if( memcmp( command , MiyaChainMSG_HEADERS::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0 )
+		return static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_HEADERS);
+
+	else if( memcmp( command, MiyaChainMSG_MEMPOOL::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0 )
+		return static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_MEMPOOL);
+
+	else if( memcmp( command, MiyaChainMSG_NOTFOUND::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0  )
+		return static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_NOTFOUND);
+
+	else
+		return -1;
+
+}
+
 
 
 MiyaChainCommand MiyaChainMessage::payload()
@@ -100,12 +142,6 @@ bool MiyaChainMessage::importRaw( std::shared_ptr<unsigned char> fromRaw , size_
 		
 	}
 
-	else if( memcmp( _header._command, MiyaChainMSG_BLOCK::command , sizeof(_header._command) )  == 0 )
-	{
-		std::cout << "(MiyaChainMSG) : block" << "\n";
-		struct MiyaChainMSG_BLOCK payload;
-	}
-
 	else if( memcmp(_header._command, MiyaChainMSG_NOTFOUND::command , sizeof(_header._command)) == 0  )
 	{
 		std::cout << "(MiyaChainMSG) : notfound" << "\n";
@@ -132,9 +168,11 @@ size_t MiyaChainMessage::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 	size_t retLength = rawPayloadLength + sizeof(_header);
 	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[retLength] );
 
+
 	size_t formatPtr = 0;
 	memcpy( (*retRaw).get() , &_header , sizeof(_header) ); formatPtr += sizeof(_header);
 	memcpy( (*retRaw).get() + formatPtr , rawPayload.get() , rawPayloadLength ); formatPtr += rawPayloadLength;
+
 
 	return formatPtr;
 }
@@ -145,78 +183,55 @@ size_t MiyaChainMessage::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 size_t MiyaChainMessage::exportRawCommand( const char* command , MiyaChainCommand commandBody ,std::shared_ptr<unsigned char> *retRaw )
 {
 
-	if( memcmp( command , MiyaChainMSG_INV::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0 ) // INV
+	switch( MiyaChainMessage::commandIndex(command) )
 	{
-		return 0;
-	}
-	else if( memcmp( command , MiyaChainMSG_BLOCK::command , MIYA_CHAIN_MSG_COMMAND_LENGTH )  == 0 ) // BLOCK
-	{
-		return 0;
-	}
-	else if( memcmp( command, MiyaChainMSG_GETBLOCKS::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0 ) // GETBLOCKS
-	{
-		std::cout << "Passed Here" << "\n";
-		return (std::get<MiyaChainMSG_GETBLOCKS>(commandBody)).exportRaw( retRaw );
-	}
-	else if( memcmp( command, MiyaChainMSG_GETDATA::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0 ) // GETDATA
-	{
-		return 0;
-	} 
-	else if( memcmp( command, MiyaChainMSG_GETHEADERS::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0 ) // GETHEADERS
-	{
-		return 0;
-	}
-	else if( memcmp( command , MiyaChainMSG_HEADERS::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0 ) // HEADERS
-	{
-		return 0;
-	}
-	else if( memcmp( command, MiyaChainMSG_MEMPOOL::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0 ) // MEMPOOL
-	{
-		return 0;
-	}
-	else if( memcmp( command, MiyaChainMSG_BLOCK::command , MIYA_CHAIN_MSG_COMMAND_LENGTH )  == 0 ) // BLOCK
-	{
-		return 0;
-	}
-	else if( memcmp( command, MiyaChainMSG_NOTFOUND::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0 ) // NOTFOUND
-	{
-		return 0;
-	}
-	else{
-		std::cout << "(コマンド書き出しエラー) 一致するコマンドがありません"  << "\n";
-		*retRaw = nullptr;
-		return 0;
-	}
+		case static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_INV):
+		{
+			std::cout << "Hello" << "\n";
+		}
+		case static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_BLOCK):
+		{
 
+		}
+		case static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_GETBLOCKS):
+		{
+			std::cout << "msg export with " << _header._command << "\n";
+			std::cout << payloadLength() << "\n";
+			return (std::get<MiyaChainMSG_GETBLOCKS>(commandBody)).exportRaw( retRaw );
+		}
+		case static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_GETDATA):
+		{
 
-}
+		}
+		case static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_GETHEADERS):
+		{
 
+		}
+		case static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_HEADERS):
+		{
 
-int MiyaChainMessage::commandIndex( const char* command )
-{
-	if( memcmp( command , MiyaChainMSG_INV::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0 )
-		return 0;
-	else if( memcmp( command , MiyaChainMSG_BLOCK::command , MIYA_CHAIN_MSG_COMMAND_LENGTH )  == 0 )
-		return 1;
-	else if( memcmp( command, MiyaChainMSG_GETBLOCKS::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0 )
-		return 2;
-	else if( memcmp( command, MiyaChainMSG_GETDATA::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0 )
-		return 3;
-	else if( memcmp( command, MiyaChainMSG_GETHEADERS::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0 )
-		return 4;
-	else if( memcmp( command , MiyaChainMSG_HEADERS::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0 )
-		return 5;
-	else if( memcmp( command, MiyaChainMSG_MEMPOOL::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0 )
-		return 6;
-	else if( memcmp( command, MiyaChainMSG_BLOCK::command , MIYA_CHAIN_MSG_COMMAND_LENGTH )  == 0 )
-		return 7;
-	else if( memcmp( command, MiyaChainMSG_NOTFOUND::command , MIYA_CHAIN_MSG_COMMAND_LENGTH ) == 0  )
-		return 8;
+		}
+		case static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_MEMPOOL):
+		{
 
-	else
-		return -1;
+		}
+		case static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_NOTFOUND):
+		{
+			std::cout << "msg export with MiyaChainMSG_NOTFOUND" << "\n";
+			return (std::get<MiyaChainMSG_NOTFOUND>(commandBody)).exportRaw( retRaw );
+		}
+
+		default:
+		{
+			std::cout << "(コマンド書き出しエラー) 一致するコマンドがありません"  << "\n";
+			*retRaw = nullptr;
+			return 0;
+		}
+	}
 
 }
+
+
 
 
 

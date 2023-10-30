@@ -37,5 +37,5 @@ add_library( MIYA_DB STATIC
 )
 
 
-add_definitions( -std=c++17 -w )
+add_definitions( -std=c++20 -w )
 

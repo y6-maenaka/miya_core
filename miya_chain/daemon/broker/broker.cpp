@@ -13,12 +13,28 @@ namespace miya_chain
 {
 
 
+void MiyaChainBrocker::allowAll()
+{
+	for( int i=0; i<allowedForwardingFilter.size(); i++ )
+		allowedForwardingFilter[i] = true;
+}
+void MiyaChainBrocker::blockAll()
+{
+	for( int i=0; i<allowedForwardingFilter.size(); i++ )
+		allowedForwardingFilter[i] = false;
+}
+
+
+
 
 
 MiyaChainBrocker::MiyaChainBrocker( std::shared_ptr<StreamBufferContainer> incomingSBC , std::shared_ptr<StreamBufferContainer> toEKP2PBrokerSBC )
 {
 	_incomingSBC = incomingSBC;
 	_toEKP2PBrokerSBC = toEKP2PBrokerSBC;
+
+	for( int i=0; i<allowedForwardingFilter.size(); i++ ) //一旦全て許可する
+		allowedForwardingFilter[i] = true;
 }
 
 
@@ -39,8 +55,6 @@ int MiyaChainBrocker::start()
 
 			std::cout << "[ MiyaChain ] を経由しました" << "\n";
 			std::cout << popedSB->bodyLength() << "\n";
-
-			popedSB->sendFlag( ekp2p::EKP2P_SENDBACK | ekp2p::EKP2P_SEND_UNICAST );
 			popedSB->forwardingSBCID( ekp2p::DEFAULT_DAEMON_FORWARDING_SBC_ID_SENDER );
 
 			_toEKP2PBrokerSBC->pushOne( std::move(popedSB) );
@@ -97,6 +111,21 @@ std::shared_ptr<StreamBufferContainer> MiyaChainBrocker::incomingSBC()
 {
 	return _incomingSBC;
 }
+
+
+
+int MiyaChainBrocker::forwardingDestination( std::shared_ptr<StreamBufferContainer> sbc , unsigned short destination )
+{
+	if( destination >= MAX_PROTOCOL ) return -1;
+	if( sbc == nullptr ) return -1;
+
+	std::cout << "\x1b[31m" <<"(MiyaChainBroker) Set forwarding destination with :: " << destination << "\x1b[39m" << "\n";
+	_sbHub.at(destination) = sbc;
+
+	return destination;
+}
+
+
 
 
 }

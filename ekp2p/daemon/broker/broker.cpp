@@ -82,7 +82,7 @@ int EKP2PBroker::forwardingDestination( std::shared_ptr<StreamBufferContainer> s
 	if( destination >= MAX_PROTOCOL ) return -1;
 	if( sbc == nullptr ) return -1;
 
-	std::cout << "\x1b[31m" <<"Set forwarding destination with :: " << destination << "\x1b[39m" << "\n";
+	std::cout << "\x1b[31m" <<"[EKP2P] Set forwarding destination with :: " << destination << "\x1b[39m" << "\n";
 	_sbHub.at(destination) = sbc;
 
 	return destination;

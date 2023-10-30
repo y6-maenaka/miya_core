@@ -8,6 +8,7 @@ add_library( MIYA_CHAIN STATIC
 							
 							miya_core_manager.cpp
 							miya_chain_state.cpp
+							IBD.cpp
 
 							transaction/tx_manager.cpp
 
@@ -40,9 +41,12 @@ add_library( MIYA_CHAIN STATIC
 							#message/protocol_message/block_data_msg.cpp
 							#message/protocol_message/block_header_msg.cpp
 							message/message.cpp
+							message/__test.cpp
 							message/command/inv/inv.cpp
 							message/command/getblocks.cpp
 							message/command/headers.cpp
+							message/command/notfound.cpp
+							message/command/getdata.cpp
 
 							transaction/p2pkh/p2pkh.cpp
 							transaction/coinbase/coinbase.cpp
@@ -52,7 +56,6 @@ add_library( MIYA_CHAIN STATIC
 							utxo_set/utxo_set.cpp
 
 							block_chain_manager/block_chain_manager.cpp
-							block_chain_manager/IBD.cpp
 							#block_chain_manager/block_local_strage_manager/transaction_store/transaction_store.cpp
 
 							mining/simple_mining.cpp
@@ -64,5 +67,5 @@ add_library( MIYA_CHAIN STATIC
 
 
 
-add_definitions( -std=c++17 -w )
+add_definitions( -std=c++20 -w )
 

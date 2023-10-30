@@ -18,8 +18,6 @@ namespace miya_chain
 {
 
 
-
-
 /*
     getheadersメッセージを受信したノードが,1つ以上のブロックヘッダを返答する際に使用する
 		invにつめて返信することはしない
@@ -36,9 +34,11 @@ private:
 	} _body;
 
 public:
-    static constexpr char command[12] = "headers";
+  static constexpr char command[12] = "headers";
 
 	void count( size_t target );
+
+	std::vector< std::shared_ptr<block::BlockHeader> > headersVector();
 
 	size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
 	bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );

@@ -35,5 +35,5 @@ add_library( EKP2P STATIC
 )
 
 
-add_definitions( -std=c++17 )
+add_definitions( -std=c++20 )
 
