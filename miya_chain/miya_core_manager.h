@@ -28,7 +28,7 @@ class StreamBufferContainer;
 
 
 
-namespace bloc
+namespace block
 {
 struct Block;
 struct BlockHeader;
@@ -47,6 +47,7 @@ constexpr unsigned short DEFAULT_DAEMON_FORWARDING_SBC_ID_RESPONDER = 1;
 class MiyaChainBrocker;
 class MiyaChainRequester;
 class BlockLocalStrageManager;
+class LightUTXOSet;
 
 
 
@@ -131,7 +132,8 @@ private:
 	} _localStrageManager;
 
 
-	MiyaChainState _chainState;
+	std::shared_ptr<MiyaChainState> _chainState;
+	std::shared_ptr<LightUTXOSet> _utxoSet;
 
 public:
 	int init( std::shared_ptr<StreamBufferContainer> toEKP2PBrokerSBC );
@@ -143,10 +145,11 @@ public:
 	/* Getter */
 	// first : toBlockIndexDBSBC ,  second : fromBlockIndexDBSBC
 	std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferContainer>> blockIndexDBSBCPair();
-	std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferContainer>> utxoSetDBSBCPair();
+	// first : toUTxOSetDBSBC , second : fromUTxOSetDBSBC ※ UTxOデータベースとのやり取りは基本的にUTxOSet(クライアント)を使う事
+	std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferContainer>> utxoSetDBSBCPair(); 
 	const std::shared_ptr<MiyaChainState> chainState();
 
-	static void __unitTest();
+	void __unitTest( std::vector<std::shared_ptr<block::Block>> blocks );
 };
 
 

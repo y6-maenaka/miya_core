@@ -13,6 +13,8 @@
 #include "../../utxo_set/utxo.h"
 #include "../../utxo_set/utxo_set.h"
 
+#include "../../validation/validation.h"
+
 #include "openssl/bio.h" 
 #include "openssl/evp.h"
 
@@ -222,7 +224,6 @@ bool P2PKH::verify( std::shared_ptr<miya_chain::LightUTXOSet> utxoSet )
 	std::shared_ptr<miya_chain::UTXO> utxo;
 	for( auto itr : _body._ins )
 	{
-		
 		// ここでutxoからpk_scriptを取得する
 		utxo = utxoSet->get( itr->prevOut() );
 

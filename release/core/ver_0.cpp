@@ -100,15 +100,20 @@ int main()
 	for( auto itr : loadedP2PKH->ins() ) // 入力に対する秘密鍵の設定
 		itr->pkey( ecdsaManager.myPkey() );
 
-	loadedP2PKH->sign(); // トランザクションのTxIn用に署名を作成する
+	bool signFlag = loadedP2PKH->sign(); // トランザクションのTxIn用に署名を作成する
+	std::cout << "loadedP2PKH signed " << signFlag  << "\n";
 
 
 	std::shared_ptr<unsigned char> rawTx; unsigned int rawTxLength; // データを増やす為これをコピーする
 	rawTxLength = loadedP2PKH->exportRaw( &rawTx );
 	std::shared_ptr<tx::P2PKH> importP2PKH = std::make_shared<tx::P2PKH>();
 	importP2PKH->importRawSequentially( rawTx );
+	std::cout << "--------------------------" << "\n";
 	importP2PKH->verify( std::make_shared<miya_chain::LightUTXOSet>(utxoSet) ); // 一応検証する
-	importP2PKH->sign();
+	std::cout << "--------------------------" << "\n";
+	signFlag = importP2PKH->sign();
+
+	std::cout << "importP2PKH signed " << signFlag << "\n";
 
 	// ブロックの作成
 	block::Block block;
@@ -126,7 +131,8 @@ int main()
 	block.header()->nonce( nonce );
 	block.header()->print();
 
-	int headerFlag = miya_chain::verifyBlockHeader(  block.header() );
+	// int headerFlag = miya_chain::BlockValidation::verifyBlockHeader(  block.header() );
+	int headerFlag = block.header()->verify();
 	std::cout << "header verify flag -> " << headerFlag << "\n";
 
 
@@ -137,8 +143,18 @@ int main()
 
 
 	std::shared_ptr<block::Block> readedBlock;
-	//readedBlock = blockLocalStrageManager.readBlock( blockHash );
+	readedBlock = blockLocalStrageManager.readBlock( blockHash );
+	if( readedBlock == nullptr ) std::cout << "read block failure" << "\n";
+	else std::cout << "read block success" << "\n";
 
+	miyaChainManager.chainState()->update( blockHash , 1 );
+	std::shared_ptr<unsigned char> chainHeadHash;
+	std::cout << "Error Here" << "\n";
+	chainHeadHash = miyaChainManager.chainState()->chainHead();
+	std::cout << "Chain Heade Hash :: ";
+	for( int i=0; i<32; i++){
+		printf("%02X", chainHeadHash.get()[i]);
+	} std::cout << "\n";
 
 	// miyaChainManager.start();
 	// MiyaChainMessageTest();
@@ -161,6 +177,15 @@ int main()
 		std::cout << itr.second.status << "\n";
 	}
 	std::cout << IBDBCBMap.size() << "\n";
+
+
+
+	std::cout << "\n\n\n\n\n\n\n-----------------------------------------------------" << "\n";
+	//miyaChainManager.startIBD();
+	std::vector< std::shared_ptr<block::Block>> blocks;
+	blocks.push_back( std::make_shared<block::Block>(block) );
+	miyaChainManager.__unitTest( blocks );
+
 
 
 	std::mutex mtx;

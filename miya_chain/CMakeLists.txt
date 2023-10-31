@@ -23,6 +23,7 @@ add_library( MIYA_CHAIN STATIC
 							transaction/tx/tx.cpp
 
 							block/block.cpp
+							block/block_header.cpp
 
 							transaction_pool/transaction_pool.cpp
 							transaction_pool/txcb.cpp
@@ -47,6 +48,7 @@ add_library( MIYA_CHAIN STATIC
 							message/command/headers.cpp
 							message/command/notfound.cpp
 							message/command/getdata.cpp
+							message/command/block.cpp
 
 							transaction/p2pkh/p2pkh.cpp
 							transaction/coinbase/coinbase.cpp

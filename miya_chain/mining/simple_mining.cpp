@@ -14,10 +14,9 @@ namespace miya_chain
 
 
 
-
+/*
 bool verifyBlockHeader( block::BlockHeader *target )
 {
-
 	uint32_t nonce = target->nonce();
 
 	std::shared_ptr<unsigned char> exportedRawHeader; size_t exportedRawHeaderLength;
@@ -49,7 +48,7 @@ bool verifyBlockHeader( block::BlockHeader *target )
 
 	return mbitcmp( rawNBitMask.get() , ret.get() );
 }
-
+*/
 
 
 

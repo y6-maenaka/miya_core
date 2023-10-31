@@ -8,13 +8,16 @@
 #include "./daemon/requester/requester.h"
 
 #include "./block/block.h"
+#include "./block/block_header.h"
 
 #include "./message/message.h"
 #include "./message/command/command_set.h"
 
 #include "../ekp2p/daemon/sender/sender.h"
-
+#include "./utxo_set/utxo_set.h"
 #include "./miya_coin/local_strage_manager.h"
+
+#include "./miya_chain_state.cpp"
 
 namespace miya_chain
 {
@@ -41,11 +44,14 @@ int MiyaChainManager::init( std::shared_ptr<StreamBufferContainer> toEKP2PBroker
 	_utxoSetDB._toUTXOSetDBSBC = std::make_shared<StreamBufferContainer>();
 	_utxoSetDB._fromUTXOSetDBSBC = std::make_shared<StreamBufferContainer>();
 	_dbManager.startWithLightMode( _utxoSetDB._toUTXOSetDBSBC, _utxoSetDB._fromUTXOSetDBSBC , "../miya_db/table_files/test/test" );
-
+	_utxoSet = std::make_shared<LightUTXOSet>( _utxoSetDB._toUTXOSetDBSBC , _utxoSetDB._fromUTXOSetDBSBC);// utxoSet(クライアント) のセットアップ
 
 	// ローカルデータストア(生ブロックを直接ファイルに保存している)
 	_localStrageManager._strageManager = std::make_shared<BlockLocalStrageManager>( _blockIndexDB._toBlockIndexDBSBC , _blockIndexDB._fromBlockIndexDBSBC );
 
+
+	// ChainStateのセットアップ
+	_chainState = std::make_shared<MiyaChainState>();
 
 	_toEKP2PBrokerSBC = toEKP2PBrokerSBC;
 
@@ -94,12 +100,75 @@ std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferCo
 
 const std::shared_ptr<MiyaChainState> MiyaChainManager::chainState()
 {
-	return std::make_shared<MiyaChainState>(_chainState);
+	return _chainState;
 }
 
-void MiyaChainManager::__unitTest()
+
+
+
+void MiyaChainManager::__unitTest( std::vector<std::shared_ptr<block::Block>> blocks )
 {
-	std::cout << "Hello" << "\n";
+	std::shared_ptr<unsigned char> localChainHead = _chainState->chainHead(); // これで見つからない場合は,自身のチェーンを遡って更新する
+
+	/* 仮想チェーンテスト*/
+	struct IBDBCB initialBCB; 
+	initialBCB.block = _localStrageManager._strageManager->readBlock( localChainHead );
+	initialBCB.status = static_cast<int>(IBDState::BlockStoread);
+	IBDVirtualChain vitrualChain( localChainHead, initialBCB );
+	std::cout << "VirtualChain size :: " << vitrualChain.size() << "\n";
+	std::cout << "----------------------------" << "\n";
+	initialBCB.print();
+	std::cout << "----------------------------" << "\n";
+
+
+	/* リクエストメッセージテスト */
+	MiyaChainCommand command;
+	MiyaChainMSG_GETBLOCKS getblocks;
+	getblocks.startHash( vitrualChain.chainHead() );
+	std::cout << "---------------------------" << "\n";
+	getblocks.print();
+	std::cout << "---------------------------" << "\n";
+
+
+	IBDHeaderFilter headerFilter( &vitrualChain ); // ヘッダフィルタ
+
+
+	/* HeaderFilter ヘッダー追加テスト */
+	std::shared_ptr<block::BlockHeader> header_0 = blocks.at(0)->headerWithSharedPtr();
+	headerFilter.add( header_0 );
+	headerFilter.add( header_0 );
+
+	sleep(1);
+	std::cout << "Layer1 size() :: " << headerFilter.sizeLayer1() << "\n";
+	std::cout << "Layer2 size() :: " << headerFilter.sizeLayer2() << "\n";
+	
+
+
+	/* ------ HeaderFilter チェックOK -----------------*/
+
+	sleep(1);
+	std::cout << "HeaderFilter Check OK" << "\n";
+	return;
+
+	/* ブロック本体ダウンロードスレッドテスト */
+	std::vector< std::thread > blockDownloadAgentThreads;
+	for( int i=0; i< (vitrualChain.size() / 100) + 1; i++ )	
+	{
+		blockDownloadAgentThreads.push_back( std::thread(IBDVirtualChain::blockDownload ,
+															 &vitrualChain,
+															  _requesterDaemon._toRequesterSBC , 
+															  _utxoSet,
+															  _localStrageManager._strageManager ) );
+		blockDownloadAgentThreads.back().join();
+	}
+
+
+
+	// filter : layer1チェック
+	// filter : layer2チェック
+
+	std::cout << "IBD完了" << "\n";
+
 }
 
 

@@ -9,6 +9,8 @@
 #include <functional>
 #include <chrono>
 
+#include "./block_header.h"
+
 #include <string.h>
 #ifdef __linux__
 	#include <endian.h>
@@ -25,57 +27,16 @@ namespace tx
 }
 
 
+namespace miya_chain
+{
+	class LightUTXOSet;
+};
+
 
 namespace block
 {
 
-
-
-
-/*
- nBit について
- 前2bytesが指数部 ( 00000000 00000000 ) 
- 後ろ2bytseがマントリップ ( 00000000 00000000 ) // 0の個数
- */
-
-
-
-
-
-struct BlockHeader
-{
-private:
-	int32_t _version; // 
-	unsigned char _previousBlockHeaderHash[32];
-	unsigned char _merkleRoot[32];
-	uint32_t _time; // このブロックが生成された時のタイムスタンプ
-	uint32_t _nBits; // 採掘難易度 目標のnonce値
-	uint32_t _nonce; // ナンス値
-
-
-public:
-	BlockHeader();
-	void merkleRoot( std::shared_ptr<unsigned char> target );
-	void updateTime();
-	uint32_t nonce();
-
-	size_t importRawSequentially( std::shared_ptr<unsigned char> fromRaw );
-	size_t importRawSequentially( void *fromRaw );
-	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );
-
-	uint32_t time();
-	uint32_t nBits();
-	void nBits( uint32_t target );
-	void nonce( uint32_t target );
-
-
-	size_t headerHash( std::shared_ptr<unsigned char> *ret );
-	void print();
-
-} __attribute__((packed)); 
-
-
-
+struct BlockHeader;
 
 
 
@@ -95,6 +56,7 @@ public:
 
 	//BlockHeader header(){ return _header; };
 	BlockHeader* header(){ return &_header; };
+	std::shared_ptr<BlockHeader> headerWithSharedPtr(){ return std::make_shared<BlockHeader>(_header); };
 	void header( std::shared_ptr<BlockHeader> target );
 	void header( BlockHeader target );
 
@@ -114,6 +76,9 @@ public:
 	//size_t exportRaw( std::shared_ptr<unsigned char> *retRaw ); // ヘッダとトランザクション部まとめて書き出すようなことはしない
 
 	uint32_t time();
+
+
+	bool verify( std::shared_ptr<miya_chain::LightUTXOSet> utxoSet );
 
 };
 

@@ -28,6 +28,9 @@ namespace miya_chain
 
 
 class IBDVirtualChain;
+class LightUTXOSet;
+class BlockLocalStrageManager;
+
 
 
 constexpr unsigned int DEFAULT_BLOCK_DOWNLOAD_AGENT_COUNT = 3; // ブロックダウンロードエージェントの起動数
@@ -38,13 +41,15 @@ enum class IBDState : int
 {
 	BlockHeaderReceived = 1, // ブロックヘッダの取得完了
 	BlockHeaderValidated, // ブロックヘッダの検証完了
+	BlockHeaderNotfound,
 	BlockBodyReceived, // ブロック本体の取得完了
-  BlockBodyValidated,  // ブロックの本体検証完了
-  BlockStoread, // ブロック本体の取得がが完了し,ローカルに保存済み
+	BlockNotfound,
+  	BlockBodyValidated,  // ブロックの本体検証完了
+  	BlockStoread, // ブロック本体の取得がが完了し,ローカルに保存済み
 
 	NowDownloading = -1, // ダウンロード中
-  Error = -2, // なんらかのエラー発生
-	Init  = 0
+  	Error = -2, // なんらかのエラー発生
+	Empty = 0
 };
 
 
@@ -61,9 +66,16 @@ struct IBDBCB // (Initial Block Donwload Block Control Block)
 	// 3 : トランザクション収集中
 	// 4 : 保存済み
 	// -1 : エラー発生
+	// -2 : 空
 	
 	IBDBCB();
 	void header( std::shared_ptr<block::BlockHeader> target );
+	void setErrorFlag();
+
+	std::shared_ptr<unsigned char> blockHash();
+	std::shared_ptr<unsigned char> prevBlock();
+
+	void print();
 };
 
 
@@ -77,6 +89,7 @@ struct BlockHashAsKey // filterのunordered_mapのキーとして使う
 	unsigned char _blockHash[32];
 	struct Hash;
 
+	BlockHashAsKey(){};
 	BlockHashAsKey( unsigned char* target );
 	BlockHashAsKey( std::shared_ptr<unsigned char> target ) : BlockHashAsKey( target.get() ){};
 	bool operator==(const BlockHashAsKey& bh ) const;
@@ -87,12 +100,13 @@ struct BlockHashAsKey // filterのunordered_mapのキーとして使う
 
 inline BlockHashAsKey::BlockHashAsKey( unsigned char* target )
 {
+	if( target == nullptr ) return;
 	memcpy( _blockHash , target , sizeof(_blockHash) );
 }
 
 
 inline bool BlockHashAsKey::operator==(const BlockHashAsKey& key) const {
-	return memcmp( _blockHash, key._blockHash , sizeof(_blockHash) );
+	return (memcmp( _blockHash, key._blockHash , sizeof(_blockHash) ) == 0 );
 }
 
 inline bool BlockHashAsKey::operator!=(const BlockHashAsKey& key) const {
@@ -106,8 +120,9 @@ struct BlockHashAsKey::Hash {
 inline std::size_t BlockHashAsKey::Hash::operator()(const BlockHashAsKey& key) const 
 {
 	std::string bytes(reinterpret_cast<const char*>(key._blockHash), sizeof(key._blockHash)); 
-	//ダブルハッシュになって非効率的だが,unsigned char[32]をsize_tに変換する術を知らない
 	return std::hash<std::string>()(bytes);
+	//std::cout << "KeyHash :: " << ret << "\n";
+	//ダブルハッシュになって非効率的だが,unsigned char[32]をsize_tに変換する術を知らない
 }
 
 inline void BlockHashAsKey::printHash() const
@@ -123,25 +138,33 @@ inline void BlockHashAsKey::printHash() const
 
 
 
+
 class IBDHeaderFilter
 {
 private:
-    struct {
-			std::unordered_map< BlockHashAsKey , struct IBDBCB , BlockHashAsKey::Hash > _um; // layer 1(全てのヘッダ)
-    } _layer1;
+    struct Layer1
+	{
+		std::mutex _mtx;
+		std::unordered_map< BlockHashAsKey , struct IBDBCB , BlockHashAsKey::Hash > _um; // layer 1(全てのヘッダ)
+    } _layer1; // ダウンロードしなければならない全てのヘッダ情報
 
-    struct {
-			std::unordered_map< BlockHashAsKey , struct IBDBCB , BlockHashAsKey::Hash > _um; // layer 2(検証が済んでvirtualChainに取り込み待ちのヘッダ)
+    struct Layer2
+	{
+		std::mutex _mtx;
+		std::unordered_map< BlockHashAsKey , struct IBDBCB , BlockHashAsKey::Hash > _um; // layer 2(検証が済んでvirtualChainに取り込み待ちのヘッダをもつIBDCB)
+
+		// 内部ibcbcのprevOutを比較対象としてpopする
+		struct IBDBCB findPop( std::shared_ptr<unsigned char> blockHash ); // callback for virtual chain(find)
+		void push( BlockHashAsKey blockKey , struct IBDBCB cb );
     } _layer2;
 
-    struct {
+    struct Validation{
       std::vector< std::unordered_map<BlockHashAsKey, struct IBDBCB, BlockHashAsKey::Hash>::iterator > _waitQueue; // leyer1の検証待ちキュー
       std::mutex _mtx;
       std::condition_variable _cv;
 
 	  std::unordered_map<BlockHashAsKey, struct IBDBCB, BlockHashAsKey::Hash>::iterator find( std::shared_ptr<unsigned char> targetHash );
-
-      struct IBDBCB pop( std::shared_ptr<unsigned char> blockHash ); // callback for virtual chain(find)
+	  void push( std::unordered_map<BlockHashAsKey, struct IBDBCB, BlockHashAsKey::Hash>::iterator target );
     } _validation;
 
     // std::shared_ptr<IBDVirtualChain> _virtualChain;
@@ -151,6 +174,10 @@ public:
     IBDHeaderFilter( IBDVirtualChain *virtualChain ); // ヘッダを検証するスレッドを起動する
     void add( std::shared_ptr<block::BlockHeader> header);
     void addBatch();
+
+
+	size_t sizeLayer1(); // IBDブロックの個数(layer1)
+	size_t sizeLayer2();
 };
 
 
@@ -163,21 +190,30 @@ class IBDVirtualChain
 private:
     // rawKey , ibdbcb
     VirtualMiyaChain _chainVector;// チェーン順に並んだIBDリスト
-	VirtualMiyaChain::const_iterator _undownloadedHead; // ダウンロードはここから行う
+	VirtualMiyaChain::iterator _undownloadedHead; // ダウンロードはここから行う
 
 public:
+	// 必ずローカルチェーンヘッドで初期化(をセット)する, _undownloadedHeadが正常に初期化されない
+	IBDVirtualChain( std::shared_ptr<unsigned char> localChainHead , struct IBDBCB initialCB );
 	std::shared_mutex _mtx;
 	std::condition_variable_any _cv; // 多少のオーバーヘッドを伴うらしい
 
-    void extendChain( std::function<void( std::shared_ptr<unsigned char> )> popCallback ); // 仮想チェーンの最先端ブロックハッシュを元にポップする
-	const std::shared_ptr<unsigned char> chainHead();
-    const VirtualMiyaChain chainVector();
+    void requestedExtendChain( std::function<struct IBDBCB( std::shared_ptr<unsigned char> )> popCallback ); // 仮想チェーンの最先端ブロックハッシュを元にポップする
+	std::shared_ptr<unsigned char> chainHead();
+    VirtualMiyaChain chainVector();
+
+		// 基本的にfilterから追加される際に使われる, すでに,blockHashを持ったIBDBがキャッシュされていることが条件
+	void add( std::shared_ptr<block::Block> target );  // 強制的に追加する, chainHeadを追加すること以外には基本的に使わない
+	void addForce( std::shared_ptr<unsigned char> blockHash ,struct IBDBCB cb );
+	void addForce( std::shared_ptr<block::Block> target );
+
+	size_t size();
 
 	//  ダウンロードエージェント系
-	VirtualMiyaChain::const_iterator popUndownloadedHead();
-	std::vector< VirtualMiyaChain::const_iterator > popUndownloadedHeadBatch( size_t count );
-	void downloadDone( VirtualMiyaChain::const_iterator itr );
-	static void blockDownload( IBDVirtualChain *virtualChain ,  std::shared_ptr<StreamBufferContainer> toRequesterSBC );
+	VirtualMiyaChain::iterator popUndownloadedHead();
+	std::vector< VirtualMiyaChain::iterator > popUndownloadedHeadBatch( size_t count );
+	void downloadDone( VirtualMiyaChain::iterator itr );
+	static void blockDownload( IBDVirtualChain *virtualChain ,  std::shared_ptr<StreamBufferContainer> toRequesterSBC , std::shared_ptr<LightUTXOSet> utxoSet , std::shared_ptr<BlockLocalStrageManager> localStrageManager );
 };
 
 

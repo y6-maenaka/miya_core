@@ -59,6 +59,7 @@ void MiyaChainState::update( std::shared_ptr<unsigned char> blockHash , unsigned
 
 MiyaChainState::~MiyaChainState()
 {
+	std::cout << "~MiyaChainState() called" << "\n";
 	munmap( _mappedPtrHead , sizeof(struct MiyaChainState::ChainMeta) );
 	close(_stateFileFD);
 }
@@ -66,7 +67,14 @@ MiyaChainState::~MiyaChainState()
 
 std::shared_ptr<unsigned char> MiyaChainState::chainHead()
 {
-	return std::make_shared<unsigned char>( *(_chainMeta->_chainHead) );
+	std::cout << "< 1 >" << "\n";
+	std::shared_ptr<unsigned char> ret = std::shared_ptr<unsigned char>(new unsigned char[sizeof(_chainMeta->_chainHead)] ); // コピー領域
+	std::cout << "< 2 >"	 << "\n";
+	printf("%p\n", _chainMeta->_chainHead );
+	std::cout << sizeof(_chainMeta->_chainHead) << "\n";
+	memcpy( ret.get() , _chainMeta->_chainHead , sizeof(_chainMeta->_chainHead) );
+	std::cout << "< 3 >" << "\n";
+	return ret;
 }
 
 

@@ -106,7 +106,7 @@ size_t BlockContainer::exportRawFormated( std::shared_ptr<unsigned char> *retRaw
 
 
 
-
+// ## ファイルがひとつもない場合はエラーが発生する(ジェネシスブロックを必ず書き込む)
 BlockLocalStrageManager::BlockLocalStrageManager( std::shared_ptr<StreamBufferContainer> toIndexDBSBC , std::shared_ptr<StreamBufferContainer> fromIndexDBSBC )
 {
 	_miyaDBClient = std::make_shared<MiyaDBSBClient>( toIndexDBSBC , fromIndexDBSBC );
