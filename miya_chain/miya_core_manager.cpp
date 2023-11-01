@@ -148,6 +148,9 @@ void MiyaChainManager::__unitTest( std::vector<std::shared_ptr<block::Block>> bl
 
 	sleep(1);
 	std::cout << "HeaderFilter Check OK" << "\n";
+
+
+	std::cout << "VirtualChain Size() :: " << vitrualChain.size() << "\n";
 	return;
 
 	/* ブロック本体ダウンロードスレッドテスト */

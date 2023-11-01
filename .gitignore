@@ -7,3 +7,5 @@
 
 
 build/*
+
+.config/ecdsa_private_key.pem

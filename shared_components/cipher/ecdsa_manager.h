@@ -38,7 +38,6 @@ protected:
 	EVP_PKEY *readPubKey( const char *path = (const char *)(DEFAULT_PUBLIC_KEY_PEM_PATH) );
 	EVP_PKEY *readPriKey( unsigned char *pemPass  = _pemPass , const char *path = (const char *)(DEFAULT_PRIVATE_KEY_PEM_PATH) );
 
-	
 
 public:
 	static EVP_PKEY *_myPkey;

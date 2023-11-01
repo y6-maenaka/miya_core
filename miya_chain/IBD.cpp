@@ -78,7 +78,8 @@ IBDHeaderFilter::IBDHeaderFilter( IBDVirtualChain *virtualChain )
 	_virtualChain = virtualChain;
 	assert(_virtualChain != nullptr ); 
 
-	std::thread headerValidator([&]()
+	// 受信ヘッダ検証用スレッド
+	std::thread headerValidator([&]()  
   {
 			for(;;)
 			{
@@ -224,10 +225,12 @@ IBDVirtualChain::IBDVirtualChain( std::shared_ptr<unsigned char> blockHash , str
 
 void IBDVirtualChain::requestedExtendChain( std::function<struct IBDBCB( std::shared_ptr<unsigned char> )> findPopCallback )
 {
+	std::cout << "<IBDVitrualChain> requestedExtendChain::called()" << "\n";
 	struct IBDBCB cb;
 	// 仮想チェーンの最先端ハッシュを取得して,prevが一致するcbを取得する
 	std::shared_ptr<unsigned char> chainHeadHash = chainHead();
 	cb = findPopCallback( chainHeadHash );
+	if( cb.status == static_cast<int>(IBDState::Empty) ) return;
 
 	std::shared_ptr<unsigned char> blockHash;
 	std::unique_lock<std::shared_mutex> lock(_mtx);
