@@ -141,9 +141,6 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 			// 2. 処理
 			switch( qctx->type() )
 			{
-
-
-
 				case QUERY_ADD: // 1 add
 				{
 					std::cout << "\x1b[32m" << "## (HANDLE) QUERY_ADD" << "\x1b[39m" << "\n";
@@ -175,6 +172,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 					flag = mmyisam->get( qctx );
 					if( !flag ){
 						sbSegment = failureSB( qctx );
+						std::cout << "\x1b[31m" << "データセットが見つかりませんでした" << "\x1b[39m" << "\n";
 						goto direct;
 					}
 					// Meta

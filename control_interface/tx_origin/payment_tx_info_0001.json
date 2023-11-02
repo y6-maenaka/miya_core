@@ -1,28 +1,15 @@
 {
 	"source" : [
 		{
-			"utxo_tx_id" : "1CF2649B3442088C4DF9BAECEB988C7394CA1FBAC2CB49313D32F9EC89D06E15",
-			"index" : 0
-		},
-		{
-			"utxo_tx_id" : "1CF2649B3442088C4DF9BAECEB988C7394CA1FBAC2CB49313D32F9EC89D06E15",
-			"index" : 1
+			"utxo_tx_id" : "CB37DC2C212D4621641F7F42997F46A0DEFB95F0F6B68A1C864BF6BC6D148230",
+			"index" : 0 
 		}
-		
 	],
 
 	"destination" : [
 		{
 			"address" : "FAB9C3405138C8016F38580260B660A8A3F1C1C0",
 			"value" : 23980
-		},
-		{
-			"address" : "FAB9C3405138C8016F38580260B660A8A3F1C1C0",
-			"value" : 23982
-		},
-		{
-			"address" : "FAB9C3405138C8016F38580260B660A8A3F1C1C0",
-			"value" : 23002
 		}
 	]
 

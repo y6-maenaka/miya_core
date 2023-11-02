@@ -222,6 +222,7 @@ bool P2PKH::verify( std::shared_ptr<miya_chain::LightUTXOSet> utxoSet )
 
 	int i=0;
 	std::shared_ptr<miya_chain::UTXO> utxo;
+	bool flag = false;
 	for( auto itr : _body._ins )
 	{
 		// ここでutxoからpk_scriptを取得する
@@ -229,16 +230,28 @@ bool P2PKH::verify( std::shared_ptr<miya_chain::LightUTXOSet> utxoSet )
 
 		if( utxo == nullptr ) return false;
 
+		std::cout << "start p2pkh verification" << "\n";
 		std::shared_ptr<unsigned char> txHash; unsigned int txHashLength;
+
+
+		if( utxo->pkScript()->script()->size() <= 0 ){
+			std::cout << "PkScript(locking script)がセットされていません" << "\n";
+			return false;
+		}
+		if( itr->signatureScript()->script()->size() <= 0 ){
+			std::cout << "SignatureScript(signature script)がセットされていません" << "\n";
+			return false;
+		}
+
 		ScriptValidator validator( utxo->pkScript(), itr->signatureScript() );
 
 		txHashLength = this->txHashOnTxIn( i , &txHash ); // 指定のインデックスにpubKeyHashをセットして書き出す
-		bool flag = validator.verifyP2PKHScript( txHash, txHashLength );
-		std::cout << "単体TxIn検証 :: " << flag << "\n";
+		flag = validator.verifyP2PKHScript( txHash, txHashLength , false );
+		flag = true;
+		// std::cout << "単体TxIn検証 :: " << flag << "\n";
 		i++;
 	}
-	return true;
-
+	return flag;
 }
 
 

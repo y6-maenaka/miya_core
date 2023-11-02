@@ -63,7 +63,7 @@ public:
 	ScriptValidator( std::shared_ptr<PkScript> pkScript , std::shared_ptr<SignatureScript> signatureScript ); // 何の検証をするにしてもpkSとsigSは必要
 
 	//void scriptControl( OPCodeCallback callback );
-	bool verifyP2PKHScript( std::shared_ptr<unsigned char> txHash , unsigned int txHashLength );
+	bool verifyP2PKHScript( std::shared_ptr<unsigned char> txHash , unsigned int txHashLength , bool showHistory = true );
 
 		
 };

@@ -11,7 +11,6 @@
 
 
 
-
 struct SBSegment;
 class StreamBuffer;
 class StreamBufferContainer;
@@ -69,8 +68,8 @@ public:
 	std::shared_ptr<UTXO> get( std::shared_ptr<tx::PrevOut> prevOut );
 
 	bool add( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_ptr<unsigned char> txID, uint32_t index );
-	bool add( std::shared_ptr<tx::P2PKH> targetTx ); // 一応dumpしてSBCに流す
-
+	// bool add( std::shared_ptr<tx::P2PKH> targetTx ); // 一応dumpしてSBCに流す
+	bool add( std::shared_ptr<tx::Coinbase> targetCoinbase );
 
 	void testInquire( std::shared_ptr<unsigned char> data , size_t dataLength );
 

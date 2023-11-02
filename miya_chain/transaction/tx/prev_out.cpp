@@ -122,4 +122,20 @@ int PrevOut::importRaw( unsigned char* fromRaw )
 }
 
 
+void PrevOut::print()
+{
+	std::cout << "TxID :: ";
+	for( int i = 0; i<32; i++ ){
+		printf("%02X", _body._txID.get()[i]);
+	} std::cout << "\n";
+
+	std::cout << "Index :: ";
+	unsigned char uIndex[sizeof(_body._index)];
+	memcpy( uIndex, &(_body._index) , sizeof(_body._index) );
+	for( int i=0; i<sizeof(_body._index); i++ ){
+		printf("%02X", uIndex[i] );
+	} std::cout << "\n";
+}
+
+
 }; // close prev_out namespace

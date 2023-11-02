@@ -125,6 +125,8 @@ public:
 	void clear();
 	std::pair< OP_CODES , std::shared_ptr<unsigned char> > at( int i );
 
+	void print();
+	size_t size();
 
 	std::vector< std::pair< OP_CODES, std::shared_ptr<unsigned char> > >::iterator begin();
 	std::vector< std::pair< OP_CODES, std::shared_ptr<unsigned char> > >::iterator end();

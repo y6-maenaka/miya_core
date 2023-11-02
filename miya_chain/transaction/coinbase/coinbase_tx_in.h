@@ -34,7 +34,7 @@ public:
 	CoinbaseTxIn();
 	CoinbaseTxIn( uint32_t height , std::shared_ptr<unsigned char> text , unsigned int textLength );
 
-
+	std::shared_ptr<PrevOut> prevOut();
 	unsigned short scriptBytes();
 
 	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );

@@ -70,7 +70,7 @@ ScriptValidator::ScriptValidator( std::shared_ptr<PkScript> pkScript , std::shar
 
 
 
-bool ScriptValidator::verifyP2PKHScript( std::shared_ptr<unsigned char> txHash  , unsigned int txHashLength )
+bool ScriptValidator::verifyP2PKHScript( std::shared_ptr<unsigned char> txHash  , unsigned int txHashLength , bool showHistory )
 {
 	int flag;
 
@@ -79,34 +79,40 @@ bool ScriptValidator::verifyP2PKHScript( std::shared_ptr<unsigned char> txHash  
 	{
 		/* まありよくない実装 */
 		if( std::holds_alternative<OP_DUP>(itr.first) ){
-			std::cout << "## OP_DUP" << "\n";
+			if( showHistory )
+				std::cout << "## OP_DUP" << "\n";
 			flag = _stack.controlStack( OP_DUP::exe );
 		}
 
 		else if( std::holds_alternative<OP_HASH_160>(itr.first) ){
-			std::cout << "## OP_HASH_160" << "\n";
+			if( showHistory )
+				std::cout << "## OP_HASH_160" << "\n";
 			flag = _stack.controlStack( OP_HASH_160::exe );
 		}
 
 		else if( std::holds_alternative<OP_EQUALVERIFY>(itr.first) ){
-			std::cout << "## OP_EQUALVERIFY" << "\n";
+			if( showHistory )
+				std::cout << "## OP_EQUALVERIFY" << "\n";
 			flag = _stack.controlStack( OP_EQUALVERIFY::exe );
 		}
 
 		else if( std::holds_alternative<OP_CHECKSIG>(itr.first) ){
-			std::cout << "## OP_CHECKSIG" << "\n";
+			if( showHistory )
+				std::cout << "## OP_CHECKSIG" << "\n";
 			_options._txHash = std::make_pair( txHash , txHashLength );
 			flag = _stack.controlStack( OP_CHECKSIG::exe ,  &_options );
 		}
 
 		else if( std::holds_alternative<OP_DATA>(itr.first) ){
-			std::cout << "## OP_DATA" << "\n";
+			if( showHistory )
+				std::cout << "## OP_DATA" << "\n";
 			_options._opData = std::make_pair( itr.second, Script::OP_DATALength(itr.first) );
 			flag = _stack.controlStack( OP_DATA::exe , &_options );
 		}
 
 		else{
-			std::cout << "## UNDEFINED" << "\n";
+			if( showHistory )
+				std::cout << "## UNDEFINED" << "\n";
 			continue;
 		}
 

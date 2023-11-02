@@ -120,7 +120,7 @@ std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<tx::PrevOut> prevOut )
 }
 
 
-
+// MiyaDBClientに換装する
 bool LightUTXOSet::add( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_ptr<unsigned char> txID, uint32_t index )
 {  // 単一のtxOutを登録する
 
@@ -192,22 +192,10 @@ bool LightUTXOSet::add( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_ptr<
 }
 
 
-
-
-bool LightUTXOSet::add( std::shared_ptr<tx::P2PKH> targetTx )
+bool LightUTXOSet::add( std::shared_ptr<tx::Coinbase> targetCoinbase )
 {
-	std::shared_ptr<unsigned char> txID; size_t TxIDLength;
-	TxIDLength = targetTx->calcTxID( &txID );
-
-
-	uint32_t index;
-	for( size_t i =0; i < targetTx->outs().size(); i++ )
-	{
-		this->add( targetTx->outs().at(i) , txID, i );
-	}
-
+	return false;
 }
-
 
 
 

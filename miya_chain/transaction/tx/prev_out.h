@@ -50,7 +50,8 @@ public:
 	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );
 	//int importRaw( std::shared_ptr<unsigned char> fromRaw );
 	int importRaw( unsigned char* fromRaw );
-	
+
+	void print();
 };
 
 

@@ -33,13 +33,14 @@ MiyaChainState::MiyaChainState()
 
 
 	
-	std::cout << "\n --- [ Chain State ] --- " << "\n";
-	printf( "ChainState File Mapped with :: %p\n", _chainMeta );
-	std::cout << "Chain Heade Block :: ";
+	std::cout << "\n --- [ Chain State ] ---------------------------------- " << "\n";
+	printf( "| ChainState File Mapped with :: %p\n", _chainMeta );
+	std::cout << "| Chain Heade Block :: ";
 	for( int i=0; i<32; i++ ){
 		printf("%02X", chainHead().get()[i] );
 	} std::cout << "\n";
-	std::cout << "Heigth :: " << height() << "\n\n";
+	std::cout << "| Heigth :: " << height() << "\n";
+	std::cout << "---------------------------------------------------------------------" << "\n";
 
 
 }

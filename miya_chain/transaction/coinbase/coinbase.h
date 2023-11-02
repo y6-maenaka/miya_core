@@ -47,6 +47,9 @@ public:
 
 	void add( std::shared_ptr<tx::TxOut> target );
 
+	std::shared_ptr<CoinbaseTxIn> txIn();
+	std::shared_ptr<TxOut> txOut();
+
 	unsigned int calcTxID( std::shared_ptr<unsigned char> *ret ); // 一旦全てを書き出してハッシュするため頻繁には呼び出さないこと
 };
 

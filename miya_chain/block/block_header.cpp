@@ -108,6 +108,20 @@ void BlockHeader::nonce( uint32_t target )
 }
 
 
+void BlockHeader::previousBlockHeaderHash( std::shared_ptr<unsigned char> target )
+{
+	memcpy( _previousBlockHeaderHash, target.get() , sizeof(_previousBlockHeaderHash));
+}
+
+
+std::shared_ptr<unsigned char> BlockHeader::previousBlockHeaderHash()
+{
+	std::shared_ptr<unsigned char> ret = std::shared_ptr<unsigned char>( new unsigned char[sizeof(_previousBlockHeaderHash)] );
+	memcpy( ret.get() , _previousBlockHeaderHash, sizeof(_previousBlockHeaderHash) );
+	return ret;
+}
+
+
 size_t BlockHeader::headerHash( std::shared_ptr<unsigned char> *ret )
 {
 	std::shared_ptr<unsigned char> exportedHeader;  size_t exportedHeaderLength;

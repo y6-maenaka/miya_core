@@ -79,6 +79,8 @@ public:
 	uint32_t nBits();
 	void nBits( uint32_t target );
 	void nonce( uint32_t target );
+	void previousBlockHeaderHash( std::shared_ptr<unsigned char> target );
+	std::shared_ptr<unsigned char> previousBlockHeaderHash();
 
 	bool verify();
 

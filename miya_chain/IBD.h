@@ -73,7 +73,7 @@ struct IBDBCB // (Initial Block Donwload Block Control Block)
 	void setErrorFlag();
 
 	std::shared_ptr<unsigned char> blockHash();
-	std::shared_ptr<unsigned char> prevBlock();
+	std::shared_ptr<unsigned char> prevBlockHash();
 
 	void print();
 };
@@ -175,6 +175,9 @@ public:
     void add( std::shared_ptr<block::BlockHeader> header);
     void addBatch();
 
+
+	std::unordered_map< BlockHashAsKey , struct IBDBCB , BlockHashAsKey::Hash > layer1Map();
+	std::unordered_map< BlockHashAsKey , struct IBDBCB , BlockHashAsKey::Hash > layer2Map();
 
 	size_t sizeLayer1(); // IBDブロックの個数(layer1)
 	size_t sizeLayer2();

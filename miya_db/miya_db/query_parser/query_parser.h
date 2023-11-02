@@ -5,6 +5,7 @@
 #include <memory>
 #include <iostream>
 #include <algorithm>
+#include <unistd.h>
 
 
 #include "../../../shared_components/json.hpp"

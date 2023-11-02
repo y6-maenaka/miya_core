@@ -44,6 +44,13 @@ bool MMyISAM::add( std::shared_ptr<QueryContext> qctx )
     // インデックスの作成
     _indexManager->add( qctx->key() , storeTarget );
 
+	std::cout << "\x1b[36m" << "(MiyaDB) add with key :: ";
+	for( int i=0; i<20; i++){
+		printf("%02X", qctx->key().get()[i]);
+	} std::cout << "\x1b[39m" << "\n";
+
+
+
 		return true;
 }
 
@@ -52,6 +59,12 @@ bool MMyISAM::add( std::shared_ptr<QueryContext> qctx )
 bool MMyISAM::get( std::shared_ptr<QueryContext> qctx )
 {
     std::shared_ptr<optr> dataOptr = _indexManager->find( qctx->key() ); // ここで取得されるoptrにはキャッシュテーブルがセットされていない
+
+	std::cout << "\x1b[32m" << "(MiyaDB) get with key :: ";
+	for( int i=0; i<20; i++){
+		printf("%02X", qctx->key().get()[i]);
+	} std::cout << "\x1b[39m" << "\n";
+
 
 		if( dataOptr == nullptr ) return false;
 		size_t dataLength; std::shared_ptr<unsigned char> data;

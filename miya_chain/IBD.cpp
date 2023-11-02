@@ -49,6 +49,13 @@ std::shared_ptr<unsigned char> IBDBCB::blockHash()
 	return ret;
 }
 
+std::shared_ptr<unsigned char> IBDBCB::prevBlockHash()
+{
+	std::shared_ptr<unsigned char> ret;
+	ret = block->header()->previousBlockHeaderHash();
+	return ret;
+}
+
 void IBDBCB::print()
 {
 	std::cout << "blockHash :: ";
@@ -191,6 +198,18 @@ void IBDHeaderFilter::add( std::shared_ptr<block::BlockHeader> header ) // こ�
 }
 
 
+std::unordered_map< BlockHashAsKey , struct IBDBCB , BlockHashAsKey::Hash > IBDHeaderFilter::layer1Map()
+{
+	return _layer1._um;
+}
+
+
+std::unordered_map< BlockHashAsKey , struct IBDBCB , BlockHashAsKey::Hash > IBDHeaderFilter::layer2Map()
+{
+	return _layer2._um;
+}
+
+
 size_t IBDHeaderFilter::sizeLayer1()
 {
 	return _layer1._um.size();
@@ -322,7 +341,7 @@ void IBDVirtualChain::downloadDone( VirtualMiyaChain::iterator itr )
 
 void IBDVirtualChain::blockDownload( IBDVirtualChain *virtualChain , std::shared_ptr<StreamBufferContainer> toRequesterSBC, std::shared_ptr<LightUTXOSet> utxoSet, std::shared_ptr<BlockLocalStrageManager> localStrageManager ) // スレッドとして起動する
 {
-	std::cout << "## 1 " << "\n";
+	std::cout << "\x1b[31m" << "BlockDownloadAgentThreads Started" << "\x1b[39m" << "\n";
 
 	auto formatGetdataCommand = ([&]( std::vector<VirtualMiyaChain::iterator> itrVector ) -> MiyaChainCommand
 	{
@@ -345,6 +364,7 @@ void IBDVirtualChain::blockDownload( IBDVirtualChain *virtualChain , std::shared
 
 	struct IBDBCB target;
 
+	bool receiveFlag = false;
 	bool downloadFlag = false;
 	size_t replayCount = 0;
 	for(;;)
@@ -355,9 +375,12 @@ void IBDVirtualChain::blockDownload( IBDVirtualChain *virtualChain , std::shared
 		std::vector<VirtualMiyaChain::iterator> itrVector = virtualChain->popUndownloadedHeadBatch( DEFAULT_DOWNLOAD_BLOCK_WINDOW_SIZE );
 
 		std::cout << itrVector.size() << "\n";
+		std::cout << "----------------------------" << "\n";
+		std::cout << "-----------------------------" << "\n";
 		std::cout << "## 4" << "\n";
 
 		Reply: // 同じ内容のメッセージを送信する
+		receiveFlag = false	;
 		assert( replayCount <= 3 ); // タイムアウトが3回以上発生したら強制終了 ※ IBDの進捗をクリアして最初からIBDする
 		std::cout << "## 4.1"	 << "\n";
 		if( itrVector.empty() )	 std::this_thread::sleep_for( std::chrono::seconds(3) );
@@ -389,6 +412,7 @@ void IBDVirtualChain::blockDownload( IBDVirtualChain *virtualChain , std::shared
 		// 検証プロセス
 		for( auto itr = itrVector.begin(); itr != itrVector.end(); itr++ )
 		{
+			receiveFlag = true;
 			if( (*itr)->second.status == static_cast<int>(IBDState::BlockBodyReceived) ){
 				// 検証
 				bool verifyFlag = (*itr)->second.block->verify( utxoSet );
@@ -397,7 +421,6 @@ void IBDVirtualChain::blockDownload( IBDVirtualChain *virtualChain , std::shared
 					std::cout << "<IBD> ブロック検証時エラー" << "\n";
 					return; // 通常は発生し得ないエラー,assertでも良いが回復メソッドも実装する必要がある
 				}
-				itrVector.erase( itr ); // 検証が完了したら削除する
 			}
 			else if( (*itr)->second.status == static_cast<int>(IBDState::BlockNotfound) ){
 				std::cout << "<IBD> ブロックが見つからない" << "\n";
@@ -405,12 +428,13 @@ void IBDVirtualChain::blockDownload( IBDVirtualChain *virtualChain , std::shared
 			} 
 
 			// 検証が完了したブロックをローカルストレージに保存する
-			localStrageManager->writeBlock( (*itr)->second.block );
+			std::cout << "\x1b[33m" << "ブロック保存" << "\x1b[39m" << "\n";
+			//localStrageManager->writeBlock( (*itr)->second.block );
 		}
+		itrVector.clear();
+		std::cout << "\x1b[35m" << "itrVector cleard" << "\x1b[39m" << "\n";
 
-		std::cout << "## 7" << "\n";
-
-		if( !(itrVector.empty()) )
+		if( !(receiveFlag) && !(itrVector.empty()) )
 		{ 
 			replayCount++;
 			goto Reply; // 再送する
@@ -539,7 +563,6 @@ bool MiyaChainManager::startIBD()
 		blockDownloadAgentThreads.back().detach();
 	}
 	
-
 
 	// ブロックダウンロードシーケンス
 	

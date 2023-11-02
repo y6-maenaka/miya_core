@@ -17,6 +17,9 @@ namespace miya_chain
 
 LocalFileController::LocalFileController( std::string filePath )
 {
+	// meta先頭にフォーマット済みか否かのバイト列を配置するのもあり
+	bool isNewFile = false; // 対象のファイルが新規作成なのか？それとも既存ファイルのロードなのか
+
 	_file = filePath;
 	_systemPageSize = sysconf( _SC_PAGESIZE ); // ランタイムで取得する
 	_fd = open( filePath.c_str() , O_RDWR | O_CREAT, (mode_t)(0600) );
@@ -25,13 +28,22 @@ LocalFileController::LocalFileController( std::string filePath )
 	if( stat( filePath.c_str() , &_st ) != 0 ) return; 
 
 	off_t currentFileSize = _st.st_size;
-	if( currentFileSize < BLK_REV_META_BLOCK_SIZE ) ftruncate( _fd , BLK_REV_META_BLOCK_SIZE ); // 領域が不足していたら確保する
+	if( currentFileSize < BLK_REV_META_BLOCK_SIZE ){
+		ftruncate( _fd , BLK_REV_META_BLOCK_SIZE ); // 領域が不足していたら確保する
+		isNewFile = true;
+	} 
 
 	std::cout << "Open " << filePath << " with FD :: " << _fd << "\n";
 
+
 	 _mapping._addr = mmap( NULL , BLK_REV_META_BLOCK_SIZE , PROT_READ | PROT_WRITE , MAP_SHARED , _fd , 0 );
 	_meta = (struct LocalFileController::Meta*)(_mapping._addr);
-	_meta->actualDataSize( BLK_REV_META_BLOCK_SIZE );
+
+	if( isNewFile )
+		_meta->actualDataSize( BLK_REV_META_BLOCK_SIZE );
+
+
+	std::cout << "## データ最後尾 :: " << _meta->actualDataSize() << "\n";
 }
 
 
@@ -41,7 +53,7 @@ LocalFileController::LocalFileController( std::string filePath )
 void LocalFileController::Meta::actualDataSize( size_t target )
 {
 	_actualDataSize =  static_cast<uint32_t>(target);
-	msync( this , BLK_REV_META_BLOCK_SIZE , MS_SYNC ); // 同期
+	msync( this , BLK_REV_META_BLOCK_SIZE , MS_SYNC ); // このthisはLocalFileController._metaを参照する？ 
 }
 
 size_t LocalFileController::Meta::actualDataSize()

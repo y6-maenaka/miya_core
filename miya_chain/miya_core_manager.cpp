@@ -31,7 +31,6 @@ namespace miya_chain
 
 int MiyaChainManager::init( std::shared_ptr<StreamBufferContainer> toEKP2PBrokerSBC )
 {
-
 	// はじめに全てのデータベースを起動する
 	
 
@@ -40,22 +39,16 @@ int MiyaChainManager::init( std::shared_ptr<StreamBufferContainer> toEKP2PBroker
 	_blockIndexDB._fromBlockIndexDBSBC = std::make_shared<StreamBufferContainer>();
 	_dbManager.startWithLightMode( _blockIndexDB._toBlockIndexDBSBC , _blockIndexDB._fromBlockIndexDBSBC  , "../miya_chain/miya_coin/blocks/index/block_index" );
 
-	std::cout << "< 1 >" << "\n";
-
 	// UTxOSetDBの簡易起動
-	
 	_utxoSetDB._toUTXOSetDBSBC = std::make_shared<StreamBufferContainer>();
 	_utxoSetDB._fromUTXOSetDBSBC = std::make_shared<StreamBufferContainer>();
 	_dbManager.startWithLightMode( _utxoSetDB._toUTXOSetDBSBC, _utxoSetDB._fromUTXOSetDBSBC , "../miya_db/table_files/utxo/utxo" );
 	_utxoSet = std::make_shared<LightUTXOSet>( _utxoSetDB._toUTXOSetDBSBC , _utxoSetDB._fromUTXOSetDBSBC);// utxoSet(クライアント) のセットアップ
 
 
-	std::cout << "< 2 >" << "n";
-
 	// ローカルデータストア(生ブロックを直接ファイルに保存している)
 	_localStrageManager._strageManager = std::make_shared<BlockLocalStrageManager>( _blockIndexDB._toBlockIndexDBSBC , _blockIndexDB._fromBlockIndexDBSBC );
 
-	std::cout << "< 3 >" << "\n";
 	// ChainStateのセットアップ
 	_chainState = std::make_shared<MiyaChainState>();
 
@@ -109,6 +102,11 @@ std::shared_ptr<MiyaChainState> MiyaChainManager::chainState()
 	return _chainState;
 }
 
+std::shared_ptr<LightUTXOSet> MiyaChainManager::utxoSet()
+{
+	return _utxoSet;
+}
+
 std::shared_ptr<BlockLocalStrageManager> MiyaChainManager::localStrageManager()
 {
 	return _localStrageManager._strageManager;
@@ -141,10 +139,14 @@ void MiyaChainManager::__unitTest( std::vector<std::shared_ptr<block::Block>> bl
 
 
 	IBDHeaderFilter headerFilter( &vitrualChain ); // ヘッダフィルタ
-
+	sleep(1);
 
 	/* HeaderFilter ヘッダー追加テスト */
 	std::shared_ptr<block::BlockHeader> header_0 = blocks.at(0)->headerWithSharedPtr();
+	std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
+	header_0->print();
+	std::cout << "verify :: " << header_0->verify() << "\n";
+	std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
 	headerFilter.add( header_0 );
 	headerFilter.add( header_0 );
 
@@ -161,10 +163,18 @@ void MiyaChainManager::__unitTest( std::vector<std::shared_ptr<block::Block>> bl
 
 
 	std::cout << "VirtualChain Size() :: " << vitrualChain.size() << "\n";
-	return;
-
+	std::cout << "--------------" << "\n";
+	std::shared_ptr<unsigned char> genesisBlockHash;
+	genesisBlockHash = vitrualChain.chainVector().at(0).second.blockHash();
+	std::cout << "GenesisBlockHash :: ";
+	for( int i=0; i<32; i++ ){
+		printf("%02X", genesisBlockHash.get()[i]);
+	} std::cout << "\n";
+	std::cout << "--------------" << "\n";
+ 
 	/* ブロック本体ダウンロードスレッドテスト */
 	std::vector< std::thread > blockDownloadAgentThreads;
+	std::cout << "BlockDownloadAgentThreads count :: " << vitrualChain.size() / 100  << "\n";
 	for( int i=0; i< (vitrualChain.size() / 100) + 1; i++ )	
 	{
 		blockDownloadAgentThreads.push_back( std::thread(IBDVirtualChain::blockDownload ,
@@ -175,8 +185,8 @@ void MiyaChainManager::__unitTest( std::vector<std::shared_ptr<block::Block>> bl
 		blockDownloadAgentThreads.back().join();
 	}
 
-
-
+	sleep(1);
+	std::cout << "VirtualChain Size() :: " << vitrualChain.size() << "\n";
 	// filter : layer1チェック
 	// filter : layer2チェック
 

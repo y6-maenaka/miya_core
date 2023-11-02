@@ -53,11 +53,9 @@ std::shared_ptr<QueryContext> QueryParser::parseQuery( std::shared_ptr<unsigned 
 
 		case 1: // ADD
 		{
-			
 			if( !(serializedQuery["key"].is_binary()) ) return nullptr;
 			std::vector<uint8_t> keyVector;
 			keyVector = serializedQuery["key"].get_binary();
-
 
 			if( !(serializedQuery["value"].is_binary()) ) return nullptr;
 			std::vector<uint8_t> valueVector; 
@@ -66,7 +64,6 @@ std::shared_ptr<QueryContext> QueryParser::parseQuery( std::shared_ptr<unsigned 
 			std::shared_ptr<unsigned char> value = std::shared_ptr<unsigned char>( new unsigned char[valueVector.size()] );
 			std::copy( valueVector.begin() , valueVector.begin() + valueVector.size() , value.get() );
 			queryContext->value( value , valueVector.size() );
-
 
 			std::shared_ptr<unsigned char> key = std::shared_ptr<unsigned char>( new unsigned char[keyVector.size()] );
 			std::copy( keyVector.begin() , keyVector.begin() + keyVector.size() , key.get() );
@@ -83,14 +80,16 @@ std::shared_ptr<QueryContext> QueryParser::parseQuery( std::shared_ptr<unsigned 
 			std::vector<uint8_t> keyVector;
 			keyVector = serializedQuery["key"].get_binary();
 
+
 			std::shared_ptr<unsigned char> key = std::shared_ptr<unsigned char>( new unsigned char[keyVector.size()] ); 
 			std::copy( keyVector.begin() , keyVector.begin() + keyVector.size() , key.get() );
 			queryContext->key( key , keyVector.size() );
+
 			break;
 		}
 	};
 
-
+	std::cout << "queryContext retuend" << "\n";
 	return queryContext;
 }
 

@@ -148,6 +148,7 @@ public:
 	// first : toUTxOSetDBSBC , second : fromUTxOSetDBSBC ※ UTxOデータベースとのやり取りは基本的にUTxOSet(クライアント)を使う事
 	std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferContainer>> utxoSetDBSBCPair(); 
 	std::shared_ptr<MiyaChainState> chainState();
+	std::shared_ptr<LightUTXOSet> utxoSet();
 
 	std::shared_ptr<BlockLocalStrageManager> localStrageManager();
 	void __unitTest( std::vector<std::shared_ptr<block::Block>> blocks );

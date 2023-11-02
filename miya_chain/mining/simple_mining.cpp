@@ -14,48 +14,6 @@ namespace miya_chain
 
 
 
-/*
-bool verifyBlockHeader( block::BlockHeader *target )
-{
-	uint32_t nonce = target->nonce();
-
-	std::shared_ptr<unsigned char> exportedRawHeader; size_t exportedRawHeaderLength;
-	exportedRawHeaderLength = target->exportRaw( &exportedRawHeader );
-
-	std::array<uint8_t,32> nBitMask = generatenBitMask(target->nBits());
-	std::shared_ptr<unsigned char> rawNBitMask = std::shared_ptr<unsigned char>( new unsigned char [32] );
-	std::copy( nBitMask.begin() , nBitMask.end() , rawNBitMask.get() );
-
-
-	std::shared_ptr<unsigned char> ret; 
-	hash::SHAHash( exportedRawHeader , exportedRawHeaderLength, &ret , "sha256" );
-
-	
-	std::cout << "------------------------------------"	 << "\n";
-	std::cout << "hash :: ";
-	for( int i=0; i<32; i++)
-	{
-		printf("%02X", ret.get()[i]);
-	} std::cout << "\n";
-
-	std::cout << "nbitmask :: ";
-	for( int i=0; i<32; i++ )
-	{
-		printf("%02X", rawNBitMask.get()[i]);
-	} std::cout << "\n";
-	std::cout << "------------------------------------"	 << "\n";
-
-
-	return mbitcmp( rawNBitMask.get() , ret.get() );
-}
-*/
-
-
-
-
-
-
-
 std::array<uint8_t,32> generatenBitMask( uint32_t nBits )
 {
 		#ifdef __linux__
@@ -85,7 +43,7 @@ std::array<uint8_t,32> generatenBitMask( uint32_t nBits )
 
 
 
-uint32_t simpleMining( uint32_t nBits , block::BlockHeader* blockHeader )
+uint32_t simpleMining( uint32_t nBits , block::BlockHeader* blockHeader , bool showHistory )
 {
 
 	
@@ -113,15 +71,17 @@ uint32_t simpleMining( uint32_t nBits , block::BlockHeader* blockHeader )
 
 	while(true)	
 	{
-
 		hash::SHAHash( rawBlockHeader , rawBlockHeaderLength , &hash , "sha256" );
 
-		std::cout << "(nonce) :: "  << _candidateNonce << "  |  ";
-		
-		for( int i=0; i<32; i++)
+		if( showHistory )
 		{
-			printf("%02X", hash.get()[i]);
-		} std::cout << "\n";
+			std::cout << "(nonce) :: "  << _candidateNonce << "  |  ";
+		
+			for( int i=0; i<32; i++)
+			{
+				printf("%02X", hash.get()[i]);
+			} std::cout << "\n";
+		}
 
 	
 		if( (mbitcmp( rawNBitMask.get() , hash.get())) ) break; // nonce値が見つかった場合

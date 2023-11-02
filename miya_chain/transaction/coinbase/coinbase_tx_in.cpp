@@ -53,6 +53,10 @@ CoinbaseTxIn::CoinbaseTxIn( uint32_t height , std::shared_ptr<unsigned char> tex
 }
 
 
+std::shared_ptr<PrevOut> CoinbaseTxIn::prevOut()
+{
+	return _body._prevOut;
+}
 
 	
 

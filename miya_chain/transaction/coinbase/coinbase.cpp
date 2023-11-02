@@ -112,6 +112,15 @@ void Coinbase::add( std::shared_ptr<tx::TxOut> target )
 }
 
 
+std::shared_ptr<CoinbaseTxIn> Coinbase::txIn()
+{
+	return _body._txIn;
+}
+
+std::shared_ptr<TxOut> Coinbase::txOut()
+{
+	return _body._txOut;
+}
 
 
 unsigned int Coinbase::calcTxID( std::shared_ptr<unsigned char> *ret )
