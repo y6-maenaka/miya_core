@@ -4,6 +4,14 @@
 
 #include <memory>
 #include <vector>
+#include <cassert>
+
+
+
+namespace miya_core
+{
+	struct MiyaCoreContext;
+};
 
 
 namespace tx
@@ -26,8 +34,11 @@ private:
 			std::shared_ptr<TxOut> _txOut;
     } _body;
 
+	std::shared_ptr<unsigned char> _pubkeyHash; // txOutに渡す用
+	std::shared_ptr<miya_core::MiyaCoreContext> _mcContext;
+
 public:
-	Coinbase( unsigned int height , std::shared_ptr<unsigned char> text , unsigned int textLength );
+	Coinbase( unsigned int height , std::shared_ptr<unsigned char> text , unsigned int textLength , std::shared_ptr<unsigned char> pubkeyHash , const std::shared_ptr<miya_core::MiyaCoreContext> mcContext );
 	Coinbase();
 
 	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );

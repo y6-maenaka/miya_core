@@ -53,6 +53,7 @@ public:
 
 	std::shared_ptr<unsigned char> _pubKeyHash = nullptr;
 	void hello(){ std::cout << "Hello TxOut"; };
+
 public:
 	TxOut();
 

@@ -31,7 +31,7 @@ CoinbaseTxIn::CoinbaseTxIn( uint32_t height , std::shared_ptr<unsigned char> tex
 
 	memset( &(_body._sequence), 0x00 , sizeof(_body._sequence) ); // coinbasenのシーケンスは0
 
-	// PrevOutの初期化
+	// PrevOutの初期化 // 実際はprevOutのコンストラクタで初期化している
 	_body._prevOut->txID(nullptr);
 	_body._prevOut->index( UINT32_MAX );
 

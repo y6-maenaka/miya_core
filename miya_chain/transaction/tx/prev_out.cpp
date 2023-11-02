@@ -10,6 +10,8 @@ PrevOut::PrevOut()
 {
 	//_body._txID = std::make_shared<unsigned char>(256/8);
 	_body._txID = std::shared_ptr<unsigned char>( new unsigned char[32] );
+	memset( _body._txID.get(), 0x00 , 32 );
+	memset( &(_body._index) , 0xff , sizeof(_body._index) );
 }
 
 

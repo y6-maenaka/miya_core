@@ -40,16 +40,22 @@ int MiyaChainManager::init( std::shared_ptr<StreamBufferContainer> toEKP2PBroker
 	_blockIndexDB._fromBlockIndexDBSBC = std::make_shared<StreamBufferContainer>();
 	_dbManager.startWithLightMode( _blockIndexDB._toBlockIndexDBSBC , _blockIndexDB._fromBlockIndexDBSBC  , "../miya_chain/miya_coin/blocks/index/block_index" );
 
+	std::cout << "< 1 >" << "\n";
+
 	// UTxOSetDBの簡易起動
+	
 	_utxoSetDB._toUTXOSetDBSBC = std::make_shared<StreamBufferContainer>();
 	_utxoSetDB._fromUTXOSetDBSBC = std::make_shared<StreamBufferContainer>();
-	_dbManager.startWithLightMode( _utxoSetDB._toUTXOSetDBSBC, _utxoSetDB._fromUTXOSetDBSBC , "../miya_db/table_files/test/test" );
+	_dbManager.startWithLightMode( _utxoSetDB._toUTXOSetDBSBC, _utxoSetDB._fromUTXOSetDBSBC , "../miya_db/table_files/utxo/utxo" );
 	_utxoSet = std::make_shared<LightUTXOSet>( _utxoSetDB._toUTXOSetDBSBC , _utxoSetDB._fromUTXOSetDBSBC);// utxoSet(クライアント) のセットアップ
+
+
+	std::cout << "< 2 >" << "n";
 
 	// ローカルデータストア(生ブロックを直接ファイルに保存している)
 	_localStrageManager._strageManager = std::make_shared<BlockLocalStrageManager>( _blockIndexDB._toBlockIndexDBSBC , _blockIndexDB._fromBlockIndexDBSBC );
 
-
+	std::cout << "< 3 >" << "\n";
 	// ChainStateのセットアップ
 	_chainState = std::make_shared<MiyaChainState>();
 
@@ -98,11 +104,15 @@ std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferCo
 	return std::make_pair( _utxoSetDB._toUTXOSetDBSBC , _utxoSetDB._fromUTXOSetDBSBC );
 }
 
-const std::shared_ptr<MiyaChainState> MiyaChainManager::chainState()
+std::shared_ptr<MiyaChainState> MiyaChainManager::chainState()
 {
 	return _chainState;
 }
 
+std::shared_ptr<BlockLocalStrageManager> MiyaChainManager::localStrageManager()
+{
+	return _localStrageManager._strageManager;
+}
 
 
 

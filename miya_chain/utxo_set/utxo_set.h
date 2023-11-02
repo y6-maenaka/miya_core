@@ -58,7 +58,6 @@ private:
 	std::shared_ptr<StreamBufferContainer> _pushSBContainer;
 	std::shared_ptr<StreamBufferContainer> _popSBContainer;
 
-
 protected:
 	// static uint32_t generateQueryID();
 

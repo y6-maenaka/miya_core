@@ -11,8 +11,6 @@ namespace miya_chain
 
 
 
-
-
 MiyaChainState::MiyaChainState()
 {
 	std::cout << "This is MiyaChainState コンストラクタ" << "\n";
@@ -34,7 +32,7 @@ MiyaChainState::MiyaChainState()
 	_chainMeta = (struct MiyaChainState::ChainMeta *)( _mappedPtrHead );
 
 
-
+	
 	std::cout << "\n --- [ Chain State ] --- " << "\n";
 	printf( "ChainState File Mapped with :: %p\n", _chainMeta );
 	std::cout << "Chain Heade Block :: ";
@@ -44,17 +42,18 @@ MiyaChainState::MiyaChainState()
 	std::cout << "Heigth :: " << height() << "\n\n";
 
 
-
 }
 
 
 void MiyaChainState::update( std::shared_ptr<unsigned char> blockHash , unsigned short height )
 {
 	memcpy( &(_chainMeta->_chainHead)  , blockHash.get() , 32 );
-	_chainMeta->_heigth = (height); // エンディアン変換しなくても別にいいかな
+	_chainMeta->_heigth = static_cast<uint32_t>(height); // エンディアン変換しなくても別にいいかな
 	_chainMeta->_timestamp = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-
+	memset( &(_chainMeta->_version) , 0x00 , sizeof(_chainMeta->_version) );
 	msync( _mappedPtrHead , sizeof(struct MiyaChainState::ChainMeta) , MS_SYNC ); // 同期を忘れない
+
+	std::cout << "updated" << "\n";
 }
 
 MiyaChainState::~MiyaChainState()
@@ -67,13 +66,8 @@ MiyaChainState::~MiyaChainState()
 
 std::shared_ptr<unsigned char> MiyaChainState::chainHead()
 {
-	std::cout << "< 1 >" << "\n";
 	std::shared_ptr<unsigned char> ret = std::shared_ptr<unsigned char>(new unsigned char[sizeof(_chainMeta->_chainHead)] ); // コピー領域
-	std::cout << "< 2 >"	 << "\n";
-	printf("%p\n", _chainMeta->_chainHead );
-	std::cout << sizeof(_chainMeta->_chainHead) << "\n";
 	memcpy( ret.get() , _chainMeta->_chainHead , sizeof(_chainMeta->_chainHead) );
-	std::cout << "< 3 >" << "\n";
 	return ret;
 }
 

@@ -70,6 +70,8 @@
 
 - いっそのことSBBody(payload)はanyの方がいいかも
 
+- LightUTXOSet 終了時にSIGSEGエラーが発生している
+
 
 
 ( 検証項目 )

@@ -1,6 +1,7 @@
 cmake_minimum_required( VERSION 3.2 )
 
 project(MIYA_CORE CXX)
+add_subdirectory( miya_core )
 add_subdirectory( ekp2p )
 add_subdirectory( miya_chain )
 add_subdirectory( miya_db )
@@ -18,6 +19,7 @@ include_directories( ${OPENSSL_INCLUDE_DIRS} )
 if( BUILD_DB )
 add_executable( db_ver_0 ./release/db/ver_0.cpp )
 target_link_libraries( db_ver_0 PRIVATE
+												MIYA_CORE
 												MIYA_DB
 												SHARED_COMPONENTS
 )
@@ -31,6 +33,7 @@ endif()
 if( BUILD_CORE )
 add_executable( core_ver_0 ./release/core/ver_0.cpp )
 target_link_libraries( core_ver_0 PRIVATE
+												MIYA_CORE
 												MIYA_DB
 												SHARED_COMPONENTS
 												EKP2P
@@ -48,6 +51,7 @@ endif()
 if( BUILD_EKP2P_TEST )
 add_executable( node_0 ./release/ekp2p_test/node_0.cpp )
 target_link_libraries( node_0 PRIVATE
+												MIYA_CORE
 												MIYA_DB
 												EKP2P
 												MIYA_CHAIN
@@ -58,6 +62,7 @@ target_compile_options( node_0 PUBLIC -Wall )
 
 add_executable( node_1 ./release/ekp2p_test/node_1.cpp )
 target_link_libraries( node_1 PRIVATE
+												MIYA_CORE
 												MIYA_DB
 												EKP2P
 												MIYA_CHAIN

@@ -502,7 +502,17 @@ bool ECDSAManager::verify( std::shared_ptr<unsigned char> sig , size_t sigLength
 }
 
 
+void ECDSAManager::showRawPubKey()
+{
+	printf("%p\n", _pkey );
+	unsigned char *rawPub; size_t rawPubLength;
+	rawPubLength = ECDSAManager::toRawPubKey( &rawPub, _pkey );
 
+	std::cout << "RawPubKey :: ";
+	for( int i=0; i<rawPubLength; i++ ){
+		printf("%02X", rawPub[i] );
+	} std::cout << "\n";
+}
 
 
 

@@ -82,10 +82,10 @@ unsigned int Block::calcMerkleRoot( std::shared_ptr<unsigned char> *ret )
 	}
 
 
-
 	if( txIDVector.size() % 2 != 0 ){ // ID要素が奇数個の場合は最後尾の要素を複製する
 		txIDVector.push_back( txIDVector.back() );
 	}
+
 
 
 	std::function<std::vector<std::shared_ptr<unsigned char>>(std::vector<std::shared_ptr<unsigned char>>)> calcRoot = [&]( std::vector<std::shared_ptr<unsigned char>> txIDVector ){

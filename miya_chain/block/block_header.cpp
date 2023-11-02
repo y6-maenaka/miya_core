@@ -32,6 +32,7 @@ BlockHeader::BlockHeader()
 	_nBits = 0;
 	_nonce = 0;
 
+	memset( _previousBlockHeaderHash , 0x00 , sizeof(_previousBlockHeaderHash) );
 	_time = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 }
 

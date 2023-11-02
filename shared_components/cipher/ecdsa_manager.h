@@ -71,6 +71,8 @@ public:
 
 	bool writePkey( const char *path , EVP_PKEY *pkey );
 	EVP_PKEY* readPkey( const char *path );
+
+	void showRawPubKey();
 };
 
 

@@ -117,13 +117,7 @@ uint32_t simpleMining( uint32_t nBits , block::BlockHeader* blockHeader )
 		hash::SHAHash( rawBlockHeader , rawBlockHeaderLength , &hash , "sha256" );
 
 		std::cout << "(nonce) :: "  << _candidateNonce << "  |  ";
-		/*
-		std::cout << "(nBits) :: ";
-		for( int i=0; i<32;i++)
-		{
-			printf("%02X", rawNBitMask.get()[i]);
-		} std::cout << "\n";
-		*/
+		
 		for( int i=0; i<32; i++)
 		{
 			printf("%02X", hash.get()[i]);

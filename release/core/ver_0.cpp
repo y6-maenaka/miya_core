@@ -44,12 +44,66 @@
 
 #include "../../miya_db/miya_db/database_manager.h"
 
+#include "../../miya_core/miya_core.h"
+
 
 int main()
 {
 	std::cout << " WELCOME TO MIYA COIN CLIENT [ MIYA_CORE ] " << "\n";
 
+
+	miya_core::MiyaCore	miyaCore;
+
+	cipher::ECDSAManager ecdsaManager;
+	std::shared_ptr<unsigned char> pemPass; size_t pemPassLength;
+	pemPassLength = miyaCore.context()->pemPass( &pemPass );
+	ecdsaManager.init( pemPass.get() , pemPassLength );
+
+
+	EVP_PKEY *pkey;
+	pkey = ecdsaManager.myPkey();
+	std::shared_ptr<unsigned char> rawPubKey; size_t rawPubKeyLength;
+	rawPubKeyLength = cipher::ECDSAManager::toRawPubKey( pkey , &rawPubKey );
 	
+	std::shared_ptr<unsigned char> rawPubKeyHash; size_t rawPubKeyHashLength;
+	rawPubKeyHashLength = hash::SHAHash( rawPubKey , rawPubKeyLength , &rawPubKeyHash , "sha1" );
+
+	/* ジェネシスブロックの作成 */
+	std::shared_ptr<unsigned char> coinbaseText = std::shared_ptr<unsigned char>( new unsigned char[43] );
+	memcpy( coinbaseText.get(), "(FRB) keeps policy interest rates unchanged" , 43 );
+	tx::Coinbase coinbase( 0 , coinbaseText , 43 , rawPubKeyHash, miyaCore.context() );
+
+	block::Block block;
+	block.coinbase( std::make_shared<tx::Coinbase>(coinbase) );
+	std::shared_ptr<unsigned char> merkleRoot; size_t merkleRootLength;
+	merkleRootLength = block.calcMerkleRoot( &merkleRoot );
+	block.header()->merkleRoot( merkleRoot );
+
+	uint32_t nBits = 532390001; // 簡易的にマイニングの実行
+	block.header()->nBits( nBits ); 
+
+	uint32_t nonce = miya_chain::simpleMining( nBits , block.header() );
+	block.header()->nonce( nonce );
+	block.header()->print();
+
+	std::shared_ptr<unsigned char> blockHash; size_t blockHashLength;
+	blockHashLength = block.blockHash( &blockHash );
+
+
+	miya_chain::MiyaChainManager miyaChainManager;
+	std::shared_ptr<StreamBufferContainer> toEKP2PBrokerDummySBC = std::make_shared<StreamBufferContainer>();
+	miyaChainManager.init( toEKP2PBrokerDummySBC );
+
+	//miyaChainManager.localStrageManager()->writeBlock( std::make_shared<block::Block>(block) );
+	//std::shared_ptr<block::Block> readedBlock = miyaChainManager.localStrageManager()->readBlock( blockHash );
+
+	sleep(1);
+	std::cout << "Done" << "\n";
+
+	// miyaChainManager.localStrageManager()->writeBlock( std::make_shared<block::Block>(block) );
+
+
+	/*
 	miya_chain::MiyaChainManager miyaChainManager;
 	std::shared_ptr<StreamBufferContainer> toEKP2PBrokerDummySBC = std::make_shared<StreamBufferContainer>();
 	miyaChainManager.init( toEKP2PBrokerDummySBC );
@@ -196,7 +250,7 @@ int main()
 
 	return 0;
 	
-
+	*/
 
 
 
