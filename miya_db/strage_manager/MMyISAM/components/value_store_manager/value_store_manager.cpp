@@ -146,9 +146,6 @@ ValueStoreManager::ValueStoreManager( std::shared_ptr<OverlayMemoryManager> oMem
 
 std::shared_ptr<optr> ValueStoreManager::add( std::shared_ptr<QueryContext> qctx )
 {
-	std::cout << "ValueStoreManager::add() called" << "\n";
-
-
 	std::shared_ptr<ValueFragmentHeader> flagmentHeader = std::make_shared<ValueFragmentHeader>(
 		_dataOverlayMemoryManager->dataCacheTable()
 	);

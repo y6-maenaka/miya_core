@@ -242,7 +242,6 @@ void OverlayMemoryAllocator::init()
 // どの仮想ファイルかを正確にする必要がある
 std::shared_ptr<optr> OverlayMemoryAllocator::allocate( unsigned long allocateSize )
 {
-	std::cout << "allocate("<< allocateSize << ") called" << "\n";
 	// 一旦allocateSizeをunsigned char型に変換する
 	unsigned char ucAllocateSize[5];
 	ucAllocateSize[0] = 0; // 要修正
@@ -260,19 +259,15 @@ std::shared_ptr<optr> OverlayMemoryAllocator::allocate( unsigned long allocateSi
 		newAllocatedBlock = newControlBlock();
 
 
-
 	newAllocatedBlock->mappingOptr( targetControlBlock->mappingOptr().get() );
 	newAllocatedBlock->freeBlockEnd(  ( *(newAllocatedBlock->mappingOptr()) + allocateSize).get() );
 	_metaBlock->allocatedBlockHead( newAllocatedBlock.get() );
 
 	//std::cout << "Generated New Allocated Block Address with -> "; newAllocatedBlock->blockOptr()->printAddr(); std::cout << "\n";
 
-
-
 	if( targetControlBlock->freeBlockSize() == 0 || targetControlBlock->freeBlockSize() > allocateSize )
 	{ // 新たなフリーブロックを作成する
 
-	
 		std::unique_ptr<ControlBlock> newFreeBlock = _metaBlock->useUnUsedControlBlockHead(); // 取得と同時に未使用ブロックはチェーンから外される
 		if( newFreeBlock == nullptr )
 			newFreeBlock = newControlBlock();
@@ -282,12 +277,7 @@ std::shared_ptr<optr> OverlayMemoryAllocator::allocate( unsigned long allocateSi
 		newFreeBlock->mappingOptr( ( *(newAllocatedBlock->mappingOptr()) + allocateSize ).get() );
 		newFreeBlock->freeBlockEnd( targetControlBlock->freeBlockEnd().get() );
 
-		
-	
 		toUnUsedControlBlock( targetControlBlock.get() ); // 対象のコントロール(フリー)ブロックをチェーンから外す
-
-
-		std::cout << "Deallocated Control Block Address with -> "; targetControlBlock->blockOptr()->printAddr(); std::cout << "\n";
 
 		// 問題1 :  freeBlockHeadにblockを突っ込んでもprevとnextが設定されていない
 		// 問題2 : mappingOptr()のマッピング値がずれている
@@ -298,9 +288,6 @@ std::shared_ptr<optr> OverlayMemoryAllocator::allocate( unsigned long allocateSi
 	{
 		toUnUsedControlBlock( targetControlBlock.get() ); // 対象のコントロール(フリー)ブロックをチェーンから外す
 	}
-
-	//optr *ret = new optr( newAllocatedBlock->mappingOptr()->addr() );
-	//ret->cacheTable( _dataCacheTable );
 
 	std::shared_ptr<optr> ret = std::shared_ptr<optr>( new optr( newAllocatedBlock->mappingOptr()->addr()) );
 	ret->cacheTable( _dataCacheTable );
@@ -372,7 +359,6 @@ void OverlayMemoryAllocator::mergeControlBlock( ControlBlock *targetControlBlock
 
 	std::unique_ptr<ControlBlock>  mergedControlBlock = findFreeBlock( targetControlBlock->freeBlockEnd().get() );
 
-	printf("%p\n" ,mergedControlBlock.get() );
 	mergedControlBlock->blockOptr()->printAddr(); std::cout << "\n";
 
 	if( mergedControlBlock == nullptr ) return;

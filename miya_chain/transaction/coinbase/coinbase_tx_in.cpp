@@ -66,6 +66,17 @@ unsigned short CoinbaseTxIn::scriptBytes()
 }
 
 
+int CoinbaseTxIn::height()
+{
+	// scriptの先頭要素を取り出す
+	std::shared_ptr<unsigned char> rawHeigth; size_t rawHeigthLength;
+	rawHeigthLength = _body._script->at(0, &rawHeigth );
+	if( rawHeigthLength <= 0 || rawHeigth == nullptr ) return -1;
+
+	uint32_t ret;
+	memcpy( &ret, rawHeigth.get(), sizeof(ret) );
+	return ntohl( ret );
+}
 
 
 unsigned int CoinbaseTxIn::exportRaw( std::shared_ptr<unsigned char> *retRaw )

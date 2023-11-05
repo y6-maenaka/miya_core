@@ -31,7 +31,7 @@
 #include "../../miya_chain/transaction_pool/txcb_bucket.h"
 #include "../../miya_chain/transaction_pool/txcb_table.h"
 
-#include "../../miya_chain/miya_core_manager.h"
+#include "../../miya_chain/miya_chain_manager.h"
 #include "../../miya_chain/miya_coin/local_strage_manager.h"
 
 
@@ -205,18 +205,17 @@ int main()
 	block_0001.header()->print();
 
 	std::cout << "p2pkh_0001 verify :: " << p2pkh_0001->verify( miyaChainManager.utxoSet() ) << "\n";
-	sleep(1);
 	std::cout << "block_0001 header verify :: " << block_0001.header()->verify() << "\n";
 	std::cout << "---------------------------------------------------------------------------" << "\n";
 	
 
 
-	std::cout << "\n\n\n\n\n\n\n-----------------------------------------------------" << "\n";
-	//miyaChainManager.startIBD();
-	std::vector< std::shared_ptr<block::Block>> blocks;
-	blocks.push_back( std::make_shared<block::Block>(block_0001) );
-	miyaChainManager.__unitTest( blocks );
+	uint32_t heigth; 
+	heigth = block_0001.coinbase()->height();
+	std::cout << "heigth :: " << static_cast<size_t>(heigth) << "\n";
 
+
+	std::cout << "\n\n\n\n\n\n\n-----------------------------------------------------" << "\n";
 
 
 	std::mutex mtx;

@@ -1,7 +1,7 @@
 #ifndef B91C1050_1882_4050_906E_9C3D404CBF86
 #define B91C1050_1882_4050_906E_9C3D404CBF86
 
-#include "./miya_core_manager.h"
+#include "./miya_chain_manager.h"
 #include <thread>
 #include <vector>
 #include <unordered_map>
@@ -35,6 +35,8 @@ class BlockLocalStrageManager;
 
 constexpr unsigned int DEFAULT_BLOCK_DOWNLOAD_AGENT_COUNT = 3; // ブロックダウンロードエージェントの起動数
 constexpr unsigned int DEFAULT_DOWNLOAD_BLOCK_WINDOW_SIZE = 10; // 一つのブロックダウンロードエージェントが一回で担当するブロック数
+constexpr unsigned int DEFAULT_IBD_MAX_TIMEOUT_COUNT = 4;
+
 
 
 enum class IBDState : int 
@@ -45,7 +47,7 @@ enum class IBDState : int
 	BlockBodyReceived, // ブロック本体の取得完了
 	BlockNotfound,
   	BlockBodyValidated,  // ブロックの本体検証完了
-  	BlockStoread, // ブロック本体の取得がが完了し,ローカルに保存済み
+  	BlockStored, // ブロック本体の取得がが完了し,ローカルに保存済み
 
 	NowDownloading = -1, // ダウンロード中
   	Error = -2, // なんらかのエラー発生
@@ -72,7 +74,7 @@ struct IBDBCB // (Initial Block Donwload Block Control Block)
 	void header( std::shared_ptr<block::BlockHeader> target );
 	void setErrorFlag();
 
-	std::shared_ptr<unsigned char> blockHash();
+	std::shared_ptr<unsigned char> blockHash() const;
 	std::shared_ptr<unsigned char> prevBlockHash();
 
 	void print();
@@ -172,8 +174,10 @@ private:
 
 public:
     IBDHeaderFilter( IBDVirtualChain *virtualChain ); // ヘッダを検証するスレッドを起動する
-    void add( std::shared_ptr<block::BlockHeader> header);
-    void addBatch();
+		
+		/* いずれもlayer1に対する操作 ユーザプログラムから直接layer2を操作することはない */
+		void add( std::shared_ptr<block::BlockHeader> header);
+		void add( std::vector< std::shared_ptr<block::BlockHeader> > headerVector );
 
 
 	std::unordered_map< BlockHashAsKey , struct IBDBCB , BlockHashAsKey::Hash > layer1Map();
@@ -192,30 +196,35 @@ class IBDVirtualChain
 {
 private:
     // rawKey , ibdbcb
-    VirtualMiyaChain _chainVector;// チェーン順に並んだIBDリスト
+  VirtualMiyaChain _chainVector;// チェーン順に並んだIBDリスト
 	VirtualMiyaChain::iterator _undownloadedHead; // ダウンロードはここから行う
+	std::shared_mutex _mtx;
+	std::condition_variable_any _cv; // 多少のオーバーヘッドを伴うらしい
+
+
+
+protected:
+	// フィルタリングせずにpush_backしてしまうので基本的に使わない 先頭仮想ブロックの追加には使う
+	void addForce( std::shared_ptr<unsigned char> blockHash ,struct IBDBCB cb );
+	void addForce( std::shared_ptr<block::Block> target );
+
 
 public:
 	// 必ずローカルチェーンヘッドで初期化(をセット)する, _undownloadedHeadが正常に初期化されない
 	IBDVirtualChain( std::shared_ptr<unsigned char> localChainHead , struct IBDBCB initialCB );
-	std::shared_mutex _mtx;
-	std::condition_variable_any _cv; // 多少のオーバーヘッドを伴うらしい
-
     void requestedExtendChain( std::function<struct IBDBCB( std::shared_ptr<unsigned char> )> popCallback ); // 仮想チェーンの最先端ブロックハッシュを元にポップする
 	std::shared_ptr<unsigned char> chainHead();
     VirtualMiyaChain chainVector();
 
 		// 基本的にfilterから追加される際に使われる, すでに,blockHashを持ったIBDBがキャッシュされていることが条件
 	void add( std::shared_ptr<block::Block> target );  // 強制的に追加する, chainHeadを追加すること以外には基本的に使わない
-	void addForce( std::shared_ptr<unsigned char> blockHash ,struct IBDBCB cb );
-	void addForce( std::shared_ptr<block::Block> target );
-
+	const std::pair< std::shared_ptr<unsigned char> , struct IBDBCB >	 back(); // virtualChain最後尾を取得
 	size_t size();
 
 	//  ダウンロードエージェント系
 	VirtualMiyaChain::iterator popUndownloadedHead();
 	std::vector< VirtualMiyaChain::iterator > popUndownloadedHeadBatch( size_t count );
-	void downloadDone( VirtualMiyaChain::iterator itr );
+	// void downloadDone( VirtualMiyaChain::iterator itr );
 	static void blockDownload( IBDVirtualChain *virtualChain ,  std::shared_ptr<StreamBufferContainer> toRequesterSBC , std::shared_ptr<LightUTXOSet> utxoSet , std::shared_ptr<BlockLocalStrageManager> localStrageManager );
 };
 

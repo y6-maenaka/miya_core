@@ -1,4 +1,4 @@
-#include "miya_core_manager.h"
+#include "miya_chain_manager.h"
 
 
 #include "../shared_components/stream_buffer/stream_buffer.h"
@@ -121,7 +121,7 @@ void MiyaChainManager::__unitTest( std::vector<std::shared_ptr<block::Block>> bl
 	/* 仮想チェーンテスト*/
 	struct IBDBCB initialBCB; 
 	initialBCB.block = _localStrageManager._strageManager->readBlock( localChainHead );
-	initialBCB.status = static_cast<int>(IBDState::BlockStoread);
+	initialBCB.status = static_cast<int>(IBDState::BlockStored);
 	IBDVirtualChain vitrualChain( localChainHead, initialBCB );
 	std::cout << "VirtualChain size :: " << vitrualChain.size() << "\n";
 	std::cout << "----------------------------" << "\n";

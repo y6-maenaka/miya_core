@@ -32,7 +32,7 @@ namespace miya_db
 
 
 
-constexpr unsigned int DEFAULT_THRESHOLD = 3;// 本番は5でいく
+constexpr unsigned int DEFAULT_THRESHOLD = 4;// 本番は5でいく
 constexpr unsigned int DEFAULT_CHILD_COUNT = DEFAULT_THRESHOLD; // 子の個数
 constexpr unsigned int DEFAULT_KEY_COUNT = DEFAULT_THRESHOLD - 1;
 constexpr unsigned int DEFAULT_DATA_OPTR_COUNT = DEFAULT_THRESHOLD - 1;
@@ -84,7 +84,6 @@ struct ViewItemSet // ノードの追加の時際,分割をサポートする仮
 	std::array< std::shared_ptr<ONode> , DEFAULT_CHILD_COUNT+1> _child;
 	std::array< std::shared_ptr<optr>, DEFAULT_DATA_OPTR_COUNT+1> _dataOPtr;
 
-	//void importItemSet( ONodeItemSet *itemSet );
 	void importItemSet( std::shared_ptr<ONodeItemSet> itemSet );
 	void moveInsertChild( unsigned short index ,std::shared_ptr<ONode> target );
 	void moveInsertDataOptr( unsigned short index , std::shared_ptr<optr> target );
@@ -110,33 +109,36 @@ private:
 public:
 	ONodeItemSet( std::shared_ptr<optr> __optr );
 
-
 	std::shared_ptr<optr> Optr();
-
 	std::shared_ptr<optr> parent();
 
-	unsigned short keyCount();
-	void keyCount( unsigned short num );
-
+	/* 子ノード */
 	unsigned short childCount();
 	std::shared_ptr<ONode> child( unsigned short index );
 	void child( unsigned short index , std::shared_ptr<ONode> targetONode );
 	void childCount( unsigned short num );
 	void moveInsertChild( unsigned short index , std::shared_ptr<ONode> targetONode );
+	void moveDeleteChild( unsigned short index );
 
+	/* キー */
+	unsigned short keyCount();
+	void keyCount( unsigned short num );
 	std::shared_ptr<optr> key( unsigned short index );
+	std::shared_ptr<unsigned char> rawKey( unsigned short index );
 	void key( unsigned short index , std::shared_ptr<unsigned char> targetKey ); // setter
 	void sortKey();
+	void moveInsertKey( unsigned short index , std::shared_ptr<unsigned char> targetKey );
+	void moveDeleteKey( unsigned short index );
 
+	/* データポインタ */
 	unsigned short dataOptrCount();
 	void dataOptrCount( unsigned short num );
 	std::shared_ptr<optr> dataOptr( unsigned short index );
 	void dataOptr( unsigned short index ,std::shared_ptr<optr> targetDataOptr );
 	void moveInsertDataOptr( unsigned short index , std::shared_ptr<optr> targetDataOptr );
-
-
-	//std::unique_ptr<ONode> child( unsigned short index );
-
+	void moveDeleteDataOptr( unsigned short index );
+	
+	void remove( unsigned short index ); // 子ノードは残す
 
 	std::array< std::shared_ptr<unsigned char> , DEFAULT_KEY_COUNT> *exportKeyArray();
 	std::array< std::shared_ptr<ONode> , DEFAULT_CHILD_COUNT> *exportChildArray();
@@ -165,7 +167,6 @@ public:
 	ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared_ptr<optr> baseOptr );
 
 	std::shared_ptr<ONode> parent();
-	//void parent( ONode* target );
 	void parent( std::shared_ptr<ONode> target );
 	std::shared_ptr<ONode> child( unsigned short index );
 
@@ -174,9 +175,7 @@ public:
 	// ルートノードが更新されるとONodeがリターンされる
 	std::shared_ptr<ONode> recursiveAdd( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<optr> targetDataOptr ,std::shared_ptr<ONode> targetONode = nullptr );
 	std::shared_ptr<optr> subtreeFind( std::shared_ptr<unsigned char> targetKey );
-	//void add( 
 	unsigned char* splitONode( unsigned char* targetKey );
-	
 
 	void isLeaf( bool flag ){ _isLeaf = flag; };
 	bool isLeaf(){ return _isLeaf; }; // getter
@@ -186,8 +185,17 @@ public:
 	void overlayMemoryManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager );
 	std::shared_ptr<OverlayMemoryManager> overlayMemoryManager();
 
+	int findIndex( std::shared_ptr<unsigned char> targetKey );
+	std::shared_ptr<ONode> remove( std::shared_ptr<unsigned char> targetKey );
+	std::shared_ptr<ONode> underflow( std::shared_ptr<ONode> sourceONode ); 
+	// ↓
+	std::shared_ptr<ONode> merge( unsigned short index ); // ルードノードの変更が発生した場合は,戻り値として帰ってくる
+	std::shared_ptr<ONode> merge( std::shared_ptr<ONode> sourceONode );
+
+	std::shared_ptr<ONode> recursiveMerge( std::shared_ptr<ONode> sourceONode );
+	std::shared_ptr<ONode> recursiveMerge( unsigned short index );
+
 	/* 肝となるメソッド2つ */
-	//void registIndex( unsigned char* key , optr *dataPtr , optr* leftChildNode = nullptr, optr* rightChildNode = nullptr );
 	void regist( unsigned char* targetKey , optr *targetDataOptr );
 
 
@@ -210,40 +218,21 @@ public:
 class OBtree
 {
 private:
-	//ONode *_rootONode = nullptr;
 	std::shared_ptr<ONode> _rootONode;
 
 public:
 	OBtree( std::shared_ptr<OverlayMemoryManager> oMemoryManager ,  std::shared_ptr<ONode> rootNode = nullptr );
 	void add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<optr> dataOptr );
+	void remove( std::shared_ptr<unsigned char> targetKey );
 	std::shared_ptr<optr> find( std::shared_ptr<unsigned char> targetKey );
 
 	void rootONode( std::shared_ptr<ONode> target );
 	const std::shared_ptr<ONode> rootONode();
+
+	static int printONode( std::shared_ptr<ONode> targetONode );
 	static int printSubTree( std::shared_ptr<ONode> subtreeRoot );
-	// void registerIndex( unsigned char* key , optr *dataOptr ); // 実際にはdataOptrのアドレスunsigned char[5]が格納される
 
 };
-
-
-
-
-
-/*
-
-
-Index 
-( key(128bit) - value(optr(40bit)) )
-
-
---------------------------------
-===============================
-|  KEY(SHA-1)    |       |      |      | 
-===============================
---------------------------------
-
-
-*/
 
 
 

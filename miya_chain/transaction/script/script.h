@@ -128,6 +128,8 @@ public:
 	void print();
 	size_t size();
 
+	size_t at( size_t index ,std::shared_ptr<unsigned char> *ret );
+
 	std::vector< std::pair< OP_CODES, std::shared_ptr<unsigned char> > >::iterator begin();
 	std::vector< std::pair< OP_CODES, std::shared_ptr<unsigned char> > >::iterator end();
 };

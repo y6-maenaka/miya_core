@@ -98,7 +98,8 @@
 
 
 [ タスク ] 
-- coinbaseのスクリプトからheigthを取り出す
+- ブロックチェーン維持
+- kademlia iterator
 
 
 
@@ -175,3 +176,9 @@
 	std::condition_variable cv;
 	std::unique_lock<std::mutex> lock(mtx);
 	cv.wait( lock );
+
+
+
+
+
+- local strage manger にキャッシュを設ける

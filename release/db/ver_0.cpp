@@ -18,16 +18,74 @@
 #include <fcntl.h>
 #include <filesystem>
 #include <memory>
+#include <string>
+
+
+
 
 int main(){
 
-	miya_db::DatabaseManager dbManager;
-	dbManager.hello();
-	
+	std::shared_ptr<miya_db::OverlayMemoryManager> oMemoryManager = std::make_shared<miya_db::OverlayMemoryManager>( std::string("../miya_db/table_files/test/test") );
+	miya_db::OBtree btree( oMemoryManager );
 
-	optr_cache_unit_test();
 
+	auto generateKey = ([&]( const char *key ) -> std::shared_ptr<unsigned char>
+	{
+		std::shared_ptr<unsigned char> ret = std::shared_ptr<unsigned char>( new unsigned char[20] );
+		memcpy( ret.get() , key , 20 );
+		return ret;
+	});
+
+
+
+	std::shared_ptr<unsigned char> key_1 = generateKey("gggggggggggggggggggg"); // 0x67
+	btree.add( key_1 , nullptr );
+
+	std::shared_ptr<unsigned char> key_2 = generateKey("cccccccccccccccccccc"); // 0x63
+	btree.add( key_2 , nullptr );
+
+	std::shared_ptr<unsigned char> key_3 = generateKey("pppppppppppppppppppp"); // 0x70
+	btree.add( key_3 , nullptr ); 
+
+	std::shared_ptr<unsigned char> key_4 = generateKey("bbbbbbbbbbbbbbbbbbbb"); // 0x62
+	btree.add( key_4 , nullptr );
+
+	std::shared_ptr<unsigned char> key_5 = generateKey("aaaaaaaaaaaaaaaaaaaa"); // 0x61
+	btree.add( key_5 , nullptr );
+
+	std::shared_ptr<unsigned char> key_6 = generateKey("dddddddddddddddddddd"); // 0x64
+	btree.add( key_6, nullptr );
+
+	std::shared_ptr<unsigned char> key_7 = generateKey("zzzzzzzzzzzzzzzzzzzz");
+	btree.add( key_7, nullptr );
+
+	std::shared_ptr<unsigned char> key_8 = generateKey("eeeeeeeeeeeeeeeeeeee"); // 0x65
+	btree.add(key_8, nullptr);
+
+	std::shared_ptr<unsigned char> key_9 = generateKey("jjjjjjjjjjjjjjjjjjjj");
+	btree.add( key_9 , nullptr );
+
+	std::shared_ptr<unsigned char> key_10 = generateKey("hhhhhhhhhhhhhhhhhhhh");
+	btree.add( key_10 , nullptr );
+
+	std::shared_ptr<unsigned char> key_11 = generateKey("kkkkkkkkkkkkkkkkkkkk");
+	btree.add( key_11, nullptr );
+
+	std::shared_ptr<unsigned char> key_12 = generateKey("mmmmmmmmmmmmmmmmmmmm");
+	btree.add( key_12 , nullptr );
+
+
+	btree.remove( key_4 );
+	std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n-----------------------------------" << "\n";
+
+	//btree.remove( key_9 );
+	// btree.remove( key_2 );
+
+
+	miya_db::OBtree::printSubTree( btree.rootONode() );
 	return 0;
+	
+	/*
 
 	int dataFd = open("../miya_db/table_files/test_table/test.oswap", O_RDWR , (mode_t)0600 );
 	int freeListFd = open("../miya_db/table_files/test_table/test.ofl", O_RDWR , (mode_t)0600 );
@@ -144,10 +202,8 @@ int main(){
 	std::cout << "ret > "; test->printAddr(); std::cout << "\n";
 	return 0;
 
+	*/
 
-
-	return 0;
-	
 
 	/*
 	MiddleBuffer buffer(100);

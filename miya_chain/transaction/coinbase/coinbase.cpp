@@ -111,6 +111,11 @@ void Coinbase::add( std::shared_ptr<tx::TxOut> target )
 	_body._txOut = target;
 }
 
+int Coinbase::height()
+{
+	return _body._txIn->height();
+}
+
 
 std::shared_ptr<CoinbaseTxIn> Coinbase::txIn()
 {

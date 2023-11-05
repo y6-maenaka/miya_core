@@ -37,6 +37,8 @@ public:
 	std::shared_ptr<PrevOut> prevOut();
 	unsigned short scriptBytes();
 
+	int height();
+
 	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );
 	unsigned int importRaw( unsigned char *fromRaw );
 };

@@ -284,6 +284,25 @@ size_t Script::size()
 }
 
 
+size_t Script::at( size_t index , std::shared_ptr<unsigned char> *ret )
+{
+	try 
+	{
+		std::pair< OP_CODES , std::shared_ptr<unsigned char> > opSet = _script.at( index );
+		size_t dataLength = Script::OP_DATALength(opSet.first);
+		*ret = std::shared_ptr<unsigned char>(new unsigned char[dataLength] );
+		memcpy( (*ret).get(), opSet.second.get() , dataLength );
+		return dataLength;
+    }
+	 catch (const std::out_of_range& e) 
+	{
+		*ret = nullptr;
+		return 0;
+    }
+
+}
+
+
 std::vector< std::pair< OP_CODES, std::shared_ptr<unsigned char> > >::iterator Script::begin()
 {
 	return _script.begin();

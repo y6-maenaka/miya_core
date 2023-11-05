@@ -46,6 +46,7 @@ public:
 	size_t importRawSequentially( void *from );
 
 	void add( std::shared_ptr<tx::TxOut> target );
+	int height();
 
 	std::shared_ptr<CoinbaseTxIn> txIn();
 	std::shared_ptr<TxOut> txOut();
