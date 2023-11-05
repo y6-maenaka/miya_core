@@ -37,7 +37,7 @@ int main(){
 	});
 
 
-
+	/*
 	std::shared_ptr<unsigned char> key_1 = generateKey("gggggggggggggggggggg"); // 0x67
 	btree.add( key_1 , nullptr );
 
@@ -80,7 +80,30 @@ int main(){
 
 	//btree.remove( key_9 );
 	// btree.remove( key_2 );
+	*/
 
+	
+	std::shared_ptr<unsigned char> key_1 = generateKey("bbbbbbbbbbbbbbbbbbbb");
+	btree.add( key_1, nullptr );
+
+	std::shared_ptr<unsigned char> key_2 = generateKey("zzzzzzzzzzzzzzzzzzzz");
+	btree.add( key_2 , nullptr );
+
+	std::shared_ptr<unsigned char> key_3 = generateKey("aaaaaaaaaaaaaaaaaaaa");
+	btree.add( key_3 , nullptr );
+
+	std::shared_ptr<unsigned char> key_4 = generateKey("cccccccccccccccccccc");
+	btree.add( key_4, nullptr );
+
+	btree.remove( key_2 );
+
+	btree.remove( key_4 );
+	btree.remove( key_1 );
+	std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n-----------------------------------" << "\n";
+	btree.remove( key_3 );
+
+	std::shared_ptr<unsigned char> key_5 = generateKey("gggggggggggggggggggg");
+	btree.add(key_5, nullptr);
 
 	miya_db::OBtree::printSubTree( btree.rootONode() );
 	return 0;

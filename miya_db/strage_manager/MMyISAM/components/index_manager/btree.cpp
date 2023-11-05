@@ -648,14 +648,15 @@ std::shared_ptr<ONode> ONode::remove( std::shared_ptr<unsigned char> targetKey )
 	int index = findIndex( targetKey );
 	if( index < 0 ) return nullptr;
 
-	if( _itemSet->keyCount() > 1 )  // 単純削除のケース
+	unsigned char addrZero[5]; memset( addrZero, 0x00 , sizeof(addrZero) );
+	if( _itemSet->keyCount() > 1 || memcmp( parent()->itemSet()->Optr()->addr() , addrZero, sizeof(addrZero) ) == 0 )  // 単純削除のケース
 	{ 
+		std::cout << "単純削除" << "\n";
 		_itemSet->remove( index ); 
 		return nullptr;
 	}
 
 	return this->parent()->underflow( shared_from_this() ); // アンダーフロー発生を通知
-
 	
 	/*
 		削除パターン
@@ -729,6 +730,7 @@ std::shared_ptr<ONode> ONode::underflow( std::shared_ptr<ONode> sourceONode )
 		return nullptr;
 	}
 
+
 	// underflowによるキー移動ができなかったので,マージ処理を行う
 	/* マージ */ 
 	return merge( index );
@@ -763,6 +765,7 @@ std::shared_ptr<ONode> ONode::merge( unsigned short index ) // mergeが呼び出
 	printf("右兄弟ノード %p\n", rightChildONode.get() );
 	std::cout << "index :: " << index << "\n";
 
+	unsigned char addrZero[5]; memset( addrZero , 0x00 , sizeof(addrZero) );
 
 	// マージの種類
 	// 1. 兄弟ノードに要素が2つ以上ある場合
@@ -811,6 +814,11 @@ std::shared_ptr<ONode> ONode::merge( unsigned short index ) // mergeが呼び出
 
 	if( leftChildONode != nullptr )
 	{
+		/* 左再帰マージ前処理 
+			1. 左ノードに親ノードの要素を移動させる
+			2. 親ノードの要素を削除する
+			3. 親ノード(中身は空)に対してマージ処理を行う
+		*/
 		std::cout << "左再帰マージ前処理" << "\n";
 		leftChildONode->itemSet()->moveInsertKey( leftChildONode->itemSet()->keyCount() , itemSet()->rawKey(index-1) ); // 0でもいい
 		leftChildONode->itemSet()->keyCount( leftChildONode->itemSet()->keyCount() + 1);
@@ -822,6 +830,10 @@ std::shared_ptr<ONode> ONode::merge( unsigned short index ) // mergeが呼び出
 
 		itemSet()->moveDeleteChild(index); // 子ノードの削除
 
+		if( memcmp( parent()->itemSet()->Optr()->addr(), addrZero, sizeof(addrZero)  ) == 0 ) {
+			_itemSet->child(0)->parent(nullptr);
+			return _itemSet->child(0);
+		}
 		//leftChildONode->itemSet()->moveInsertChild( leftChildONode->itemSet()->childCount(), itemSet()->child(index) );
 		//leftChildONode->itemSet()->childCount( leftChildONode->itemSet()->childCount() + 1 );
 		//leftChildONode->itemSet()->child( leftChildONode->itemSet()->childCount() - 1)->parent( leftChildONode );
@@ -844,6 +856,10 @@ std::shared_ptr<ONode> ONode::merge( unsigned short index ) // mergeが呼び出
 		itemSet()->moveDeleteChild(index);
 		// ここで本ノードは空になっているはず
 
+		if( memcmp( parent()->itemSet()->Optr()->addr(), addrZero, sizeof(addrZero)  ) == 0 ){
+			_itemSet->child(0)->parent(nullptr);
+			return _itemSet->child(0);
+		} 
 		//rightChildONode->itemSet()->moveInsertChild( 0 , itemSet()->child(index) );
 		//rightChildONode->itemSet()->childCount( rightChildONode->itemSet()->childCount() + 1 );
 		//rightChildONode->itemSet()->child(0)->parent( rightChildONode );
@@ -876,6 +892,7 @@ std::shared_ptr<ONode> ONode::recursiveMerge( unsigned short index ) // mergeが
 {
 	std::cout << "再帰マージが実行されます" << "\n";
 	std::cout << "index :: " << index << "\n";
+	std::cout << "keyCount() :: " << _itemSet->keyCount() << "\n";
 	if( _itemSet->keyCount() <= 0 ){ 
 		std::cout << "ここでは子ノードの数は一つだけのはず child Count :: " << _itemSet->childCount() << "\n";
 		_itemSet->child(0)->parent(nullptr);
