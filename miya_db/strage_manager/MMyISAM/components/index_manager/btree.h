@@ -175,6 +175,7 @@ public:
 	// ルートノードが更新されるとONodeがリターンされる
 	std::shared_ptr<ONode> recursiveAdd( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<optr> targetDataOptr ,std::shared_ptr<ONode> targetONode = nullptr );
 	std::shared_ptr<optr> subtreeFind( std::shared_ptr<unsigned char> targetKey );
+	std::shared_ptr<ONode> subtreeONodeFind( std::shared_ptr<unsigned char> targetKey );
 	unsigned char* splitONode( unsigned char* targetKey );
 
 	void isLeaf( bool flag ){ _isLeaf = flag; };
@@ -195,12 +196,16 @@ public:
 	std::shared_ptr<ONode> recursiveMerge( std::shared_ptr<ONode> sourceONode );
 	std::shared_ptr<ONode> recursiveMerge( unsigned short index );
 
+
+	std::shared_ptr<ONode> subtreeMax();
+	void matchSwap( std::shared_ptr<unsigned char> replaceFrom , std::pair<std::shared_ptr<unsigned char>, std::shared_ptr<optr>> replaceTo );
+
 	/* 肝となるメソッド2つ */
 	void regist( unsigned char* targetKey , optr *targetDataOptr );
 
 
 	// 被ラップ関係からのキャストだからあまりよくない
-	std::unique_ptr<ONode> subtreeKeySearch( ONode* targetONode,unsigned char *targetKey );  // 挿入一のノードを検索してくる
+	std::shared_ptr<ONode> subtreeKeySearch( ONode* targetONode,unsigned char *targetKey );  // 挿入一のノードを検索してくる
 
 
 };

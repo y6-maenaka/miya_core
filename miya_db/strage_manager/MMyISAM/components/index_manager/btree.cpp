@@ -238,7 +238,6 @@ void ONodeItemSet::moveDeleteChild( unsigned short index )
 
 	for( int i = index; i<childCount()-1; i++ )
 	{
-		std::cout << "do moveDelete child" << "\n";
 		child( i , child(i+1) );
 	}
 	childCount( childCount() - 1 );
@@ -623,7 +622,7 @@ std::shared_ptr<OverlayMemoryManager> ONode::overlayMemoryManager()
 void ONode::regist( unsigned char *targetKey , optr *targetDataOptr )
 {
 
-	std::unique_ptr<ONode> insertTargetONode = subtreeKeySearch( this , targetKey );
+	std::shared_ptr<ONode> insertTargetONode = subtreeKeySearch( this , targetKey );
 	
 
 }
@@ -645,14 +644,45 @@ int ONode::findIndex( std::shared_ptr<unsigned char> targetKey )
 
 std::shared_ptr<ONode> ONode::remove( std::shared_ptr<unsigned char> targetKey )
 {
+	unsigned char addrZero[5]; memset( addrZero , 0x00 , sizeof(addrZero) );
 	int index = findIndex( targetKey );
 	if( index < 0 ) return nullptr;
 
-	unsigned char addrZero[5]; memset( addrZero, 0x00 , sizeof(addrZero) );
+	if( _itemSet->childCount() >= 1 ) // 削除対象が中間ノードであった場合
+	{
+		std::cout << "中間ノード削除" << "\n";
+		// 対象ノードの左サブツリーから最大値(ツリー内で対象の次に大きい)を取得する
+		std::shared_ptr<ONode> subtreeMax = _itemSet->child(0)->subtreeMax();
+		_itemSet->key( index , subtreeMax->itemSet()->rawKey( subtreeMax->itemSet()->keyCount() - 1 ) );
+		_itemSet->dataOptr( index , subtreeMax->itemSet()->dataOptr( subtreeMax->itemSet()->dataOptrCount() - 1 ) );
+
+		std::shared_ptr<ONode> candidateNewRootONode;
+		candidateNewRootONode = subtreeMax->remove( subtreeMax->itemSet()->rawKey( subtreeMax->itemSet()->keyCount() - 1 ) );
+
+		if // 無理矢理感がある
+		(
+			candidateNewRootONode != nullptr && 
+			candidateNewRootONode->itemSet()->keyCount() <= 0 &&
+			candidateNewRootONode->itemSet()->childCount() == 1 &&
+			memcmp( candidateNewRootONode->parent()->itemSet()->Optr()->addr() , addrZero , sizeof(addrZero) ) == 0 
+		)
+		{
+			candidateNewRootONode->itemSet()->child(0)->parent(nullptr);
+			return candidateNewRootONode->itemSet()->child(0);
+		}
+
+		return candidateNewRootONode;
+	}
+
 	if( _itemSet->keyCount() > 1 || memcmp( parent()->itemSet()->Optr()->addr() , addrZero, sizeof(addrZero) ) == 0 )  // 単純削除のケース
 	{ 
-		std::cout << "単純削除" << "\n";
 		_itemSet->remove( index ); 
+		return nullptr;
+	}
+
+	if( memcmp( this->parent()->itemSet()->Optr()->addr(), addrZero , sizeof(addrZero)) == 0 )
+	{
+		_itemSet->moveDeleteKey(0);
 		return nullptr;
 	}
 
@@ -730,7 +760,6 @@ std::shared_ptr<ONode> ONode::underflow( std::shared_ptr<ONode> sourceONode )
 		return nullptr;
 	}
 
-
 	// underflowによるキー移動ができなかったので,マージ処理を行う
 	/* マージ */ 
 	return merge( index );
@@ -761,10 +790,6 @@ std::shared_ptr<ONode> ONode::merge( unsigned short index ) // mergeが呼び出
 	std::shared_ptr<ONode> leftChildONode = (index > 0) ? this->child(index-1) : nullptr; // マイナスになる可能性があるので
 	std::shared_ptr<ONode> rightChildONode = this->child(index+1);
 
-	printf("左兄弟ノード %p\n", leftChildONode.get() );
-	printf("右兄弟ノード %p\n", rightChildONode.get() );
-	std::cout << "index :: " << index << "\n";
-
 	unsigned char addrZero[5]; memset( addrZero , 0x00 , sizeof(addrZero) );
 
 	// マージの種類
@@ -775,7 +800,6 @@ std::shared_ptr<ONode> ONode::merge( unsigned short index ) // mergeが呼び出
 		if( leftChildONode != nullptr )	
 		{
 			std::cout << "左兄弟ノードマージ" << "\n";
-			std::cout << "index :: " << index << "\n";
 			_itemSet->moveDeleteChild( index );
 
 			leftChildONode->itemSet()->key( leftChildONode->itemSet()->keyCount() ,_itemSet->rawKey(index-1) );
@@ -794,7 +818,6 @@ std::shared_ptr<ONode> ONode::merge( unsigned short index ) // mergeが呼び出
 		if( rightChildONode != nullptr )
 		{
 			std::cout << "右兄弟ノードマージ前処理" << "\n";
-			std::cout << "index :: " << index << "\n";
 			_itemSet->moveDeleteChild( index );
 
 			rightChildONode->itemSet()->moveInsertKey( 0 , _itemSet->rawKey(index) );
@@ -891,10 +914,7 @@ std::shared_ptr<ONode> ONode::recursiveMerge( std::shared_ptr<ONode> sourceONode
 std::shared_ptr<ONode> ONode::recursiveMerge( unsigned short index ) // mergeが呼び出されて後に必ず呼び出される 
 {
 	std::cout << "再帰マージが実行されます" << "\n";
-	std::cout << "index :: " << index << "\n";
-	std::cout << "keyCount() :: " << _itemSet->keyCount() << "\n";
 	if( _itemSet->keyCount() <= 0 ){ 
-		std::cout << "ここでは子ノードの数は一つだけのはず child Count :: " << _itemSet->childCount() << "\n";
 		_itemSet->child(0)->parent(nullptr);
 		return _itemSet->child(0); // 新たなルートノードを返却する
 	}
@@ -904,7 +924,6 @@ std::shared_ptr<ONode> ONode::recursiveMerge( unsigned short index ) // mergeが
 	std::shared_ptr<ONode> targetONode = _itemSet->child(index);
 	std::shared_ptr<ONode> leftChildONode = (index > 0) ? this->child(index-1) : nullptr; // マイナスになる可能性があるので
 	std::shared_ptr<ONode> rightChildONode = this->child(index+1);
-
 
 
 	if( leftChildONode != nullptr && leftChildONode->itemSet()->keyCount() >= 2 ) // 兄弟左ノードから親ノード要素を押し出す
@@ -962,7 +981,6 @@ std::shared_ptr<ONode> ONode::recursiveMerge( unsigned short index ) // mergeが
 	if( leftChildONode != nullptr )
 	{
 		std::cout << "トップレベル左再帰マージ" << "\n";
-		std::cout << "index :: " << index << "\n";
 		leftChildONode->itemSet()->moveInsertKey( leftChildONode->itemSet()->keyCount(), _itemSet->rawKey(index-1) );
 		leftChildONode->itemSet()->keyCount( leftChildONode->itemSet()->keyCount() + 1 );
 		itemSet()->moveDeleteKey(index-1); 
@@ -1008,6 +1026,60 @@ std::shared_ptr<ONode> ONode::recursiveMerge( unsigned short index ) // mergeが
 }
 
 
+std::shared_ptr<ONode> ONode::subtreeMax()
+{
+	if( _itemSet->childCount() >= 1 ) // 本ノードに子ノードが存在すれば,最大の子ノードを再帰的に探索する
+	 return _itemSet->child( _itemSet->childCount() - 1 )->subtreeMax();
+
+	return shared_from_this();
+}
+
+
+void ONode::matchSwap( std::shared_ptr<unsigned char> replaceFrom , std::pair<std::shared_ptr<unsigned char>, std::shared_ptr<optr>> replaceTo )
+{
+	std::shared_ptr<ONode> targetONode = subtreeONodeFind(replaceFrom );
+	int index = targetONode->findIndex( replaceFrom ); 
+	if( index < 0 ) return;
+
+	targetONode->itemSet()->key(index, replaceTo.first );
+	targetONode->itemSet()->dataOptr(index , replaceTo.second );
+	return;
+}
+
+
+
+
+
+std::shared_ptr<ONode> ONode::subtreeONodeFind( std::shared_ptr<unsigned char> targetKey )
+{
+	std::shared_ptr<ONode> candidateChild;
+	std::shared_ptr<optr> keyOptr;
+	std::shared_ptr<unsigned char> rawKey = std::shared_ptr<unsigned char>( new unsigned char[KEY_SIZE] );
+	int flag;
+
+	for( int i=0; i<_itemSet->keyCount(); i++ )
+	{
+		rawKey = _itemSet->rawKey(i); 
+		flag = memcmp( targetKey.get() , rawKey.get() , KEY_SIZE );
+
+		if( flag < 0 ){
+			candidateChild = _itemSet->child(i);
+			if( candidateChild == nullptr ) return nullptr;
+			goto direct;
+		}
+		else if( flag == 0 ){
+			return shared_from_this();
+		}
+	}
+
+	candidateChild = _itemSet->child( _itemSet->childCount() -1 );
+	if( candidateChild == nullptr ) return nullptr;
+
+	direct:
+		return candidateChild->subtreeONodeFind( targetKey );
+}
+
+
 
 std::shared_ptr<optr> ONode::subtreeFind( std::shared_ptr<unsigned char> targetKey )
 {
@@ -1046,7 +1118,7 @@ std::shared_ptr<optr> ONode::subtreeFind( std::shared_ptr<unsigned char> targetK
 
 
 
-std::unique_ptr<ONode> ONode::subtreeKeySearch( ONode* targetONode ,unsigned char *targetKey )
+std::shared_ptr<ONode> ONode::subtreeKeySearch( ONode* targetONode ,unsigned char *targetKey )
 {
 	if( targetONode->isLeaf() ) return std::unique_ptr<ONode>(targetONode);
 
@@ -1183,7 +1255,8 @@ void OBtree::remove( std::shared_ptr<unsigned char> targetKey )
 {
 	std::shared_ptr<ONode> deepestONode;
 	std::shared_ptr<ONode> currentONode = _rootONode;
-	while( (currentONode->itemSet()->childCount() >= 1 ) )
+	bool matchFlag = false;
+	while( (currentONode->itemSet()->childCount() >= 1 ) && (!matchFlag) )
 	{
 		std::shared_ptr<optr> keyOptr;
 		std::shared_ptr<unsigned char> rawKey = std::shared_ptr<unsigned char>( new unsigned char[KEY_SIZE] );
@@ -1191,6 +1264,12 @@ void OBtree::remove( std::shared_ptr<unsigned char> targetKey )
 		{
 			keyOptr = currentONode->itemSet()->key(i);
 			omemcpy( rawKey.get() , keyOptr , KEY_SIZE );
+
+			if( memcmp( targetKey.get(), rawKey.get(), KEY_SIZE ) == 0 ) {
+				currentONode = currentONode;
+				matchFlag = true;
+				goto direct;
+			}
 
 			if( memcmp( targetKey.get(), rawKey.get() , KEY_SIZE ) < 0 ){
 				currentONode = currentONode->child(i);
@@ -1205,7 +1284,6 @@ void OBtree::remove( std::shared_ptr<unsigned char> targetKey )
 
 	deepestONode = currentONode;
 
-	std::cout << "\n\n----------------------------------" << "\n";
 	std::shared_ptr<ONode> newRootNode = nullptr;
 	newRootNode = deepestONode->remove( targetKey );
 	if( newRootNode != nullptr ) // ルートノードを変更する

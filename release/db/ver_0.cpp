@@ -95,15 +95,44 @@ int main(){
 	std::shared_ptr<unsigned char> key_4 = generateKey("cccccccccccccccccccc");
 	btree.add( key_4, nullptr );
 
-	btree.remove( key_2 );
-
-	btree.remove( key_4 );
-	btree.remove( key_1 );
-	std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n-----------------------------------" << "\n";
-	btree.remove( key_3 );
 
 	std::shared_ptr<unsigned char> key_5 = generateKey("gggggggggggggggggggg");
 	btree.add(key_5, nullptr);
+
+	std::shared_ptr<unsigned char> key_6 = generateKey("ffffffffffffffffffff");
+	btree.add( key_6, nullptr );
+
+	std::shared_ptr<unsigned char> key_7 = generateKey("yyyyyyyyyyyyyyyyyyyy");
+	btree.add( key_7, nullptr );
+
+
+	std::shared_ptr<unsigned char> key_9 = generateKey("qqqqqqqqqqqqqqqqqqqq");
+	btree.add( key_9, nullptr );
+
+	std::shared_ptr<unsigned char> key_10 = generateKey("uuuuuuuuuuuuuuuuuuuu");
+	btree.add( key_10, nullptr );
+
+	std::shared_ptr<unsigned char> key_11 = generateKey("vvvvvvvvvvvvvvvvvvvv");
+	btree.add( key_11, nullptr );
+
+
+
+
+
+	btree.remove( key_1 ); // b
+	btree.remove( key_9 ); // q
+	btree.remove( key_11 ); // v
+	btree.remove( key_7 ); // y
+	btree.remove( key_4 ); // c
+	btree.remove( key_5 ); // g
+	btree.remove( key_6 ); // f
+	btree.remove( key_10); // u
+	btree.remove( key_3 );  // a
+	btree.remove( key_2 );
+	std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n......................................." << "\n";
+
+	std::shared_ptr<unsigned char> key_12 = generateKey("aaaaaaaaaaaaaaaaaaaa");
+	btree.add( key_12 , nullptr );
 
 	miya_db::OBtree::printSubTree( btree.rootONode() );
 	return 0;
