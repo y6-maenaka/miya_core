@@ -1,5 +1,7 @@
 #include "query_parser.h"
 
+#include "../database_manager.h"
+
 
 
 
@@ -48,10 +50,11 @@ std::shared_ptr<QueryContext> QueryParser::parseQuery( std::shared_ptr<unsigned 
 
 
 	std::shared_ptr<QueryContext> queryContext = std::make_shared<QueryContext>( static_cast<int>(serializedQuery["query"]), static_cast<uint32_t>(serializedQuery["QueryID"]) );
+	std::cout << "QueryContext::type :: " << queryContext->type() << "\n";
 	switch( queryContext->type() )
 	{
 
-		case 1: // ADD
+		case QUERY_ADD: // ADD
 		{
 			if( !(serializedQuery["key"].is_binary()) ) return nullptr;
 			std::vector<uint8_t> keyVector;
@@ -73,7 +76,7 @@ std::shared_ptr<QueryContext> QueryParser::parseQuery( std::shared_ptr<unsigned 
 
 
 
-		case 2: // GET
+		case QUERY_SELECT: // GET
 		{
 			if( !(serializedQuery["key"].is_binary() ) ) return nullptr;
 
@@ -87,6 +90,22 @@ std::shared_ptr<QueryContext> QueryParser::parseQuery( std::shared_ptr<unsigned 
 
 			break;
 		}
+		
+
+		case QUERY_REMOVE: // remove
+		{
+			std::cout << "parse to Queru_Remove msg" << "\n";
+			if( !(serializedQuery["key"].is_binary() ) ) return nullptr;
+
+			std::vector<uint8_t> keyVector;
+			keyVector = serializedQuery["key"].get_binary();
+			std::shared_ptr<unsigned char> key = std::shared_ptr<unsigned char>( new unsigned char[keyVector.size()] ); 
+			std::copy( keyVector.begin() , keyVector.begin() + keyVector.size() , key.get() );
+			queryContext->key( key , keyVector.size() );
+
+			break;
+		}
+
 	};
 
 	std::cout << "queryContext retuend" << "\n";

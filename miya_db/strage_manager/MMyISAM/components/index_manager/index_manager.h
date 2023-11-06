@@ -26,6 +26,7 @@ public:
 
 	// 基本的に操作系は２通り deleteは未実装
 	void add( std::shared_ptr<unsigned char> key , std::shared_ptr<optr> dataOptr );
+	void remove( std::shared_ptr<unsigned char> key );
 	std::shared_ptr<optr> find( std::shared_ptr<unsigned char> key );
 };
 

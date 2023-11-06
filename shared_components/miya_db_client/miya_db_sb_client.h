@@ -32,6 +32,7 @@ public:
 
 	size_t get( std::shared_ptr<unsigned char> rawKey ,std::shared_ptr<unsigned char> *retRaw );
 	bool add( std::shared_ptr<unsigned char> rawKey , std::shared_ptr<unsigned char> rawValue , size_t rawValueLength );
+	bool remove( std::shared_ptr<unsigned char> rawKey );
 
 	void hello(){ std::cout << "HelloWorld" << "\n"; }; 
 

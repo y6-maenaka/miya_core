@@ -9,6 +9,9 @@ namespace miya_db
 
 constexpr int MIYA_DB_QUERY_ADD = 1;
 constexpr int MIYA_DB_QUERY_GET = 2;
+constexpr int MIYA_DB_QUERY_EXIST = 3;
+constexpr int MIYA_DB_QUERY_REMOVE = 4;
+
 constexpr int MIYA_DB_KEY_LENGTH = 20;
 
 constexpr int MIYA_DB_STATUS_OK = 0;

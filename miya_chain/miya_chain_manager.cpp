@@ -43,7 +43,7 @@ int MiyaChainManager::init( std::shared_ptr<StreamBufferContainer> toEKP2PBroker
 	_utxoSetDB._toUTXOSetDBSBC = std::make_shared<StreamBufferContainer>();
 	_utxoSetDB._fromUTXOSetDBSBC = std::make_shared<StreamBufferContainer>();
 	_dbManager.startWithLightMode( _utxoSetDB._toUTXOSetDBSBC, _utxoSetDB._fromUTXOSetDBSBC , "../miya_db/table_files/utxo/utxo" );
-	_utxoSet = std::make_shared<LightUTXOSet>( _utxoSetDB._toUTXOSetDBSBC , _utxoSetDB._fromUTXOSetDBSBC);// utxoSet(クライアント) のセットアップ
+	_utxoSet = std::make_shared<LightUTXOSet>( _utxoSetDB._toUTXOSetDBSBC , _utxoSetDB._fromUTXOSetDBSBC );// utxoSet(クライアント) のセットアップ
 
 
 	// ローカルデータストア(生ブロックを直接ファイルに保存している)

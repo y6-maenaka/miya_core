@@ -12,7 +12,14 @@
 
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/unit_test.h"
 
+#include "../../shared_components/stream_buffer/stream_buffer.h"
+#include "../../shared_components/stream_buffer/stream_buffer_container.h"
+#include "../../shared_components/miya_db_client/miya_db_sb_client.h"
 
+#include "../../miya_chain/utxo_set/utxo_set.h"
+#include "../../miya_chain/utxo_set/utxo.h"
+#include "../../miya_chain/transaction/p2pkh/p2pkh.h"
+#include "../../miya_chain/transaction/tx/tx_out.h"
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -25,8 +32,37 @@
 
 int main(){
 
-	std::shared_ptr<miya_db::OverlayMemoryManager> oMemoryManager = std::make_shared<miya_db::OverlayMemoryManager>( std::string("../miya_db/table_files/test/test") );
-	miya_db::OBtree btree( oMemoryManager );
+	
+	//std::shared_ptr<miya_db::OverlayMemoryManager> oMemoryManager = std::make_shared<miya_db::OverlayMemoryManager>( std::string("../miya_db/table_files/test/test") );
+	//miya_db::OBtree btree( oMemoryManager );
+	miya_db::DatabaseManager dbManager;
+
+	std::shared_ptr<StreamBufferContainer> toUTxODBSBC = std::make_shared<StreamBufferContainer>();
+	std::shared_ptr<StreamBufferContainer> fromUTXoDBSBC = std::make_shared<StreamBufferContainer>();
+	dbManager.startWithLightMode( toUTxODBSBC , fromUTXoDBSBC , "../miya_db/table_files/test_utxo/test_utxo");
+
+
+	miya_chain::LightUTXOSet utxoSet( toUTxODBSBC , fromUTXoDBSBC );
+
+	std::shared_ptr<unsigned char> txID_1 = std::shared_ptr<unsigned char>( new unsigned char[32] );
+	memcpy( txID_1.get() , "aaaaaaaaaabbbbbbbbbbccccccccccdd", 32 );
+	uint32_t index_1 = htonl(10);
+
+	std::shared_ptr<tx::TxOut> txOut_1 = std::make_shared<tx::TxOut>();
+	txOut_1->value( 2023 );
+
+	std::cout << "before value :: " << txOut_1->value() << "\n";
+	utxoSet.add( txOut_1, txID_1 , index_1 );
+
+	std::cout << "\n\n\n\n\n\n\n\n\n\n-----------------------------------" << "\n";
+
+	std::shared_ptr<miya_chain::UTXO> utxo_1;
+	utxoSet.remove( txID_1 , index_1 );
+	utxo_1 = utxoSet.get( txID_1 , index_1 );
+	if( utxo_1 != nullptr )
+		std::cout << "after value :: " << utxo_1->amount() << "\n";
+	else
+		std::cout << "utxoが見つかりません" << "\n";
 
 
 	auto generateKey = ([&]( const char *key ) -> std::shared_ptr<unsigned char>
@@ -82,7 +118,7 @@ int main(){
 	// btree.remove( key_2 );
 	*/
 
-	
+	/*
 	std::shared_ptr<unsigned char> key_1 = generateKey("bbbbbbbbbbbbbbbbbbbb");
 	btree.add( key_1, nullptr );
 
@@ -136,6 +172,7 @@ int main(){
 
 	miya_db::OBtree::printSubTree( btree.rootONode() );
 	return 0;
+	*/
 	
 	/*
 

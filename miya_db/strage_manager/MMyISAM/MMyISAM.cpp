@@ -79,6 +79,23 @@ bool MMyISAM::get( std::shared_ptr<QueryContext> qctx )
 
 
 
+
+bool MMyISAM::remove( std::shared_ptr<QueryContext> qctx )
+{
+	std::cout << "\x1b[35m" << "(MiyaDB) remove with key :: ";
+	for( int i=0; i<20; i++){
+		printf("%02X", qctx->key().get()[i] );
+	}  std::cout << "\x1b[39m"  << "\n";
+
+	_indexManager->remove( qctx->key() );
+ // 本来はvalueStoreからも削除する
+
+	return true;
+}
+
+
+
+
 bool MMyISAM::exists( std::shared_ptr<QueryContext> qctx )
 {
 	std::shared_ptr<optr> dataOptr = nullptr;

@@ -14,7 +14,7 @@
 struct SBSegment;
 class StreamBuffer;
 class StreamBufferContainer;
-
+class MiyaDBSBClient;
 
 
 
@@ -22,7 +22,6 @@ class StreamBufferContainer;
 
 
 /*
-
 	UTXOで取得するもの
 */
 
@@ -56,6 +55,7 @@ class LightUTXOSet
 private:
 	std::shared_ptr<StreamBufferContainer> _pushSBContainer;
 	std::shared_ptr<StreamBufferContainer> _popSBContainer;
+	std::shared_ptr<MiyaDBSBClient> _miyaDBClient;
 
 protected:
 	// static uint32_t generateQueryID();
@@ -63,6 +63,7 @@ protected:
 public:
 	LightUTXOSet( std::shared_ptr<StreamBufferContainer> pushSBContainer , std::shared_ptr<StreamBufferContainer> popSBContainer );
 
+	std::shared_ptr<unsigned char> generateUTxOKey( std::shared_ptr<unsigned char> txID , uint32_t index );
 
 	std::shared_ptr<UTXO> get( std::shared_ptr<unsigned char> txID , uint32_t index );
 	std::shared_ptr<UTXO> get( std::shared_ptr<tx::PrevOut> prevOut );
@@ -70,6 +71,8 @@ public:
 	bool add( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_ptr<unsigned char> txID, uint32_t index );
 	// bool add( std::shared_ptr<tx::P2PKH> targetTx ); // 一応dumpしてSBCに流す
 	bool add( std::shared_ptr<tx::Coinbase> targetCoinbase );
+
+	bool remove( std::shared_ptr<unsigned char> txID , uint32_t index );
 
 	void testInquire( std::shared_ptr<unsigned char> data , size_t dataLength );
 

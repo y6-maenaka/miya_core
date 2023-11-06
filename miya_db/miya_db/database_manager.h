@@ -36,6 +36,7 @@ constexpr char *INFORMATION_SCHEMA_PATH = "./.config/.information_schema.json";
 constexpr int QUERY_ADD = 1;
 constexpr int QUERY_SELECT = 2;
 constexpr int QUERY_EXISTS = 3;
+constexpr int QUERY_REMOVE = 4;
 
 
 

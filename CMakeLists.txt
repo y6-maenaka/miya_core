@@ -22,6 +22,7 @@ target_link_libraries( db_ver_0 PRIVATE
 												MIYA_CORE
 												MIYA_DB
 												SHARED_COMPONENTS
+												MIYA_CHAIN
 )
 target_compile_options( db_ver_0 PUBLIC -Wall )
 endif()

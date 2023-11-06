@@ -23,6 +23,13 @@ void IndexManager::add( std::shared_ptr<unsigned char> key , std::shared_ptr<opt
 
 
 
+void IndexManager::remove( std::shared_ptr<unsigned char> key )
+{
+	return _masterBtree->remove( key );
+}
+
+
+
 
 std::shared_ptr<optr> IndexManager::find( std::shared_ptr<unsigned char> key )
 {

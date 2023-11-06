@@ -6,6 +6,7 @@
 #include "../../shared_components/json.hpp"
 #include "../../shared_components/hash/sha_hash.h"
 #include "../../shared_components/miya_db_client/common.h"
+#include "../../shared_components/miya_db_client/miya_db_sb_client.h"
 
 #include "../transaction/p2pkh/p2pkh.h"
 #include "../transaction/tx/tx_out.h"
@@ -23,14 +24,13 @@ LightUTXOSet::LightUTXOSet( std::shared_ptr<StreamBufferContainer> pushSBContain
 {
 	_pushSBContainer = pushSBContainer;
 	_popSBContainer = popSBContainer;
+
+	_miyaDBClient = std::make_shared<MiyaDBSBClient>( pushSBContainer , popSBContainer );
 }
 
 
-
-
-std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<unsigned char> txID , uint32_t index )
+std::shared_ptr<unsigned char> LightUTXOSet::generateUTxOKey( std::shared_ptr<unsigned char> txID , uint32_t index )
 {
-	//  キーを作成する
 	size_t joinedIDIndexLength = 32 + sizeof(index);
 	std::shared_ptr<unsigned char> joinedIDIndex = std::shared_ptr<unsigned char>( new unsigned char[joinedIDIndexLength] );
 	memcpy( joinedIDIndex.get() , txID.get() , 32 );
@@ -39,8 +39,17 @@ std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<unsigned char> txID , u
 	std::shared_ptr<unsigned char> rawKey; size_t rawKeyLength;
 	rawKeyLength = hash::SHAHash( joinedIDIndex , joinedIDIndexLength, &rawKey , "sha1" );
 
-	std::vector<uint8_t> keyVector; keyVector.assign( rawKey.get() , rawKey.get() + rawKeyLength );
+	return rawKey;
+}
 
+
+
+std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<unsigned char> txID , uint32_t index )
+{
+	//  キーを作成する
+	std::shared_ptr<unsigned char> rawKey; size_t rawKeyLength = 20; // あとで修正する
+	rawKey = generateUTxOKey( txID , index );
+	std::vector<uint8_t> keyVector; keyVector.assign( rawKey.get() , rawKey.get() + rawKeyLength );
 
 	std::cout << "\x1b[33m" << "-----------------------------------------------------------" << "\x1b[39m" << "\n";
 	std::cout << "<< Search Information >> " << "\n";
@@ -198,6 +207,13 @@ bool LightUTXOSet::add( std::shared_ptr<tx::Coinbase> targetCoinbase )
 }
 
 
+bool LightUTXOSet::remove( std::shared_ptr<unsigned char> txID, uint32_t index )
+{
+	std::shared_ptr<unsigned char> rawKey; size_t rawKeyLength = 20; // あとで修正する
+	rawKey = generateUTxOKey( txID , index );
+
+	return _miyaDBClient->remove( rawKey );
+}
 
 
 

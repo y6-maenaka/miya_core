@@ -209,7 +209,21 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 					sbSegment->body( dumpedJsonRaw , dumpedJson.size() );
 					break;
 				}
+
+
+				case QUERY_REMOVE:
+				{
+					std::cout << "## (HANDLE) QUERY_REMOVE" << "\n";
+
+					flag = mmyisam->remove( qctx );
+					responseJson["QueryID"] = qctx->id();
+					responseJson["status"] = flag;
+
+					break;
+				}
+
 			}
+			
 	
 			direct:
 			outgoingSBC->pushOne( std::move(sbSegment) );

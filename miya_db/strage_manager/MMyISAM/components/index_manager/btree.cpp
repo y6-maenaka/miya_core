@@ -1093,7 +1093,6 @@ std::shared_ptr<optr> ONode::subtreeFind( std::shared_ptr<unsigned char> targetK
 	for( int i=0; i<_itemSet->keyCount(); i++ )
 	{
 		keyOptr = _itemSet->key(i); omemcpy( rawKey.get(), keyOptr , 5 );
-
 		flag = memcmp( targetKey.get() , rawKey.get() , 5 );
 
 

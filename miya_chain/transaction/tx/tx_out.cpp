@@ -110,6 +110,10 @@ unsigned short TxOut::value()
 	#endif
 }
 
+void TxOut::value( unsigned int value )
+{
+	_body._value = htonll(value);
+}
 
 
 

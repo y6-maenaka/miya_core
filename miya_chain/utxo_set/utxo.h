@@ -53,6 +53,7 @@ public:
 	UTXO( std::shared_ptr<tx::TxOut> target ); // utxoを登録する場合
 	std::vector<uint8_t> dumpToBson( bool isUsed = false );
 
+	size_t amount();
 	std::shared_ptr<tx::PkScript> pkScript();
 
 	// void set( std::shared_ptr<tx::TxOut> target , std::shared_ptr<unsigned char> txID , unsigned short index );

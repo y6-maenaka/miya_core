@@ -51,6 +51,10 @@ UTXO::UTXO( std::shared_ptr<tx::TxOut> target )
 }
 
 
+size_t UTXO::amount()
+{
+	return static_cast<size_t>(ntohll(_content._amount));
+}
 
 
 std::shared_ptr<tx::PkScript> UTXO::pkScript()
