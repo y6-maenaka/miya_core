@@ -32,9 +32,11 @@
 
 int main(){
 
-	
-	//std::shared_ptr<miya_db::OverlayMemoryManager> oMemoryManager = std::make_shared<miya_db::OverlayMemoryManager>( std::string("../miya_db/table_files/test/test") );
-	//miya_db::OBtree btree( oMemoryManager );
+
+	std::shared_ptr<miya_db::OverlayMemoryManager> oMemoryManager = std::make_shared<miya_db::OverlayMemoryManager>( std::string("../miya_db/table_files/test/test") );
+	miya_db::OBtree btree( oMemoryManager );
+
+	/*
 	miya_db::DatabaseManager dbManager;
 
 	std::shared_ptr<StreamBufferContainer> toUTxODBSBC = std::make_shared<StreamBufferContainer>();
@@ -64,6 +66,7 @@ int main(){
 	else
 		std::cout << "utxoが見つかりません" << "\n";
 
+	*/
 
 	auto generateKey = ([&]( const char *key ) -> std::shared_ptr<unsigned char>
 	{
@@ -71,7 +74,6 @@ int main(){
 		memcpy( ret.get() , key , 20 );
 		return ret;
 	});
-
 
 	/*
 	std::shared_ptr<unsigned char> key_1 = generateKey("gggggggggggggggggggg"); // 0x67
@@ -81,7 +83,7 @@ int main(){
 	btree.add( key_2 , nullptr );
 
 	std::shared_ptr<unsigned char> key_3 = generateKey("pppppppppppppppppppp"); // 0x70
-	btree.add( key_3 , nullptr ); 
+	btree.add( key_3 , nullptr );
 
 	std::shared_ptr<unsigned char> key_4 = generateKey("bbbbbbbbbbbbbbbbbbbb"); // 0x62
 	btree.add( key_4 , nullptr );
@@ -118,7 +120,7 @@ int main(){
 	// btree.remove( key_2 );
 	*/
 
-	/*
+
 	std::shared_ptr<unsigned char> key_1 = generateKey("bbbbbbbbbbbbbbbbbbbb");
 	btree.add( key_1, nullptr );
 
@@ -130,7 +132,6 @@ int main(){
 
 	std::shared_ptr<unsigned char> key_4 = generateKey("cccccccccccccccccccc");
 	btree.add( key_4, nullptr );
-
 
 	std::shared_ptr<unsigned char> key_5 = generateKey("gggggggggggggggggggg");
 	btree.add(key_5, nullptr);
@@ -151,10 +152,6 @@ int main(){
 	std::shared_ptr<unsigned char> key_11 = generateKey("vvvvvvvvvvvvvvvvvvvv");
 	btree.add( key_11, nullptr );
 
-
-
-
-
 	btree.remove( key_1 ); // b
 	btree.remove( key_9 ); // q
 	btree.remove( key_11 ); // v
@@ -165,15 +162,17 @@ int main(){
 	btree.remove( key_10); // u
 	btree.remove( key_3 );  // a
 	btree.remove( key_2 );
-	std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n......................................." << "\n";
+
 
 	std::shared_ptr<unsigned char> key_12 = generateKey("aaaaaaaaaaaaaaaaaaaa");
 	btree.add( key_12 , nullptr );
 
+
+	std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n......................................." << "\n";
 	miya_db::OBtree::printSubTree( btree.rootONode() );
 	return 0;
-	*/
-	
+
+
 	/*
 
 	int dataFd = open("../miya_db/table_files/test_table/test.oswap", O_RDWR , (mode_t)0600 );
@@ -184,7 +183,7 @@ int main(){
 	miya_db::OverlayMemoryManager *oMemoryManager = new miya_db::OverlayMemoryManager(dataFd , freeListFd );
 
 
-	
+
 	std::cout << miya_db::O_NODE_ITEMSET_SIZE << "\n";
 
 	miya_db::OBtree btree( (std::shared_ptr<miya_db::OverlayMemoryManager>(oMemoryManager)) );
@@ -210,7 +209,7 @@ int main(){
 	btree.add( key_3 , nullptr );
 
 
-	
+
 	std::shared_ptr<unsigned char> key_4 = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	memcpy( key_4.get() , "bbbbbbbbbbbbbbbbbbbb", 20 );
 	//newRootNode->add( key_4 );
@@ -220,7 +219,7 @@ int main(){
 
 
 
-	
+
 	std::shared_ptr<unsigned char> key_5 = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	memcpy( key_5.get() , "dddddddddddddddddddd", 20 );
 	printf("%p\n",btree.rootONode()->overlayMemoryManager().get() );
@@ -228,7 +227,7 @@ int main(){
 
 
 	std::cout << "\n\n\n\n\n\n\n------------------------------------------------------------------"	 << "\n";
-	
+
 	std::shared_ptr<unsigned char> key_6 = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	memcpy( key_6.get() , "gggggggggggggggggggg", 20 );
 	printf("%p\n",btree.rootONode()->overlayMemoryManager().get() );
@@ -326,44 +325,44 @@ int main(){
 	unsigned char *dataPtr_3 = (unsigned char *)"ccccccc";
 	tree->_root->regist( key_3 , dataPtr_3 );
 
-	
+
 	std::cout << "\n====== forth key insert" << "\n";
 	unsigned char *key_4 = (unsigned char *)"dddddddddddddddddddddddddddddddd";
 	unsigned char *dataPtr_4 = (unsigned char *)"ddddddd";
 	tree->_root->regist( key_4 , dataPtr_4 );
-	
 
-	
-	
+
+
+
 	std::cout << "\n====== fifth key insert" << "\n";
 	unsigned char *key_5 = (unsigned char *)"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
 	unsigned char *dataPtr_5 = (unsigned char *)"eeeeeeee";
 	tree->_root->regist( key_5 , dataPtr_5 );
-	
 
-	
+
+
 	std::cout << "\n====== sixth key insert" << "\n";
 	unsigned char *key_6 = (unsigned char *)"ffffffffffffffffffffffffffffffff";
 	unsigned char *dataPtr_6 = (unsigned char *)"fffffff";
 	tree->_root->regist( key_6 , dataPtr_6 );
-	
-	
 
-	
+
+
+
 	std::cout << "\n====== seven key insert" << "\n";
 	unsigned char *key_7 = (unsigned char *)"gggggggggggggggggggggggggggggggg";
 	unsigned char *dataPtr_7 = (unsigned char *)"gggggggg";
 	tree->_root->regist( key_7 , dataPtr_7 );
-	
+
 
 
 	std::cout << "\n====== eigh key insert" << "\n";
 	unsigned char *key_8 = (unsigned char *)"hhhhhhhhhhhhhhhhhhhhhhhhhhhhh";
 	unsigned char *dataPtr_8 = (unsigned char *)"hhhhhhhhh";
 	tree->_root->regist( key_8 , dataPtr_8 );
-	
 
-	
+
+
 	std::cout << "\n====== nine key insert" << "\n";
 	unsigned char *key_9 = (unsigned char *)"iiiiiiiiiiiiiiiiiiiiiiiiiiiiii";
 	unsigned char *dataPtr_9 = (unsigned char *)"iiiiiiiiiiii";
@@ -375,50 +374,50 @@ int main(){
 	unsigned char *key_10 = (unsigned char *)"pppppppppppppppppppppppppppppppp";
 	unsigned char *dataPtr_10 = (unsigned char *)"ppppppppppppppp";
 	tree->_root->regist( key_10 , dataPtr_10 );
-	
 
-	
+
+
 	std::cout << "\n====== ereven key insert" << "\n";
 	unsigned char *key_11 = (unsigned char *)"jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj";
 	unsigned char *dataPtr_11 = (unsigned char *)"jjjjjjjjjjjjjjj";
 	tree->_root->regist( key_11 , dataPtr_11 );
 
 
-	
+
 	std::cout << "\n====== twelve key insert" << "\n";
 	unsigned char *key_12 = (unsigned char *)"kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk";
 	unsigned char *dataPtr_12 = (unsigned char *)"kkkkkkkkkkkkkkkk";
 	tree->_root->regist( key_12 , dataPtr_12 );
-	
 
-	
+
+
 	std::cout << "\n====== 13 key insert" << "\n";
 	unsigned char *key_13 = (unsigned char *)"llllllllllllllllllllllllllllllll";
 	unsigned char *dataPtr_13 = (unsigned char *)"llllllllllllllll";
 	tree->_root->regist( key_13 , dataPtr_13 );
-	
 
-	
+
+
 	std::cout << "\n====== 14 key insert" << "\n";
 	unsigned char *key_14 = (unsigned char *)"rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr";
 	unsigned char *dataPtr_14 = (unsigned char *)"rrrrrrrrrrrrr";
 	tree->_root->regist( key_14 , dataPtr_14 );
 
 
-	
+
 	std::cout << "\n====== 15 key insert" << "\n";
 	unsigned char *key_15 = (unsigned char *)"ssssssssssssssssssssssssssssssss";
 	unsigned char *dataPtr_15 = (unsigned char *)"sssssssssssss";
 	tree->_root->regist( key_15 , dataPtr_15 );
-	
 
-	
+
+
 	std::cout << "\n====== 16 key insert" << "\n";
 	unsigned char *key_16 = (unsigned char *)"tttttttttttttttttttttttttttttttt";
 	unsigned char *dataPtr_16 = (unsigned char *)"tttttttttttt";
 	tree->_root->regist( key_16 , dataPtr_16 );
-	
-	
+
+
 	std::cout << "ちょっとてすと" << "\n";
 	std::cout << tree->_root->isLeaf() << "\n";
 	//std::cout << tree->_root->_itemSet->_itemSet._child[0]->first->isLeaf() << "\n";
@@ -434,7 +433,7 @@ int main(){
 
 	//std::cout << tree->_root->_itemSet->childCnt( true ) << "\n";
 	*/
-	
+
 
 
 
@@ -444,7 +443,7 @@ int main(){
 	miya_db::CacheTable _cacheTable( indexOswapFD );
 	miya_db::Mapper *_mapper = _cacheTable.mapper();
 	// std::cout << _mapper->fd() << "\n";
-	
+
 
 	std::cout << "====================================" << "\n";
 	unsigned char initAddr[5] = {0x00 , 0x00 , 0x02, 0x00, 0x05};
@@ -453,7 +452,7 @@ int main(){
 	std::cout << "Frame -> " << _optr.frame() << "\n";
 	std::cout << _optr.offset() << "\n";
 	_optr.value('B'); // ファイル上の1バイト格納空間のオーバレイポインタ
-	
+
 	_cacheTable.cacheingList();
 	_cacheTable.invalidList();
 	std::cout << "====================================" << "\n\n";
@@ -468,7 +467,7 @@ int main(){
 	std::cout << "Frame -> " << _optr2.frame() << "\n";
 	std::cout << _optr2.offset() << "\n";
 	_optr2.value('C'); // ファイル上の1バイト格納空間のオーバレイポインタ
-	
+
 	_cacheTable.cacheingList();
 	_cacheTable.invalidList();
 	std::cout << "====================================" << "\n\n";
@@ -482,7 +481,7 @@ int main(){
 	std::cout << "Frame -> "<< _optr3.frame() << "\n";
 	std::cout << _optr3.offset() << "\n";
 	_optr3.value('X'); // ファイル上の1バイト格納空間のオーバレイポインタ
-	
+
 	_cacheTable.cacheingList();
 	_cacheTable.invalidList();
 	std::cout << "====================================" << "\n\n";
@@ -495,7 +494,7 @@ int main(){
 	std::cout << "Frame -> "<< _optr4.frame() << "\n";
 	std::cout << _optr4.offset() << "\n";
 	_optr4.value('X'); // ファイル上の1バイト格納空間のオーバレイポインタ
-	
+
 	_cacheTable.cacheingList();
 	_cacheTable.invalidList();
 	std::cout << "====================================" << "\n\n";
@@ -509,7 +508,7 @@ int main(){
 	std::cout << "Frame -> "<< _optr5.frame() << "\n";
 	std::cout << _optr5.offset() << "\n";
 	_optr5.value('X'); // ファイル上の1バイト格納空間のオーバレイポインタ
-	
+
 	_cacheTable.cacheingList();
 	_cacheTable.invalidList();
 	std::cout << "====================================" << "\n\n";
@@ -522,7 +521,7 @@ int main(){
 	std::cout << "Frame -> "<< _optr6.frame() << "\n";
 	std::cout << _optr6.offset() << "\n";
 	_optr6.value('X'); // ファイル上の1バイト格納空間のオーバレイポインタ
-	
+
 	_cacheTable.cacheingList();
 	_cacheTable.invalidList();
 	std::cout << "====================================" << "\n\n";
@@ -535,7 +534,7 @@ int main(){
 	*/
 
 
-	/*	
+	/*
 	int indexOswapFD = open("../miya_db/table_files/test_table/test.oswap", O_RDWR , (mode_t)0600 );
 	miya_db::CacheTable _cacheTable( indexOswapFD );
 	// miya_db::Mapper *_mapper = _cacheTable.mapper();
@@ -554,7 +553,7 @@ int main(){
 	char *hello = "Hello World";
 	//omemcpy( tmp , (void*)hello ,12 );
 	omemcpy( tmp.get() , (void*)hello , 12 );
-	*/	
+	*/
 
 	//deallocate_test_pattern_1();
 	//common_test();

@@ -28,6 +28,7 @@ public:
 	std::shared_ptr<ValueStoreManager>	_valueStoreManager;
 	std::shared_ptr<IndexManager> _indexManager; // インデックスが保存されているマネージャーを渡す
 
+
 //public:
 	MMyISAM( std::string filePath );
 

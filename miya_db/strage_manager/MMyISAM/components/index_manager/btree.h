@@ -45,7 +45,7 @@ constexpr unsigned int DATA_OPTR_SIZE = 5; // [ bytes ]
 constexpr unsigned int NODE_OPTR_SIZE = 5; // [ bytes ]
 
 constexpr unsigned int ELEMENT_COUNT_SIZE = 1;
- 
+
 
 
 /* 要素の個数からのポインタ */
@@ -77,15 +77,15 @@ struct ONodeItemSet;
 
 
 
-struct ViewItemSet // ノードの追加の時際,分割をサポートする仮想的なアイテムセット 
+struct ViewItemSet // ノードの追加の時際,分割をサポートする仮想的なアイテムセット
 									 // ※少々オーバヘッドが大きいため,分割の際だけに使用する
 {
 	std::array< std::shared_ptr<unsigned char> , DEFAULT_KEY_COUNT+1> _key; // 分割の際に一体対象のキーも追加するためサイズはプラス１
-	std::array< std::shared_ptr<ONode> , DEFAULT_CHILD_COUNT+1> _child;
+	std::array< std::shared_ptr<optr> , DEFAULT_CHILD_COUNT+1> _childOptr;
 	std::array< std::shared_ptr<optr>, DEFAULT_DATA_OPTR_COUNT+1> _dataOPtr;
 
 	void importItemSet( std::shared_ptr<ONodeItemSet> itemSet );
-	void moveInsertChild( unsigned short index ,std::shared_ptr<ONode> target );
+	void moveInsertChildOptr( unsigned short index ,std::shared_ptr<optr> target );
 	void moveInsertDataOptr( unsigned short index , std::shared_ptr<optr> target );
 };
 
@@ -113,12 +113,12 @@ public:
 	std::shared_ptr<optr> parent();
 
 	/* 子ノード */
-	unsigned short childCount();
-	std::shared_ptr<ONode> child( unsigned short index );
-	void child( unsigned short index , std::shared_ptr<ONode> targetONode );
-	void childCount( unsigned short num );
-	void moveInsertChild( unsigned short index , std::shared_ptr<ONode> targetONode );
-	void moveDeleteChild( unsigned short index );
+	unsigned short childOptrCount();
+	std::shared_ptr<optr> childOptr( unsigned short index );
+	void childOptr( unsigned short index , std::shared_ptr<optr> targetONode );
+	void childOptrCount( unsigned short num );
+	void moveInsertChildOptr( unsigned short index , std::shared_ptr<optr> targetONode );
+	void moveDeleteChildOptr( unsigned short index );
 
 	/* キー */
 	unsigned short keyCount();
@@ -137,11 +137,11 @@ public:
 	void dataOptr( unsigned short index ,std::shared_ptr<optr> targetDataOptr );
 	void moveInsertDataOptr( unsigned short index , std::shared_ptr<optr> targetDataOptr );
 	void moveDeleteDataOptr( unsigned short index );
-	
+
 	void remove( unsigned short index ); // 子ノードは残す
 
 	std::array< std::shared_ptr<unsigned char> , DEFAULT_KEY_COUNT> *exportKeyArray();
-	std::array< std::shared_ptr<ONode> , DEFAULT_CHILD_COUNT> *exportChildArray();
+	std::array< std::shared_ptr<optr> , DEFAULT_CHILD_COUNT> *exportChildOptrArray();
 	std::array< std::shared_ptr<optr>, DEFAULT_DATA_OPTR_COUNT > *exportDataOptrArray();
 
 	void clear();
@@ -158,37 +158,40 @@ class ONode : public std::enable_shared_from_this<ONode>
 {
 private:
 	std::shared_ptr<ONodeItemSet> _itemSet;
-	std::shared_ptr<OverlayMemoryManager> _oMemoryManager;
+	std::shared_ptr<OverlayMemoryManager> _oMemoryManager; // これから新たなノードを生成する可能性がある
 	bool _isLeaf = true;
+
+protected:
+	int findIndex( std::shared_ptr<unsigned char> targetKey );
+	std::shared_ptr<ONode> subtreeMax();
+	//void matchSwap( std::shared_ptr<unsigned char> replaceFrom , std::pair<std::shared_ptr<unsigned char>, std::shared_ptr<optr>> replaceTo );
 
 public:
 	ONode( std::shared_ptr<optr> baseOptr );
 	ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager );
 	ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared_ptr<optr> baseOptr );
 
+	void overlayMemoryManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager );
+	std::shared_ptr<OverlayMemoryManager> overlayMemoryManager();
+
 	std::shared_ptr<ONode> parent();
 	void parent( std::shared_ptr<ONode> target );
-	std::shared_ptr<ONode> child( unsigned short index );
 
+	std::shared_ptr<ONode> child( unsigned short index );
 	std::shared_ptr<ONodeItemSet> itemSet();
 
 	// ルートノードが更新されるとONodeがリターンされる
 	std::shared_ptr<ONode> recursiveAdd( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<optr> targetDataOptr ,std::shared_ptr<ONode> targetONode = nullptr );
 	std::shared_ptr<optr> subtreeFind( std::shared_ptr<unsigned char> targetKey );
 	std::shared_ptr<ONode> subtreeONodeFind( std::shared_ptr<unsigned char> targetKey );
-	unsigned char* splitONode( unsigned char* targetKey );
+	//unsigned char* splitONode( unsigned char* targetKey );
 
 	void isLeaf( bool flag ){ _isLeaf = flag; };
 	bool isLeaf(){ return _isLeaf; }; // getter
 
-	void splitONode(); // キー数が閾値を超えるとスプリットする
 
-	void overlayMemoryManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager );
-	std::shared_ptr<OverlayMemoryManager> overlayMemoryManager();
-
-	int findIndex( std::shared_ptr<unsigned char> targetKey );
 	std::shared_ptr<ONode> remove( std::shared_ptr<unsigned char> targetKey );
-	std::shared_ptr<ONode> underflow( std::shared_ptr<ONode> sourceONode ); 
+	std::shared_ptr<ONode> underflow( std::shared_ptr<ONode> sourceONode );
 	// ↓
 	std::shared_ptr<ONode> merge( unsigned short index ); // ルードノードの変更が発生した場合は,戻り値として帰ってくる
 	std::shared_ptr<ONode> merge( std::shared_ptr<ONode> sourceONode );
@@ -196,18 +199,11 @@ public:
 	std::shared_ptr<ONode> recursiveMerge( std::shared_ptr<ONode> sourceONode );
 	std::shared_ptr<ONode> recursiveMerge( unsigned short index );
 
-
-	std::shared_ptr<ONode> subtreeMax();
-	void matchSwap( std::shared_ptr<unsigned char> replaceFrom , std::pair<std::shared_ptr<unsigned char>, std::shared_ptr<optr>> replaceTo );
-
 	/* 肝となるメソッド2つ */
-	void regist( unsigned char* targetKey , optr *targetDataOptr );
-
+	//void regist( unsigned char* targetKey , optr *targetDataOptr );
 
 	// 被ラップ関係からのキャストだからあまりよくない
-	std::shared_ptr<ONode> subtreeKeySearch( ONode* targetONode,unsigned char *targetKey );  // 挿入一のノードを検索してくる
-
-
+	//std::shared_ptr<ONode> subtreeKeySearch( ONode* targetONode,unsigned char *targetKey );  // 挿入一のノードを検索してくる
 };
 
 
@@ -260,6 +256,3 @@ public:
 
 
 #endif // A06C4298_986B_4258_90AC_11D64FF761CA
-
-
-

@@ -25,10 +25,10 @@ private:
         std::shared_ptr<unsigned char> _pass;
     } _pemPass;
 
-    struct 
+    struct
     {
         uint32_t _version;
-        struct 
+        struct
         {
             size_t _miningReward;
             std::string _miningText;
@@ -61,5 +61,3 @@ public:
 };
 
 #endif // F720D5DF_D04A_420E_950E_112986BF5BF9
-
-

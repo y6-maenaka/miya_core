@@ -81,7 +81,6 @@ public:
 class ValueStoreManager
 {
 
-
 private:
 
 	std::shared_ptr<OverlayMemoryManager> _dataOverlayMemoryManager; // データが保存されているファイルのマネージャー
