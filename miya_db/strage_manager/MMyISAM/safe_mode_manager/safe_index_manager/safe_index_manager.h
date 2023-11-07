@@ -21,7 +21,6 @@ class SafeOBtree;
 
 
 
-
 class SafeIndexManager : public IndexManager
 {
 

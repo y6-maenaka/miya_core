@@ -182,3 +182,7 @@
 
 
 - local strage manger にキャッシュを設ける
+
+
+
+- miya_db/safe_btreeでの静的クラス変数の使用

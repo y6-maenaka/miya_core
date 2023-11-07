@@ -28,6 +28,7 @@ add_library( MIYA_DB STATIC
 				strage_manager/MMyISAM/components/page_table/cache_manager/mapper/mapper.cpp
 				strage_manager/MMyISAM/safe_mode_manager/safe_mode_manager.cpp
 				strage_manager/MMyISAM/safe_mode_manager/safe_index_manager/safe_index_manager.cpp
+				strage_manager/MMyISAM/safe_mode_manager/safe_index_manager/safe_btree.cpp
 
 				strage_manager/MMyISAM/components/.unit_test.cpp
 

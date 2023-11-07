@@ -95,7 +95,7 @@ struct BlockHashAsKey // filterのunordered_mapのキーとして使う
 	BlockHashAsKey( unsigned char* target );
 	BlockHashAsKey( std::shared_ptr<unsigned char> target ) : BlockHashAsKey( target.get() ){};
 	bool operator==(const BlockHashAsKey& bh ) const;
-  bool operator!=(const BlockHashAsKey& bh ) const;
+  	bool operator!=(const BlockHashAsKey& bh ) const;
 
 	void printHash() const;
 };

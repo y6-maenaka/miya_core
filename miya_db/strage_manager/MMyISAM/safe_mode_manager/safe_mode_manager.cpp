@@ -13,15 +13,11 @@ namespace miya_db
 
 
 
-
-
-
-MMyISAMSafeModeManager::MMyISAMSafeModeManager( std::shared_ptr<ValueStoreManager> valueStoreManager, std::shared_ptr<IndexManager> indexManager )
+MMyISAMSafeModeManager::MMyISAMSafeModeManager( std::shared_ptr<ValueStoreManager> normalValueStoreManager, std::shared_ptr<IndexManager> normalIndexManager )
 {
-	_normalModules._valueStoreManager = valueStoreManager;
-	_normalModules._indexManager = indexManager;
+	_normalModules._valueStoreManager = normalValueStoreManager;
+	_normalModules._indexManager = normalIndexManager;
 }
-
 
 
 

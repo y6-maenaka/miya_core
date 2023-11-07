@@ -192,22 +192,15 @@ std::shared_ptr<optr> ONodeItemSet::childOptr( unsigned short index )
 {
 	// 指定インデックスのoptrを取得する
 	if( index >= (childOptrCount()) ) return nullptr;
-	/*
-	std::shared_ptr<optr> childHead = *_optr + ( CHILD_ELEMENT_OFFSET + ELEMENT_COUNT_SIZE + (index*NODE_OPTR_SIZE) );
-	std::cout << "(childOptr) Addr :: ";
-	childHead->printAddr(); std::cout << "\n";
-
-	return childHead;
-	*/
 
 	std::shared_ptr<optr> childHead = *_optr + ( CHILD_ELEMENT_OFFSET + ELEMENT_COUNT_SIZE + (index*NODE_OPTR_SIZE) );
 		
 	unsigned char oAddr[5];
 	omemcpy( oAddr , childHead , 5 );
 
-	std::shared_ptr<optr> childOptr = std::make_shared<optr>( oAddr, childHead->cacheTable() );
+	return std::make_shared<optr>( oAddr );
 			
-	return childOptr;
+	//return childOptr;
 }
 
 
@@ -373,25 +366,26 @@ std::array< std::shared_ptr<optr>, DEFAULT_DATA_OPTR_COUNT > *ONodeItemSet::expo
 
 
 
-
+/*
 ONode::ONode( std::shared_ptr<optr> baseOptr ) // これではメモリマネージャーがセットされないので必ずONodeを介すこと
 {
 	_itemSet = std::make_shared<ONodeItemSet>( baseOptr );
 }
+*/
 
 
-
-ONode::ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager )
+ONode::ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager ) // 新規作成
 {
 	_oMemoryManager = oMemoryManager;
+	if( oMemoryManager == nullptr ) return;
 
 	std::shared_ptr<optr> baseOptr = oMemoryManager->allocate( O_NODE_ITEMSET_SIZE ); // 新規作成の場合
 	_itemSet = std::make_shared<ONodeItemSet>( baseOptr );
 	_itemSet->clear(); // ゼロ埋めする
 }
 
-
-ONode::ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared_ptr<optr> baseOptr )
+// ラップ
+ONode::ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared_ptr<optr> baseOptr ) // アドレスの引き継ぎ
 {
 	_oMemoryManager = oMemoryManager;
 	_itemSet = std::make_shared<ONodeItemSet>( baseOptr );
@@ -430,6 +424,49 @@ std::shared_ptr<ONodeItemSet> ONode::itemSet()
 	return _itemSet;
 }
 
+
+
+std::shared_ptr<ONode> ONode::child( unsigned short index )
+{
+	std::shared_ptr<optr> retOptr = _itemSet->childOptr( index );
+	if( retOptr == nullptr ) return nullptr;
+
+
+	// ここでcacheTableを上書きしないとsafeファイルのoptｒを使用できない
+	retOptr->cacheTable( _oMemoryManager->dataCacheTable() ); // _oMemoryManagerよりDatacacheTableを取得する
+	//std::shared_ptr<ONode> ret = std::make_shared<ONode>(  _oMemoryManager ,retOptr );
+	return std::make_shared<ONode>( _oMemoryManager , retOptr );
+	//ret->overlayMemoryManager( _oMemoryManager ); // OverlayMemoryManagerをセットする
+
+	// return ret;
+}
+
+
+void ONode::overlayMemoryManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager )
+{
+	_oMemoryManager = oMemoryManager;
+}
+
+
+std::shared_ptr<OverlayMemoryManager> ONode::overlayMemoryManager()
+{
+	return _oMemoryManager;
+}
+
+
+
+int ONode::findIndex( std::shared_ptr<unsigned char> targetKey )
+{
+	std::shared_ptr<unsigned char> rawKey = std::shared_ptr<unsigned char>( new unsigned char[KEY_SIZE] );
+	std::shared_ptr<optr> keyOptr; int flag;
+	for( int i=0; i<_itemSet->keyCount(); i++ ){
+		keyOptr = _itemSet->key(i);  omemcpy( rawKey.get(), keyOptr, KEY_SIZE );
+		flag = memcmp( targetKey.get() , rawKey.get(), KEY_SIZE );
+
+		if( flag == 0 ) return i;
+	}
+	return -1;
+}
 
 
 
@@ -602,57 +639,6 @@ std::shared_ptr<ONode> ONode::recursiveAdd( std::shared_ptr<unsigned char> targe
 	return nullptr;
 }
 
-
-
-std::shared_ptr<ONode> ONode::child( unsigned short index )
-{
-	std::shared_ptr<optr> retOptr = _itemSet->childOptr( index );
-	if( retOptr == nullptr ) return nullptr;
-
-
-	// ここでcacheTableを上書きしないとsafeファイルのoptｒを使用できない
-	//retOptr->cacheTable( _oMemoryManager->dataCacheTable() ); // _oMemoryManagerよりDatacacheTableを取得する
-	std::shared_ptr<ONode> ret = std::make_shared<ONode>( retOptr );
-	ret->overlayMemoryManager( _oMemoryManager ); // OverlayMemoryManagerをセットする
-
-	return ret;
-}
-
-
-void ONode::overlayMemoryManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager )
-{
-	_oMemoryManager = oMemoryManager;
-}
-
-
-std::shared_ptr<OverlayMemoryManager> ONode::overlayMemoryManager()
-{
-	return _oMemoryManager;
-}
-
-
-
-	/*
-void ONode::regist( unsigned char *targetKey , optr *targetDataOptr )
-{
-
-	std::shared_ptr<ONode> insertTargetONode = subtreeKeySearch( this , targetKey );
-}
-*/
-
-
-int ONode::findIndex( std::shared_ptr<unsigned char> targetKey )
-{
-	std::shared_ptr<unsigned char> rawKey = std::shared_ptr<unsigned char>( new unsigned char[KEY_SIZE] );
-	std::shared_ptr<optr> keyOptr; int flag;
-	for( int i=0; i<_itemSet->keyCount(); i++ ){
-		keyOptr = _itemSet->key(i);  omemcpy( rawKey.get(), keyOptr, KEY_SIZE );
-		flag = memcmp( targetKey.get() , rawKey.get(), KEY_SIZE );
-
-		if( flag == 0 ) return i;
-	}
-	return -1;
-}
 
 
 std::shared_ptr<ONode> ONode::remove( std::shared_ptr<unsigned char> targetKey )

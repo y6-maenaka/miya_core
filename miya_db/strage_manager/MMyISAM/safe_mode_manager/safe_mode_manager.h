@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 
 
@@ -18,20 +19,13 @@ namespace miya_db{
 
 class ValueStoreManager;
 class IndexManager;
+class OverlayMemoryManager;
 class ONode;
+class SafeONode;
 
 
 
-using ONodeConversionEntry = std::pair< std::shared_ptr<ONode>, std::shared_ptr<unsigned char> >;
-/*
- 通常モードで使用するONodeとセーフモードで使用するSafeONodeとの変換テーブル
- ONodeはoptrで管理されており,SafeONodeは通常のポインタで管理する　その対応テーブル
- */
-struct ONodeConversionTable // optr to poitner / pointer to optr
-{
 
-private:
-};
 
 
 
@@ -58,13 +52,12 @@ private:
 	{
 		std::shared_ptr<ValueStoreManager> _valueStoreManager;
 		std::shared_ptr<IndexManager> _indexManager;
-
 	} _safeModules;
 
 
 
 public:
-	MMyISAMSafeModeManager( std::shared_ptr<ValueStoreManager> valueStoreManager, std::shared_ptr<IndexManager> indexManager );
+	MMyISAMSafeModeManager( std::shared_ptr<ValueStoreManager> normalValueStoreManager, std::shared_ptr<IndexManager> normalIndexManager );
 
 };
 
