@@ -9,7 +9,7 @@ namespace miya_db
 
 
 
-void ViewItemSet::importItemSet( std::shared_ptr<ONodeItemSet> itemSet )
+void ViewItemSet::importItemSet( const std::shared_ptr<ONodeItemSet> itemSet )
 {
 	std::array< std::shared_ptr<unsigned char>, DEFAULT_KEY_COUNT> *keySorce = itemSet->exportKeyArray(); // キーを一旦配列として書き出す
 	std::copy( keySorce->begin() ,keySorce->end() , _key.begin() ); // 上書きで大丈夫
@@ -305,6 +305,25 @@ void ONodeItemSet::moveDeleteDataOptr( unsigned short index )
 }
 
 
+void ONodeItemSet::parent( std::shared_ptr<ONode> target )
+{
+	if( target == nullptr ) // 空の場合はnull(0x00)を挿入する
+	{
+		std::cout << "親ノードが0x00に設定されます" << "\n";
+		unsigned char addrZero[NODE_OPTR_SIZE]; memset( addrZero , 0x00 , NODE_OPTR_SIZE );
+		//std::cout << sizeof(addrZero) << "\n";
+		//std::cout << NODE_OPTR_SIZE << "\n";
+		omemcpy( _optr , addrZero , sizeof(addrZero) );
+		std::cout << "親ノードアダー :: ";_optr->printAddr(); std::cout << "\n";
+		return;
+	}
+
+
+	omemcpy( _optr , target->citemSet()->Optr()->addr() , NODE_OPTR_SIZE );
+
+	return;	
+}
+
 
 void ONodeItemSet::remove( unsigned short index )
 {
@@ -380,15 +399,50 @@ ONode::ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager ) // 新規�
 	if( oMemoryManager == nullptr ) return;
 
 	std::shared_ptr<optr> baseOptr = oMemoryManager->allocate( O_NODE_ITEMSET_SIZE ); // 新規作成の場合
-	_itemSet = std::make_shared<ONodeItemSet>( baseOptr );
-	_itemSet->clear(); // ゼロ埋めする
+	itemSet( std::make_shared<ONodeItemSet>(baseOptr) );
+	itemSet()->clear();
+	//_itemSet = std::make_shared<ONodeItemSet>( baseOptr );
+	//_itemSet->clear(); // ゼロ埋めする
 }
 
 // ラップ
 ONode::ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared_ptr<optr> baseOptr ) // アドレスの引き継ぎ
 {
 	_oMemoryManager = oMemoryManager;
-	_itemSet = std::make_shared<ONodeItemSet>( baseOptr );
+	itemSet( std::make_shared<ONodeItemSet>(baseOptr) );
+	//_itemSet = std::make_shared<ONodeItemSet>( baseOptr );
+}
+
+void ONode::ItemSet::itemSet( std::shared_ptr<ONodeItemSet> target )
+{
+	_body = target;
+}
+
+const std::shared_ptr<ONodeItemSet> ONode::ItemSet::citemSet() const
+{
+	return _body;
+}
+
+std::shared_ptr<ONodeItemSet> ONode::ItemSet::itemSet()
+{
+	return _body;
+}
+
+
+void ONode::itemSet( std::shared_ptr<ONodeItemSet> target )
+{
+	_itemSet.itemSet( target ); // あまり良くない
+}
+
+
+const std::shared_ptr<ONodeItemSet> ONode::citemSet() const
+{
+	return _itemSet.citemSet();
+}
+
+std::shared_ptr<ONodeItemSet> ONode::itemSet()
+{
+	return _itemSet.itemSet();
 }
 
 
@@ -396,39 +450,15 @@ ONode::ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared
 std::shared_ptr<ONode> ONode::parent()
 {
 	//return std::make_shared<ONode>( new ONode( _itemSet->Optr()) );
-	return std::make_shared<ONode>( _oMemoryManager , _itemSet->parent() );
+	return std::make_shared<ONode>( _oMemoryManager , citemSet()->parent() );
 }
 
-
-
-
-void ONode::parent( std::shared_ptr<ONode> target )
-{
-	if( target == nullptr ) // 空の場合はnull(0x00)を挿入する
-	{
-		unsigned char *tmp = new unsigned char[NODE_OPTR_SIZE]; memset( tmp , 0x0000000000, sizeof(NODE_OPTR_SIZE) );
-		omemcpy( _itemSet->Optr() , tmp , NODE_OPTR_SIZE );
-		return;
-	}
-
-
-	omemcpy( _itemSet->Optr() , target->itemSet()->Optr()->addr() , NODE_OPTR_SIZE );
-
-	return;
-}
-
-
-
-std::shared_ptr<ONodeItemSet> ONode::itemSet()
-{
-	return _itemSet;
-}
 
 
 
 std::shared_ptr<ONode> ONode::child( unsigned short index )
 {
-	std::shared_ptr<optr> retOptr = _itemSet->childOptr( index );
+	std::shared_ptr<optr> retOptr = citemSet()->childOptr( index );
 	if( retOptr == nullptr ) return nullptr;
 
 
@@ -459,8 +489,8 @@ int ONode::findIndex( std::shared_ptr<unsigned char> targetKey )
 {
 	std::shared_ptr<unsigned char> rawKey = std::shared_ptr<unsigned char>( new unsigned char[KEY_SIZE] );
 	std::shared_ptr<optr> keyOptr; int flag;
-	for( int i=0; i<_itemSet->keyCount(); i++ ){
-		keyOptr = _itemSet->key(i);  omemcpy( rawKey.get(), keyOptr, KEY_SIZE );
+	for( int i=0; i<citemSet()->keyCount(); i++ ){
+		keyOptr = citemSet()->key(i);  omemcpy( rawKey.get(), keyOptr, KEY_SIZE );
 		flag = memcmp( targetKey.get() , rawKey.get(), KEY_SIZE );
 
 		if( flag == 0 ) return i;
@@ -473,13 +503,15 @@ int ONode::findIndex( std::shared_ptr<unsigned char> targetKey )
 
 std::shared_ptr<ONode> ONode::recursiveAdd( std::shared_ptr<unsigned char> targetKey, std::shared_ptr<optr> targetDataOptr, std::shared_ptr<ONode> targetONode )
 {
-	if( _itemSet->keyCount() >= DEFAULT_KEY_COUNT ) // ノードの分割が発生するパターン
+	std::cout << "再帰追加が実行されます" << "\n";
+
+	if( citemSet()->keyCount() >= DEFAULT_KEY_COUNT ) // ノードの分割が発生するパターン
 	{
 		auto splitONode = [&]( std::shared_ptr<unsigned char> *_targetKey , std::shared_ptr<optr> *_targetDataOptr  ,std::shared_ptr<ONode> *_targetONode ) // targetKeyとtargetONodeは入出力引数となる
 		{
 			std::cout << "ノード分割が発生します" << "\n";
 			ViewItemSet viewItemSet; // 分裂中央のコントロールが面倒なので仮想的にサイズが一つ大きいアイテムセットを用意する
-			viewItemSet.importItemSet( _itemSet ); // 仮想アイテムセットに既存のアイテムセット情報を取り込む
+			viewItemSet.importItemSet( citemSet() ); // 仮想アイテムセットに既存のアイテムセット情報を取り込む
 
 			// 一旦仮想アイテムセットに対象要素を追加する
 			viewItemSet._key.at( DEFAULT_KEY_COUNT ) = *_targetKey; // 繰り越したキーの挿入
@@ -521,35 +553,34 @@ std::shared_ptr<ONode> ONode::recursiveAdd( std::shared_ptr<unsigned char> targe
 			}
 			splitONode->itemSet()->dataOptrCount( (DEFAULT_DATA_OPTR_COUNT+1)-separatorKeyIndex-1 );
 
-			splitONode->parent( this->parent() );
+			splitONode->itemSet()->parent( this->parent() );
 
 			// 本アイテムセットは左子ノードとなる 分割対象の中央左のキーを格納する
 			for( int i=0; i<separatorKeyIndex; i++)
-				_itemSet->key( i , viewItemSet._key.at(i) );
-			_itemSet->keyCount(separatorKeyIndex);
+				itemSet()->key( i , viewItemSet._key.at(i) );
+			itemSet()->keyCount(separatorKeyIndex);
 			for( int i=0; i<separatorKeyIndex; i++) // データポインタの挿入
-				_itemSet->dataOptr( i , viewItemSet._dataOPtr.at(i) );
-			_itemSet->dataOptrCount(separatorKeyIndex);
+				itemSet()->dataOptr( i , viewItemSet._dataOPtr.at(i) );
+			itemSet()->dataOptrCount(separatorKeyIndex);
 
 	
-			if( _itemSet->childOptrCount() > 0 ) // アイテムセットに子供ノードが存在する場合は分割したノードに分ける
+			if( citemSet()->childOptrCount() > 0 ) // アイテムセットに子供ノードが存在する場合は分割したノードに分ける
 			{
 				int center = (viewItemSet._childOptr.size() % 2 == 0) ? (viewItemSet._childOptr.size()/2) : ((viewItemSet._childOptr.size()/2) );
 				for( int i=0; i<center; i++ ){
-					_itemSet->childOptr( i , viewItemSet._childOptr.at(i) ); // 分割後左ノード
+					itemSet()->childOptr( i , viewItemSet._childOptr.at(i) ); // 分割後左ノード
 				}
-				_itemSet->childOptrCount( center );
+				itemSet()->childOptrCount( center );
 
 				for( int i=center; i<viewItemSet._childOptr.size(); i++ ){
 					splitONode->itemSet()->childOptr( i - center, viewItemSet._childOptr.at(i) );
 					splitONode->itemSet()->childOptrCount(i-center+1);
 
 					if( splitONode->itemSet()->childOptr( i - center ) != nullptr ){
-						splitONode->child( i - center )->parent( splitONode ); // 分割後右ノード
+						splitONode->child( i - center )->itemSet()->parent( splitONode ); // 分割後右ノード
 					}
 				}
 				splitONode->itemSet()->childOptrCount( viewItemSet._childOptr.size() - center );
-				std::cout << "!!!! :: "; _itemSet->childOptr(0)->printAddr(); std::cout << "\n";
 			}
 
 			*_targetKey = separatorKey;
@@ -594,9 +625,9 @@ std::shared_ptr<ONode> ONode::recursiveAdd( std::shared_ptr<unsigned char> targe
 			newRootNode->itemSet()->childOptr( 1 ,targetONode->itemSet()->Optr() ); // 新規に作成したノードの追加
 			newRootNode->itemSet()->childOptrCount(2);
 
-			this->parent( newRootNode ); // 左ONodeの親はこれにセット
-			targetONode->parent( newRootNode ); // 右ONOdeの親はこれにセット
-			newRootNode->parent( nullptr ); // 新たなルートノードの親ノードは0x00(無設定)になる
+			this->itemSet()->parent( newRootNode ); // 左ONodeの親はこれにセット
+			targetONode->itemSet()->parent( newRootNode ); // 右ONOdeの親はこれにセット
+			newRootNode->itemSet()->parent( nullptr ); // 新たなルートノードの親ノードは0x00(無設定)になる
 
 			return newRootNode;  // 必ずリターンする
 		}
@@ -607,29 +638,28 @@ std::shared_ptr<ONode> ONode::recursiveAdd( std::shared_ptr<unsigned char> targe
 
 	else{ // 単純追加
 
-		_itemSet->key( _itemSet->keyCount() , targetKey );
-		_itemSet->keyCount( _itemSet->keyCount() + 1 );
-		_itemSet->sortKey();
+		itemSet()->key( citemSet()->keyCount() , targetKey );
+		itemSet()->keyCount( citemSet()->keyCount() + 1 );
+		itemSet()->sortKey();
 
 
 		unsigned short keyInsertedIndex = 0; // キー素挿入した位置を得る
 		std::shared_ptr<optr> oKey; std::shared_ptr<unsigned char> uKey = std::shared_ptr<unsigned char>( new unsigned char[20] );
-		for( int i=0; i<_itemSet->keyCount(); i++ )
+		for( int i=0; i<citemSet()->keyCount(); i++ )
 		{
-			oKey = _itemSet->key(i); omemcpy( uKey.get(), oKey , KEY_SIZE );
+			oKey = citemSet()->key(i); omemcpy( uKey.get(), oKey , KEY_SIZE );
 			if( memcmp( uKey.get(), targetKey.get(), KEY_SIZE ) == 0 ){
 				keyInsertedIndex = i;
 				break;
 			}
 		}
-		//_itemSet->dataOptr( keyInsertedIndex,  targetDataOptr );
-		_itemSet->moveInsertDataOptr( keyInsertedIndex , targetDataOptr );
-		_itemSet->dataOptrCount( _itemSet->dataOptrCount() + 1 );
+		itemSet()->moveInsertDataOptr( keyInsertedIndex , targetDataOptr );
+		itemSet()->dataOptrCount( citemSet()->dataOptrCount() + 1 );
 
 		if( targetONode != nullptr )
 		{
-			_itemSet->moveInsertChildOptr( keyInsertedIndex + 1  , targetONode->itemSet()->Optr() );
-			_itemSet->childOptrCount( _itemSet->keyCount() + 1 );
+			itemSet()->moveInsertChildOptr( keyInsertedIndex + 1  , targetONode->itemSet()->Optr() );
+			itemSet()->childOptrCount( citemSet()->keyCount() + 1 );
 		}
 
 
@@ -647,41 +677,49 @@ std::shared_ptr<ONode> ONode::remove( std::shared_ptr<unsigned char> targetKey )
 	int index = findIndex( targetKey );
 	if( index < 0 ) return nullptr;
 
-	if( _itemSet->childOptrCount() >= 1 ) // 削除対象が中間ノードであった場合
+	if( citemSet()->childOptrCount() >= 1 ) // 削除対象が中間ノードであった場合
 	{
 		std::cout << "中間ノード削除" << "\n";
 		// 対象ノードの左サブツリーから最大値(ツリー内で対象の次に大きい)を取得する
-		std::shared_ptr<ONode> subtreeMax = child(0)->subtreeMax();
-		_itemSet->key( index , subtreeMax->itemSet()->rawKey( subtreeMax->itemSet()->keyCount() - 1 ) );
-		_itemSet->dataOptr( index , subtreeMax->itemSet()->dataOptr( subtreeMax->itemSet()->dataOptrCount() - 1 ) );
+		std::shared_ptr<ONode> subtreeMax = child(0)->subtreeMax(); 
+		itemSet()->key( index , subtreeMax->itemSet()->rawKey( subtreeMax->itemSet()->keyCount() - 1 ) ); // 削除対象にサブツリーマックス要素を追加
+		itemSet()->dataOptr( index , subtreeMax->itemSet()->dataOptr( subtreeMax->itemSet()->dataOptrCount() - 1 ) );  // 削除対象にサブツリーマックス要素を追加
 
-		std::shared_ptr<ONode> candidateNewRootONode;
+		std::shared_ptr<ONode> candidateNewRootONode; // ルートノードが書き換わる場合
 		candidateNewRootONode = subtreeMax->remove( subtreeMax->itemSet()->rawKey( subtreeMax->itemSet()->keyCount() - 1 ) );
 
-		if // 無理矢理感がある
-		(
+		std::cout << "++++++++++++++++++++++++++++++++++++" << "\n";
+		if( candidateNewRootONode != nullptr )
+			OBtree::printONode( candidateNewRootONode );
+		std::cout << "++++++++++++++++++++++++++++++++++++" << "\n";
+
+		if  // ルートノードが書き換わり, 子ノードのみ直列に連結している場合
+		( // 無理矢理感がある
 			candidateNewRootONode != nullptr &&
 			candidateNewRootONode->itemSet()->keyCount() <= 0 &&
 			candidateNewRootONode->itemSet()->childOptrCount() == 1 &&
 			memcmp( candidateNewRootONode->parent()->itemSet()->Optr()->addr() , addrZero , sizeof(addrZero) ) == 0
 		)
 		{
-			candidateNewRootONode->child(0)->parent(nullptr);
+			std::cout << "ルートノードが削除されます" << "\n";
+			candidateNewRootONode->child(0)->itemSet()->parent(nullptr);
 			return candidateNewRootONode->child(0);
 		}
 
 		return candidateNewRootONode;
 	}
 
-	if( _itemSet->keyCount() > 1 || memcmp( parent()->itemSet()->Optr()->addr() , addrZero, sizeof(addrZero) ) == 0 )  // 単純削除のケース
+	// 本ノードがルートノードの場合は単純削除し,ルートノードは変更しない
+	if( citemSet()->keyCount() > 1 || memcmp( parent()->itemSet()->Optr()->addr() , addrZero, sizeof(addrZero) ) == 0 )  // 単純削除のケース
 	{
-		_itemSet->remove( index );
+		itemSet()->remove( index );
 		return nullptr;
 	}
 
+	// 本ノードがルートノードで要素が1つの場合,アイテムセットを空にしてルートノードは変更しない
 	if( memcmp( this->parent()->itemSet()->Optr()->addr(), addrZero , sizeof(addrZero)) == 0 )
 	{
-		_itemSet->moveDeleteKey(0);
+		itemSet()->moveDeleteKey(0);
 		return nullptr;
 	}
 
@@ -712,7 +750,7 @@ std::shared_ptr<ONode> ONode::underflow( std::shared_ptr<ONode> sourceONode )
 	std::cout << "\x1b[33m" << "underflowが発生しました" << "\x1b[39m" << "\n";
 	// とりあえずsourceONodeを元に,削除対象のONodeのインデックスを逆引きする(非効率)
 	int index = -1;
-	for( int i=0; i<=_itemSet->childOptrCount() - 1; i++ ){
+	for( int i=0; i<=citemSet()->childOptrCount() - 1; i++ ){
 		index = ( memcmp( sourceONode->itemSet()->Optr()->addr(), child(i)->itemSet()->Optr()->addr(), 5 ) == 0 ) ? i : -1;
 		if( index != -1 ) break;
 	}
@@ -731,14 +769,14 @@ std::shared_ptr<ONode> ONode::underflow( std::shared_ptr<ONode> sourceONode )
 	// 兄弟ノードから移動できるキーが存在するか確認する
 	if( leftChildONode != nullptr && leftChildONode->itemSet()->keyCount() >= 2 ){
 		std::cout << "左兄弟ノードからキーを移動" << "\n";
-		sourceONode->itemSet()->key( 0 , _itemSet->rawKey(index-1) );
+		sourceONode->itemSet()->key( 0 , citemSet()->rawKey(index-1) );
 		sourceONode->itemSet()->keyCount(1);
-		sourceONode->itemSet()->dataOptr( 0 , _itemSet->dataOptr(index-1) );
+		sourceONode->itemSet()->dataOptr( 0 , citemSet()->dataOptr(index-1) );
 		sourceONode->itemSet()->dataOptrCount(1);
 
-		_itemSet->key( index-1, leftChildONode->itemSet()->rawKey( leftChildONode->itemSet()->keyCount() - 1 ) ); // 最後尾を取得
+		itemSet()->key( index-1, leftChildONode->itemSet()->rawKey( leftChildONode->itemSet()->keyCount() - 1 ) ); // 最後尾を取得
 		leftChildONode->itemSet()->moveDeleteKey( leftChildONode->itemSet()->keyCount() - 1 );
-		_itemSet->dataOptr( index-1 , leftChildONode->itemSet()->dataOptr(leftChildONode->itemSet()->dataOptrCount() - 1 ) );
+		itemSet()->dataOptr( index-1 , leftChildONode->itemSet()->dataOptr(leftChildONode->itemSet()->dataOptrCount() - 1 ) );
 		leftChildONode->itemSet()->moveDeleteDataOptr( leftChildONode->itemSet()->dataOptrCount() - 1 );
 		return nullptr;
 	}
@@ -746,14 +784,14 @@ std::shared_ptr<ONode> ONode::underflow( std::shared_ptr<ONode> sourceONode )
 	{
 		std::cout << "右兄弟ノードからキーを移動" << "\n";
 		// 右ノードからキー移動
-		sourceONode->itemSet()->key( 0 , _itemSet->rawKey(index) );
+		sourceONode->itemSet()->key( 0 , citemSet()->rawKey(index) );
 		sourceONode->itemSet()->keyCount(1);
-		sourceONode->itemSet()->dataOptr( 0 , _itemSet->dataOptr(index) );
+		sourceONode->itemSet()->dataOptr( 0 , citemSet()->dataOptr(index) );
 		sourceONode->itemSet()->dataOptrCount(1);
 
-		_itemSet->key( index, rightChildONode->itemSet()->rawKey( 0 ) ); // 最後尾を取得
+		itemSet()->key( index, rightChildONode->itemSet()->rawKey( 0 ) ); // 最後尾を取得
 		rightChildONode->itemSet()->moveDeleteKey( 0 );
-		_itemSet->dataOptr( index , rightChildONode->itemSet()->dataOptr(0) );
+		itemSet()->dataOptr( index , rightChildONode->itemSet()->dataOptr(0) );
 		rightChildONode->itemSet()->moveDeleteDataOptr(0);
 
 		return nullptr;
@@ -769,7 +807,7 @@ std::shared_ptr<ONode> ONode::underflow( std::shared_ptr<ONode> sourceONode )
 std::shared_ptr<ONode> ONode::merge( std::shared_ptr<ONode> sourceONode )
 {
 	int index = -1;
-	for( int i=0; i<=_itemSet->childOptrCount() - 1; i++ ){
+	for( int i=0; i<=citemSet()->childOptrCount() - 1; i++ ){
 		index = ( memcmp( sourceONode->itemSet()->Optr()->addr(), child(i)->itemSet()->Optr()->addr(), 5 ) == 0 ) ? i : -1;
 		if( index != -1 ) break;
 	}
@@ -793,19 +831,19 @@ std::shared_ptr<ONode> ONode::merge( unsigned short index ) // mergeが呼び出
 
 	// マージの種類
 	// 1. 兄弟ノードに要素が2つ以上ある場合
-	if( _itemSet->keyCount() >= 2 )
+	if( citemSet()->keyCount() >= 2 )
 	{
 		// indexの箇所の子ノードを解消する
 		if( leftChildONode != nullptr )
 		{
 			std::cout << "左兄弟ノードマージ" << "\n";
-			_itemSet->moveDeleteChildOptr( index );
+			itemSet()->moveDeleteChildOptr( index );
 
-			leftChildONode->itemSet()->key( leftChildONode->itemSet()->keyCount() ,_itemSet->rawKey(index-1) );
+			leftChildONode->itemSet()->key( leftChildONode->itemSet()->keyCount() ,citemSet()->rawKey(index-1) );
 			leftChildONode->itemSet()->keyCount( leftChildONode->itemSet()->keyCount() + 1 );
-			_itemSet->moveDeleteKey(index-1);
+			itemSet()->moveDeleteKey(index-1);
 
-			leftChildONode->itemSet()->dataOptr( leftChildONode->itemSet()->dataOptrCount(), _itemSet->dataOptr(index-1) );
+			leftChildONode->itemSet()->dataOptr( leftChildONode->itemSet()->dataOptrCount(), citemSet()->dataOptr(index-1) );
 			leftChildONode->itemSet()->dataOptrCount( leftChildONode->itemSet()->dataOptrCount() + 1 );
 
 			//_itemSet->moveInsertChild( _itemSet->childCount(), leftChildONode->itemSet()->child( leftChildONode->itemSet()->childCount()) );
@@ -817,13 +855,13 @@ std::shared_ptr<ONode> ONode::merge( unsigned short index ) // mergeが呼び出
 		if( rightChildONode != nullptr )
 		{
 			std::cout << "右兄弟ノードマージ前処理" << "\n";
-			_itemSet->moveDeleteChildOptr( index );
+			itemSet()->moveDeleteChildOptr( index );
 
-			rightChildONode->itemSet()->moveInsertKey( 0 , _itemSet->rawKey(index) );
+			rightChildONode->itemSet()->moveInsertKey( 0 , citemSet()->rawKey(index) );
 			rightChildONode->itemSet()->keyCount( rightChildONode->itemSet()->keyCount() + 1 );
-			_itemSet->moveDeleteKey(index);
+			itemSet()->moveDeleteKey(index);
 
-			rightChildONode->itemSet()->moveInsertDataOptr( 0 , _itemSet->dataOptr(index) );
+			rightChildONode->itemSet()->moveInsertDataOptr( 0 , citemSet()->dataOptr(index) );
 			rightChildONode->itemSet()->dataOptrCount( rightChildONode->itemSet()->dataOptrCount() );
 
 			//_itemSet->moveInsertChild( _itemSet->childCount() , rightChildONode->itemSet()->child(0) );
@@ -853,7 +891,7 @@ std::shared_ptr<ONode> ONode::merge( unsigned short index ) // mergeが呼び出
 		itemSet()->moveDeleteChildOptr(index); // 子ノードの削除
 
 		if( memcmp( parent()->itemSet()->Optr()->addr(), addrZero, sizeof(addrZero)  ) == 0 ) {
-			child(0)->parent(nullptr);
+			child(0)->itemSet()->parent(nullptr);
 			return child(0);
 		}
 		//leftChildONode->itemSet()->moveInsertChild( leftChildONode->itemSet()->childCount(), itemSet()->child(index) );
@@ -878,8 +916,8 @@ std::shared_ptr<ONode> ONode::merge( unsigned short index ) // mergeが呼び出
 		itemSet()->moveDeleteChildOptr(index);
 		// ここで本ノードは空になっているはず
 
-		if( memcmp( parent()->itemSet()->Optr()->addr(), addrZero, sizeof(addrZero)  ) == 0 ){
-			child(0)->parent(nullptr);
+		if( memcmp( parent()->citemSet()->Optr()->addr(), addrZero, sizeof(addrZero)  ) == 0 ){
+			child(0)->itemSet()->parent(nullptr);
 			return child(0);
 		}
 		//rightChildONode->itemSet()->moveInsertChild( 0 , itemSet()->child(index) );
@@ -898,7 +936,7 @@ std::shared_ptr<ONode> ONode::merge( unsigned short index ) // mergeが呼び出
 std::shared_ptr<ONode> ONode::recursiveMerge( std::shared_ptr<ONode> sourceONode )
 {
 	int index = -1;
-	for( int i=0; i<=_itemSet->childOptrCount() - 1; i++ ){
+	for( int i=0; i<=citemSet()->childOptrCount() - 1; i++ ){
 		index = ( memcmp( sourceONode->itemSet()->Optr()->addr(), child(i)->itemSet()->Optr()->addr(), 5 ) == 0 ) ? i : -1;
 		if( index != -1 ) break;
 	}
@@ -913,8 +951,12 @@ std::shared_ptr<ONode> ONode::recursiveMerge( std::shared_ptr<ONode> sourceONode
 std::shared_ptr<ONode> ONode::recursiveMerge( unsigned short index ) // mergeが呼び出されて後に必ず呼び出される
 {
 	std::cout << "再帰マージが実行されます" << "\n";
-	if( _itemSet->keyCount() <= 0 ){
-		child(0)->parent(nullptr);
+	if( citemSet()->keyCount() <= 0 ){
+		std::cout << "親ノードを削除します" << "\n";
+		child(0)->itemSet()->parent(nullptr);
+
+
+		std::cout << "@@@ "; child(0)->itemSet()->parent()->printValueContinuously(5); std::cout << "\n";
 		return child(0); // 新たなルートノードを返却する
 	}
 
@@ -929,22 +971,22 @@ std::shared_ptr<ONode> ONode::recursiveMerge( unsigned short index ) // mergeが
 	{
 		std::cout << "左移動再帰マージ" << "\n";
 		// 再帰追加の際はindex要素はまだ死んでいない
-		targetONode->itemSet()->key( 0 , _itemSet->rawKey(0) );
+		targetONode->itemSet()->key( 0 , citemSet()->rawKey(0) );
 		targetONode->itemSet()->keyCount( targetONode->itemSet()->keyCount() + 1 );
-		_itemSet->keyCount(0);
-		targetONode->itemSet()->dataOptr( 0 , _itemSet->dataOptr(0) );
-		_itemSet->dataOptrCount(0);
+		itemSet()->keyCount(0);
+		targetONode->itemSet()->dataOptr( 0 , citemSet()->dataOptr(0) );
+		itemSet()->dataOptrCount(0);
 
-		_itemSet->key( 0 , leftChildONode->itemSet()->rawKey(leftChildONode->itemSet()->keyCount()) );  // 最後尾
-		_itemSet->keyCount(1);
+		itemSet()->key( 0 , leftChildONode->itemSet()->rawKey(leftChildONode->itemSet()->keyCount()) );  // 最後尾
+		itemSet()->keyCount(1);
 		leftChildONode->itemSet()->moveDeleteKey( leftChildONode->itemSet()->keyCount() );
-		_itemSet->dataOptr( 0 , leftChildONode->itemSet()->dataOptr(leftChildONode->itemSet()->dataOptrCount()) );
-		_itemSet->dataOptrCount(1);
+		itemSet()->dataOptr( 0 , leftChildONode->itemSet()->dataOptr(leftChildONode->itemSet()->dataOptrCount()) );
+		itemSet()->dataOptrCount(1);
 		leftChildONode->itemSet()->moveDeleteDataOptr(leftChildONode->itemSet()->dataOptrCount());
 
 		targetONode->itemSet()->moveInsertChildOptr( 0, leftChildONode->child(leftChildONode->itemSet()->childOptrCount())->itemSet()->Optr() );
 		targetONode->itemSet()->childOptrCount( targetONode->itemSet()->childOptrCount() + 1 );
-		targetONode->child( 0 )->parent( targetONode );
+		targetONode->child( 0 )->itemSet()->parent( targetONode );
 		//printf("%p\n", targetONode->itemSet()->child( targetONode->itemSet()->childCount()).get() );
 		leftChildONode->itemSet()->moveDeleteChildOptr( leftChildONode->itemSet()->childOptrCount() );
 		return nullptr;
@@ -955,32 +997,34 @@ std::shared_ptr<ONode> ONode::recursiveMerge( unsigned short index ) // mergeが
 	{
 		std::cout << "右移動再帰マージ" << "\n";
 		// 再帰追加の際はindex要素はまだ死んでいない
-		targetONode->itemSet()->key( 0 , _itemSet->rawKey(0) );
+		targetONode->itemSet()->key( 0 , citemSet()->rawKey(0) );
 		targetONode->itemSet()->keyCount( targetONode->itemSet()->keyCount() + 1 );
-		_itemSet->keyCount(0);
-		targetONode->itemSet()->dataOptr( 0 , _itemSet->dataOptr(0) );
-		_itemSet->dataOptrCount(0);
+		itemSet()->keyCount(0);
+		targetONode->itemSet()->dataOptr( 0 , citemSet()->dataOptr(0) );
+		itemSet()->dataOptrCount(0);
 
-		_itemSet->key( 0 , rightChildONode->itemSet()->rawKey(0) );
-		_itemSet->keyCount(1);
+		itemSet()->key( 0 , rightChildONode->itemSet()->rawKey(0) );
+		itemSet()->keyCount(1);
 		rightChildONode->itemSet()->moveDeleteKey(0);
-		_itemSet->dataOptr( 0 , rightChildONode->itemSet()->dataOptr(0) );
-		_itemSet->dataOptrCount(1);
+		itemSet()->dataOptr( 0 , rightChildONode->itemSet()->dataOptr(0) );
+		itemSet()->dataOptrCount(1);
 		rightChildONode->itemSet()->moveDeleteDataOptr(0);
 
 		targetONode->itemSet()->moveInsertChildOptr( targetONode->itemSet()->childOptrCount(), rightChildONode->child(0)->itemSet()->Optr() );
 		targetONode->itemSet()->childOptrCount( targetONode->itemSet()->childOptrCount() + 1 );
-		targetONode->child( targetONode->itemSet()->childOptrCount() - 1 )->parent( targetONode );
+		targetONode->child( targetONode->itemSet()->childOptrCount() - 1 )->itemSet()->parent( targetONode );
 		//printf("%p\n", targetONode->itemSet()->child( targetONode->itemSet()->childCount()).get() );
 		rightChildONode->itemSet()->moveDeleteChildOptr(0);
 		return nullptr;
 	}
 
+
+
 	// 最終手段
 	if( leftChildONode != nullptr )
 	{
 		std::cout << "トップレベル左再帰マージ" << "\n";
-		leftChildONode->itemSet()->moveInsertKey( leftChildONode->itemSet()->keyCount(), _itemSet->rawKey(index-1) );
+		leftChildONode->itemSet()->moveInsertKey( leftChildONode->itemSet()->keyCount(), citemSet()->rawKey(index-1) );
 		leftChildONode->itemSet()->keyCount( leftChildONode->itemSet()->keyCount() + 1 );
 		itemSet()->moveDeleteKey(index-1);
 
@@ -990,11 +1034,19 @@ std::shared_ptr<ONode> ONode::recursiveMerge( unsigned short index ) // mergeが
 
 		leftChildONode->itemSet()->moveInsertChildOptr( leftChildONode->itemSet()->childOptrCount() , targetONode->child(0)->itemSet()->Optr() );
 		leftChildONode->itemSet()->childOptrCount( leftChildONode->itemSet()->childOptrCount() + 1 );
-		leftChildONode->child( leftChildONode->itemSet()->childOptrCount() - 1 )->parent( leftChildONode );
+		leftChildONode->child( leftChildONode->itemSet()->childOptrCount() - 1 )->itemSet()->parent( leftChildONode );
 
-		_itemSet->moveDeleteChildOptr(index);
+		itemSet()->moveDeleteChildOptr(index);
 
-		if( _itemSet->keyCount() <= 0 ) return child(0); // ルートノード変更
+
+		std::cout << "@@ トップレベル左再帰マージ" << "\n";
+		OBtree::printONode( child(0) );
+		std::cout << "ctimeSet()->keyCount() :: " << citemSet()->keyCount() << "\n";
+
+		if( citemSet()->keyCount() <= 0 ){
+			child(0)->itemSet()->parent(nullptr);
+			return child(0); // ルートノード変更
+		} 
 		return nullptr; // ルートノードの変更は発生しない
 
 	}
@@ -1013,11 +1065,14 @@ std::shared_ptr<ONode> ONode::recursiveMerge( unsigned short index ) // mergeが
 
 		rightChildONode->itemSet()->moveInsertChildOptr( 0 , targetONode->child(0)->itemSet()->Optr() );
 		rightChildONode->itemSet()->childOptrCount( rightChildONode->itemSet()->childOptrCount() + 1 );
-		rightChildONode->child( rightChildONode->itemSet()->childOptrCount() - 1 )->parent( rightChildONode );
+		rightChildONode->child( rightChildONode->itemSet()->childOptrCount() - 1 )->itemSet()->parent( rightChildONode );
 
-		_itemSet->moveDeleteChildOptr(index);
+		itemSet()->moveDeleteChildOptr(index);
 
-		if( _itemSet->keyCount() <= 0 ) return child(0);
+		if( citemSet()->keyCount() <= 0 ){
+			child(0)->itemSet()->parent(nullptr);
+			return child(0);
+		} 
 		return nullptr;
 	}
 
@@ -1027,8 +1082,8 @@ std::shared_ptr<ONode> ONode::recursiveMerge( unsigned short index ) // mergeが
 
 std::shared_ptr<ONode> ONode::subtreeMax()
 {
-	if( _itemSet->childOptrCount() >= 1 ) // 本ノードに子ノードが存在すれば,最大の子ノードを再帰的に探索する
-	 return child( _itemSet->childOptrCount() - 1 )->subtreeMax();
+	if( citemSet()->childOptrCount() >= 1 ) // 本ノードに子ノードが存在すれば,最大の子ノードを再帰的に探索する
+	 return child( citemSet()->childOptrCount() - 1 )->subtreeMax();
 
 	return shared_from_this();
 }
@@ -1058,9 +1113,9 @@ std::shared_ptr<ONode> ONode::subtreeONodeFind( std::shared_ptr<unsigned char> t
 	std::shared_ptr<unsigned char> rawKey = std::shared_ptr<unsigned char>( new unsigned char[KEY_SIZE] );
 	int flag;
 
-	for( int i=0; i<_itemSet->keyCount(); i++ )
+	for( int i=0; i<citemSet()->keyCount(); i++ )
 	{
-		rawKey = _itemSet->rawKey(i);
+		rawKey = citemSet()->rawKey(i);
 		flag = memcmp( targetKey.get() , rawKey.get() , KEY_SIZE );
 
 		if( flag < 0 ){
@@ -1073,7 +1128,7 @@ std::shared_ptr<ONode> ONode::subtreeONodeFind( std::shared_ptr<unsigned char> t
 		}
 	}
 
-	candidateChild = child( _itemSet->childOptrCount() -1 );
+	candidateChild = child( itemSet()->childOptrCount() -1 );
 	if( candidateChild == nullptr ) return nullptr;
 
 	direct:
@@ -1091,9 +1146,9 @@ std::shared_ptr<optr> ONode::subtreeFind( std::shared_ptr<unsigned char> targetK
 	std::shared_ptr<unsigned char> rawKey = std::shared_ptr<unsigned char>( new unsigned char[5] );
 	int flag;
 
-	for( int i=0; i<_itemSet->keyCount(); i++ )
+	for( int i=0; i<citemSet()->keyCount(); i++ )
 	{
-		keyOptr = _itemSet->key(i); omemcpy( rawKey.get(), keyOptr , 5 );
+		keyOptr = citemSet()->key(i); omemcpy( rawKey.get(), keyOptr , 5 );
 		flag = memcmp( targetKey.get() , rawKey.get() , 5 );
 
 
@@ -1103,12 +1158,12 @@ std::shared_ptr<optr> ONode::subtreeFind( std::shared_ptr<unsigned char> targetK
 			goto direct;
 		}
 		else if( flag == 0 ){
-			return _itemSet->dataOptr(i);
+			return citemSet()->dataOptr(i);
 		}
 	}
 
 
-	candidateChild = child( _itemSet->childOptrCount() -1 );
+	candidateChild = child( citemSet()->childOptrCount() -1 );
 	if( candidateChild == nullptr ) return nullptr;
 
 	direct:
