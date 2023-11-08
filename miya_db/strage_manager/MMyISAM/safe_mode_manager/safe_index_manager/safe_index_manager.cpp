@@ -1,31 +1,48 @@
 #include "safe_index_manager.h"
 
+#include "./safe_o_node.h"
 #include "./safe_btree.h"
+#include "../../components/page_table/overlay_memory_manager.h"
 
 
 namespace miya_db
 {
 
-std::shared_ptr<SafeONode> ONodeConversionTable::ref( std::shared_ptr<SafeONode> target )
-{
-    auto itr = _entryMap.find( target );
-    if( itr == _entryMap.end() ) return target; // 変換テーブルに要素が存在しなかった場合は,targetを返却する
 
-    return itr->second; // 変換テーブルに要素が存在した場合
+ONodeConversionTable SafeONode::_conversionTable = ONodeConversionTable( nullptr );
+
+
+
+SafeIndexManager::SafeIndexManager( std::shared_ptr<ONode> normalRootONode )
+{
+    std::string systemSafeDirectories = "../miya_db/table_fiels/.system/safe"; // あとでグローバルに静的に定義する
+    // OverlayMemoryManagerの作成
+    std::shared_ptr<OverlayMemoryManager> safeOverlayMemoryManager = std::make_shared<OverlayMemoryManager>( systemSafeDirectories );
+
+   SafeIndexManager::_masterBtree = std::make_shared<SafeOBtree>( normalRootONode );
 }
 
 
-void ONodeConversionTable::regist( std::shared_ptr<SafeONode> key , std::shared_ptr<SafeONode> value )
+
+void SafeIndexManager::add( std::shared_ptr<unsigned char> key , std::shared_ptr<optr> dataOptr )
 {
-    // コピーを作成する
-
-    _entryMap[key] = value;
-
-
-    // ここでONodeとマッピングされるSafeONodeはメンバの optrとoMemoryManager がsafeModeのものになっている
+    return;
 }
 
 
+
+
+
+void SafeIndexManager::remove( std::shared_ptr<unsigned char> key )
+{
+    return;
+}
+
+
+std::shared_ptr<optr> SafeIndexManager::find( std::shared_ptr<unsigned char> key )
+{
+    return nullptr;
+}
 
 
 

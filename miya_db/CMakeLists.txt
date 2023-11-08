@@ -11,7 +11,9 @@ add_library( MIYA_DB STATIC
 
 
 				strage_manager/MMyISAM/components/index_manager/btree.cpp
+				strage_manager/MMyISAM/components/index_manager/o_node.cpp
 				strage_manager/MMyISAM/components/index_manager/index_manager.cpp
+				strage_manager/MMyISAM/components/index_manager/normal_index_manager.cpp
 
 				strage_manager/MMyISAM/components/page_table/page_table.cpp
 				strage_manager/MMyISAM/components/page_table/overlay_ptr.cpp
@@ -28,7 +30,8 @@ add_library( MIYA_DB STATIC
 				strage_manager/MMyISAM/components/page_table/cache_manager/mapper/mapper.cpp
 				strage_manager/MMyISAM/safe_mode_manager/safe_mode_manager.cpp
 				strage_manager/MMyISAM/safe_mode_manager/safe_index_manager/safe_index_manager.cpp
-				strage_manager/MMyISAM/safe_mode_manager/safe_index_manager/safe_btree.cpp
+				strage_manager/MMyISAM/safe_mode_manager/safe_index_manager/safe_o_node.cpp
+				strage_manager/MMyISAM/safe_mode_manager/safe_index_manager/safe_btree.h
 
 				strage_manager/MMyISAM/components/.unit_test.cpp
 

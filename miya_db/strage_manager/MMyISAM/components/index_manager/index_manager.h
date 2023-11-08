@@ -1,39 +1,41 @@
-#ifndef CD358C3C_D694_4AD5_922A_7558220922B5
-#define CD358C3C_D694_4AD5_922A_7558220922B5
+#ifndef D4434870_B0A9_4BF6_BF2D_11DC9C256726
+#define D4434870_B0A9_4BF6_BF2D_11DC9C256726
 
 
 #include <memory>
-#include <iostream>
 
-namespace miya_db{
-class PageTableManager;
-class OverlayMemoryManager;
-class OBtreeNode;
-class OBtree;
+
+namespace miya_db
+{
+
+
 class optr;
 
 
+class IndexManager
+{
 
-class IndexManager{
-
-//private:
 public:
-	std::shared_ptr<OBtree> _masterBtree; // バックアップファイルから起動する場合は
-
-//public:
-
-	IndexManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager );
-
-	// 基本的に操作系は２通り deleteは未実装
-	void add( std::shared_ptr<unsigned char> key , std::shared_ptr<optr> dataOptr );
-	void remove( std::shared_ptr<unsigned char> key );
-	std::shared_ptr<optr> find( std::shared_ptr<unsigned char> key );
+    virtual void add( std::shared_ptr<unsigned char> key , std::shared_ptr<optr> dataOptr ) = 0;
+    virtual void remove( std::shared_ptr<unsigned char> key ) = 0;
+    virtual std::shared_ptr<optr> find( std::shared_ptr<unsigned char> key ) = 0; 
 };
 
 
-}; // close miya_db namespace
 
 
 
-#endif // CD358C3C_D694_4AD5_922A_7558220922B5
+
+
+
+};
+
+
+
+
+
+
+#endif // D4434870_B0A9_4BF6_BF2D_11DC9C256726
+
+
 

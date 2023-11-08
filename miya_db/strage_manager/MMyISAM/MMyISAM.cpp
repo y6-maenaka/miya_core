@@ -8,9 +8,13 @@
 #include "./components/page_table/cache_manager/mapper/mapper.h"
 
 #include "./components/index_manager/index_manager.h"
+#include "./components/index_manager/normal_index_manager.h"
+
 #include "./components/value_store_manager/value_store_manager.h"
 
 #include "../../miya_db/query_context/query_context.h"
+
+#include "./safe_mode_manager/safe_index_manager/safe_index_manager.h"
 
 namespace miya_db
 {
@@ -22,14 +26,20 @@ MMyISAM::MMyISAM( std::string filePath )
     // 1. memoryManager
     // 2. indexManager
 
-    // データストアの初期化
+
+   // データストアの初期化
     std::shared_ptr<OverlayMemoryManager> dataOverlayMemoryManager = std::shared_ptr<OverlayMemoryManager>( new OverlayMemoryManager(filePath) );
-		_valueStoreManager = std::shared_ptr<ValueStoreManager>( new ValueStoreManager(dataOverlayMemoryManager) );
+	_normal._valueStoreManager = std::shared_ptr<ValueStoreManager>( new ValueStoreManager(dataOverlayMemoryManager) );
 
     // インデックスの初期化
     filePath += "_index";
     std::shared_ptr<OverlayMemoryManager> indexOverlayMemoryManager = std::shared_ptr<OverlayMemoryManager>( new OverlayMemoryManager(filePath) );
-    _indexManager = std::shared_ptr<IndexManager>( new IndexManager(indexOverlayMemoryManager) );
+    _normal._indexManager = std::shared_ptr<IndexManager>( new NormalIndexManager(indexOverlayMemoryManager) );
+
+
+	// 初回起動時は通常モードで起動する
+	_valueStoreManager = _normal._valueStoreManager.get(); 
+	_indexManager = dynamic_cast<IndexManager*>(_normal._indexManager.get());
 
 }
 
@@ -39,7 +49,7 @@ MMyISAM::MMyISAM( std::string filePath )
 bool MMyISAM::add( std::shared_ptr<QueryContext> qctx )
 {
     // データの保存
-		std::shared_ptr<optr> storeTarget = _valueStoreManager->add( qctx ); // 先にデータ()を配置する
+	std::shared_ptr<optr> storeTarget = _valueStoreManager->add( qctx ); // 先にデータ()を配置する
 
     // インデックスの作成
     _indexManager->add( qctx->key() , storeTarget );
@@ -51,7 +61,7 @@ bool MMyISAM::add( std::shared_ptr<QueryContext> qctx )
 
 
 
-		return true;
+	return true;
 }
 
 
