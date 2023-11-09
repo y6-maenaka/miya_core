@@ -27,49 +27,6 @@ void DatabaseManager::loadInformationSchema( char *path )
 
 
 
-
-void DatabaseManager::startQueryHandleThread( bool isAdditionalThread )
-{
-	/*
-	std::thread queryHanalder( [&](){
-		std::cout << "query handler started" << "\n";
-
-		unsigned char* segment;  unsigned int segmentSize;
-
-		int availableSpace = 0;
-
-		if( isAdditionalThread ){
-			for( int i=0; i<3; i++) // 3回ブロッキングなしでバッファをチェックしていずれも空だったら,そのスレッドは破棄する
-			{ 
-			 	availableSpace =	_inbandMiddleBuffer->popOne() &segment , &segmentSize , false ;
-				if( avaiableSpace > 0 ) break;
-				else continue;
-
-				std::this_thread::sleep_for(std::chrono::milliseconds(500));
-			}
-			if( avaiableSpace <= 0 ) return; // ３回バッファに問い合わせても空だったらリターンする
-
-		}else{
-			availableSpace = _inbandMiddleBuffer->popOne( &segment , &segmentSize , true );
-		}
-
-		if( (( avaiableSpace / _inbandMiddleBuffer->_bufferSize )*100)  >= 30 ){ // バッファ使用率が任意の値を超えたら
-			_startQueryHandleThread( true ); // 追加ハンドラの起動
-		}
-
-			
-		QueryPack *queryPack = new QueryPack;
-		queryPack->importRaw( segment , segmentSize );
-		delete segment;
-
-
-		
-		delete queryPack;
-	});
-	*/
-}
-
-
 void DatabaseManager::hello()
 {
 	
@@ -92,8 +49,6 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 		
 		int flag;
 		std::shared_ptr<QueryContext> qctx;
-
-
 
 		auto failureSB = []( std::shared_ptr<QueryContext> qctx ) -> std::unique_ptr<SBSegment>
 		{
@@ -121,8 +76,6 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 			// 1. ポップ
 			sbSegment = incomingSBC->popOne();
 			std::cout << "(MiyaDB) Query Poped" << "\n";
-			printf("%p\n", sbSegment.get() );
-			printf("%p - %d\n", sbSegment->body().get(), sbSegment->bodyLength() );
 
 			// クエリの取り出し
 			//  クエリの解析と対応する操作メソッドの呼び出し
@@ -130,7 +83,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 
 			std::cout << "(MiyaDB) Query Parsed" << "\n";
 
-			if( qctx == nullptr ) { // クエリメッセージの解析に失敗した場合
+			if( qctx == nullptr || qctx->type() < 0 ) { // クエリメッセージの解析に失敗した場合
 				sbSegment = failureSB( qctx );
 				std::cout << "(MiyaDB) Handle query failure" << "\n";
 				goto direct;
@@ -161,9 +114,6 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 					break;
 				}
 			
-
-
-
 
 				case QUERY_SELECT: // 2 get
 				{
@@ -219,6 +169,36 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 					responseJson["QueryID"] = qctx->id();
 					responseJson["status"] = flag;
 
+					break;
+				}
+
+
+				case QUERY_SWITCH_TO_SAFE_MODE:
+				{
+					std::cout << "## (HANDLE) QUERY_SWITCH_TO_SAFE_MODE" << "\n";
+
+					flag = mmyisam->switchToSafeMode();
+					responseJson["QueryID"] = qctx->id();
+					responseJson["status"] = flag;
+					break;
+				}
+				case QUERY_SAFE_MODE_COMMIT:
+				{
+					std::cout << "## (HANDLE) QUERY_SAFE_MODE_COMMIT" << "\n";
+
+					flag = mmyisam->safeCommitExit();
+					responseJson["QueryID"] = qctx->id();
+					responseJson["status"] = flag;
+					break;
+				}
+
+				case QUERY_SAFE_MODE_ABORT:
+				{
+					std::cout << "## (HANDLE) QUERY_SAFE_MODE_ABORT" << "\n";
+
+					flag = mmyisam->safeAbortExit();
+					responseJson["QueryID"] = qctx->id();
+					responseJson["status"] = flag;
 					break;
 				}
 

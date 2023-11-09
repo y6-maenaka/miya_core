@@ -22,20 +22,12 @@ namespace miya_db
 
 MMyISAM::MMyISAM( std::string filePath )
 {   
-    // 初期化の順番は
-    // 1. memoryManager
-    // 2. indexManager
-
-
    // データストアの初期化
-    std::shared_ptr<OverlayMemoryManager> dataOverlayMemoryManager = std::shared_ptr<OverlayMemoryManager>( new OverlayMemoryManager(filePath) );
-	_normal._valueStoreManager = std::shared_ptr<ValueStoreManager>( new ValueStoreManager(dataOverlayMemoryManager) );
+	_normal._valueStoreManager = std::make_shared<ValueStoreManager>( filePath );
 
     // インデックスの初期化
     filePath += "_index";
-    std::shared_ptr<OverlayMemoryManager> indexOverlayMemoryManager = std::shared_ptr<OverlayMemoryManager>( new OverlayMemoryManager(filePath) );
-    _normal._indexManager = std::shared_ptr<IndexManager>( new NormalIndexManager(indexOverlayMemoryManager) );
-
+	_normal._indexManager = std::make_shared<NormalIndexManager>( filePath );
 
 	// 初回起動時は通常モードで起動する
 	_valueStoreManager = _normal._valueStoreManager.get(); 
@@ -51,7 +43,7 @@ bool MMyISAM::add( std::shared_ptr<QueryContext> qctx )
     // データの保存
 	std::shared_ptr<optr> storeTarget = _valueStoreManager->add( qctx ); // 先にデータ()を配置する
 
-    // インデックスの作成
+	// インデックスの作成
     _indexManager->add( qctx->key() , storeTarget );
 
 	std::cout << "\x1b[36m" << "(MiyaDB) add with key :: ";
@@ -59,6 +51,15 @@ bool MMyISAM::add( std::shared_ptr<QueryContext> qctx )
 		printf("%02X", qctx->key().get()[i]);
 	} std::cout << "\x1b[39m" << "\n";
 
+
+	std::cout << "-----------------------------------------------------------------------" << "\n";
+	std::cout << "[ NormalIndexManager ]" << "\n";
+	_indexManager->printIndexTree();
+	std::cout << "-----------------------------------------------------------------------" << "\n";
+	std::cout << "[ IndexManager ( Normal or Safe ) ] :: ";
+	if( _isSafeMode ) std::cout << "safe" << "\n";
+	else std::cout << "normal"  << "\n";
+	std::cout << "-----------------------------------------------------------------------" << "\n";
 
 
 	return true;
@@ -76,14 +77,14 @@ bool MMyISAM::get( std::shared_ptr<QueryContext> qctx )
 	} std::cout << "\x1b[39m" << "\n";
 
 
-		if( dataOptr == nullptr ) return false;
-		size_t dataLength; std::shared_ptr<unsigned char> data;
+	if( dataOptr == nullptr ) return false;
+	size_t dataLength; std::shared_ptr<unsigned char> data;
 
-		dataLength = _valueStoreManager->get( dataOptr , &data );
+	dataLength = _valueStoreManager->get( dataOptr , &data );
 
-		qctx->value( data , dataLength );
+	qctx->value( data , dataLength );
 
-		return true;
+	return true;
 }
 
 
@@ -116,6 +117,61 @@ bool MMyISAM::exists( std::shared_ptr<QueryContext> qctx )
 	return true; // キーが存在しない : true
 }
 
+
+
+bool MMyISAM::switchToSafeMode()
+{
+	if( _isSafeMode ) return false;
+
+	//std::shared_ptr<SafeIndexManager> safeIndexManager = std::shared_ptr<SafeIndexManager>( new SafeIndexManager(_normal._indexManager->masterBtree()) );
+	SafeIndexManager* safeIndexManager = new SafeIndexManager( _normal._indexManager->masterBtree() );
+	/* SafeIndexManager は内部で関連ファイルを削除&フォーマットするので明示的にclearする必要はない */
+
+	// あとでファイル名はハードコードする
+	ValueStoreManager* valueStoreManager = new ValueStoreManager{std::string("../miya_db/table_files/.system/safe/safe")};
+	valueStoreManager->clear();
+
+	_indexManager = dynamic_cast<IndexManager*>( safeIndexManager );
+	_valueStoreManager = valueStoreManager;
+
+	_isSafeMode = true;
+
+	std::cout << "セーフモードに切り替わりました" << "\n";
+	std::cout << _isSafeMode << "\n";
+}
+
+
+bool MMyISAM::safeCommitExit()
+{
+	if( !_isSafeMode ) return false;
+	/*
+	 	ここでsafeModeをコミットする
+	*/
+
+	delete _indexManager; 
+	delete _valueStoreManager;
+
+	_indexManager = dynamic_cast<IndexManager*>( _normal._indexManager.get() );
+	_valueStoreManager = dynamic_cast<ValueStoreManager*>( _normal._valueStoreManager.get() );
+
+	_isSafeMode = false;
+}
+
+
+bool MMyISAM::safeAbortExit()
+{
+	if( !_isSafeMode ) return false;
+	/*
+		ここでsafeModeをabortする
+	*/
+	delete _indexManager;
+	delete _valueStoreManager;
+
+	_indexManager = dynamic_cast<IndexManager*>( _normal._indexManager.get() );
+	_valueStoreManager = dynamic_cast<ValueStoreManager*>( _normal._valueStoreManager.get() );
+
+	_isSafeMode = false;
+}
 
 
 

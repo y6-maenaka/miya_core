@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <iostream>
+#include <string>
 
 
 namespace miya_db{
@@ -19,18 +20,23 @@ class optr;
 class NormalIndexManager : public IndexManager
 {
 
-//private:
-public:
+private:
 	std::shared_ptr<OBtree> _masterBtree; // バックアップファイルから起動する場合は
+	std::shared_ptr<OverlayMemoryManager> _oMemoryManager; 
 
-//public:
+public:
+	const std::shared_ptr<OBtree> masterBtree();
 
-	NormalIndexManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager );
+	NormalIndexManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager ); // 基本的にこのコンストラクタは使わない
+	NormalIndexManager( std::string indexFilePath );
+	virtual ~NormalIndexManager(){};
 
 	// 基本的に操作系は２通り deleteは未実装
-	void add( std::shared_ptr<unsigned char> key , std::shared_ptr<optr> dataOptr );
-	void remove( std::shared_ptr<unsigned char> key );
-	std::shared_ptr<optr> find( std::shared_ptr<unsigned char> key );
+	void add( std::shared_ptr<unsigned char> key , std::shared_ptr<optr> dataOptr ) override;
+	void remove( std::shared_ptr<unsigned char> key ) override;
+	std::shared_ptr<optr> find( std::shared_ptr<unsigned char> key ) override;
+
+	void printIndexTree();
 };
 
 

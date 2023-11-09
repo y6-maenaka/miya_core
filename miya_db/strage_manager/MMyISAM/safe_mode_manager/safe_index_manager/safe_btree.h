@@ -22,6 +22,8 @@ private:
 public:
     SafeOBtree( std::shared_ptr<ONode> normalRootONode );
     const std::shared_ptr<SafeONode> rootONode();
+
+    void hello();
 };
 
 

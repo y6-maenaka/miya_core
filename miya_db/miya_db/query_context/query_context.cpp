@@ -9,6 +9,7 @@ void QueryContext::key( std::shared_ptr<unsigned char> key , size_t keyLength )
 {
 	_data._key = key;
 	_data._keyLength = keyLength;
+
 }
 
 
@@ -22,6 +23,17 @@ void QueryContext::value( std::shared_ptr<unsigned char> data , size_t dataLengt
 }
 
 
+
+int QueryContext::type()
+{
+	return _type;
+}
+
+
+void QueryContext::type( int target )
+{
+	_type = target;
+}
 
 
 std::shared_ptr<unsigned char> QueryContext::key()

@@ -27,46 +27,14 @@
 #include <memory>
 #include <string>
 
+#include <mutex>
+#include <condition_variable>
 
 
 
-int main(){
 
-
-	std::shared_ptr<miya_db::OverlayMemoryManager> oMemoryManager = std::make_shared<miya_db::OverlayMemoryManager>( std::string("../miya_db/table_files/test/test") );
-	miya_db::OBtree btree( oMemoryManager );
-
-	/*
-	miya_db::DatabaseManager dbManager;
-
-	std::shared_ptr<StreamBufferContainer> toUTxODBSBC = std::make_shared<StreamBufferContainer>();
-	std::shared_ptr<StreamBufferContainer> fromUTXoDBSBC = std::make_shared<StreamBufferContainer>();
-	dbManager.startWithLightMode( toUTxODBSBC , fromUTXoDBSBC , "../miya_db/table_files/test_utxo/test_utxo");
-
-
-	miya_chain::LightUTXOSet utxoSet( toUTxODBSBC , fromUTXoDBSBC );
-
-	std::shared_ptr<unsigned char> txID_1 = std::shared_ptr<unsigned char>( new unsigned char[32] );
-	memcpy( txID_1.get() , "aaaaaaaaaabbbbbbbbbbccccccccccdd", 32 );
-	uint32_t index_1 = htonl(10);
-
-	std::shared_ptr<tx::TxOut> txOut_1 = std::make_shared<tx::TxOut>();
-	txOut_1->value( 2023 );
-
-	std::cout << "before value :: " << txOut_1->value() << "\n";
-	utxoSet.add( txOut_1, txID_1 , index_1 );
-
-	std::cout << "\n\n\n\n\n\n\n\n\n\n-----------------------------------" << "\n";
-
-	std::shared_ptr<miya_chain::UTXO> utxo_1;
-	utxoSet.remove( txID_1 , index_1 );
-	utxo_1 = utxoSet.get( txID_1 , index_1 );
-	if( utxo_1 != nullptr )
-		std::cout << "after value :: " << utxo_1->amount() << "\n";
-	else
-		std::cout << "utxoが見つかりません" << "\n";
-
-	*/
+int main()
+{
 
 	auto generateKey = ([&]( const char *key ) -> std::shared_ptr<unsigned char>
 	{
@@ -75,117 +43,96 @@ int main(){
 		return ret;
 	});
 
-	/*
-	std::shared_ptr<unsigned char> key_1 = generateKey("gggggggggggggggggggg"); // 0x67
-	btree.add( key_1 , nullptr );
-
-	std::shared_ptr<unsigned char> key_2 = generateKey("cccccccccccccccccccc"); // 0x63
-	btree.add( key_2 , nullptr );
-
-	std::shared_ptr<unsigned char> key_3 = generateKey("pppppppppppppppppppp"); // 0x70
-	btree.add( key_3 , nullptr );
-
-	std::shared_ptr<unsigned char> key_4 = generateKey("bbbbbbbbbbbbbbbbbbbb"); // 0x62
-	btree.add( key_4 , nullptr );
-
-	std::shared_ptr<unsigned char> key_5 = generateKey("aaaaaaaaaaaaaaaaaaaa"); // 0x61
-	btree.add( key_5 , nullptr );
-
-	std::shared_ptr<unsigned char> key_6 = generateKey("dddddddddddddddddddd"); // 0x64
-	btree.add( key_6, nullptr );
-
-	std::shared_ptr<unsigned char> key_7 = generateKey("zzzzzzzzzzzzzzzzzzzz");
-	btree.add( key_7, nullptr );
-
-	std::shared_ptr<unsigned char> key_8 = generateKey("eeeeeeeeeeeeeeeeeeee"); // 0x65
-	btree.add(key_8, nullptr);
-
-	std::shared_ptr<unsigned char> key_9 = generateKey("jjjjjjjjjjjjjjjjjjjj");
-	btree.add( key_9 , nullptr );
-
-	std::shared_ptr<unsigned char> key_10 = generateKey("hhhhhhhhhhhhhhhhhhhh");
-	btree.add( key_10 , nullptr );
-
-	std::shared_ptr<unsigned char> key_11 = generateKey("kkkkkkkkkkkkkkkkkkkk");
-	btree.add( key_11, nullptr );
-
-	std::shared_ptr<unsigned char> key_12 = generateKey("mmmmmmmmmmmmmmmmmmmm");
-	btree.add( key_12 , nullptr );
 
 
-	btree.remove( key_4 );
-	std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n-----------------------------------" << "\n";
-
-	//btree.remove( key_9 );
-	// btree.remove( key_2 );
-	*/
+	std::shared_ptr<miya_db::DatabaseManager> dbManager = std::make_shared<miya_db::DatabaseManager>();
+	std::shared_ptr<StreamBufferContainer> toDBSBC = std::make_shared<StreamBufferContainer>();
+	std::shared_ptr<StreamBufferContainer> fromDBSBC = std::make_shared<StreamBufferContainer>();
 
 
+	dbManager->startWithLightMode( toDBSBC , fromDBSBC , "../miya_db/table_files/test/test" ); // データベース
+	
+	std::shared_ptr<MiyaDBSBClient> dbClient = std::make_shared<MiyaDBSBClient>( toDBSBC , fromDBSBC ); // クライアント
+
+
+	
 	std::shared_ptr<unsigned char> key_1 = generateKey("bbbbbbbbbbbbbbbbbbbb");
-	btree.add( key_1, nullptr );
+	std::shared_ptr<unsigned char> value_1 = std::shared_ptr<unsigned char>( new unsigned char[11] );
+	memcpy( value_1.get() , "HelloWorld1", 11 );
+	dbClient->add( key_1 , value_1 , 11 );
+	sleep(1);
 
+	
 	std::shared_ptr<unsigned char> key_2 = generateKey("zzzzzzzzzzzzzzzzzzzz");
-	btree.add( key_2 , nullptr );
+	std::shared_ptr<unsigned char> value_2 = std::shared_ptr<unsigned char>( new unsigned char[11] );
+	memcpy( value_2.get() , "HelloWorld2", 11 );
+	dbClient->add( key_2 , value_2 , 11 );
+	sleep(1);
+	
 
 	std::shared_ptr<unsigned char> key_3 = generateKey("aaaaaaaaaaaaaaaaaaaa");
-	btree.add( key_3 , nullptr );
+	std::shared_ptr<unsigned char> value_3 = std::shared_ptr<unsigned char>( new unsigned char[11] );
+	memcpy( value_3.get(),  "HelloWorld3", 11 );
+	dbClient->add( key_3 , value_3 , 11 );
+	sleep(1);
 
 	std::shared_ptr<unsigned char> key_4 = generateKey("cccccccccccccccccccc");
-	btree.add( key_4, nullptr );
-
-	std::shared_ptr<unsigned char> key_5 = generateKey("gggggggggggggggggggg");
-	btree.add(key_5, nullptr);
-
-	std::shared_ptr<unsigned char> key_6 = generateKey("ffffffffffffffffffff");
-	btree.add( key_6, nullptr );
-
-	std::shared_ptr<unsigned char> key_7 = generateKey("yyyyyyyyyyyyyyyyyyyy");
-	btree.add( key_7, nullptr );
-
-	std::shared_ptr<unsigned char> key_9 = generateKey("qqqqqqqqqqqqqqqqqqqq");
-	btree.add( key_9, nullptr );
-
-	std::shared_ptr<unsigned char> key_10 = generateKey("uuuuuuuuuuuuuuuuuuuu");
-	btree.add( key_10, nullptr );
-
-	std::shared_ptr<unsigned char> key_11 = generateKey("vvvvvvvvvvvvvvvvvvvv");
-	btree.add( key_11, nullptr );
+	std::shared_ptr<unsigned char> value_4 = std::shared_ptr<unsigned char>( new unsigned char[11] );
+	memcpy( value_4.get(), "HelloWorld4", 11 );
+	dbClient->add( key_4 , value_4 , 11 );
+	sleep(1);
 
 
 
 
-
-
-
-
-
-	btree.remove( key_1 ); // b
-	btree.remove( key_9 ); // q
-	btree.remove( key_11 ); // v
-																		
-	btree.remove( key_7 ); // y
-																		
-
-
-	btree.remove( key_4 ); // c
-	btree.remove( key_5 ); // g
-	btree.remove( key_6 ); // f
-
-
-
-	btree.remove( key_10); // u
-					
-
-
-	btree.remove( key_3 );  // a
-	btree.remove( key_2 );
-
-
-	std::shared_ptr<unsigned char> key_12 = generateKey("aaaaaaaaaaaaaaaaaaaa");
-	btree.add( key_12 , nullptr );
+	std::cout << "セーフモードを発行しました" << "\n";
+	dbClient->safeMode();
 
 	std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n......................................." << "\n";
-	miya_db::OBtree::printSubTree( btree.rootONode() );
+
+	std::shared_ptr<unsigned char> key_5 = generateKey("gggggggggggggggggggg");
+	std::shared_ptr<unsigned char> value_5 = std::shared_ptr<unsigned char>( new unsigned char[11] );
+	memcpy( value_5.get() , "HelloWorld5", 11 );
+	dbClient->add( key_5 , value_5 , 11 );
+
+
+
+	std::mutex mtx;
+	std::condition_variable cv;
+	std::unique_lock<std::mutex> lock(mtx);
+
+	cv.wait( lock );
+	return 0;
+
+
+
+
+	std::shared_ptr<unsigned char> key_6 = generateKey("ffffffffffffffffffff");
+	std::shared_ptr<unsigned char> key_7 = generateKey("yyyyyyyyyyyyyyyyyyyy");
+	std::shared_ptr<unsigned char> key_9 = generateKey("qqqqqqqqqqqqqqqqqqqq");
+	std::shared_ptr<unsigned char> key_10 = generateKey("uuuuuuuuuuuuuuuuuuuu");
+	std::shared_ptr<unsigned char> key_11 = generateKey("vvvvvvvvvvvvvvvvvvvv");
+
+
+
+	//btree.remove( key_1 ); // b
+	//btree.remove( key_9 ); // q
+	//btree.remove( key_11 ); // v
+	//btree.remove( key_7 ); // y
+	//btree.remove( key_4 ); // c
+	//btree.remove( key_5 ); // g
+	//btree.remove( key_6 ); // f
+	//btree.remove( key_10); // u
+	//btree.remove( key_3 );  // a
+	//btree.remove( key_2 );
+
+
+	// ここまでで全てのインデックスが削除されているはず
+
+	std::shared_ptr<unsigned char> key_12 = generateKey("aaaaaaaaaaaaaaaaaaaa");
+	//btree.add( key_12 , nullptr );
+
+	//miya_db::OBtree::printSubTree( btree.rootONode() );
 
 
 

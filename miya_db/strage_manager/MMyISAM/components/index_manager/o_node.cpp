@@ -30,7 +30,6 @@ void ViewItemSet::importItemSet( const std::shared_ptr<ONodeItemSet> itemSet )
 
 
 
-
 void ViewItemSet::moveInsertChildOptr( unsigned short index ,std::shared_ptr<optr> target )
 {
 	for( int i = _childOptr.size()-1; i > index; i-- )
@@ -406,7 +405,9 @@ ONode::ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager ) // 新規�
 	//_itemSet->clear(); // ゼロ埋めする
 }
 
-// ラップ
+
+
+// ラップコンストラクタ
 ONode::ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared_ptr<optr> baseOptr ) // アドレスの引き継ぎ
 {
 	_oMemoryManager = oMemoryManager;
@@ -428,6 +429,9 @@ std::shared_ptr<ONodeItemSet> ONode::ItemSet::itemSet()
 {
 	return _body;
 }
+
+
+
 
 
 void ONode::itemSet( std::shared_ptr<ONodeItemSet> target )

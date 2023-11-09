@@ -18,7 +18,6 @@ namespace miya_db
 
 ValueFragmentHeader::ValueFragmentHeader( std::shared_ptr<CacheTable> cacheTable )
 {
-
 	//std::time_t timestamp = std::time(nullptr);
 	uint64_t timestamp = static_cast<uint64_t>( std::time(nullptr) );
 	_meta._timestamp = timestamp;
@@ -133,14 +132,19 @@ size_t ValueFragmentHeader::exportBianry( std::shared_ptr<unsigned char> *ret )
 
 
 
-
+/*
 ValueStoreManager::ValueStoreManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager )
 {
 	_dataOverlayMemoryManager = oMemoryManager;
 }
+*/
 
 
-
+ValueStoreManager::ValueStoreManager( std::string valueFilePath )
+{
+	_dataOverlayMemoryManager = std::make_shared<OverlayMemoryManager>( valueFilePath );
+	printf("ValueStoreManager Initialized with %p\n", _dataOverlayMemoryManager.get() );
+}
 
 
 
@@ -153,18 +157,14 @@ std::shared_ptr<optr> ValueStoreManager::add( std::shared_ptr<QueryContext> qctx
 
 	flagmentHeader->valueLength( qctx->valueLength() );
 
-
 	std::shared_ptr<unsigned char> exportedFlagmentHeader;
 	size_t exportedFlagmentHeaderLength = flagmentHeader->exportBianry( &exportedFlagmentHeader );
 
-
 	std::shared_ptr<optr> storeTargetOptr;
 	storeTargetOptr = _dataOverlayMemoryManager->allocate( exportedFlagmentHeaderLength + qctx->valueLength() );
-
 	omemcpy( storeTargetOptr.get() , exportedFlagmentHeader.get() , flagmentHeader->headerLength());
 
 	omemcpy( (*storeTargetOptr + flagmentHeader->headerLength()).get() , qctx->value().get() , qctx->valueLength() );
-
 
 	return storeTargetOptr;
 }
@@ -193,6 +193,19 @@ size_t ValueStoreManager::get( std::shared_ptr<optr> targetOptr ,std::shared_ptr
 
 
 
+
+
+
+void ValueStoreManager::clear()
+{
+	_dataOverlayMemoryManager->clear();
+}
+
+
+const std::shared_ptr<OverlayMemoryManager> ValueStoreManager::overlayMemoryManager()
+{
+	return _dataOverlayMemoryManager;
+}
 
 
 };

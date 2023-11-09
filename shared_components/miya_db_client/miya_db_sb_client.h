@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 
-
+#include "../../shared_components/json.hpp"
 
 
 struct SBSegment;
@@ -33,6 +33,16 @@ public:
 	size_t get( std::shared_ptr<unsigned char> rawKey ,std::shared_ptr<unsigned char> *retRaw );
 	bool add( std::shared_ptr<unsigned char> rawKey , std::shared_ptr<unsigned char> rawValue , size_t rawValueLength );
 	bool remove( std::shared_ptr<unsigned char> rawKey );
+
+	bool safeMode();
+	bool commit();
+	bool abort();
+
+	size_t dumpRaw( nlohmann::json target , std::shared_ptr<unsigned char> *retRaw );
+	std::unique_ptr<SBSegment> generateQuerySB( nlohmann::json queryJson );
+
+	// 不完全な実装 要修正
+	nlohmann::json filterResponseSB( nlohmann::json queryJson );
 
 	void hello(){ std::cout << "HelloWorld" << "\n"; }; 
 

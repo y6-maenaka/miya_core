@@ -44,16 +44,17 @@ std::shared_ptr<QueryContext> QueryParser::parseQuery( std::shared_ptr<unsigned 
 	// 一旦簡単に実装しておく
 	nlohmann::json serializedQuery = nlohmann::json::from_bson( fromBson ); // ここで大量のエラーが発生する
 
+	std::cout << "..................." << "\n";
+	std::cout << serializedQuery["QueryID"] << "\n";
+	std::cout << "..................." << "\n";
 
 	if( !(serializedQuery.contains("query")) ) return nullptr;
 	if( !(serializedQuery.contains("QueryID")) ) return nullptr;
-
 
 	std::shared_ptr<QueryContext> queryContext = std::make_shared<QueryContext>( static_cast<int>(serializedQuery["query"]), static_cast<uint32_t>(serializedQuery["QueryID"]) );
 	std::cout << "QueryContext::type :: " << queryContext->type() << "\n";
 	switch( queryContext->type() )
 	{
-
 		case QUERY_ADD: // ADD
 		{
 			if( !(serializedQuery["key"].is_binary()) ) return nullptr;
@@ -94,7 +95,6 @@ std::shared_ptr<QueryContext> QueryParser::parseQuery( std::shared_ptr<unsigned 
 
 		case QUERY_REMOVE: // remove
 		{
-			std::cout << "parse to Queru_Remove msg" << "\n";
 			if( !(serializedQuery["key"].is_binary() ) ) return nullptr;
 
 			std::vector<uint8_t> keyVector;
@@ -106,6 +106,25 @@ std::shared_ptr<QueryContext> QueryParser::parseQuery( std::shared_ptr<unsigned 
 			break;
 		}
 
+		case QUERY_SWITCH_TO_SAFE_MODE:
+		{
+			break;
+		}
+
+		case QUERY_SAFE_MODE_COMMIT:
+		{
+			break;
+		}
+
+		case QUERY_SAFE_MODE_ABORT:
+		{
+			break;
+		}
+
+		default:
+		{
+			queryContext->type(-1);
+		}
 	};
 
 	std::cout << "queryContext retuend" << "\n";

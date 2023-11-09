@@ -57,16 +57,18 @@ private:
 public:
 	static ONodeConversionTable _conversionTable;
 
-
-
 	SafeONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager );
-	std::shared_ptr<SafeONode> parent();
-	std::shared_ptr<SafeONode> child( unsigned short index );
+	std::shared_ptr<SafeONode> parent(); // 再定義
+	std::shared_ptr<SafeONode> child( unsigned short index ); // 再定義
 
+	std::shared_ptr<ONodeItemSet> itemSet() override;
+ 
 	struct Hash;
 
 	bool operator ==( SafeONode& so ) const;
 	bool operator !=( SafeONode& so ) const;
+
+	void hello() override { std::cout << "Hello SafeONode" << "\n";};
 
 	std::shared_ptr<SafeONode> shared_from_this()  
 	{

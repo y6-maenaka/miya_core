@@ -12,6 +12,10 @@ constexpr int MIYA_DB_QUERY_GET = 2;
 constexpr int MIYA_DB_QUERY_EXIST = 3;
 constexpr int MIYA_DB_QUERY_REMOVE = 4;
 
+constexpr int MIYA_DB_QUERY_SAFE_MODE = 10;
+constexpr int MIYA_DB_QUERY_COMMIT = 11;
+constexpr int MIYA_DB_QUERY_ABORT = 12;
+
 constexpr int MIYA_DB_KEY_LENGTH = 20;
 
 constexpr int MIYA_DB_STATUS_OK = 0;

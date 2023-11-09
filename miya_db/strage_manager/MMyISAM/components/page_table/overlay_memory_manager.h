@@ -31,7 +31,6 @@ private:
 
 public:
 	OverlayMemoryManager( int dataFileFD , int freeListFileFD );
-	OverlayMemoryManager( const char* targetFilePath );
 	OverlayMemoryManager( std::string filePath );
 
 	OverlayMemoryAllocator* memoryAllocator(){ return _memoryAllocator; };
@@ -40,8 +39,9 @@ public:
 	void deallocate( optr *target );
 
 	std::shared_ptr<optr> get( unsigned char* oAddr );
-
 	std::shared_ptr<optr> wrap( std::shared_ptr<optr> target );
+
+	void clear();
 
 	std::shared_ptr<CacheTable> dataCacheTable();
 	std::shared_ptr<CacheTable> freeListCacheTable();

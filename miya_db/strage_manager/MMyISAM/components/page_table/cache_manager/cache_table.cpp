@@ -91,25 +91,6 @@ void* CacheTable::convert( optr *src )
 }
 
 
-/*
-void* convert( unsigned char* src )
-{
-	unsigned short frame = 0;
-	unsigned short offset = 0;
-unsigned short exponentialList[5] = {64, 32, 16, 8, 0};
-
-
-	frame += static_cast<unsigned long>( src[0]) * pow(2, exponentialList[0] );
-	frame += static_cast<unsigned long>( src[1]) * pow(2, exponentialList[1] );
-	frame += static_cast<unsigned long>( src[2]) * pow(2, exponentialList[2] );
-
-	offset += static_cast<unsigned long>( src[3]) * pow(2, exponentialList[0] );
-	offset += static_cast<unsigned long>( src[4]) * pow(2, exponentialList[1] );
-
-}
-*/
-
-
 /* この辺りは無闇に触らない */
 
 unsigned short CacheTable::pageFault( unsigned int frame )

@@ -637,6 +637,10 @@ std::shared_ptr<optr> OverlayMemoryAllocator::get( unsigned char* oAddr )
 
 
 
+void OverlayMemoryAllocator::clear()
+{
+	init();
+}
 
 
 std::shared_ptr<CacheTable> OverlayMemoryAllocator::dataCacheTable()

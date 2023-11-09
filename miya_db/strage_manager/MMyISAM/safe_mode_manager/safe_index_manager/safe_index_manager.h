@@ -18,6 +18,7 @@ namespace miya_db
 
 class SafeOBtree;
 class ONode;
+class OBtree;
 
 
 
@@ -30,11 +31,14 @@ private:
 
 public:
 	 // コンストラクタ実行時に必ずNormalIndexManagerのマッピング位置の倍数にならない様にダミー領域をはじめに確保する
-	SafeIndexManager( std::shared_ptr<ONode> normalRootONode );
+	SafeIndexManager( const std::shared_ptr<OBtree> normalBtree );
+	virtual ~SafeIndexManager(){};
 
-	void add( std::shared_ptr<unsigned char> key , std::shared_ptr<optr> dataOptr );
-	void remove( std::shared_ptr<unsigned char> key );
-	std::shared_ptr<optr> find( std::shared_ptr<unsigned char> key );
+	void add( std::shared_ptr<unsigned char> key , std::shared_ptr<optr> dataOptr ) override;
+	void remove( std::shared_ptr<unsigned char> key ) override;
+	std::shared_ptr<optr> find( std::shared_ptr<unsigned char> key ) override;
+
+	void printIndexTree();
 };
 
 

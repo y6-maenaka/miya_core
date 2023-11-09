@@ -19,7 +19,12 @@ public:
     virtual void add( std::shared_ptr<unsigned char> key , std::shared_ptr<optr> dataOptr ) = 0;
     virtual void remove( std::shared_ptr<unsigned char> key ) = 0;
     virtual std::shared_ptr<optr> find( std::shared_ptr<unsigned char> key ) = 0; 
-};
+
+    
+
+    // debug
+    virtual void printIndexTree() = 0;
+}; 
 
 
 

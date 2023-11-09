@@ -89,9 +89,7 @@ public:
 	std::unique_ptr<ControlBlock> freeBlockHead(); 
 
 	void allocatedBlockHead( ControlBlock *targetAllodatedBlock  ); // 先頭にセットする機能も兼ねる
-	//void allocatedBlockHead( ControlBlock *targetAllodatedBlock ); // 先頭にセットする機能も兼ねる
 	std::unique_ptr<ControlBlock> allocatedBlockHead();	
-
 
 	std::unique_ptr<ControlBlock> useUnUsedControlBlockHead();
 	void unUsedControlBlockHead( ControlBlock* targetUnUsedControlBlock ); // 先頭にセットする機能も備える
@@ -101,7 +99,6 @@ public:
 	std::unique_ptr<ControlBlock> controlBlockTail();
 
 	bool isFormatted();
-
 	bool isFileFormatted();
 };
 
@@ -138,7 +135,6 @@ public:
 	std::shared_ptr<optr> blockOptr(); // getter
 	unsigned char* blockAddr();
 
-
   //  ----- このメソッドでリターンされるoptrには,cacheTableがセットされていないから要注意 ---------------
 	std::unique_ptr<optr> mappingOptr();
 	void mappingOptr( optr *target ); // 対象のoptrを投げる
@@ -147,12 +143,10 @@ public:
 	// PrevControlBlock
 	std::unique_ptr<ControlBlock> prevControlBlock();
 	void prevControlBlock( ControlBlock* target );
-	//void prevControlBlock( optr* target );
 
 	// NextControlBlock
 	std::unique_ptr<ControlBlock> nextControlBlock();
 	void nextControlBlock( ControlBlock* target );
-	//void nextControlBlock( optr* target );
 
 	// ControlBlockEnd
 	std::unique_ptr<optr> freeBlockEnd();
@@ -179,10 +173,11 @@ private:
 	std::shared_ptr<CacheTable> _freeListCacheTable = nullptr;
 
 protected:
-
+	// 管理ファイルを初期化するので迂闊に呼び出さない
 	void init(); // 初めのコントロールブロックを配置する
 
 public:
+
 	OverlayMemoryAllocator( int dataFileFD  = -1 , int freeListFileFD = -1 );
 
 	std::shared_ptr<optr> allocate( unsigned long allocateSize );
@@ -212,6 +207,8 @@ public:
 	void printFreeBlockChain();
 
 	std::shared_ptr<optr> get( unsigned char* oAddr );
+
+	void clear(); // 管理ファイルを実質削除&フォーマットする
 
 	std::shared_ptr<CacheTable> dataCacheTable();
 	std::shared_ptr<CacheTable> freeListCacheTable();

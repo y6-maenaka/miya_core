@@ -38,6 +38,10 @@ constexpr int QUERY_SELECT = 2;
 constexpr int QUERY_EXISTS = 3;
 constexpr int QUERY_REMOVE = 4;
 
+constexpr int QUERY_SWITCH_TO_SAFE_MODE = 10;
+constexpr int QUERY_SAFE_MODE_COMMIT = 11;
+constexpr int QUERY_SAFE_MODE_ABORT = 12;
+
 
 
 class DatabaseManager : public QueryParser

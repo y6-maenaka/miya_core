@@ -188,3 +188,6 @@
 - miya_db/safe_btreeでの静的クラス変数の使用
 
 - index_manager / value_store_manager のOverlayMemoryManagerは引数で与えず,コンストラクタで生成する
+
+
+- 現在の実装ではobtreeは表面上でしか削除できていない

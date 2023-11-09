@@ -80,6 +80,8 @@ struct ONodeItemSet;
 class OBtree
 {
 private:
+
+protected:
 	std::shared_ptr<ONode> _rootONode;
 
 public:
@@ -95,9 +97,7 @@ public:
 
 	static int printONode( std::shared_ptr<ONode> targetONode );
 	static int printSubTree( std::shared_ptr<ONode> subtreeRoot );
-
 };
-
 
 
 

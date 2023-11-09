@@ -32,21 +32,20 @@ private:
 	IndexManager* _indexManager; // インデックスが保存されているマネージャーを渡す
 
 
-
 	struct 
 	{
 		struct {
 			std::shared_ptr<ValueStoreManager> _valueStoreManager = nullptr;
-			std::shared_ptr<IndexManager> _indexManager = nullptr;
+			std::shared_ptr<NormalIndexManager> _indexManager = nullptr;
 		} _normal;
 
-		struct {
-			std::shared_ptr<ValueStoreManager> _valueStoreManager = nullptr;
-			std::shared_ptr<SafeIndexManager> _indexManager = nullptr;
+		struct { // safe関係モジュールは毎回初期化されるので,持つ必要ないかも
+			// std::shared_ptr<ValueStoreManager> _valueStoreManager = nullptr;
+			//std::shared_ptr<SafeIndexManager> _indexManager = nullptr;
 		} _safe;
 	};
 
-	bool isSafeMode = false;
+	bool _isSafeMode = false;
 
 public:
 	MMyISAM( std::string filePath );
@@ -57,9 +56,9 @@ public:
 	bool exists( std::shared_ptr<QueryContext> qctx );
 
 
-	bool switchSafeMode(); // セーフモードに移行する
-	bool safeConfirmExit(); // セーフモードを本ファイルに同期して終了する
-	bool safeDiscardExit();  // セーフモードを破棄して終了する
+	bool switchToSafeMode(); // セーフモードに移行する ※トランザクションのイメージ
+	bool safeCommitExit(); // セーフモードを本ファイルに同期して終了する
+	bool safeAbortExit();  // セーフモードを破棄して終了する
 
 	void hello();
 };

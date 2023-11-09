@@ -51,6 +51,9 @@ private:
 	//optr *_optr;
 	std::shared_ptr<optr> _optr = nullptr; // このItemSetの起点となる
 
+	// struct itemSet* _itemSet;
+	// struct citemSet* _citemSet;
+
 public:
 	ONodeItemSet( std::shared_ptr<optr> __optr );
 
@@ -95,8 +98,6 @@ public:
 	std::array< std::shared_ptr<unsigned char> , DEFAULT_KEY_COUNT> *exportKeyArray();
 	std::array< std::shared_ptr<optr> , DEFAULT_CHILD_COUNT> *exportChildOptrArray();
 	std::array< std::shared_ptr<optr>, DEFAULT_DATA_OPTR_COUNT > *exportDataOptrArray();
-
-
 };
 
 
@@ -129,7 +130,6 @@ protected:
 	std::shared_ptr<ONode> subtreeMax();
 
 public:
-
 	// ノード新規作成(新規割り当て)
 	ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager );
 	// ノードラップ(新規作成はしない)
@@ -143,7 +143,7 @@ public:
 	// セーフモード( Getterのみを参照できる )
 	const std::shared_ptr<ONodeItemSet> citemSet() const;
 	// これが呼び出されるとsafeファイルにコピーが作成される
-	std::shared_ptr<ONodeItemSet> itemSet();
+	virtual std::shared_ptr<ONodeItemSet> itemSet();
 
 	void parent( std::shared_ptr<ONode> target );
 	std::shared_ptr<ONode> parent();
@@ -154,6 +154,8 @@ public:
 
 	void isLeaf( bool flag ){ _isLeaf = flag; };
 	bool isLeaf(){ return _isLeaf; }; // getter
+
+	virtual void hello(){ std::cout << "Hello ONode" << "\n";};
 
 	// ルートノードが更新されるとONodeがリターンされる
 	std::shared_ptr<ONode> recursiveAdd( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<optr> targetDataOptr ,std::shared_ptr<ONode> targetONode = nullptr );

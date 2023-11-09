@@ -21,7 +21,7 @@ namespace miya_db
 struct QueryContext
 {
 private:
-	const int _type;
+	int _type;
 	uint32_t _id = 0;
 
 	// 考慮すべき格納データ
@@ -46,10 +46,11 @@ private:
 public:
 	QueryContext( int type , uint32_t queryID ) : _type(type) , _id(queryID){};
 
-	int type(){ return _type; };
 	void key( std::shared_ptr<unsigned char> key , size_t keyLength );
 	void value( std::shared_ptr<unsigned char> data , size_t dataLength );
 
+	int type();
+	void type( int target );
 
 	std::shared_ptr<unsigned char> key();
 	size_t keyLength();

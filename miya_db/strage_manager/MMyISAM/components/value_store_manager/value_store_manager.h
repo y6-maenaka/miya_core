@@ -82,19 +82,20 @@ class ValueStoreManager
 {
 
 private:
-
 	std::shared_ptr<OverlayMemoryManager> _dataOverlayMemoryManager; // データが保存されているファイルのマネージャー
 	
 
 public:
-	ValueStoreManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager );
+	// こっちは基本的に使わない
+	// ValueStoreManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager ); 
+	ValueStoreManager( std::string valueFilePath );
+
 	std::shared_ptr<optr> add( std::shared_ptr<QueryContext> qctx );
 	std::shared_ptr<unsigned char> get();
-
-
 	size_t get( std::shared_ptr<optr> targetOptr ,std::shared_ptr<unsigned char> *ret );
 	
-
+	void clear(); // 管理ファイルを完全にリフレッシュする 
+	const std::shared_ptr<OverlayMemoryManager> overlayMemoryManager();
 };
 
 

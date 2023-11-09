@@ -3,7 +3,7 @@
 
 #include "../../shared_components/stream_buffer/stream_buffer.h"
 #include "../../shared_components/stream_buffer/stream_buffer_container.h"
-#include "../../shared_components/json.hpp"
+
 
 #include "./common.h"
 
@@ -37,7 +37,7 @@ size_t MiyaDBSBClient::get( std::shared_ptr<unsigned char> rawKey ,std::shared_p
 	}
 
 	std::vector<uint8_t> keyVector;
-	keyVector.assign( rawKey.get() , rawKey.get() + 32 );
+	keyVector.assign( rawKey.get() , rawKey.get() + 20 );
 
 	nlohmann::json queryJson;
 	queryJson["QueryID"] = miya_db::generateQueryID();
@@ -99,18 +99,16 @@ bool MiyaDBSBClient::add( std::shared_ptr<unsigned char> rawKey , std::shared_pt
 	if( _popSBContainer == nullptr || _popSBContainer == nullptr ) return false;
 
 	std::vector<uint8_t> keyVector;
-	keyVector.assign( rawKey.get() , rawKey.get() + 32 );
+	keyVector.assign( rawKey.get() , rawKey.get() + 20 );
 
 	std::vector<uint8_t> valueVector;
 	valueVector.assign( rawValue.get() , rawValue.get() + rawValueLength );
-
 
 	nlohmann::json queryJson;
 	queryJson["QueryID"] = miya_db::generateQueryID();
 	queryJson["query"] = miya_db::MIYA_DB_QUERY_ADD;
 	queryJson["key"] = nlohmann::json::binary( keyVector );
 	queryJson["value"] = nlohmann::json::binary( valueVector );
-
 
 	std::vector<uint8_t> dumpedQueryVector; 
 	dumpedQueryVector = nlohmann::json::to_bson( queryJson );
@@ -125,6 +123,7 @@ bool MiyaDBSBClient::add( std::shared_ptr<unsigned char> rawKey , std::shared_pt
 	std::unique_ptr<SBSegment> responseSB;
 	std::vector<uint8_t> responseVector;
 	nlohmann::json responseJson;
+
 	for(;;){
 
 		responseSB = _popSBContainer->popOne();
@@ -136,6 +135,7 @@ bool MiyaDBSBClient::add( std::shared_ptr<unsigned char> rawKey , std::shared_pt
 		_popSBContainer->pushOne( std::move(responseSB) );  // 違うSBセグメントは一旦キュー最後尾に送っておく
 	}
 
+
 	if( !(responseJson.contains("status")) ) return false;
 	return (responseJson["status"] == miya_db::MIYA_DB_STATUS_OK );
 }
@@ -146,11 +146,10 @@ bool MiyaDBSBClient::add( std::shared_ptr<unsigned char> rawKey , std::shared_pt
 
 bool MiyaDBSBClient::remove( std::shared_ptr<unsigned char> rawKey )
 {
-	std::cout << "<MiyaDBSBClient> remove() called" << "\n";
 	if( _popSBContainer == nullptr || _popSBContainer == nullptr ) return false;
 
 	std::vector<uint8_t> keyVector;
-	keyVector.assign( rawKey.get() , rawKey.get() + 32 );
+	keyVector.assign( rawKey.get() , rawKey.get() + 20 );
 
 	nlohmann::json queryJson;
 	queryJson["QueryID"] = miya_db::generateQueryID();
@@ -171,8 +170,8 @@ bool MiyaDBSBClient::remove( std::shared_ptr<unsigned char> rawKey )
 	std::unique_ptr<SBSegment> responseSB;
 	std::vector<uint8_t> responseVector;
 	nlohmann::json responseJson;
-	for(;;){
-
+	for(;;)
+	{
 		responseSB = _popSBContainer->popOne();
 		responseVector.clear(); responseJson.clear();
 		responseVector.assign( responseSB->body().get() , responseSB->body().get() + responseSB->bodyLength() );
@@ -184,4 +183,77 @@ bool MiyaDBSBClient::remove( std::shared_ptr<unsigned char> rawKey )
 
 	if( !(responseJson.contains("status")) ) return false;
 	return (responseJson["status"] == miya_db::MIYA_DB_STATUS_OK );
+}
+
+
+
+
+
+bool MiyaDBSBClient::safeMode()
+{
+	if( _popSBContainer == nullptr || _popSBContainer == nullptr ) return false;
+
+	nlohmann::json queryJson;
+	queryJson["QueryID"] = miya_db::generateQueryID();
+	queryJson["query"] = miya_db::MIYA_DB_QUERY_SAFE_MODE;
+
+	std::unique_ptr<SBSegment> querySB = generateQuerySB( queryJson );
+	_pushSBContainer->pushOne( std::move(querySB) );
+
+	nlohmann::json responseJson;
+	responseJson = filterResponseSB( queryJson );
+
+	if( !(responseJson.contains("status")) ) return false;
+	return (responseJson["status"] == miya_db::MIYA_DB_STATUS_OK );
+}
+
+
+
+
+
+
+
+
+
+size_t MiyaDBSBClient::dumpRaw( nlohmann::json queryJson , std::shared_ptr<unsigned char> *retRaw )
+{
+	std::vector<uint8_t> dumpedQueryVector;  // ret
+	dumpedQueryVector = nlohmann::json::to_bson( queryJson );
+	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[dumpedQueryVector.size()] );
+	std::copy( dumpedQueryVector.begin() , dumpedQueryVector.end(), (*retRaw).get() );
+
+	return dumpedQueryVector.size();
+}
+
+
+
+std::unique_ptr<SBSegment> MiyaDBSBClient::generateQuerySB( nlohmann::json queryJson )
+{
+	std::shared_ptr<unsigned char> dumpedRawQuery; size_t dumpedRawQueryLength;
+	dumpedRawQueryLength =  dumpRaw( queryJson , &dumpedRawQuery );
+
+	std::unique_ptr<SBSegment> querySB = std::make_unique<SBSegment>();
+	querySB->body( dumpedRawQuery , dumpedRawQueryLength );
+	
+	return std::move(querySB);
+}
+
+
+nlohmann::json MiyaDBSBClient::filterResponseSB( nlohmann::json queryJson )
+{
+	std::unique_ptr<SBSegment> responseSB;
+	std::vector<uint8_t> responseVector;
+	nlohmann::json responseJson;
+	for(;;)
+	{
+		responseSB = _popSBContainer->popOne();
+		responseVector.clear(); responseJson.clear();
+		responseVector.assign( responseSB->body().get() , responseSB->body().get() + responseSB->bodyLength() );
+		responseJson = nlohmann::json::from_bson( responseVector );
+
+		if( responseJson.contains("QueryID") && (responseJson["QueryID"] == queryJson["QueryID"]) )
+			return responseJson;
+
+		_popSBContainer->pushOne( std::move(responseSB) );  // 違うSBセグメントは一旦キュー最後尾に送っておく
+	}
 }

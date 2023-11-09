@@ -31,7 +31,7 @@ add_library( MIYA_DB STATIC
 				strage_manager/MMyISAM/safe_mode_manager/safe_mode_manager.cpp
 				strage_manager/MMyISAM/safe_mode_manager/safe_index_manager/safe_index_manager.cpp
 				strage_manager/MMyISAM/safe_mode_manager/safe_index_manager/safe_o_node.cpp
-				strage_manager/MMyISAM/safe_mode_manager/safe_index_manager/safe_btree.h
+				strage_manager/MMyISAM/safe_mode_manager/safe_index_manager/safe_btree.cpp
 
 				strage_manager/MMyISAM/components/.unit_test.cpp
 

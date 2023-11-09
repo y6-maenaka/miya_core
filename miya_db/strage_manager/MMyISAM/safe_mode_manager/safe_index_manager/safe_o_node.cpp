@@ -6,7 +6,16 @@
 namespace miya_db
 {
 
+ONodeConversionTable::ONodeConversionTable( std::shared_ptr<OverlayMemoryManager> safeOMemoryManager )
+{
+    _safeOMemoryManager = safeOMemoryManager;
+}
 
+
+void ONodeConversionTable::init()
+{
+    _entryMap.clear();
+}
 
 
 std::shared_ptr<SafeONode> ONodeConversionTable::ref( std::shared_ptr<SafeONode> target )
@@ -30,6 +39,7 @@ void ONodeConversionTable::safeOMemoryManager( std::shared_ptr<OverlayMemoryMana
 {
     _safeOMemoryManager = oMemoryManager;
 }
+
 
 const std::shared_ptr<OverlayMemoryManager> ONodeConversionTable::safeOMemoryManager()
 {
@@ -62,8 +72,11 @@ SafeONode::SafeONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager ) : O
     overlayMemoryManager( _conversionTable.safeOMemoryManager() );
 
     std::shared_ptr<optr> baseOptr = oMemoryManager->allocate( O_NODE_ITEMSET_SIZE ); // 新規作成の場合
-    itemSet( std::make_shared<ONodeItemSet>(baseOptr) );
+    ONode::itemSet( std::make_shared<ONodeItemSet>(baseOptr) );
     itemSet()->clear(); // ゼロ埋め
+
+
+    std::cout << "\x1b[35m" << "SafeONodeが初期化されました" << "\x1b[39m" << "\n";
 }
 
 
@@ -71,6 +84,8 @@ std::shared_ptr<SafeONode> SafeONode::parent()
 {
    // 変換テーブルを一旦参照する 変換テーブルに該当するエントリがなければ,自身がそのまま帰ってくる
    std::shared_ptr<SafeONode> convertedONode = _conversionTable.ref( shared_from_this() );
+
+    std::cout << "\x1b[35m" << "This is SafeONode::parent" << "\x1b[39m" << "\n";
 
    ONode *oNode = (dynamic_cast<ONode*>(convertedONode.get()))->parent().get();
    SafeONode *safeONode = static_cast<SafeONode*>(oNode);
@@ -85,6 +100,7 @@ std::shared_ptr<SafeONode> SafeONode::child( unsigned short index )
     // 変換テーブルを一旦参照する 変換テーブルに該当するエントリがなければ,自身がそのまま帰ってくる
     std::shared_ptr<SafeONode> convertedONode = _conversionTable.ref( shared_from_this() );
 
+    std::cout << "\x1b[35m" << "This is SafeONode::child" << "\x1b[39m" << "\n";
     return static_pointer_cast<SafeONode>(convertedONode->child(index));
 
     /*
@@ -95,6 +111,11 @@ std::shared_ptr<SafeONode> SafeONode::child( unsigned short index )
 }
 
 
+std::shared_ptr<ONodeItemSet> SafeONode::itemSet()
+{
+    std::cout << "\x1b[35m" << "SafeONode::itemSet()" << "\x1b[39m" << "\n";
+    return ONode::itemSet();
+}
 
 
 

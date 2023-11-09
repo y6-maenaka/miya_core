@@ -57,7 +57,7 @@ public:
 	// Mapper *mapper(){ return _mapper; }; // getter
 	std::shared_ptr<Mapper> mapper(){ return _mapper; };
 
-	bool init();
+	// bool init();
 	CacheTable( int fd );
 
 	// unsigned char* operator []( unsigned short frame );	
