@@ -37,7 +37,7 @@ OBtree::OBtree( std::shared_ptr<OverlayMemoryManager> oMemoryManager, std::share
 			std::shared_ptr<optr>	newMetaHeadOptr = oMemoryManager->allocate( 100 ); // Meta領域のサイズ分確保する
 
 			_rootONode = std::shared_ptr<ONode>( new ONode(oMemoryManager) );  // meta領域に続いて領域を作成する
-			omemcpy( (*metaHeadOptr) + META_ROOT_NODE_OFFSET , _rootONode->itemSet()->Optr()->addr() , NODE_OPTR_SIZE ); // ルートノードのセット
+			omemcpy( (*metaHeadOptr) + META_ROOT_NODE_OFFSET , _rootONode->citemSet()->Optr()->addr() , NODE_OPTR_SIZE ); // ルートノードのセット
 
 			omemcpy( metaHeadOptr.get() , (unsigned char *)(FORMAT_CODE) , 20 ); // フォーマットコードを設置する
 			return;
@@ -84,13 +84,13 @@ void OBtree::add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<opt
 
 	std::shared_ptr<ONode> currentONode = _rootONode;
 
-	while( (currentONode->itemSet()->childOptrCount() >= 1 ) )
+	while( (currentONode->citemSet()->childOptrCount() >= 1 ) )
 	{
 		std::shared_ptr<optr> keyOptr;
 		std::shared_ptr<unsigned char> rawKey = std::shared_ptr<unsigned char>( new unsigned char[KEY_SIZE] );
-		for( int i=0; i<currentONode->itemSet()->childOptrCount(); i++ )
+		for( int i=0; i<currentONode->citemSet()->childOptrCount(); i++ )
 		{
-			keyOptr = currentONode->itemSet()->key(i);
+			keyOptr = currentONode->citemSet()->key(i);
 			omemcpy( rawKey.get() , keyOptr , KEY_SIZE );
 
 			if( memcmp( targetKey.get(), rawKey.get() , KEY_SIZE ) < 0 ){
@@ -99,7 +99,7 @@ void OBtree::add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<opt
 			}
 		}
 
-		currentONode = currentONode->child( currentONode->itemSet()->childOptrCount()-1 );
+		currentONode = currentONode->child( currentONode->citemSet()->childOptrCount()-1 );
 
 		direct:;
 	}
@@ -120,13 +120,13 @@ void OBtree::remove( std::shared_ptr<unsigned char> targetKey )
 	std::shared_ptr<ONode> deepestONode;
 	std::shared_ptr<ONode> currentONode = _rootONode;
 	bool matchFlag = false;
-	while( (currentONode->itemSet()->childOptrCount() >= 1 ) && (!matchFlag) )
+	while( (currentONode->citemSet()->childOptrCount() >= 1 ) && (!matchFlag) )
 	{
 		std::shared_ptr<optr> keyOptr;
 		std::shared_ptr<unsigned char> rawKey = std::shared_ptr<unsigned char>( new unsigned char[KEY_SIZE] );
-		for( int i=0; i<currentONode->itemSet()->childOptrCount(); i++ )
+		for( int i=0; i<currentONode->citemSet()->childOptrCount(); i++ )
 		{
-			keyOptr = currentONode->itemSet()->key(i);
+			keyOptr = currentONode->citemSet()->key(i);
 			omemcpy( rawKey.get() , keyOptr , KEY_SIZE );
 
 			if( memcmp( targetKey.get(), rawKey.get(), KEY_SIZE ) == 0 ) {
@@ -141,7 +141,7 @@ void OBtree::remove( std::shared_ptr<unsigned char> targetKey )
 			}
 		}
 
-		currentONode = currentONode->child( currentONode->itemSet()->childOptrCount()-1 );
+		currentONode = currentONode->child( currentONode->citemSet()->childOptrCount()-1 );
 
 		direct:;
 	}

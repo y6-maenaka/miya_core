@@ -32,7 +32,6 @@ MMyISAM::MMyISAM( std::string filePath )
 	// 初回起動時は通常モードで起動する
 	_valueStoreManager = _normal._valueStoreManager.get(); 
 	_indexManager = dynamic_cast<IndexManager*>(_normal._indexManager.get());
-
 }
 
 

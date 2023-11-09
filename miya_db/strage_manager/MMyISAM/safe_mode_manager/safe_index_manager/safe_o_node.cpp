@@ -111,7 +111,7 @@ std::shared_ptr<SafeONode> SafeONode::child( unsigned short index )
 }
 
 
-std::shared_ptr<ONodeItemSet> SafeONode::itemSet()
+OItemSet* SafeONode::itemSet() 
 {
     std::cout << "\x1b[35m" << "SafeONode::itemSet()" << "\x1b[39m" << "\n";
     return ONode::itemSet();
@@ -120,13 +120,13 @@ std::shared_ptr<ONodeItemSet> SafeONode::itemSet()
 
 
 
-bool SafeONode::operator ==( SafeONode& so ) const 
+bool SafeONode::operator ==( SafeONode& so ) 
 {
     return (memcmp( citemSet()->Optr()->addr() , so.citemSet()->Optr()->addr() , NODE_OPTR_SIZE ) == 0 );
 }
 
 
-bool SafeONode::operator !=( SafeONode& so ) const 
+bool SafeONode::operator !=( SafeONode& so )
 {
     return !(this->operator==(so));
 }

@@ -61,12 +61,14 @@ public:
 	std::shared_ptr<SafeONode> parent(); // 再定義
 	std::shared_ptr<SafeONode> child( unsigned short index ); // 再定義
 
-	std::shared_ptr<ONodeItemSet> itemSet() override;
+	OItemSet* itemSet() override;
  
 	struct Hash;
 
-	bool operator ==( SafeONode& so ) const;
-	bool operator !=( SafeONode& so ) const;
+	//bool operator ==( SafeONode& so ) const;
+	bool operator ==( SafeONode& so );
+	//bool operator !=( SafeONode& so ) const;
+	bool operator !=( SafeONode& so );
 
 	void hello() override { std::cout << "Hello SafeONode" << "\n";};
 
