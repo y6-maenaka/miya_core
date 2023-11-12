@@ -59,7 +59,8 @@ void SafeIndexManager::remove( std::shared_ptr<unsigned char> key )
 
 std::shared_ptr<optr> SafeIndexManager::find( std::shared_ptr<unsigned char> key )
 {
-    return nullptr;
+	std::cout << "find() with SafeIndexManager" << "\n";
+	return _masterBtree->find( key );
 }
 
 

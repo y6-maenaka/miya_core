@@ -91,7 +91,7 @@ public:
 
 	virtual void add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<optr> dataOptr );
 	virtual void remove( std::shared_ptr<unsigned char> targetKey );
-	std::shared_ptr<optr> find( std::shared_ptr<unsigned char> targetKey );
+	virtual std::shared_ptr<optr> find( std::shared_ptr<unsigned char> targetKey );
 
 	void rootONode( std::shared_ptr<ONode> target );
 	const std::shared_ptr<ONode> rootONode();

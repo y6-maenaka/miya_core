@@ -108,6 +108,10 @@ void SafeOBtree::hello()
 
 
 
+std::shared_ptr<optr> SafeOBtree::find( std::shared_ptr<unsigned char> targetKey )
+{
+	return _rootONode->subtreeFind( targetKey );
+}
 
 
 

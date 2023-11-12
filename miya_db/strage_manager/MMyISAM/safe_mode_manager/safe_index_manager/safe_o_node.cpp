@@ -708,6 +708,38 @@ std::shared_ptr<SafeONode> SafeONode::recursiveMerge( unsigned short index ) // 
 
 
 
+std::shared_ptr<optr> SafeONode::subtreeFind( std::shared_ptr<unsigned char> targetKey )
+{
+	std::shared_ptr<SafeONode> candidateChild;
+
+	std::shared_ptr<optr> keyOptr;
+	std::shared_ptr<unsigned char> rawKey = std::shared_ptr<unsigned char>( new unsigned char[5] );
+	int flag;
+
+	for( int i=0; i<citemSet()->keyCount(); i++ )
+	{
+		keyOptr = citemSet()->key(i); omemcpy( rawKey.get(), keyOptr , 5 );
+		flag = memcmp( targetKey.get() , rawKey.get() , 5 );
+
+
+		if( flag < 0 ){
+			candidateChild = child(i);
+			if( candidateChild == nullptr ) return nullptr;
+			goto direct;
+		}
+		else if( flag == 0 ){
+			return citemSet()->dataOptr(i);
+		}
+	}
+
+
+	candidateChild = child( citemSet()->childOptrCount() -1 );
+	if( candidateChild == nullptr ) return nullptr;
+
+	direct:
+		return candidateChild->subtreeFind( targetKey );
+}
+
 
 
 

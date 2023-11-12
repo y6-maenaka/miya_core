@@ -37,6 +37,7 @@ public:
 
 	std::shared_ptr<OCItemSet> citemSet() override;
 	std::shared_ptr<OItemSet> itemSet() override;
+	std::shared_ptr<optr> subtreeFind( std::shared_ptr<unsigned char> key );
 	std::shared_ptr<SafeONode> subtreeMax();
  
 	struct Hash;

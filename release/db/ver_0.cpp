@@ -140,6 +140,14 @@ int main()
 	dbClient->add( key_12 , value_12 , 12 );
 
 
+
+	std::shared_ptr<unsigned char> popedValue; size_t popedValueLength;
+	popedValueLength = dbClient->get( key_12 , &popedValue );
+
+	for( int i=0; i<popedValueLength; i++ ){
+		printf("%c", popedValue.get()[i] );
+	}std::cout << "\n";
+
 	return 0;
 
 

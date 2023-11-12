@@ -69,7 +69,7 @@ bool MMyISAM::add( std::shared_ptr<QueryContext> qctx )
 
 bool MMyISAM::get( std::shared_ptr<QueryContext> qctx )
 {
-    std::shared_ptr<optr> dataOptr = _indexManager->find( qctx->key() ); // ここで取得されるoptrにはキャッシュテーブルがセットされていない
+  std::shared_ptr<optr> dataOptr = _indexManager->find( qctx->key() ); // ここで取得されるoptrにはキャッシュテーブルがセットされていない
 
 	std::cout << "\x1b[32m" << "(MiyaDB) get with key :: ";
 	for( int i=0; i<20; i++){

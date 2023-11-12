@@ -24,7 +24,8 @@ public:
     const std::shared_ptr<SafeONode> rootONode();
 
     void add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<optr> dataOptr ) override;
-	void remove( std::shared_ptr<unsigned char> targetKey ) override;
+		void remove( std::shared_ptr<unsigned char> targetKey ) override;
+		std::shared_ptr<optr> find( std::shared_ptr<unsigned char> targetKey ) override;
 
     static int printONode( std::shared_ptr<SafeONode> targetONode );
 	static int printSubTree( std::shared_ptr<SafeONode> subtreeRoot );
