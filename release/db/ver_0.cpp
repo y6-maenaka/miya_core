@@ -60,40 +60,86 @@ int main()
 	std::shared_ptr<unsigned char> value_1 = std::shared_ptr<unsigned char>( new unsigned char[11] );
 	memcpy( value_1.get() , "HelloWorld1", 11 );
 	dbClient->add( key_1 , value_1 , 11 );
-	sleep(1);
 
 	
 	std::shared_ptr<unsigned char> key_2 = generateKey("zzzzzzzzzzzzzzzzzzzz");
 	std::shared_ptr<unsigned char> value_2 = std::shared_ptr<unsigned char>( new unsigned char[11] );
 	memcpy( value_2.get() , "HelloWorld2", 11 );
 	dbClient->add( key_2 , value_2 , 11 );
-	sleep(1);
 	
 
 	std::shared_ptr<unsigned char> key_3 = generateKey("aaaaaaaaaaaaaaaaaaaa");
 	std::shared_ptr<unsigned char> value_3 = std::shared_ptr<unsigned char>( new unsigned char[11] );
 	memcpy( value_3.get(),  "HelloWorld3", 11 );
 	dbClient->add( key_3 , value_3 , 11 );
-	sleep(1);
 
 	std::shared_ptr<unsigned char> key_4 = generateKey("cccccccccccccccccccc");
 	std::shared_ptr<unsigned char> value_4 = std::shared_ptr<unsigned char>( new unsigned char[11] );
 	memcpy( value_4.get(), "HelloWorld4", 11 );
 	dbClient->add( key_4 , value_4 , 11 );
-	sleep(1);
 
 
-
-
+	// セーフモードへの以降
 	std::cout << "セーフモードを発行しました" << "\n";
 	dbClient->safeMode();
 
-	std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n......................................." << "\n";
 
 	std::shared_ptr<unsigned char> key_5 = generateKey("gggggggggggggggggggg");
 	std::shared_ptr<unsigned char> value_5 = std::shared_ptr<unsigned char>( new unsigned char[11] );
 	memcpy( value_5.get() , "HelloWorld5", 11 );
 	dbClient->add( key_5 , value_5 , 11 );
+
+	std::shared_ptr<unsigned char> key_6 = generateKey("ffffffffffffffffffff");
+	std::shared_ptr<unsigned char> value_6 = std::shared_ptr<unsigned char>( new unsigned char[11] );
+	memcpy( value_6.get(), "HelloWorld6", 11 );
+	dbClient->add( key_6 , value_6 ,11 ); 
+
+	std::shared_ptr<unsigned char> key_7 = generateKey("yyyyyyyyyyyyyyyyyyyy");
+	std::shared_ptr<unsigned char> value_7 = std::shared_ptr<unsigned char>( new unsigned char[11] );
+	memcpy( value_7.get() , "HelloWorld7", 11 );
+	dbClient->add( key_7, value_7, 11 );
+
+	std::shared_ptr<unsigned char> key_9 = generateKey("qqqqqqqqqqqqqqqqqqqq");
+	std::shared_ptr<unsigned char> value_9 = std::shared_ptr<unsigned char>( new unsigned char[11] );
+	memcpy( value_9.get() , "HelloWorld9", 11 );
+	dbClient->add( key_9 , value_9 , 11 );
+
+	std::shared_ptr<unsigned char> key_10 = generateKey("uuuuuuuuuuuuuuuuuuuu");
+	std::shared_ptr<unsigned char> value_10 = std::shared_ptr<unsigned char>( new unsigned char[12] );
+	memcpy( value_10.get() , "HelloWorld10", 12 );
+	dbClient->add( key_10, value_10 , 12 );
+
+	std::shared_ptr<unsigned char> key_11 = generateKey("vvvvvvvvvvvvvvvvvvvv");
+	std::shared_ptr<unsigned char> value_11 = std::shared_ptr<unsigned char>( new unsigned char[12] );
+	memcpy( value_11.get(), "HelloWorld11", 12 );
+	dbClient->add( key_11 , value_11, 12 );
+
+
+
+	dbClient->remove( key_1 );
+	dbClient->remove( key_9 );
+	dbClient->remove( key_11 );
+	dbClient->remove( key_7 );
+	dbClient->remove( key_4 );
+	dbClient->remove( key_5 );
+	dbClient->remove( key_6 );
+	dbClient->remove( key_10 );
+	dbClient->remove( key_3 );
+	dbClient->remove( key_2 );
+
+
+
+	std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n......................................." << "\n";
+	return 0;
+
+
+
+
+
+
+
+
+
 
 
 
@@ -105,13 +151,6 @@ int main()
 	return 0;
 
 
-
-
-	std::shared_ptr<unsigned char> key_6 = generateKey("ffffffffffffffffffff");
-	std::shared_ptr<unsigned char> key_7 = generateKey("yyyyyyyyyyyyyyyyyyyy");
-	std::shared_ptr<unsigned char> key_9 = generateKey("qqqqqqqqqqqqqqqqqqqq");
-	std::shared_ptr<unsigned char> key_10 = generateKey("uuuuuuuuuuuuuuuuuuuu");
-	std::shared_ptr<unsigned char> key_11 = generateKey("vvvvvvvvvvvvvvvvvvvv");
 
 
 

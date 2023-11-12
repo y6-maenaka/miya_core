@@ -20,6 +20,8 @@ NormalIndexManager::NormalIndexManager( std::string indexFilePath )
 {
 	_oMemoryManager	 = std::make_shared<OverlayMemoryManager>( indexFilePath );
 	_masterBtree = std::make_shared<OBtree>( _oMemoryManager );
+
+	printf("NormalIndexManager :: OverlayMemoryManager Initialized with %p\n", _oMemoryManager.get() );
 }
 
 

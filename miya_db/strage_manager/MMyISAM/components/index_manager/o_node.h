@@ -24,7 +24,7 @@ struct ViewItemSet // ノードの追加の時際,分割をサポートする仮
 	std::array< std::shared_ptr<optr> , DEFAULT_CHILD_COUNT+1> _childOptr;
 	std::array< std::shared_ptr<optr>, DEFAULT_DATA_OPTR_COUNT+1> _dataOPtr;
 
-	void importItemSet( OCItemSet *citemSet );
+	void importItemSet( std::shared_ptr<OCItemSet> citemSet );
 	void moveInsertChildOptr( unsigned short index ,std::shared_ptr<optr> target );
 	void moveInsertDataOptr( unsigned short index , std::shared_ptr<optr> target );
 };
@@ -104,10 +104,10 @@ public:
 struct OItemSet
 {
 private:
-	ONodeItemSet* _base;
+	std::shared_ptr<ONodeItemSet> _base;
 
 public:
-	OItemSet( ONodeItemSet* base );
+	OItemSet( std::shared_ptr<ONodeItemSet> base );
 
 	void childOptr( unsigned short index , std::shared_ptr<optr> targetONode );
 	void childOptrCount( unsigned short num );
@@ -137,10 +137,10 @@ public:
 struct OCItemSet
 {
 private:
-	ONodeItemSet* _base;
+	std::shared_ptr<ONodeItemSet> _base;
 
 public:	
-	OCItemSet( ONodeItemSet* base );
+	OCItemSet( std::shared_ptr<ONodeItemSet> base );
 
 	const std::shared_ptr<optr> Optr();
 	const std::shared_ptr<optr> parent();
@@ -174,8 +174,10 @@ struct ItemSet{
 	public:
 		ItemSet( std::shared_ptr<ONodeItemSet> target );
 
-		OItemSet *itemSet();
-		OCItemSet *citemSet();
+		//OItemSet *itemSet();
+		//OCItemSet *citemSet();
+		std::shared_ptr<OItemSet> itemSet();
+		std::shared_ptr<OCItemSet> citemSet();
 };
 
 
@@ -184,16 +186,17 @@ struct ItemSet{
 class ONode : public std::enable_shared_from_this<ONode> 
 {
 private:
-	std::shared_ptr<OverlayMemoryManager> _oMemoryManager; // これから新たなノードを生成する可能性がある
 	bool _isLeaf = true;
 
-	std::shared_ptr<ItemSet> _itemSet;
-
 protected:
+	std::shared_ptr<OverlayMemoryManager> _oMemoryManager; // これから新たなノードを生成する可能性がある
 	int findIndex( std::shared_ptr<unsigned char> targetKey );
 	std::shared_ptr<ONode> subtreeMax();
 
 public:
+	std::shared_ptr<ItemSet> _itemSet;
+
+
 	// ノード新規作成(新規割り当て)
 	ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager );
 	// ノードラップ(新規作成はしない)
@@ -206,8 +209,8 @@ public:
 	void itemSet( std::shared_ptr<ONodeItemSet> target ); 
 
 	/* Getter */
-	OCItemSet* citemSet(); 	// セーフモード( Getterのみを参照できる )
-	virtual OItemSet* itemSet();  // これが呼び出されるとsafeファイルにコピーが作成される
+	virtual std::shared_ptr<OCItemSet> citemSet(); 	// セーフモード( Getterのみを参照できる )
+	virtual std::shared_ptr<OItemSet> itemSet();  // これが呼び出されるとsafeファイルにコピーが作成される
 
 	void parent( std::shared_ptr<ONode> target );
 	std::shared_ptr<ONode> parent();

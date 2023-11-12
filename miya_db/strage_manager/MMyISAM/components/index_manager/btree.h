@@ -83,17 +83,20 @@ private:
 
 protected:
 	std::shared_ptr<ONode> _rootONode;
+	std::shared_ptr<OverlayMemoryManager> _oMemoryManager;
 
 public:
 	OBtree( std::shared_ptr<OverlayMemoryManager> oMemoryManager ,  std::shared_ptr<ONode> rootNode = nullptr );
 	// OBtree( std::shared_ptr<ONode> rootNode = nullptr );
 
-	void add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<optr> dataOptr );
-	void remove( std::shared_ptr<unsigned char> targetKey );
+	virtual void add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<optr> dataOptr );
+	virtual void remove( std::shared_ptr<unsigned char> targetKey );
 	std::shared_ptr<optr> find( std::shared_ptr<unsigned char> targetKey );
 
 	void rootONode( std::shared_ptr<ONode> target );
 	const std::shared_ptr<ONode> rootONode();
+
+	const std::shared_ptr<OverlayMemoryManager> overlayMemoryManager();
 
 	static int printONode( std::shared_ptr<ONode> targetONode );
 	static int printSubTree( std::shared_ptr<ONode> subtreeRoot );

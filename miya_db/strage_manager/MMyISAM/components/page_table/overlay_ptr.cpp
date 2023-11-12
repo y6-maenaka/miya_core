@@ -45,6 +45,15 @@ unsigned char *optr::addr()
 
 
 
+std::shared_ptr<unsigned char> optr::caddr() const
+{
+	std::shared_ptr<unsigned char> ret = std::shared_ptr<unsigned char>( new unsigned char[sizeof(_addr)] );
+	memcpy( ret.get(), _addr , sizeof(_addr) ); 
+	return ret;
+}
+
+
+
 void optr::addr( unsigned long ulongOptr )
 {
 	_addr[0] = (ulongOptr >> 32) & 0xFF;
@@ -149,32 +158,6 @@ std::shared_ptr<optr> optr::operator +( unsigned long addend ) const
 }
 
 
-/*
-std::shared_ptr<optr> optr::operator +( unsigned long addend ) const
-{
-	uint64_t ulongOptr = 0;
-
-	unsigned short exponentialList[5] = {64, 32, 16, 8, 0};
-	
-	ulongOptr += static_cast<unsigned long>(_addr[0]) * pow(2, exponentialList[0]) ;
-	ulongOptr += static_cast<unsigned long>(_addr[1]) * pow(2, exponentialList[1]) ;
-	ulongOptr += static_cast<unsigned long>(_addr[2]) * pow(2, exponentialList[2]) ;
-	ulongOptr += static_cast<unsigned long>(_addr[3]) * pow(2, exponentialList[3]) ;
-	ulongOptr += static_cast<unsigned long>(_addr[4]) * pow(2, exponentialList[4]) ;
-
-	ulongOptr += addend;
-	
-	std::shared_ptr<optr> newOptr( new optr );
-	newOptr->cacheTable( _cacheTable );
-	newOptr->addr( ulongOptr );
-
-	return newOptr;
-}
-*/
-
-
-
-
 
 
 
@@ -197,7 +180,7 @@ std::unique_ptr<unsigned char> optr::mapToMemory( unsigned int size )
 
 
 
-void optr::printAddr()
+void optr::printAddr() const
 {
 	for( int i=0; i<OPTR_ADDR_LENGTH; i++ )
 		printf("%02X", _addr[i] );
@@ -205,7 +188,7 @@ void optr::printAddr()
 
 
 
-void optr::printValueContinuously( unsigned int length )
+void optr::printValueContinuously( unsigned int length ) const
 {
 	for( int i=0; i<length; i++ )
 	{

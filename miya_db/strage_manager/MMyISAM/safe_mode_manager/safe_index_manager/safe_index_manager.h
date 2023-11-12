@@ -9,12 +9,14 @@
 
 
 #include "../../components/index_manager/index_manager.h"
+#include "./safe_btree.h"
 
 
 namespace miya_db
 {
 
 
+constexpr unsigned short SAFE_MODE_COLLICION_OFFSET = (O_NODE_ITEMSET_SIZE / 2);
 
 class SafeOBtree;
 class ONode;

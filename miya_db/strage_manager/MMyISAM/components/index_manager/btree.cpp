@@ -23,6 +23,7 @@ namespace miya_db
 
 OBtree::OBtree( std::shared_ptr<OverlayMemoryManager> oMemoryManager, std::shared_ptr<ONode> rootNode )
 {
+	_oMemoryManager = oMemoryManager;
 	if( rootNode == nullptr )
 	{
 		// インデックスファイルが初期化されているか調べる
@@ -55,6 +56,7 @@ OBtree::OBtree( std::shared_ptr<OverlayMemoryManager> oMemoryManager, std::share
 		return;
 	}
 
+
 	_rootONode = rootNode;
 
 }
@@ -80,9 +82,8 @@ const std::shared_ptr<ONode> OBtree::rootONode()
 
 void OBtree::add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<optr> dataOptr )
 {
-	std::shared_ptr<ONode> deepestONode;
-
-	std::shared_ptr<ONode> currentONode = _rootONode;
+	std::cout << "add with :: "; _rootONode->hello();
+	auto currentONode = _rootONode;
 
 	while( (currentONode->citemSet()->childOptrCount() >= 1 ) )
 	{
@@ -104,11 +105,7 @@ void OBtree::add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<opt
 		direct:;
 	}
 
-
-	deepestONode = currentONode;
-
-	std::shared_ptr<ONode> newRootNode;
-	newRootNode = deepestONode->recursiveAdd( targetKey , dataOptr , nullptr );
+	auto newRootNode = currentONode->recursiveAdd( targetKey , dataOptr , nullptr );
 	if( newRootNode != nullptr )
 		_rootONode = newRootNode;
 	return;
@@ -117,8 +114,7 @@ void OBtree::add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<opt
 
 void OBtree::remove( std::shared_ptr<unsigned char> targetKey )
 {
-	std::shared_ptr<ONode> deepestONode;
-	std::shared_ptr<ONode> currentONode = _rootONode;
+	auto currentONode = _rootONode;
 	bool matchFlag = false;
 	while( (currentONode->citemSet()->childOptrCount() >= 1 ) && (!matchFlag) )
 	{
@@ -146,10 +142,7 @@ void OBtree::remove( std::shared_ptr<unsigned char> targetKey )
 		direct:;
 	}
 
-	deepestONode = currentONode;
-
-	std::shared_ptr<ONode> newRootNode = nullptr;
-	newRootNode = deepestONode->remove( targetKey );
+	auto newRootNode = currentONode->remove( targetKey );
 	if( newRootNode != nullptr ) // ルートノードを変更する
 		_rootONode = newRootNode;
 	return;
@@ -163,9 +156,15 @@ std::shared_ptr<optr> OBtree::find( std::shared_ptr<unsigned char> targetKey )
 }
 
 
+const std::shared_ptr<OverlayMemoryManager> OBtree::overlayMemoryManager()
+{
+	return _oMemoryManager;
+}
+
+
 int OBtree::printONode( std::shared_ptr<ONode> targetONode )
 {
-	std::cout << "\n\n============================================" << "\n";
+	std::cout << "\n\n--------------------------------------------" << "\n";
 	std::cout << "| [ "; targetONode->citemSet()->Optr()->printAddr(); std::cout << " ]\n";
 	std::cout << "| [ 親ノードアドレス ] :: ";
 	targetONode->parent()->citemSet()->Optr()->printAddr(); std::cout << "\n";
@@ -192,7 +191,7 @@ int OBtree::printONode( std::shared_ptr<ONode> targetONode )
 	}
 
 	std::cout << "| [ リーフノード ] :: " << targetONode->isLeaf()  << "\n";
-	std::cout << "============================================\n\n" << "\n";
+	std::cout << "--------------------------------------------\n\n" << "\n";
 }
 
 
@@ -201,35 +200,7 @@ int OBtree::printONode( std::shared_ptr<ONode> targetONode )
 int OBtree::printSubTree( std::shared_ptr<ONode> subtreeRoot )
 {
 
-	std::cout << "\n\n============================================" << "\n";
-	std::cout << "| [ "; subtreeRoot->citemSet()->Optr()->printAddr(); std::cout << " ]\n";
-	std::cout << "| [ 親ノードアドレス ] :: ";
-	subtreeRoot->parent()->citemSet()->Optr()->printAddr(); std::cout << "\n";
-
-	std::cout << "| [ キー個数 ] :: " << subtreeRoot->citemSet()->keyCount() << "\n";
-	for( int i=0; i<subtreeRoot->citemSet()->keyCount(); i++ )
-	{
-		std::shared_ptr<unsigned char> rawKey = subtreeRoot->citemSet()->rawKey(i);
-		std::shared_ptr<optr> oKey = subtreeRoot->citemSet()->key(i);
-		std::cout << "|　 (" << i << ") "; oKey->printValueContinuously(20);  std::cout << "[";
-		for( int i=0; i<20; i++ ) printf("%c", rawKey.get()[i]);
-		std::cout << "]\n";
-	}
-
-
-	std::cout << "| [ データOポインターの個数 ] :: " << subtreeRoot->citemSet()->dataOptrCount() << "\n";
-
-	std::cout << "| [ 子ノード個数 ] :: " << subtreeRoot->citemSet()->childOptrCount() << "\n";
-	for( int i=0; i<subtreeRoot->citemSet()->childOptrCount(); i++ )
-	{
-		std::shared_ptr<ONode> cON = subtreeRoot->child(i);
-		std::cout << "|　 (" << i << ")" ;
-		cON->citemSet()->Optr()->printAddr(); std::cout << "\n";
-	}
-
-	std::cout << "| [ リーフノード ] :: " << subtreeRoot->isLeaf()  << "\n";
-	std::cout << "============================================\n\n" << "\n";
-
+	printONode( subtreeRoot );
 
 
 	for( int i=0; i<subtreeRoot->citemSet()->childOptrCount(); i++ )

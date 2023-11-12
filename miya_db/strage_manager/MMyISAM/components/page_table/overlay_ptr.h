@@ -5,6 +5,7 @@
 #include <string.h>
 #include <memory>
 #include <cmath>
+#include <string>
 
 
 
@@ -44,7 +45,9 @@ public:
 	// CacheTable *cacheTable(){ return _cacheTable; };
 	std::shared_ptr<CacheTable> cacheTable(){ return _cacheTable; };
 
-	unsigned char *addr(); // getter // get with unsigned char[5]
+	unsigned char *addr();// getter // get with unsigned char[5]
+	unsigned char *addr() const;
+	std::shared_ptr<unsigned char> caddr() const;
 	void addr( unsigned long ulongOptr );
 	void addr( optr* from );
 	void addr( unsigned char* from );
@@ -61,14 +64,38 @@ public:
 
 	std::unique_ptr<unsigned char> mapToMemory( unsigned int size );
 
-	void printAddr();
-	void printValueContinuously( unsigned int length );
+	void printAddr() const;
+	void printValueContinuously( unsigned int length ) const;
+
+	bool operator ==( const optr& op ) const;
+	bool operator !=( const optr& op ) const;
+	struct Hash;
 };
 
 
+inline bool optr::operator ==( const optr& op ) const
+{
+	return ( memcmp( _addr , op.caddr().get(), sizeof(_addr) ) == 0 );
+}
+
+inline bool optr::operator !=( const optr& op ) const
+{
+	return !(this->operator==(op));
+}
+
+struct optr::Hash
+{
+	std::size_t operator()( const optr& op ) const;
+};
 
 
-
+inline std::size_t optr::Hash::operator()( const optr& op ) const
+{
+	std::string bytes;
+	std::shared_ptr<unsigned char> caddr = op.caddr();
+	std::copy( caddr.get() , caddr.get() + 5 , std::back_inserter(bytes) );
+	return std::hash<std::string>()(bytes);
+}
 
 
 

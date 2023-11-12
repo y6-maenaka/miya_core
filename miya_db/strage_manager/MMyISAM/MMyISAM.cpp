@@ -52,6 +52,7 @@ bool MMyISAM::add( std::shared_ptr<QueryContext> qctx )
 
 
 	std::cout << "-----------------------------------------------------------------------" << "\n";
+	std::cout << "( add )" << "\n";
 	std::cout << "[ NormalIndexManager ]" << "\n";
 	_indexManager->printIndexTree();
 	std::cout << "-----------------------------------------------------------------------" << "\n";
@@ -99,6 +100,19 @@ bool MMyISAM::remove( std::shared_ptr<QueryContext> qctx )
 
 	_indexManager->remove( qctx->key() );
  // 本来はvalueStoreからも削除する
+
+
+	std::cout << "-----------------------------------------------------------------------" << "\n";
+	std::cout << "( REMOVE )" << "\n";
+	std::cout << "[ NormalIndexManager ]" << "\n";
+	_indexManager->printIndexTree();
+	std::cout << "-----------------------------------------------------------------------" << "\n";
+	std::cout << "[ IndexManager ( Normal or Safe ) ] :: ";
+	if( _isSafeMode ) std::cout << "safe" << "\n";
+	else std::cout << "normal"  << "\n";
+	std::cout << "-----------------------------------------------------------------------" << "\n";
+
+
 
 	return true;
 }

@@ -14,7 +14,7 @@ namespace miya_db
 
 
 
-void ViewItemSet::importItemSet( OCItemSet *citemSet )
+void ViewItemSet::importItemSet( std::shared_ptr<OCItemSet> citemSet )
 {
 	std::array< std::shared_ptr<unsigned char>, DEFAULT_KEY_COUNT> *keySorce = citemSet->exportKeyArray(); // キーを一旦配列として書き出す
 	std::copy( keySorce->begin() ,keySorce->end() , _key.begin() ); // 上書きで大丈夫
@@ -380,7 +380,7 @@ std::array< std::shared_ptr<optr>, DEFAULT_DATA_OPTR_COUNT > *ONodeItemSet::expo
 
 
 
-OItemSet::OItemSet( ONodeItemSet* base )
+OItemSet::OItemSet( std::shared_ptr<ONodeItemSet> base )
 {
 	_base = base;
 }
@@ -426,7 +426,7 @@ std::array< std::shared_ptr<optr>, DEFAULT_DATA_OPTR_COUNT > *OCItemSet::exportD
 
 
 
-OCItemSet::OCItemSet( ONodeItemSet* base )
+OCItemSet::OCItemSet( std::shared_ptr<ONodeItemSet> base )
 {
 	_base = base;
 }
@@ -502,20 +502,21 @@ void ONode::itemSet( std::shared_ptr<ONodeItemSet> target )
 ItemSet::ItemSet( std::shared_ptr<ONodeItemSet> target )
 {
 	_body = target;
-	__itemSet = std::make_shared<OItemSet>( target.get() );
-	__citemSet = std::make_shared<OCItemSet>( target.get() );
+	__itemSet = std::make_shared<OItemSet>( target );
+	__citemSet = std::make_shared<OCItemSet>( target );
 }
 
 
-OItemSet* ItemSet::itemSet()
+std::shared_ptr<OItemSet> ItemSet::itemSet()
 {
-	return __itemSet.get();
+	return __itemSet;
 }
 
 
-OCItemSet* ItemSet::citemSet()
+
+std::shared_ptr<OCItemSet> ItemSet::citemSet()
 {
-	return __citemSet.get();
+	return __citemSet;
 }
 
 
@@ -547,13 +548,14 @@ ONode::ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared
 
 
 
-OItemSet* ONode::itemSet()
+std::shared_ptr<OItemSet> ONode::itemSet() 
 {
+	// std::cout << "\x1b[33m" << "ONode::itemSet()" << "\x1b[39m" << "\n";
 	return _itemSet->itemSet();
 }
 
 
-OCItemSet* ONode::citemSet() 
+std::shared_ptr<OCItemSet> ONode::citemSet() 
 {
 	return _itemSet->citemSet();
 }
@@ -573,14 +575,9 @@ std::shared_ptr<ONode> ONode::child( unsigned short index )
 	std::shared_ptr<optr> retOptr = citemSet()->childOptr( index );
 	if( retOptr == nullptr ) return nullptr;
 
-
 	// ここでcacheTableを上書きしないとsafeファイルのoptｒを使用できない
 	retOptr->cacheTable( _oMemoryManager->dataCacheTable() ); // _oMemoryManagerよりDatacacheTableを取得する
-	//std::shared_ptr<ONode> ret = std::make_shared<ONode>(  _oMemoryManager ,retOptr );
 	return std::make_shared<ONode>( _oMemoryManager , retOptr );
-	//ret->overlayMemoryManager( _oMemoryManager ); // OverlayMemoryManagerをセットする
-
-	// return ret;
 }
 
 
@@ -704,14 +701,14 @@ std::shared_ptr<ONode> ONode::recursiveAdd( std::shared_ptr<unsigned char> targe
 		splitONode( &targetKey , &targetDataOptr ,&targetONode );
 
 
-		std::shared_ptr<ONode> parentONode = this->parent();
+		auto parentONode = this->parent();
 		unsigned char oAddrZero[5]; memset( oAddrZero, 0x00 , sizeof(oAddrZero) );
 
 
 		if( memcmp( parentONode->citemSet()->Optr()->addr(), oAddrZero, 5  )  == 0 )  // 自身がルートノード場合
 		{
 			//ONode* newRootNode = new ONode( _oMemoryManager ); // 新たなルートノードの作成
-			std::shared_ptr<ONode> newRootNode = std::shared_ptr<ONode>( new ONode(_oMemoryManager) );
+			auto newRootNode = std::shared_ptr<ONode>( new ONode(_oMemoryManager) );
 
 			/* ルートノード情報の上書き */
 			std::cout << "[ @ ] (Btree::ルートノードが上書きされました)" << "\n";
@@ -793,12 +790,11 @@ std::shared_ptr<ONode> ONode::remove( std::shared_ptr<unsigned char> targetKey )
 	{
 		std::cout << "中間ノード削除" << "\n";
 		// 対象ノードの左サブツリーから最大値(ツリー内で対象の次に大きい)を取得する
-		std::shared_ptr<ONode> subtreeMax = child(0)->subtreeMax(); 
+		auto subtreeMax = child(0)->subtreeMax(); 
 		itemSet()->key( index , subtreeMax->citemSet()->rawKey( subtreeMax->citemSet()->keyCount() - 1 ) ); // 削除対象にサブツリーマックス要素を追加
 		itemSet()->dataOptr( index , subtreeMax->citemSet()->dataOptr( subtreeMax->citemSet()->dataOptrCount() - 1 ) );  // 削除対象にサブツリーマックス要素を追加
 
-		std::shared_ptr<ONode> candidateNewRootONode; // ルートノードが書き換わる場合
-		candidateNewRootONode = subtreeMax->remove( subtreeMax->citemSet()->rawKey( subtreeMax->citemSet()->keyCount() - 1 ) );
+		auto candidateNewRootONode = subtreeMax->remove( subtreeMax->citemSet()->rawKey( subtreeMax->citemSet()->keyCount() - 1 ) );
 
 		if  // ルートノードが書き換わり, 子ノードのみ直列に連結している場合
 		( // 無理矢理感がある
@@ -866,9 +862,9 @@ std::shared_ptr<ONode> ONode::underflow( std::shared_ptr<ONode> sourceONode )
 	/* キー移動 */
 	// 左右兄弟を検索してキー移動が可能であれば移動する
 	// 検索対象は対象と隣接している兄弟(対象からインデックス差が±1)ONodeだけ　
-	std::shared_ptr<ONode> targetONode = child(index);
-	std::shared_ptr<ONode> leftChildONode = (index > 0) ? this->child(index-1) : nullptr; // マイナスになる可能性があるので
-	std::shared_ptr<ONode> rightChildONode = this->child(index+1);
+	auto targetONode = child(index);
+	auto leftChildONode = (index > 0) ? this->child(index-1) : nullptr; // マイナスになる可能性があるので
+	auto rightChildONode = this->child(index+1);
 
 
 
@@ -929,9 +925,9 @@ std::shared_ptr<ONode> ONode::merge( unsigned short index ) // mergeが呼び出
 	std::cout << "\x1b[33m" << "underflow(マージ)が発生しました" << "\x1b[39m" << "\n";
 	if( index == -1 ) return nullptr;
 
-	std::shared_ptr<ONode> targetONode = child(index);
-	std::shared_ptr<ONode> leftChildONode = (index > 0) ? this->child(index-1) : nullptr; // マイナスになる可能性があるので
-	std::shared_ptr<ONode> rightChildONode = this->child(index+1);
+	auto targetONode = child(index);
+	auto leftChildONode = (index > 0) ? this->child(index-1) : nullptr; // マイナスになる可能性があるので
+	auto rightChildONode = this->child(index+1);
 
 	unsigned char addrZero[5]; memset( addrZero , 0x00 , sizeof(addrZero) );
 
@@ -1068,9 +1064,9 @@ std::shared_ptr<ONode> ONode::recursiveMerge( unsigned short index ) // mergeが
 
 	if( index == -1 ) return nullptr;
 
-	std::shared_ptr<ONode> targetONode = child(index);
-	std::shared_ptr<ONode> leftChildONode = (index > 0) ? this->child(index-1) : nullptr; // マイナスになる可能性があるので
-	std::shared_ptr<ONode> rightChildONode = this->child(index+1);
+	auto targetONode = child(index);
+	auto leftChildONode = (index > 0) ? this->child(index-1) : nullptr; // マイナスになる可能性があるので
+	auto rightChildONode = this->child(index+1);
 
 
 	if( leftChildONode != nullptr && leftChildONode->citemSet()->keyCount() >= 2 ) // 兄弟左ノードから親ノード要素を押し出す
@@ -1182,6 +1178,8 @@ std::shared_ptr<ONode> ONode::recursiveMerge( unsigned short index ) // mergeが
 }
 
 
+
+
 std::shared_ptr<ONode> ONode::subtreeMax()
 {
 	if( citemSet()->childOptrCount() >= 1 ) // 本ノードに子ノードが存在すれば,最大の子ノードを再帰的に探索する
@@ -1225,11 +1223,9 @@ std::shared_ptr<ONode> ONode::subtreeONodeFind( std::shared_ptr<unsigned char> t
 }
 
 
-
 std::shared_ptr<optr> ONode::subtreeFind( std::shared_ptr<unsigned char> targetKey )
 {
 	std::shared_ptr<ONode> candidateChild;
-
 
 	std::shared_ptr<optr> keyOptr;
 	std::shared_ptr<unsigned char> rawKey = std::shared_ptr<unsigned char>( new unsigned char[5] );
