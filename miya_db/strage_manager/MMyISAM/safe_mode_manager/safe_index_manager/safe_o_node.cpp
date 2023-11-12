@@ -144,7 +144,9 @@ std::shared_ptr<SafeONode> SafeONode::parent()
 
 std::shared_ptr<SafeONode> SafeONode::child( unsigned short index )
 {
-	return std::make_shared<SafeONode>( *(static_cast<SafeONode*>(ONode::child(index).get())) );
+	std::shared_ptr<ONode> retONode = ONode::child(index);
+	if( retONode == nullptr ) return nullptr;
+	return std::make_shared<SafeONode>( *(static_cast<SafeONode*>(retONode.get())) );
 }
 
 
@@ -408,17 +410,25 @@ std::shared_ptr<SafeONode> SafeONode::remove( std::shared_ptr<unsigned char> tar
 
 std::shared_ptr<SafeONode> SafeONode::underflow( std::shared_ptr<SafeONode> sourceONode )
 {
-	std::cout << "\x1b[33m" << "underflowが発生しました" << "\x1b[39m" << "\n";
 	int index = -1;
 	for( int i=0; i<=citemSet()->childOptrCount() - 1; i++ ){
 		index = ( memcmp( sourceONode->citemSet()->Optr()->addr(), child(i)->citemSet()->Optr()->addr(), 5 ) == 0 ) ? i : -1;
 		if( index != -1 ) break;
 	}
 	if( index == -1 ) return nullptr;
-	
+
+	std::cout << "index :: " << index << "\n";
+	//SafeOBtree::printONode( shared_from_this() );
+	//SafeOBtree::printONode( child(index+1) );
+
+	std::cout << "< 0 >" << "\n";
 	auto targetONode = child(index);
+	std::cout << "< 1 >" << "\n";
 	auto leftChildONode = (index > 0) ? this->child(index-1) : nullptr; 
+	std::cout << "< 2 >" << "\n";
 	auto rightChildONode = this->child(index+1);
+
+	std::cout << "< 3 >" << "\n";
 
 	
 	if( leftChildONode != nullptr && leftChildONode->citemSet()->keyCount() >= 2 ){

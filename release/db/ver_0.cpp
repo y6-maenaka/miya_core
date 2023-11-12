@@ -117,6 +117,9 @@ int main()
 
 
 	dbClient->remove( key_1 );
+
+
+
 	dbClient->remove( key_9 );
 	dbClient->remove( key_11 );
 	dbClient->remove( key_7 );
@@ -127,10 +130,21 @@ int main()
 	dbClient->remove( key_3 );
 	dbClient->remove( key_2 );
 
-
-
 	std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n......................................." << "\n";
+
+
+
+	std::shared_ptr<unsigned char> key_12 = generateKey("aaaaaaaaaaaaaaaaaaaa");
+	std::shared_ptr<unsigned char> value_12 = std::shared_ptr<unsigned char>( new unsigned char[12] );
+	memcpy( value_12.get() , "HelloWorld12", 12 );
+	dbClient->add( key_12 , value_12 , 12 );
+
+
 	return 0;
+
+
+
+
 
 
 
@@ -152,23 +166,8 @@ int main()
 
 
 
-
-
-	//btree.remove( key_1 ); // b
-	//btree.remove( key_9 ); // q
-	//btree.remove( key_11 ); // v
-	//btree.remove( key_7 ); // y
-	//btree.remove( key_4 ); // c
-	//btree.remove( key_5 ); // g
-	//btree.remove( key_6 ); // f
-	//btree.remove( key_10); // u
-	//btree.remove( key_3 );  // a
-	//btree.remove( key_2 );
-
-
 	// ここまでで全てのインデックスが削除されているはず
 
-	std::shared_ptr<unsigned char> key_12 = generateKey("aaaaaaaaaaaaaaaaaaaa");
 	//btree.add( key_12 , nullptr );
 
 	//miya_db::OBtree::printSubTree( btree.rootONode() );
