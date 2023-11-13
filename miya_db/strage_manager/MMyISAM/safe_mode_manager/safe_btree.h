@@ -3,7 +3,7 @@
 
 
 
-#include "../../components/index_manager/btree.h"
+#include "../components/index_manager/btree.h"
 
 
 
@@ -27,8 +27,11 @@ public:
 		void remove( std::shared_ptr<unsigned char> targetKey ) override;
 		std::shared_ptr<optr> find( std::shared_ptr<unsigned char> targetKey ) override;
 
+		std::shared_ptr<ONode> mergeSafeBtree( std::shared_ptr<SafeONode> subtreeRootONode , short int childIndex = -1  ,std::shared_ptr<ONode> parentONode = nullptr ); // セーフモードでの変更を通常Obtreeに反映する ≒ commit
+
     static int printONode( std::shared_ptr<SafeONode> targetONode );
-	static int printSubTree( std::shared_ptr<SafeONode> subtreeRoot );
+		static int printSubTree( std::shared_ptr<SafeONode> subtreeRoot );
+
     void hello();
 };
 
@@ -36,4 +39,4 @@ public:
 
 };
 
-#endif 
+#endif

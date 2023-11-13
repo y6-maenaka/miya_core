@@ -209,6 +209,43 @@ bool MiyaDBSBClient::safeMode()
 
 
 
+bool MiyaDBSBClient::abort()
+{
+	if( _popSBContainer == nullptr || _popSBContainer == nullptr ) return false;
+
+	nlohmann::json queryJson;
+	queryJson["QueryID"] = miya_db::generateQueryID();
+	queryJson["query"] = miya_db::MIYA_DB_QUERY_ABORT;
+
+	std::unique_ptr<SBSegment> querySB = generateQuerySB( queryJson );
+	_pushSBContainer->pushOne( std::move(querySB) );
+	
+	nlohmann::json responseJson;
+	responseJson = filterResponseSB( queryJson );
+
+	if( !(responseJson.contains("status")) ) return false;
+	return (responseJson["status"] == miya_db::MIYA_DB_STATUS_OK );
+}
+
+
+
+bool MiyaDBSBClient::commit()
+{
+	if( _popSBContainer == nullptr || _popSBContainer == nullptr ) return false;
+
+	nlohmann::json queryJson;
+	queryJson["QueryID"] = miya_db::generateQueryID();
+	queryJson["query"] = miya_db::MIYA_DB_QUERY_COMMIT;
+
+	std::unique_ptr<SBSegment> querySB = generateQuerySB( queryJson );
+	_pushSBContainer->pushOne( std::move(querySB) );
+	
+	nlohmann::json responseJson;
+	responseJson = filterResponseSB( queryJson );
+
+	if( !(responseJson.contains("status")) ) return false;
+	return (responseJson["status"] == miya_db::MIYA_DB_STATUS_OK );
+}
 
 
 

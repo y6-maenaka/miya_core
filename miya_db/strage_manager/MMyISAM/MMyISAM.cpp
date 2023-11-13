@@ -14,14 +14,16 @@
 
 #include "../../miya_db/query_context/query_context.h"
 
-#include "./safe_mode_manager/safe_index_manager/safe_index_manager.h"
+#include "./safe_mode_manager/safe_index_manager.h"
+#include "./safe_mode_manager/safe_o_node.h"
+#include "./safe_mode_Manager/safe_btree.h"
 
 namespace miya_db
 {
 
 
 MMyISAM::MMyISAM( std::string filePath )
-{   
+{
    // データストアの初期化
 	_normal._valueStoreManager = std::make_shared<ValueStoreManager>( filePath );
 
@@ -30,7 +32,7 @@ MMyISAM::MMyISAM( std::string filePath )
 	_normal._indexManager = std::make_shared<NormalIndexManager>( filePath );
 
 	// 初回起動時は通常モードで起動する
-	_valueStoreManager = _normal._valueStoreManager.get(); 
+	_valueStoreManager = _normal._valueStoreManager.get();
 	_indexManager = dynamic_cast<IndexManager*>(_normal._indexManager.get());
 }
 
@@ -157,15 +159,26 @@ bool MMyISAM::switchToSafeMode()
 bool MMyISAM::safeCommitExit()
 {
 	if( !_isSafeMode ) return false;
-	/*
-	 	ここでsafeModeをコミットする
-	*/
 
-	delete _indexManager; 
+	/* Meta領域のコピ 雑すぎる　後で修正する */
+	unsigned char addrZero[5]; memset( addrZero , 0x00 , sizeof(addrZero) );
+	std::shared_ptr<optr> onodeMeta = std::make_shared<optr>( addrZero , SafeONode::_conversionTable.normalOMemoryManager()->dataCacheTable() );
+	std::shared_ptr<optr> safeONodeMeta = std::make_shared<optr>( addrZero , SafeONode::_conversionTable.safeOMemoryManager()->dataCacheTable() );
+	omemcpy( onodeMeta.get() , safeONodeMeta.get() , 100 );
+
+	/* ルートノード更新の反映 */
+	std::shared_ptr<ONode> newRootONode = dynamic_cast<SafeIndexManager*>(_indexManager)->mergeSafeBtree();
+	dynamic_cast<NormalIndexManager*>(_normal._indexManager.get())->masterBtree()->rootONode( newRootONode );
+
+	delete _indexManager;
 	delete _valueStoreManager;
 
 	_indexManager = dynamic_cast<IndexManager*>( _normal._indexManager.get() );
 	_valueStoreManager = dynamic_cast<ValueStoreManager*>( _normal._valueStoreManager.get() );
+
+
+	std::cout << "\n\n\n\n";
+	_indexManager->printIndexTree();
 
 	_isSafeMode = false;
 }
@@ -174,9 +187,8 @@ bool MMyISAM::safeCommitExit()
 bool MMyISAM::safeAbortExit()
 {
 	if( !_isSafeMode ) return false;
-	/*
-		ここでsafeModeをabortする
-	*/
+
+
 	delete _indexManager;
 	delete _valueStoreManager;
 

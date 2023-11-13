@@ -115,11 +115,8 @@ int main()
 	dbClient->add( key_11 , value_11, 12 );
 
 
-
+	/*
 	dbClient->remove( key_1 );
-
-
-
 	dbClient->remove( key_9 );
 	dbClient->remove( key_11 );
 	dbClient->remove( key_7 );
@@ -129,9 +126,13 @@ int main()
 	dbClient->remove( key_10 );
 	dbClient->remove( key_3 );
 	dbClient->remove( key_2 );
+	*/
 
 	std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n......................................." << "\n";
 
+
+	dbClient->commit(); // SafeModeでの修正を反映する
+	return 0;
 
 
 	std::shared_ptr<unsigned char> key_12 = generateKey("aaaaaaaaaaaaaaaaaaaa");
@@ -141,12 +142,16 @@ int main()
 
 
 
-	std::shared_ptr<unsigned char> popedValue; size_t popedValueLength;
-	popedValueLength = dbClient->get( key_12 , &popedValue );
+	// dbClient->abort();
+	// std::cout << "SafeModeを破棄しました" << "\n";
 
-	for( int i=0; i<popedValueLength; i++ ){
-		printf("%c", popedValue.get()[i] );
-	}std::cout << "\n";
+
+	
+	std::shared_ptr<unsigned char> key_13 = generateKey("rrrrrrrrrrrrrrrrrrrr");
+	std::shared_ptr<unsigned char> value_13 = std::shared_ptr<unsigned char>( new unsigned char[12] );
+	memcpy( value_13.get() , "HelloWorld13", 12 );
+	dbClient->add( key_13, value_13 , 12 );
+		
 
 	return 0;
 

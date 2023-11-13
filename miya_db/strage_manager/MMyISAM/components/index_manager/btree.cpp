@@ -67,6 +67,12 @@ OBtree::OBtree( std::shared_ptr<OverlayMemoryManager> oMemoryManager, std::share
 void OBtree::rootONode( std::shared_ptr<ONode> target )
 {
 	_rootONode = target;
+
+	/* 少々雑だが,メタ領域のルートノードアドレス項目も書き換える */
+	unsigned char addrZero[5]; memset( addrZero , 0x00 , sizeof(addrZero) );
+	std::shared_ptr<optr> metaHeaderOptr = std::make_shared<optr>(addrZero  ,_oMemoryManager->dataCacheTable() );
+	if( target != nullptr ) //　空をセット
+		omemcpy( (*(metaHeaderOptr.get())) + META_ROOT_NODE_OFFSET , (unsigned char*)(_rootONode->citemSet()->Optr()->addr()) , NODE_OPTR_SIZE  );
 }
 
 

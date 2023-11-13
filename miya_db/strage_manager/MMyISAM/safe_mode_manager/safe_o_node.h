@@ -4,8 +4,7 @@
 
 
 // #include "../../components/index_manager/btree.h"
-#include "../../components/index_manager/o_node.h"
-#include "../safe_mode_manager.h"
+#include "../components/index_manager/o_node.h"
 
 
 
@@ -30,7 +29,7 @@ public:
 	static ONodeConversionTable _conversionTable;
 
 	SafeONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager = nullptr ); // 新規作成コンストラクタ
-	SafeONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared_ptr<optr> baseOptr ); // 
+	SafeONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared_ptr<optr> baseOptr ); //
 
 	std::shared_ptr<SafeONode> parent(); // 再定義
 	std::shared_ptr<SafeONode> child( unsigned short index ); // 再定義
@@ -39,7 +38,7 @@ public:
 	std::shared_ptr<OItemSet> itemSet() override;
 	std::shared_ptr<optr> subtreeFind( std::shared_ptr<unsigned char> key );
 	std::shared_ptr<SafeONode> subtreeMax();
- 
+
 	struct Hash;
 
 	//bool operator ==( SafeONode& so ) const;
@@ -57,7 +56,7 @@ public:
 
 	void hello() override { std::cout << "Hello SafeONode" << "\n";};
 
-		
+
 	std::shared_ptr<SafeONode> shared_from_this()
 	{
 		return std::dynamic_pointer_cast<SafeONode>(ONode::shared_from_this());
@@ -96,6 +95,14 @@ inline std::size_t SafeONode::Hash::operator()( std::shared_ptr<SafeONode> so ) 
 
 
 
+struct ONodeConversionTableEntryDetail
+{
+	std::shared_ptr<SafeONode> convertedONode; // 変換結果
+	bool isExists; // 変換エントリ(情報)が存在したか否か
+	std::pair< std::shared_ptr<optr>, std::shared_ptr<optr> > entry; // エントリ
+};
+
+
 
 struct ONodeConversionTable // ONode to SafeONode
 {
@@ -110,6 +117,7 @@ public:
 	void init();
 
 	std::pair< std::shared_ptr<SafeONode>, bool > ref( std::shared_ptr<optr> target );
+	ONodeConversionTableEntryDetail refEx( std::shared_ptr<optr> target);
 	void regist( std::shared_ptr<optr> key , std::shared_ptr<optr> value );
 
 	void safeOMemoryManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager );
@@ -134,6 +142,3 @@ public:
 
 
 #endif // E81917A3_924A_4690_938C_E7F1FB47E25E
-
-
-

@@ -52,7 +52,7 @@ constexpr unsigned int CONTROL_BLOCK_TAIL_OFFSET = UNUSED_BLOCK_HEAD_OFFSET + 5;
 
 
 /*
- [ フリーブロック管理ブロックの構造 ] 
+ [ フリーブロック管理ブロックの構造 ]
  	- Prev Control Block
 	- Next Control Block
 	- Mapping Optr
@@ -69,7 +69,7 @@ struct ControlBlock;
 
 /*
  -------------------------------------------------------------------------------------------
-  | FORMAT_ID | CONTROL_BLOCK_HEAD | ALLOCATED_BLOCK_HEAD | UNUSED_BLOCK_HEAD | CONTROL_BLOCK_TAIL 
+  | FORMAT_ID | CONTROL_BLOCK_HEAD | ALLOCATED_BLOCK_HEAD | UNUSED_BLOCK_HEAD | CONTROL_BLOCK_TAIL
  --------------------------------------------------------------------------------------------
 */
 
@@ -86,10 +86,10 @@ public:
 	optr* primaryOptr();
 
 	void freeBlockHead( ControlBlock *targetControlBlock ); // 先頭にセットする機能も備える
-	std::unique_ptr<ControlBlock> freeBlockHead(); 
+	std::unique_ptr<ControlBlock> freeBlockHead();
 
 	void allocatedBlockHead( ControlBlock *targetAllodatedBlock  ); // 先頭にセットする機能も兼ねる
-	std::unique_ptr<ControlBlock> allocatedBlockHead();	
+	std::unique_ptr<ControlBlock> allocatedBlockHead();
 
 	std::unique_ptr<ControlBlock> useUnUsedControlBlockHead();
 	void unUsedControlBlockHead( ControlBlock* targetUnUsedControlBlock ); // 先頭にセットする機能も備える
@@ -116,7 +116,7 @@ public:
 
 /*
  -----------------------------------------------------------------------------------
-  | PrevControlBlock(5) | NextControlBlock(5) | MappingOptr(5) | MappingEndOptr(5) | 
+  | PrevControlBlock(5) | NextControlBlock(5) | MappingOptr(5) | MappingEndOptr(5) |
  -----------------------------------------------------------------------------------
 */
 
@@ -190,7 +190,7 @@ public:
 	std::unique_ptr<ControlBlock> findFreeBlock( optr* targetOptr ); // 指定のアドレスのマッピング情報を持つフリーブロックを検索する
 	std::unique_ptr<ControlBlock> findFreeBlock( ControlBlock *targetControlBlock, unsigned int allocateSize ); // 指定のサイズ以上のマッピング領域を持つフリーブロックを検索する
 	std::unique_ptr<ControlBlock> findAllocatedBlock( optr *targetOptr );
-	std::unique_ptr<ControlBlock> targetOptrPrevControlBlock( ControlBlock *targetControlBlock , optr *targetOptr ); 
+	std::unique_ptr<ControlBlock> targetOptrPrevControlBlock( ControlBlock *targetControlBlock , optr *targetOptr );
 
 	std::unique_ptr<ControlBlock> placeControlBlock( optr* targetOptr , ControlBlock* prevControlBlock, ControlBlock *nextControlBlock , optr* freeBlockEnd , bool isReplace = false );
 	std::unique_ptr<ControlBlock> rePlaceControlBlock( optr *destOptr , ControlBlock* fromControlBlock , optr* freeBlockEnd );

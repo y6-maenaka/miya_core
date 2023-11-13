@@ -182,6 +182,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 					responseJson["status"] = flag;
 					break;
 				}
+
 				case QUERY_SAFE_MODE_COMMIT:
 				{
 					std::cout << "## (HANDLE) QUERY_SAFE_MODE_COMMIT" << "\n";
