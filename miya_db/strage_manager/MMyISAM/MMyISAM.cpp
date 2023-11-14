@@ -53,6 +53,7 @@ bool MMyISAM::add( std::shared_ptr<QueryContext> qctx )
 	} std::cout << "\x1b[39m" << "\n";
 
 
+	/*
 	std::cout << "-----------------------------------------------------------------------" << "\n";
 	std::cout << "( add )" << "\n";
 	std::cout << "[ NormalIndexManager ]" << "\n";
@@ -62,7 +63,7 @@ bool MMyISAM::add( std::shared_ptr<QueryContext> qctx )
 	if( _isSafeMode ) std::cout << "safe" << "\n";
 	else std::cout << "normal"  << "\n";
 	std::cout << "-----------------------------------------------------------------------" << "\n";
-
+	*/
 
 	return true;
 }
@@ -71,7 +72,7 @@ bool MMyISAM::add( std::shared_ptr<QueryContext> qctx )
 
 bool MMyISAM::get( std::shared_ptr<QueryContext> qctx )
 {
-  std::shared_ptr<optr> dataOptr = _indexManager->find( qctx->key() ); // ここで取得されるoptrにはキャッシュテーブルがセットされていない
+	std::pair< std::shared_ptr<optr>, int > dataOptr = _indexManager->find( qctx->key() ); // ここで取得されるoptrにはキャッシュテーブルがセットされていない
 
 	std::cout << "\x1b[32m" << "(MiyaDB) get with key :: ";
 	for( int i=0; i<20; i++){
@@ -79,10 +80,14 @@ bool MMyISAM::get( std::shared_ptr<QueryContext> qctx )
 	} std::cout << "\x1b[39m" << "\n";
 
 
-	if( dataOptr == nullptr ) return false;
+	if( dataOptr.first == nullptr ) return false;
 	size_t dataLength; std::shared_ptr<unsigned char> data;
 
-	dataLength = _valueStoreManager->get( dataOptr , &data );
+	/* あまり良くないデータストアの切り替え方法 */
+	if( dataOptr.second == 0 ) // SafeModeで0以外が返却されることは実装上ありあえないので大丈夫だと思う
+		dataLength = _normal._valueStoreManager->get( dataOptr.first , &data );
+	if( dataOptr.second == 1 ) // Safeに存在する場合
+		dataLength = _valueStoreManager->get( dataOptr.first , &data );
 
 	qctx->value( data , dataLength );
 
@@ -103,7 +108,7 @@ bool MMyISAM::remove( std::shared_ptr<QueryContext> qctx )
 	_indexManager->remove( qctx->key() );
  // 本来はvalueStoreからも削除する
 
-
+	/*
 	std::cout << "-----------------------------------------------------------------------" << "\n";
 	std::cout << "( REMOVE )" << "\n";
 	std::cout << "[ NormalIndexManager ]" << "\n";
@@ -113,7 +118,7 @@ bool MMyISAM::remove( std::shared_ptr<QueryContext> qctx )
 	if( _isSafeMode ) std::cout << "safe" << "\n";
 	else std::cout << "normal"  << "\n";
 	std::cout << "-----------------------------------------------------------------------" << "\n";
-
+	*/
 
 
 	return true;
@@ -124,11 +129,10 @@ bool MMyISAM::remove( std::shared_ptr<QueryContext> qctx )
 
 bool MMyISAM::exists( std::shared_ptr<QueryContext> qctx )
 {
-	std::shared_ptr<optr> dataOptr = nullptr;
-	dataOptr = _indexManager->find( qctx->key() );
+	std::pair< std::shared_ptr<optr> , int > dataOptr = _indexManager->find( qctx->key() );
 
 	// 簡易的にキーが存在するか否かでデータの存在有無を判別することとする
-	if( dataOptr == nullptr ) return false; // キーが存在しない : false
+	if( dataOptr.first == nullptr ) return false; // キーが存在しない : false
 	return true; // キーが存在しない : true
 }
 
@@ -170,15 +174,15 @@ bool MMyISAM::safeCommitExit()
 	std::shared_ptr<ONode> newRootONode = dynamic_cast<SafeIndexManager*>(_indexManager)->mergeSafeBtree();
 	dynamic_cast<NormalIndexManager*>(_normal._indexManager.get())->masterBtree()->rootONode( newRootONode );
 
+	std::cout << "SafeOBtreeの表示" << "\n";
+	_indexManager->printIndexTree();
+
 	delete _indexManager;
 	delete _valueStoreManager;
 
 	_indexManager = dynamic_cast<IndexManager*>( _normal._indexManager.get() );
 	_valueStoreManager = dynamic_cast<ValueStoreManager*>( _normal._valueStoreManager.get() );
 
-
-	std::cout << "\n\n\n\n";
-	_indexManager->printIndexTree();
 
 	_isSafeMode = false;
 }

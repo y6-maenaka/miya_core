@@ -47,9 +47,9 @@ void NormalIndexManager::remove( std::shared_ptr<unsigned char> key )
 
 
 
-std::shared_ptr<optr> NormalIndexManager::find( std::shared_ptr<unsigned char> key )
+std::pair< std::shared_ptr<optr>, int > NormalIndexManager::find( std::shared_ptr<unsigned char> key )
 {
-	return _masterBtree->find( key );
+	return std::make_pair( _masterBtree->find( key ) , DATA_OPTR_LOCATED_AT_NORMAL ); // あとで修正する 0: Normal
 };
 
 

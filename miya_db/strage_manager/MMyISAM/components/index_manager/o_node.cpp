@@ -199,12 +199,12 @@ std::shared_ptr<optr> ONodeItemSet::childOptr( unsigned short index )
 	if( index >= (childOptrCount()) ) return nullptr;
 
 	std::shared_ptr<optr> childHead = *_optr + ( CHILD_ELEMENT_OFFSET + ELEMENT_COUNT_SIZE + (index*NODE_OPTR_SIZE) );
-		
+
 	unsigned char oAddr[5];
 	omemcpy( oAddr , childHead , 5 );
 
 	return std::make_shared<optr>( oAddr );
-			
+
 	//return childOptr;
 }
 
@@ -322,7 +322,7 @@ void ONodeItemSet::parent( std::shared_ptr<ONode> target )
 
 	omemcpy( _optr , target->citemSet()->Optr()->addr() , NODE_OPTR_SIZE );
 
-	return;	
+	return;
 }
 
 
@@ -384,7 +384,6 @@ OItemSet::OItemSet( std::shared_ptr<ONodeItemSet> base )
 {
 	_base = base;
 }
-
 const std::shared_ptr<optr> OCItemSet::Optr(){
 	return _base->Optr();
 }
@@ -431,6 +430,9 @@ OCItemSet::OCItemSet( std::shared_ptr<ONodeItemSet> base )
 	_base = base;
 }
 
+const std::shared_ptr<optr> OItemSet::Optr(){
+	return _base->Optr();
+}
 void OItemSet::childOptr( unsigned short index , std::shared_ptr<optr> targetONode ){
 	return _base->childOptr( index , targetONode );
 }
@@ -548,14 +550,14 @@ ONode::ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared
 
 
 
-std::shared_ptr<OItemSet> ONode::itemSet() 
+std::shared_ptr<OItemSet> ONode::itemSet()
 {
 	// std::cout << "\x1b[33m" << "ONode::itemSet()" << "\x1b[39m" << "\n";
 	return _itemSet->itemSet();
 }
 
 
-std::shared_ptr<OCItemSet> ONode::citemSet() 
+std::shared_ptr<OCItemSet> ONode::citemSet()
 {
 	return _itemSet->citemSet();
 }
@@ -672,7 +674,7 @@ std::shared_ptr<ONode> ONode::recursiveAdd( std::shared_ptr<unsigned char> targe
 				itemSet()->dataOptr( i , viewItemSet._dataOPtr.at(i) );
 			itemSet()->dataOptrCount(separatorKeyIndex);
 
-	
+
 			if( citemSet()->childOptrCount() > 0 ) // アイテムセットに子供ノードが存在する場合は分割したノードに分ける
 			{
 				int center = (viewItemSet._childOptr.size() % 2 == 0) ? (viewItemSet._childOptr.size()/2) : ((viewItemSet._childOptr.size()/2) );
@@ -790,7 +792,7 @@ std::shared_ptr<ONode> ONode::remove( std::shared_ptr<unsigned char> targetKey )
 	{
 		std::cout << "中間ノード削除" << "\n";
 		// 対象ノードの左サブツリーから最大値(ツリー内で対象の次に大きい)を取得する
-		auto subtreeMax = child(0)->subtreeMax(); 
+		auto subtreeMax = child(0)->subtreeMax();
 		itemSet()->key( index , subtreeMax->citemSet()->rawKey( subtreeMax->citemSet()->keyCount() - 1 ) ); // 削除対象にサブツリーマックス要素を追加
 		itemSet()->dataOptr( index , subtreeMax->citemSet()->dataOptr( subtreeMax->citemSet()->dataOptrCount() - 1 ) );  // 削除対象にサブツリーマックス要素を追加
 
@@ -1144,7 +1146,7 @@ std::shared_ptr<ONode> ONode::recursiveMerge( unsigned short index ) // mergeが
 		if( citemSet()->keyCount() <= 0 ){
 			child(0)->itemSet()->parent(nullptr);
 			return child(0); // ルートノード変更
-		} 
+		}
 		return nullptr; // ルートノードの変更は発生しない
 
 	}
@@ -1170,7 +1172,7 @@ std::shared_ptr<ONode> ONode::recursiveMerge( unsigned short index ) // mergeが
 		if( citemSet()->keyCount() <= 0 ){
 			child(0)->itemSet()->parent(nullptr);
 			return child(0);
-		} 
+		}
 		return nullptr;
 	}
 

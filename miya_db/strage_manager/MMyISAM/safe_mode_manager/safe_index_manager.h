@@ -40,7 +40,8 @@ public:
 
 	void add( std::shared_ptr<unsigned char> key , std::shared_ptr<optr> dataOptr ) override;
 	void remove( std::shared_ptr<unsigned char> key ) override;
-	std::shared_ptr<optr> find( std::shared_ptr<unsigned char> key ) override;
+	std::pair<std::shared_ptr<optr>, int > find( std::shared_ptr<unsigned char> key ) override;
+	// [(first): データ本体先頭ポインター], [(second): データ本体が格納されているデータファイルインデックス]
 
 	std::shared_ptr<ONode> mergeSafeBtree(); // セーフモードでの変更を通常OBtreeに反映する ≒ commit
 

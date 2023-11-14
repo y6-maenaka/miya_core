@@ -13,6 +13,7 @@ namespace miya_db
 class SafeONode;
 
 
+using DataOptrEx = std::pair< std::shared_ptr<optr> , int >; // データ本体先頭Optrとデータファイルインデックス
 
 class SafeOBtree : public OBtree
 {
@@ -25,7 +26,7 @@ public:
 
     void add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<optr> dataOptr ) override;
 		void remove( std::shared_ptr<unsigned char> targetKey ) override;
-		std::shared_ptr<optr> find( std::shared_ptr<unsigned char> targetKey ) override;
+		std::shared_ptr<DataOptrEx> find( std::shared_ptr<unsigned char> targetKey );
 
 		std::shared_ptr<ONode> mergeSafeBtree( std::shared_ptr<SafeONode> subtreeRootONode , short int childIndex = -1  ,std::shared_ptr<ONode> parentONode = nullptr ); // セーフモードでの変更を通常Obtreeに反映する ≒ commit
 

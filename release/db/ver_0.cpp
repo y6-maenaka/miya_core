@@ -43,7 +43,14 @@ int main()
 		return ret;
 	});
 
+	auto printData = ([&]( std::shared_ptr<unsigned char> data , size_t dataLength ){
 
+	std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n......................................." << "\n";
+		for( int i=0; i<dataLength; i++ ){
+				printf("%c", data.get()[i]);
+		} std::cout << "\n";
+	std::cout << "......................................" << "\n";
+	});
 
 	std::shared_ptr<miya_db::DatabaseManager> dbManager = std::make_shared<miya_db::DatabaseManager>();
 	std::shared_ptr<StreamBufferContainer> toDBSBC = std::make_shared<StreamBufferContainer>();
@@ -51,22 +58,23 @@ int main()
 
 
 	dbManager->startWithLightMode( toDBSBC , fromDBSBC , "../miya_db/table_files/test/test" ); // データベース
-	
+
 	std::shared_ptr<MiyaDBSBClient> dbClient = std::make_shared<MiyaDBSBClient>( toDBSBC , fromDBSBC ); // クライアント
 
+	std::shared_ptr<unsigned char> data; size_t dataLength;
 
-	
 	std::shared_ptr<unsigned char> key_1 = generateKey("bbbbbbbbbbbbbbbbbbbb");
 	std::shared_ptr<unsigned char> value_1 = std::shared_ptr<unsigned char>( new unsigned char[11] );
 	memcpy( value_1.get() , "HelloWorld1", 11 );
 	dbClient->add( key_1 , value_1 , 11 );
 
-	
+
+
 	std::shared_ptr<unsigned char> key_2 = generateKey("zzzzzzzzzzzzzzzzzzzz");
 	std::shared_ptr<unsigned char> value_2 = std::shared_ptr<unsigned char>( new unsigned char[11] );
 	memcpy( value_2.get() , "HelloWorld2", 11 );
 	dbClient->add( key_2 , value_2 , 11 );
-	
+
 
 	std::shared_ptr<unsigned char> key_3 = generateKey("aaaaaaaaaaaaaaaaaaaa");
 	std::shared_ptr<unsigned char> value_3 = std::shared_ptr<unsigned char>( new unsigned char[11] );
@@ -92,7 +100,7 @@ int main()
 	std::shared_ptr<unsigned char> key_6 = generateKey("ffffffffffffffffffff");
 	std::shared_ptr<unsigned char> value_6 = std::shared_ptr<unsigned char>( new unsigned char[11] );
 	memcpy( value_6.get(), "HelloWorld6", 11 );
-	dbClient->add( key_6 , value_6 ,11 ); 
+	dbClient->add( key_6 , value_6 ,11 );
 
 	std::shared_ptr<unsigned char> key_7 = generateKey("yyyyyyyyyyyyyyyyyyyy");
 	std::shared_ptr<unsigned char> value_7 = std::shared_ptr<unsigned char>( new unsigned char[11] );
@@ -115,7 +123,7 @@ int main()
 	dbClient->add( key_11 , value_11, 12 );
 
 
-	/*
+		/*
 	dbClient->remove( key_1 );
 	dbClient->remove( key_9 );
 	dbClient->remove( key_11 );
@@ -129,6 +137,15 @@ int main()
 	*/
 
 	std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n......................................." << "\n";
+
+	dataLength = dbClient->get( key_3 , &data );
+	printData( data , dataLength );
+
+	dataLength = dbClient->get( key_5 , &data );
+	printData( data  , dataLength );
+
+	dataLength = dbClient->get( key_11 , &data );
+	printData( data, dataLength );
 
 
 	dbClient->commit(); // SafeModeでの修正を反映する
@@ -146,12 +163,12 @@ int main()
 	// std::cout << "SafeModeを破棄しました" << "\n";
 
 
-	
+
 	std::shared_ptr<unsigned char> key_13 = generateKey("rrrrrrrrrrrrrrrrrrrr");
 	std::shared_ptr<unsigned char> value_13 = std::shared_ptr<unsigned char>( new unsigned char[12] );
 	memcpy( value_13.get() , "HelloWorld13", 12 );
 	dbClient->add( key_13, value_13 , 12 );
-		
+
 
 	return 0;
 

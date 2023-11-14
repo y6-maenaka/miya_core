@@ -67,9 +67,10 @@ void SafeIndexManager::remove( std::shared_ptr<unsigned char> key )
 }
 
 
-std::shared_ptr<optr> SafeIndexManager::find( std::shared_ptr<unsigned char> key )
+std::pair< std::shared_ptr<optr> ,int> SafeIndexManager::find( std::shared_ptr<unsigned char> key )
 {
-	return _masterBtree->find( key );
+	std::shared_ptr< DataOptrEx > ret = _masterBtree->find( key );
+	return std::make_pair( ret->first , ret->second );
 }
 
 

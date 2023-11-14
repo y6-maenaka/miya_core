@@ -5,6 +5,10 @@
 
 // #include "../../components/index_manager/btree.h"
 #include "../components/index_manager/o_node.h"
+#include "../components/index_manager/index_manager.h"
+#include "./safe_btree.h"
+
+#include <array>
 
 
 
@@ -13,16 +17,48 @@ namespace miya_db
 
 
 struct ONodeConversionTable;
+struct SafeOCItemSet;
+struct SafeOItemSet;
 
-constexpr int DATA_OPTR_LOCATED_AT_NORMAL = 0;
-constexpr int DATA_OPTR_LOCATED_AT_SAFE = 1;
+
+
+
+// SafONodeではDataOptrの格納先ファイルの切り替えがdataOptr単位で発生する為,本体の所在を保持しておく必要がある
+// first: dataOptr , int: dataOptrLocation
+
+
+
+// 分割用の仮想アイテムセット
+struct SafeViewItemSet : ViewItemSet
+{
+	std::array< DataOptrEx , DEFAULT_DATA_OPTR_COUNT + 1> _dataOPtr;
+
+	void importItemSet( std::shared_ptr<SafeOCItemSet> citemSet );
+	void moveInsertDataOptr( unsigned short index , DataOptrEx target );
+};
+
+
+
+struct SafeOCItemSet : public OCItemSet
+{
+	// dataOptr返却時にConversionTable/DataOptrLocationを取得し,データの所在を付与する
+	const DataOptrEx dataOptr( unsigned short index );
+	std::array< DataOptrEx, DEFAULT_DATA_OPTR_COUNT > *exportDataOptrArray(); // DataOptrExで書き出す
+};
+
+
 
 
 struct SafeOItemSet : public OItemSet
 {
 public:
-	void dataOptr( unsigned short index , std::shared_ptr<optr> targetDataOptr ) override;
+	// データポインタ保存・変更時にConversionTable/DataOptrLocationも変更する
+	void dataOptr( unsigned short index , DataOptrEx target );
+	void moveInsertDataOptr( unsigned short index , DataOptrEx targetDataOptr , std::shared_ptr<SafeOCItemSet> citemSet );
 };
+
+
+
 
 
 // SafeONodeはONodeと異なるMemoryManagerを持っている為,SafeONodeから生成されたSafeONodeはSafeファイル自動で機に生成される
@@ -30,6 +66,8 @@ class SafeONode : public ONode
 {
 private:
 	//static const std::shared_ptr<ONodeConversionTable> _conversionTable;
+protected:
+	int findIndex( std::shared_ptr<unsigned char> targetKey ) override;
 
 public:
 	static ONodeConversionTable _conversionTable;
@@ -40,9 +78,10 @@ public:
 	std::shared_ptr<SafeONode> parent(); // 再定義
 	std::shared_ptr<SafeONode> child( unsigned short index ); // 再定義
 
-	std::shared_ptr<OCItemSet> citemSet() override;
-	std::shared_ptr<OItemSet> itemSet() override;
-	std::shared_ptr<optr> subtreeFind( std::shared_ptr<unsigned char> key );
+	std::shared_ptr<SafeOCItemSet> citemSet();
+	std::shared_ptr<SafeOItemSet> itemSet();
+
+	std::shared_ptr<DataOptrEx> subtreeFind( std::shared_ptr<unsigned char> key );
 	std::shared_ptr<SafeONode> subtreeMax();
 
 	struct Hash;
@@ -50,7 +89,7 @@ public:
 	bool operator ==( SafeONode& so ) const;
 	bool operator !=( SafeONode& so ) const;
 
-	std::shared_ptr<SafeONode> recursiveAdd( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<optr> targetDataOptr ,std::shared_ptr<SafeONode> targetONode = nullptr );
+	std::shared_ptr<SafeONode> recursiveAdd( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<DataOptrEx> targetDataOptr ,std::shared_ptr<SafeONode> targetONode = nullptr );
 	std::shared_ptr<SafeONode> remove( std::shared_ptr<unsigned char> targetKey );
 	std::shared_ptr<SafeONode> underflow( std::shared_ptr<SafeONode> sourceONode );
 	std::shared_ptr<SafeONode> merge( unsigned short index );
@@ -60,13 +99,11 @@ public:
 
 	void hello() override { std::cout << "Hello SafeONode" << "\n";};
 
-
 	std::shared_ptr<SafeONode> shared_from_this()
 	{
 		return std::dynamic_pointer_cast<SafeONode>(ONode::shared_from_this());
 	}
 };
-
 
 
 
@@ -99,32 +136,38 @@ inline std::size_t SafeONode::Hash::operator()( std::shared_ptr<SafeONode> so ) 
 
 
 
+
+
+
+
+struct MappingContext
+{
+	optr _optr; // 変換先optr
+	std::array< int /*index*/ , DEFAULT_DATA_OPTR_COUNT > _dataOptrLocation; // これを使ってDataOptrExを作成する
+	// ONode/SafeONodeはメモリを使用しない為参照が終了すると関連情報以外は保存されない
+
+	MappingContext( const optr target ) : _optr(target) {
+		for( int i=0; i<_dataOptrLocation.size(); i++ ) _dataOptrLocation[i] = DATA_OPTR_LOCATED_AT_NORMAL;
+	};
+
+};
+
+
 struct ONodeConversionTableEntryDetail
 {
 	std::shared_ptr<SafeONode> convertedONode; // 変換結果
 	bool isExists; // 変換エントリ(情報)が存在したか否か
-	std::pair< std::shared_ptr<optr>, std::shared_ptr<optr> > entry; // エントリ
+	std::shared_ptr<optr> key;
+	std::shared_ptr<MappingContext> value;
 };
 
-struct MappingContext
-{
-	const optr _optr;
-	std::array< int , DEFAULT_DATA_OPTR_COUNT > _dataOptrLocation;
 
-	MappingContext( const optr target ) : _optr(target) {
-		for( auto itr : _dataOptrLocation ) itr = 0;
-	};
-
-	std::shared_ptr<optr> Optr() const {
-		return std::make_shared<optr>( _optr );
-	}
-};
 
 
 struct ONodeConversionTable // ONode to SafeONode
 {
 private:
-	std::unordered_map< const optr , const MappingContext , optr::Hash > _entryMap;
+	std::unordered_map< const optr , MappingContext , optr::Hash > _entryMap;
 
 	std::shared_ptr<OverlayMemoryManager> _safeOMemoryManager;
 	std::shared_ptr<OverlayMemoryManager> _normalOMemoryManager;
@@ -136,6 +179,7 @@ public:
 	std::pair< std::shared_ptr<SafeONode>, bool > ref( std::shared_ptr<optr> target );
 	ONodeConversionTableEntryDetail refEx( std::shared_ptr<optr> target);
 	void regist( std::shared_ptr<optr> key , std::shared_ptr<optr> value );
+	void update( std::shared_ptr<optr> key , std::shared_ptr<MappingContext> target ); // そのままtargetに置き換わるので注意
 
 	void safeOMemoryManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager );
 	const std::shared_ptr<OverlayMemoryManager> safeOMemoryManager();
