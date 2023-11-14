@@ -170,12 +170,15 @@ bool MMyISAM::safeCommitExit()
 	std::shared_ptr<optr> safeONodeMeta = std::make_shared<optr>( addrZero , SafeONode::_conversionTable.safeOMemoryManager()->dataCacheTable() );
 	omemcpy( onodeMeta.get() , safeONodeMeta.get() , 100 );
 
+	SafeONode::_conversionTable.printEntryMap();
+
+	/* Dataのコピー・移動 */
+	_normal._valueStoreManager->mergeDataOptr( _valueStoreManager );
+
 	/* ルートノード更新の反映 */
-	std::shared_ptr<ONode> newRootONode = dynamic_cast<SafeIndexManager*>(_indexManager)->mergeSafeBtree();
+	std::shared_ptr<ONode> newRootONode = dynamic_cast<SafeIndexManager*>(_indexManager)->mergeSafeBtree(); // インデックスのコミット
 	dynamic_cast<NormalIndexManager*>(_normal._indexManager.get())->masterBtree()->rootONode( newRootONode );
 
-	std::cout << "SafeOBtreeの表示" << "\n";
-	_indexManager->printIndexTree();
 
 	delete _indexManager;
 	delete _valueStoreManager;

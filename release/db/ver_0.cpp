@@ -138,6 +138,9 @@ int main()
 
 	std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n......................................." << "\n";
 
+
+	dbClient->commit(); // SafeModeでの修正を反映する
+
 	dataLength = dbClient->get( key_3 , &data );
 	printData( data , dataLength );
 
@@ -148,16 +151,13 @@ int main()
 	printData( data, dataLength );
 
 
-	dbClient->commit(); // SafeModeでの修正を反映する
-	return 0;
-
-
 	std::shared_ptr<unsigned char> key_12 = generateKey("aaaaaaaaaaaaaaaaaaaa");
 	std::shared_ptr<unsigned char> value_12 = std::shared_ptr<unsigned char>( new unsigned char[12] );
 	memcpy( value_12.get() , "HelloWorld12", 12 );
 	dbClient->add( key_12 , value_12 , 12 );
 
 
+	return 0;
 
 	// dbClient->abort();
 	// std::cout << "SafeModeを破棄しました" << "\n";

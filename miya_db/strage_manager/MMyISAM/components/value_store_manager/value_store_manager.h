@@ -54,7 +54,7 @@ struct ValueFragmentHeader
 	} _meta;
 
 	std::shared_ptr<CacheTable> _cacheTable;
-	
+
 
 public:
 	ValueFragmentHeader( std::shared_ptr<CacheTable> cacheTable );
@@ -83,18 +83,22 @@ class ValueStoreManager
 
 private:
 	std::shared_ptr<OverlayMemoryManager> _dataOverlayMemoryManager; // データが保存されているファイルのマネージャー
-	
+
 
 public:
 	// こっちは基本的に使わない
-	// ValueStoreManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager ); 
+	// ValueStoreManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager );
 	ValueStoreManager( std::string valueFilePath );
 
+	std::shared_ptr<optr> add( std::shared_ptr<unsigned char> data , size_t dataLength );
 	std::shared_ptr<optr> add( std::shared_ptr<QueryContext> qctx );
 	std::shared_ptr<unsigned char> get();
 	size_t get( std::shared_ptr<optr> targetOptr ,std::shared_ptr<unsigned char> *ret );
-	
-	void clear(); // 管理ファイルを完全にリフレッシュする 
+
+	// Safeモードでセーフファイルに割り付けてあるファイルを本ファイルに移動する // ConvertsionTableにアクセスするためにIndex関連ファイルのインポートが必要なのは仕方ない
+	void mergeDataOptr( ValueStoreManager* safeValueStoreManager );
+
+	void clear(); // 管理ファイルを完全にリフレッシュする
 	const std::shared_ptr<OverlayMemoryManager> overlayMemoryManager();
 };
 
@@ -105,6 +109,4 @@ public:
 
 
 
-#endif // 
-
-
+#endif //

@@ -8,6 +8,8 @@
 
 #include "../../../../miya_db/query_context/query_context.h"
 
+#include "../../safe_mode_manager/safe_btree.h"
+#include "../../safe_mode_Manager/safe_o_node.h"
 
 namespace miya_db
 {
@@ -22,7 +24,7 @@ ValueFragmentHeader::ValueFragmentHeader( std::shared_ptr<CacheTable> cacheTable
 	uint64_t timestamp = static_cast<uint64_t>( std::time(nullptr) );
 	_meta._timestamp = timestamp;
 
-	std::shared_ptr<unsigned char> addrZero = std::shared_ptr<unsigned char>( new unsigned char[VALUE_FLAGMENT_ADDR_SIZE] ); 
+	std::shared_ptr<unsigned char> addrZero = std::shared_ptr<unsigned char>( new unsigned char[VALUE_FLAGMENT_ADDR_SIZE] );
 	memset( addrZero.get() , 0x00 , VALUE_FLAGMENT_ADDR_SIZE );
 
 	_meta._prevFlagment = std::shared_ptr<optr>( new optr(addrZero.get(), cacheTable ) );
@@ -108,7 +110,7 @@ size_t ValueFragmentHeader::exportBianry( std::shared_ptr<unsigned char> *ret )
 	omemcpy( (*ret).get() + formatPtr , _meta._nextFlagment.get() , VALUE_FLAGMENT_ADDR_SIZE ); formatPtr += VALUE_FLAGMENT_ADDR_SIZE;
 
 	memcpy( (*ret).get() + formatPtr , &(_meta._valueLength) , sizeof(_meta._valueLength) ); formatPtr += sizeof(_meta._valueLength);
-	
+
 	memcpy( (*ret).get() + formatPtr , &(_meta._timestamp) , sizeof(_meta._timestamp) ); formatPtr += sizeof(_meta._timestamp);
 
 	return formatPtr;
@@ -148,12 +150,33 @@ ValueStoreManager::ValueStoreManager( std::string valueFilePath )
 
 
 
-std::shared_ptr<optr> ValueStoreManager::add( std::shared_ptr<QueryContext> qctx )
+std::shared_ptr<optr> ValueStoreManager::add( std::shared_ptr<unsigned char> data , size_t dataLength )
 {
 	std::shared_ptr<ValueFragmentHeader> flagmentHeader = std::make_shared<ValueFragmentHeader>(
 		_dataOverlayMemoryManager->dataCacheTable()
 	);
 
+	flagmentHeader->valueLength( dataLength );
+
+	std::shared_ptr<unsigned char> exportedFlagmentHeader;
+	size_t exportedFlagmentHeaderLength = flagmentHeader->exportBianry( &exportedFlagmentHeader );
+
+	std::shared_ptr<optr> storeTargetOptr;
+	storeTargetOptr = _dataOverlayMemoryManager->allocate( exportedFlagmentHeaderLength + dataLength );
+	omemcpy( storeTargetOptr.get() , exportedFlagmentHeader.get() , flagmentHeader->headerLength());
+
+	omemcpy( (*storeTargetOptr + flagmentHeader->headerLength()).get() , data.get() , dataLength  );
+
+	return storeTargetOptr;
+}
+
+
+// あとで,中身はもう一方のaddを呼ぶようにする
+std::shared_ptr<optr> ValueStoreManager::add( std::shared_ptr<QueryContext> qctx )
+{
+	std::shared_ptr<ValueFragmentHeader> flagmentHeader = std::make_shared<ValueFragmentHeader>(
+		_dataOverlayMemoryManager->dataCacheTable()
+	);
 
 	flagmentHeader->valueLength( qctx->valueLength() );
 
@@ -184,7 +207,7 @@ size_t ValueStoreManager::get( std::shared_ptr<optr> targetOptr ,std::shared_ptr
 
 	// 本来はここで他フラグメントが存在する場合は,それに合わせて拡張する
 
-	size_t valueLength = flagmentHeader->valueLength(); 
+	size_t valueLength = flagmentHeader->valueLength();
 	*ret = std::shared_ptr<unsigned char>( new unsigned char[valueLength] );
 	omemcpy( (*ret).get() , *targetOptr + (flagmentHeader->headerLength()) , flagmentHeader->valueLength() );
 
@@ -193,6 +216,27 @@ size_t ValueStoreManager::get( std::shared_ptr<optr> targetOptr ,std::shared_ptr
 
 
 
+void ValueStoreManager::mergeDataOptr( ValueStoreManager* safeValueStoreManager )
+{
+	std::shared_ptr<unsigned char> data; size_t dataLength;
+	for( auto itr : SafeONode::_conversionTable.entryMap() )
+	{
+		std::shared_ptr<SafeONode> targetSafeONode = std::make_shared<SafeONode>( SafeONode::_conversionTable.safeOMemoryManager(), std::make_shared<optr>(itr.first) );
+		for( int i=0; i< targetSafeONode->citemSet()->dataOptrCount() ; i++ )
+		{
+			if( itr.second._dataOptrLocation[i] == DATA_OPTR_LOCATED_AT_SAFE )
+			{
+					DataOptrEx dataOptr = targetSafeONode->citemSet()->dataOptr(i);
+					dataLength = safeValueStoreManager->get( dataOptr.first , &data );
+					std::shared_ptr<optr> copyedOptr = this->add( data , dataLength );
+
+					targetSafeONode->itemSet()->dataOptr( i , std::make_pair( copyedOptr , DATA_OPTR_LOCATED_AT_NORMAL ));
+					// itr.second._dataOptrLocation[i] = DATA_OPTR_LOCATED_AT_NORMAL; // 明示的に変更説ともdataOptr呼び出し時に変更される
+			}
+		}
+		SafeONode::_conversionTable.update( std::make_shared<optr>(itr.first) , std::make_shared<MappingContext>(itr.second) );
+	}
+}
 
 
 

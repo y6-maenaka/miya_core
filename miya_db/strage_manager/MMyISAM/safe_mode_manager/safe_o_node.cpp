@@ -208,6 +208,12 @@ const std::shared_ptr<OverlayMemoryManager> ONodeConversionTable::normalOMemoryM
 	return _normalOMemoryManager;
 }
 
+const std::unordered_map< const optr , MappingContext , optr::Hash > ONodeConversionTable::entryMap()
+{
+  return _entryMap;
+}
+
+
 
 void ONodeConversionTable::printEntryMap()
 {

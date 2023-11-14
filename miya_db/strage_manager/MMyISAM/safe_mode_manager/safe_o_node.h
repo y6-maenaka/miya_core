@@ -187,6 +187,7 @@ public:
 	void normalOMemoryManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager );
 	const std::shared_ptr<OverlayMemoryManager> normalOMemoryManager();
 
+	const std::unordered_map< const optr , MappingContext , optr::Hash > entryMap();
 	void printEntryMap();
 };
 
