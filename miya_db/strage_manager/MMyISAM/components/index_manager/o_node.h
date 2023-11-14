@@ -114,7 +114,7 @@ public:
 	void moveInsertChildOptr( unsigned short index , std::shared_ptr<optr> targetONode );
 	void moveDeleteChildOptr( unsigned short index );
 
-	void key( unsigned short index , std::shared_ptr<unsigned char> targetKey ); 
+	void key( unsigned short index , std::shared_ptr<unsigned char> targetKey );
 	void keyCount( unsigned short num );
 	void sortKey();
 	void moveInsertKey( unsigned short index , std::shared_ptr<unsigned char> targetKey );
@@ -127,7 +127,7 @@ public:
 
 	void parent( std::shared_ptr<ONode> target );
 
-	void remove( unsigned short index ); 
+	void remove( unsigned short index );
 	void clear();
 };
 
@@ -139,7 +139,7 @@ struct OCItemSet
 private:
 	std::shared_ptr<ONodeItemSet> _base;
 
-public:	
+public:
 	OCItemSet( std::shared_ptr<ONodeItemSet> base );
 
 	const std::shared_ptr<optr> Optr();
@@ -174,8 +174,6 @@ struct ItemSet{
 	public:
 		ItemSet( std::shared_ptr<ONodeItemSet> target );
 
-		//OItemSet *itemSet();
-		//OCItemSet *citemSet();
 		std::shared_ptr<OItemSet> itemSet();
 		std::shared_ptr<OCItemSet> citemSet();
 };
@@ -183,7 +181,7 @@ struct ItemSet{
 
 
 
-class ONode : public std::enable_shared_from_this<ONode> 
+class ONode : public std::enable_shared_from_this<ONode>
 {
 private:
 	bool _isLeaf = true;
@@ -206,7 +204,7 @@ public:
 	std::shared_ptr<OverlayMemoryManager> overlayMemoryManager();
 
 	/* Setter */
-	void itemSet( std::shared_ptr<ONodeItemSet> target ); 
+	void itemSet( std::shared_ptr<ONodeItemSet> target );
 
 	/* Getter */
 	virtual std::shared_ptr<OCItemSet> citemSet(); 	// セーフモード( Getterのみを参照できる )
@@ -268,4 +266,3 @@ public:
 
 
 #endif // EE675C7D_7BCE_4454_845B_FDFD59A725D4
-

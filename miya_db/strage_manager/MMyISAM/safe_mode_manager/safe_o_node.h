@@ -14,9 +14,15 @@ namespace miya_db
 
 struct ONodeConversionTable;
 
+constexpr int DATA_OPTR_LOCATED_AT_NORMAL = 0;
+constexpr int DATA_OPTR_LOCATED_AT_SAFE = 1;
 
 
-
+struct SafeOItemSet : public OItemSet
+{
+public:
+	void dataOptr( unsigned short index , std::shared_ptr<optr> targetDataOptr ) override;
+};
 
 
 // SafeONodeはONodeと異なるMemoryManagerを持っている為,SafeONodeから生成されたSafeONodeはSafeファイル自動で機に生成される
@@ -41,9 +47,7 @@ public:
 
 	struct Hash;
 
-	//bool operator ==( SafeONode& so ) const;
 	bool operator ==( SafeONode& so ) const;
-	//bool operator !=( SafeONode& so ) const;
 	bool operator !=( SafeONode& so ) const;
 
 	std::shared_ptr<SafeONode> recursiveAdd( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<optr> targetDataOptr ,std::shared_ptr<SafeONode> targetONode = nullptr );
@@ -102,12 +106,25 @@ struct ONodeConversionTableEntryDetail
 	std::pair< std::shared_ptr<optr>, std::shared_ptr<optr> > entry; // エントリ
 };
 
+struct MappingContext
+{
+	const optr _optr;
+	std::array< int , DEFAULT_DATA_OPTR_COUNT > _dataOptrLocation;
+
+	MappingContext( const optr target ) : _optr(target) {
+		for( auto itr : _dataOptrLocation ) itr = 0;
+	};
+
+	std::shared_ptr<optr> Optr() const {
+		return std::make_shared<optr>( _optr );
+	}
+};
 
 
 struct ONodeConversionTable // ONode to SafeONode
 {
 private:
-	std::unordered_map< const optr , const optr , optr::Hash > _entryMap;
+	std::unordered_map< const optr , const MappingContext , optr::Hash > _entryMap;
 
 	std::shared_ptr<OverlayMemoryManager> _safeOMemoryManager;
 	std::shared_ptr<OverlayMemoryManager> _normalOMemoryManager;

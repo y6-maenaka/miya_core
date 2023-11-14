@@ -33,7 +33,7 @@ std::pair< std::shared_ptr<SafeONode> , bool > ONodeConversionTable::ref( std::s
 	}
 
 	//std::cout << "\x1b[33m" << "マッピング情報が存在します" << "\x1b[39m" << "\n";
-	std::shared_ptr<optr> retOptr = std::make_shared<optr>(itr->second);
+	std::shared_ptr<optr> retOptr = itr->second.Optr();
 	retOptr->cacheTable( _safeOMemoryManager->dataCacheTable() );
   	return std::make_pair( std::make_shared<SafeONode>( _safeOMemoryManager ,retOptr ), true ); // 変換テーブルに要素が存在した場合
 }
@@ -57,11 +57,11 @@ ONodeConversionTableEntryDetail ONodeConversionTable::refEx( std::shared_ptr<opt
 		return retDetail;
 	}
 
-	std::shared_ptr<optr> retOptr = std::make_shared<optr>(itr->second);
+	std::shared_ptr<optr> retOptr = itr->second.Optr();
 	retOptr->cacheTable( _safeOMemoryManager->dataCacheTable() );
 	retDetail.convertedONode = std::make_shared<SafeONode>( _safeOMemoryManager , retOptr );
 	retDetail.isExists = true;
-	retDetail.entry = std::make_pair( target , std::make_shared<optr>(itr->second) ); // ここでのoptrのdataCacheはNormalModeの者になっている必要がある
+	retDetail.entry = std::make_pair( target , itr->second.Optr() ); // ここでのoptrのdataCacheはNormalModeの者になっている必要がある
 	return retDetail;
 }
 
@@ -69,8 +69,8 @@ ONodeConversionTableEntryDetail ONodeConversionTable::refEx( std::shared_ptr<opt
 void ONodeConversionTable::regist( std::shared_ptr<optr> key , std::shared_ptr<optr> value )
 {
     // コピーを作成する
-    // _entryMap[key] = value;
 	optr *_key = key.get(); optr *_value = value.get();
+  struct MappingContext mctx( *_value );
 	_entryMap.insert( { *_key , *_value } );
 
 
@@ -118,9 +118,9 @@ void ONodeConversionTable::printEntryMap()
 		std::cout << " -key :: "; itr.first.printAddr(); std::cout << "\n";
 		std::cout << "\x1b[39m";
 
-		if( ((100 + itr.second.offset()) % O_NODE_ITEMSET_SIZE) == 0 ) std::cout << "\x1b[33m";
-		if( ((100 + itr.second.offset() + SAFE_MODE_COLLICION_OFFSET) % O_NODE_ITEMSET_SIZE) == 0 ) std::cout << "\x1b[35m";
-		std::cout << " -value :: "; itr.second.printAddr(); std::cout << "\n";
+		if( ((100 + itr.second.Optr()->offset()) % O_NODE_ITEMSET_SIZE) == 0 ) std::cout << "\x1b[33m";
+		if( ((100 + itr.second.Optr()->offset() + SAFE_MODE_COLLICION_OFFSET) % O_NODE_ITEMSET_SIZE) == 0 ) std::cout << "\x1b[35m";
+		std::cout << " -value :: "; itr.second.Optr()->printAddr(); std::cout << "\n";
 		std::cout << "\x1b[39m";
 		std::cout << "\n";
 		i++;
