@@ -59,7 +59,9 @@ int main()
 
 	dbManager->startWithLightMode( toDBSBC , fromDBSBC , "../miya_db/table_files/test/test" ); // データベース
 
+
 	std::shared_ptr<MiyaDBSBClient> dbClient = std::make_shared<MiyaDBSBClient>( toDBSBC , fromDBSBC ); // クライアント
+
 
 	std::shared_ptr<unsigned char> data; size_t dataLength;
 

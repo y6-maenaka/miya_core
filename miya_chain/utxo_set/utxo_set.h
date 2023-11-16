@@ -62,6 +62,9 @@ protected:
 
 public:
 	LightUTXOSet( std::shared_ptr<StreamBufferContainer> pushSBContainer , std::shared_ptr<StreamBufferContainer> popSBContainer );
+	void toVirtual(); // 仮想(本UTXOへ影響を与えない)モードへ移行 ≒ トランザクション開始
+	void virtualCommit(); // 仮想モードの保存&終了
+	void virtualAbort(); // 仮想モードの破棄＆終了
 
 	std::shared_ptr<unsigned char> generateUTxOKey( std::shared_ptr<unsigned char> txID , uint32_t index );
 
@@ -90,9 +93,3 @@ public:
 
 
 #endif // FEBF8752_FAA3_4C86_B045_1BC8265E9E9E
-
-
-
-
-
-

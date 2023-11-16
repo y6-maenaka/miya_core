@@ -97,7 +97,7 @@
 
 
 
-[ タスク ] 
+[ タスク ]
 - ブロックチェーン維持
 - kademlia iterator
 
@@ -120,7 +120,7 @@
 	pkey = ecdsaManager.myPkey();
 	std::shared_ptr<unsigned char> rawPubKey; size_t rawPubKeyLength;
 	rawPubKeyLength = cipher::ECDSAManager::toRawPubKey( pkey , &rawPubKey );
-	
+
 	std::shared_ptr<unsigned char> rawPubKeyHash; size_t rawPubKeyHashLength;
 	rawPubKeyHashLength = hash::SHAHash( rawPubKey , rawPubKeyLength , &rawPubKeyHash , "sha1" );
 
@@ -136,7 +136,7 @@
 	block.header()->merkleRoot( merkleRoot );
 
 	uint32_t nBits = 532390001; // 簡易的にマイニングの実行
-	block.header()->nBits( nBits ); 
+	block.header()->nBits( nBits );
 
 	uint32_t nonce = miya_chain::simpleMining( nBits , block.header() );
 	block.header()->nonce( nonce );
@@ -191,3 +191,6 @@
 
 
 - 現在の実装ではobtreeは表面上でしか削除できていない
+
+
+- commit時にインデックス変換エントリを削除しないので,データがコピーされてしまう( 削除時はエントリを削除する )

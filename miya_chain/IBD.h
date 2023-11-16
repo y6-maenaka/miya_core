@@ -39,7 +39,7 @@ constexpr unsigned int DEFAULT_IBD_MAX_TIMEOUT_COUNT = 4;
 
 
 
-enum class IBDState : int 
+enum class IBDState : int
 {
 	BlockHeaderReceived = 1, // ブロックヘッダの取得完了
 	BlockHeaderValidated, // ブロックヘッダの検証完了
@@ -62,14 +62,14 @@ struct IBDBCB // (Initial Block Donwload Block Control Block)
 {
 	std::shared_ptr<block::Block> block;
 	uint32_t height; // いらないかも
-	int status; 
+	int status;
 	// 1 : blockHashまで受信完了
 	// 2 : ヘッダーまで受信完了
 	// 3 : トランザクション収集中
 	// 4 : 保存済み
 	// -1 : エラー発生
 	// -2 : 空
-	
+
 	IBDBCB();
 	void header( std::shared_ptr<block::BlockHeader> target );
 	void setErrorFlag();
@@ -119,9 +119,9 @@ struct BlockHashAsKey::Hash {
     std::size_t operator()(const BlockHashAsKey& key) const;
 };
 
-inline std::size_t BlockHashAsKey::Hash::operator()(const BlockHashAsKey& key) const 
+inline std::size_t BlockHashAsKey::Hash::operator()(const BlockHashAsKey& key) const
 {
-	std::string bytes(reinterpret_cast<const char*>(key._blockHash), sizeof(key._blockHash)); 
+	std::string bytes(reinterpret_cast<const char*>(key._blockHash), sizeof(key._blockHash));
 	return std::hash<std::string>()(bytes);
 	//std::cout << "KeyHash :: " << ret << "\n";
 	//ダブルハッシュになって非効率的だが,unsigned char[32]をsize_tに変換する術を知らない
@@ -174,7 +174,7 @@ private:
 
 public:
     IBDHeaderFilter( IBDVirtualChain *virtualChain ); // ヘッダを検証するスレッドを起動する
-		
+
 		/* いずれもlayer1に対する操作 ユーザプログラムから直接layer2を操作することはない */
 		void add( std::shared_ptr<block::BlockHeader> header);
 		void add( std::vector< std::shared_ptr<block::BlockHeader> > headerVector );

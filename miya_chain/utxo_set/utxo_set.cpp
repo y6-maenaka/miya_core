@@ -29,6 +29,22 @@ LightUTXOSet::LightUTXOSet( std::shared_ptr<StreamBufferContainer> pushSBContain
 }
 
 
+void LightUTXOSet::toVirtual()
+{
+	_miyaDBClient->safeMode();
+}
+
+void LightUTXOSet::virtualCommit()
+{
+	_miyaDBClient->commit();
+}
+
+void LightUTXOSet::virtualAbort()
+{
+	_miyaDBClient->abort();
+}
+
+
 std::shared_ptr<unsigned char> LightUTXOSet::generateUTxOKey( std::shared_ptr<unsigned char> txID , uint32_t index )
 {
 	size_t joinedIDIndexLength = 32 + sizeof(index);
@@ -88,7 +104,7 @@ std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<unsigned char> txID , u
 	// クエリを流す
 	_pushSBContainer->pushOne( std::move(querySB) );
 
-	
+
 	// SBの監視中に別のレスポンスが入ってくる可能性がある -> 簡易的に取り出してIDが異なったら最後尾に追加する？
 
 
@@ -99,10 +115,10 @@ std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<unsigned char> txID , u
 	std::vector<uint8_t> responseVector;
 	responseVector.assign( response->body().get() , response->body().get() + response->bodyLength() ); // レスポンスの型変換
 
-	
+
 	nlohmann::json responseJson = nlohmann::json::from_bson( responseVector );
 	if( !(responseJson.contains("QueryID")) ) return nullptr;
-	if( responseJson["QueryID"] != queryJson["QueryID"] ) 
+	if( responseJson["QueryID"] != queryJson["QueryID"] )
 	{
 		_popSBContainer->pushOne( std::move(response) );
 		goto re;
@@ -111,10 +127,10 @@ std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<unsigned char> txID , u
 	if( !(responseJson.contains("status")) ) return nullptr;
 	if( (responseJson["status"]) != 0 ) return nullptr;
 
-
+	// bsomにダンプしているデータのデコード
 	nlohmann::json valueJson = nlohmann::json::from_bson( responseJson["value"].get_binary() );
 	std::shared_ptr<UTXO> retUTXO = std::make_shared<UTXO>();
-	if( retUTXO->set( valueJson ) )
+	if( retUTXO->importFromJson( valueJson ) )
 		return retUTXO;
 
 	return nullptr;
@@ -133,11 +149,11 @@ std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<tx::PrevOut> prevOut )
 bool LightUTXOSet::add( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_ptr<unsigned char> txID, uint32_t index )
 {  // 単一のtxOutを登録する
 
-	std::shared_ptr<UTXO> valueUTXO = std::make_shared<UTXO>( targetTxOut ); // 登録するUTXOの作成
+	std::shared_ptr<UTXO> valueUTXO = std::make_shared<UTXO>( targetTxOut , index ); // 登録するUTXOの作成
 	std::vector<uint8_t> dumpedUTXO = valueUTXO->dumpToBson();
 
 	size_t joinedIDIndexLength = 32 + sizeof(index); // あとで置き換える
-	std::shared_ptr<unsigned char> joinedIDIndex = std::shared_ptr<unsigned char>( new unsigned char[joinedIDIndexLength] );  
+	std::shared_ptr<unsigned char> joinedIDIndex = std::shared_ptr<unsigned char>( new unsigned char[joinedIDIndexLength] );
 	memcpy( joinedIDIndex.get() , txID.get() , 32 );
 	memcpy( joinedIDIndex.get() + 32  , &index , sizeof(index) );
 
@@ -145,7 +161,7 @@ bool LightUTXOSet::add( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_ptr<
 	rawKeyLength = hash::SHAHash( joinedIDIndex, joinedIDIndexLength , &rawKey , "sha1" );
 
 	std::vector<uint8_t> keyVector; keyVector.assign( rawKey.get() , rawKey.get() + rawKeyLength );
-	
+
 	std::cout << "\x1b[32m" << "-----------------------------------------------------------" << "\x1b[39m" << "\n";
 	std::cout << " << Store Information >> " << "\n";
 	std::cout << "\x1b[32m" << "[TxID] :: " ;
@@ -175,7 +191,7 @@ bool LightUTXOSet::add( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_ptr<
 
 	std::shared_ptr<unsigned char> dumpedQuery = std::shared_ptr<unsigned char>( new unsigned char[dumpedQueryVector.size()] );
 	std::copy( dumpedQueryVector.begin() , dumpedQueryVector.begin() + dumpedQueryVector.size() , dumpedQuery.get() );
-	
+
 	std::unique_ptr<SBSegment> query = std::make_unique<SBSegment>();
 	query->body( dumpedQuery , dumpedQueryVector.size() );
 
@@ -232,7 +248,7 @@ void LightUTXOSet::testInquire( std::shared_ptr<unsigned char> data , size_t dat
 	std::shared_ptr<unsigned char> queryKey = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	memcpy( queryKey.get() , "aaaaaaaaaaaaaaaaaaaa" , 20 );
 	std::vector<uint8_t> keyVector; keyVector.assign( queryKey.get() , queryKey.get() + 20 );
-	
+
 	std::vector<uint8_t> valueVector; valueVector.assign( data.get() , data.get() + dataLength );
 
 
@@ -286,14 +302,14 @@ void LightUTXOSet::testInquire( std::shared_ptr<unsigned char> data , size_t dat
 	requestSegment->body( exportedRequestJsonRaw, exportedRequestJsonVector.size() );
 	_pushSBContainer->pushOne( std::move(requestSegment) );
 
-	
+
 	std::unique_ptr<SBSegment> getResponseSegment = _popSBContainer->popOne();
 	std::cout << "とりあえず仮取得できました" << "\n";
 
 	std::cout << "----------- 取得したデータ -----------" << "\n";
 	std::vector<uint8_t> getResponseSegmentVector;
 	getResponseSegmentVector.assign( getResponseSegment->body().get() , getResponseSegment->body().get() + getResponseSegment->bodyLength() );
-	
+
 	nlohmann::json ret = nlohmann::json::from_bson( getResponseSegmentVector );
 
 	std::cout << ret << "\n";

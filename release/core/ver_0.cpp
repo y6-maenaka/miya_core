@@ -64,7 +64,7 @@ int main()
 	pkey = ecdsaManager.myPkey();
 	std::shared_ptr<unsigned char> rawPubKey; size_t rawPubKeyLength;
 	rawPubKeyLength = cipher::ECDSAManager::toRawPubKey( pkey , &rawPubKey );
-	
+
 	std::shared_ptr<unsigned char> rawPubKeyHash; size_t rawPubKeyHashLength;
 	rawPubKeyHashLength = hash::SHAHash( rawPubKey , rawPubKeyLength , &rawPubKeyHash , "sha1" );
 
@@ -80,7 +80,7 @@ int main()
 	block.header()->merkleRoot( merkleRoot );
 
 	uint32_t nBits = 532390001; // 簡易的にマイニングの実行
-	block.header()->nBits( nBits ); 
+	block.header()->nBits( nBits );
 
 	uint32_t nonce = miya_chain::simpleMining( nBits , block.header() ,false );
 	block.header()->nonce( nonce );
@@ -119,7 +119,7 @@ int main()
 	std::condition_variable cv;
 	std::unique_lock<std::mutex> lock(mtx);
 	cv.wait( lock );
-	*/	
+	*/
 
 
 
@@ -128,30 +128,95 @@ int main()
 
 
 
-
-
-
-
-	
-	// -------- [ 必須セットアップ ] ------------------------------------------------------------------------------------------------------ 
+	// -------- [ 必須セットアップ ] ------------------------------------------------------------------------------------------------------
 	miya_core::MiyaCore miyaCore;
+
+	ControlInterface interface;
 
 	cipher::ECDSAManager ecdsaManager; // 暗号関係マネージャーの起動
 	std::shared_ptr<unsigned char> pemPass; size_t pemPassLength;
 	pemPassLength = miyaCore.context()->pemPass( &pemPass );
 	ecdsaManager.init( pemPass.get() , pemPassLength ); // priKeyには鍵がかかっているので
 	std::shared_ptr<unsigned char> selfAddress; size_t selfAddressLength;
-	EVP_PKEY *pkey = ecdsaManager.myPkey(); 
+	EVP_PKEY *pkey = ecdsaManager.myPkey();
 	selfAddressLength = cipher::ECDSAManager::toRawPubKey( pkey , &selfAddress );
 
 
 	miya_chain::MiyaChainManager miyaChainManager;
 	std::shared_ptr<StreamBufferContainer> toEKP2PBrokerDummySBC = std::make_shared<StreamBufferContainer>();
 	miyaChainManager.init( toEKP2PBrokerDummySBC );
-	// ------------------------------------------------------------------------------------------------------------------ 
+	// ------------------------------------------------------------------------------------------------------------------
 
+
+
+
+
+
+
+
+
+	std::shared_ptr<miya_chain::BlockLocalStrageManager> localStrageManager;
+	localStrageManager = miyaChainManager.localStrageManager();
+
+
+	std::shared_ptr<tx::P2PKH> p2pkh_0001 = interface.createTxFromJsonFile("../control_interface/tx_origin/payment_tx_info_0001.json");
+	for( auto itr : p2pkh_0001->ins() ){
+		itr->pkey( ecdsaManager.myPkey() );
+	}
+	std::cout << "p2pkh_0001 sign :: " << p2pkh_0001->sign() << "\n";
+	std::cout << "p2pkh_0001 txout count :: " << p2pkh_0001->outCount() << "\n";
+
+
+
+
+	std::shared_ptr<tx::P2PKH> p2pkh_0002 = interface.createTxFromJsonFile("../control_interface/tx_origin/payment_tx_info_0002.json");
+	for( auto itr : p2pkh_0002->ins() ){
+		itr->pkey( ecdsaManager.myPkey() );
+	}
+	std::cout << "p2pkh_0002 sign:: " << p2pkh_0002->sign() << "\n"; // 署名しないと使えない
+	std::cout << "p2pkh_0002 txout count :: " << p2pkh_0002->outCount() << "\n";
+	std::shared_ptr<unsigned char> coinbase_0002Text = std::shared_ptr<unsigned char>( new unsigned char[10] );
+	memcpy( coinbase_0002Text.get() , "HelloWorld", 10 );
+	tx::Coinbase coinbase_0002( 2 , coinbase_0002Text , 10 , selfAddress , miyaCore.context() );
+	
+	block::Block block_0002;
+	block_0002.coinbase( std::make_shared<tx::Coinbase>(coinbase_0002) );
+	block_0002.add( p2pkh_0001 );
+	block_0002.add( p2pkh_0002 );
+
+	std::shared_ptr<unsigned char> merkleRoot_0002; size_t merkleRoot_0002Length;
+	merkleRoot_0002Length = block_0002.calcMerkleRoot( &merkleRoot_0002 );
+	block_0002.header()->merkleRoot( merkleRoot_0002 );
+
+
+	std::shared_ptr<unsigned char> dummyPrevBlockHash = std::shared_ptr<unsigned char>( new unsigned char[32] );
+	memcpy( dummyPrevBlockHash.get(), "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" , 32 );
+	uint32_t nBits_0002 = 532390001;
+	block_0002.header()->nBits( nBits_0002 );
+	block_0002.header()->previousBlockHeaderHash( dummyPrevBlockHash );
+	uint32_t nonce_0002 = miya_chain::simpleMining( nBits_0002 , block_0002.header(), false );
+	block_0002.header()->nonce( nonce_0002 );
+	block_0002.header()->print();
 
 	
+
+	localStrageManager->writeBlock( std::make_shared<block::Block>(block_0002) );
+
+
+	std::mutex mtx;
+	std::condition_variable cv;
+	std::unique_lock<std::mutex> lock(mtx);
+	cv.wait( lock );
+
+
+
+
+
+	return 0;
+
+
+	/*
+
 	// Block0000
 	std::cout << "=========================================================" << "\n";
 	std::cout << "Block0000" << "\n";
@@ -172,9 +237,8 @@ int main()
 	std::cout << "=========================================================" << "\n";
 
 
-	// Block0001 
+	// Block0001
 	std::cout << "---------------------------------------------------------------------------" << "\n";
-	ControlInterface interface;
 	std::shared_ptr<tx::P2PKH> p2pkh_0001 = interface.createTxFromJsonFile("../control_interface/tx_origin/payment_tx_info_0001.json");
 	for( auto itr : p2pkh_0001->ins() ){
 		itr->pkey( ecdsaManager.myPkey() );
@@ -187,7 +251,7 @@ int main()
 	p2pkh_0001->ins().at(0)->prevOut()->print();
 
 	// block_2 のcoinbase作成
-	std::shared_ptr<unsigned char> coinbase_0001Text = std::shared_ptr<unsigned char>( new unsigned char[10] ); 
+	std::shared_ptr<unsigned char> coinbase_0001Text = std::shared_ptr<unsigned char>( new unsigned char[10] );
 	memcpy( coinbase_0001Text.get() , "HelloWorld" , 10 );
 	tx::Coinbase coinbase_0001( 1 , coinbase_0001Text , 10 , selfAddress ,miyaCore.context() );
 
@@ -198,7 +262,7 @@ int main()
 	block_0001.header()->merkleRoot( merkleRoot );
 
 	uint32_t nBits = 532390001; // 簡易的にマイニングの実行
-	block_0001.header()->nBits( nBits ); 
+	block_0001.header()->nBits( nBits );
 	block_0001.header()->previousBlockHeaderHash( blockHash_0000 );
 	uint32_t nonce = miya_chain::simpleMining( nBits , block_0001.header() , false );
 	block_0001.header()->nonce( nonce );
@@ -207,16 +271,18 @@ int main()
 	std::cout << "p2pkh_0001 verify :: " << p2pkh_0001->verify( miyaChainManager.utxoSet() ) << "\n";
 	std::cout << "block_0001 header verify :: " << block_0001.header()->verify() << "\n";
 	std::cout << "---------------------------------------------------------------------------" << "\n";
-	
 
 
-	uint32_t heigth; 
+
+	uint32_t heigth;
 	heigth = block_0001.coinbase()->height();
 	std::cout << "heigth :: " << static_cast<size_t>(heigth) << "\n";
 
 
 	std::cout << "\n\n\n\n\n\n\n-----------------------------------------------------" << "\n";
 
+
+	// ローカルファイルマネージャーのテスト
 
 	std::mutex mtx;
 	std::condition_variable cv;
@@ -225,13 +291,13 @@ int main()
 
 
 	return 0;
-	
+	*/
 
 
 	/*
 	miya_db::DatabaseManager headerDBManager;
 
-	// SBコンテナのセットアップ 
+	// SBコンテナのセットアップ
 	std::shared_ptr<StreamBufferContainer> toHeaderDBSBContainer = std::make_shared<StreamBufferContainer>();
 	std::shared_ptr<StreamBufferContainer> fromHeaderDBSBContainer = std::make_shared<StreamBufferContainer>();
 
@@ -248,11 +314,11 @@ int main()
 
 	std::string localTxDBFile = "test_txs";
 	txDBManager.startWithLightMode( toTxDBSBContainer , fromTxDBSBContainer , localTxDBFile );
-	
 
 
 
-	
+
+
 	cipher::ECDSAManager ecdsaManager;
 	ecdsaManager.init( (unsigned char *)"hello", 5 ); // priKeyには鍵がかかっているので
 
@@ -262,7 +328,7 @@ int main()
 	ControlInterface interface;
 	std::shared_ptr<tx::P2PKH> loadedP2PKH = interface.createTxFromJsonFile("../control_interface/tx_origin/payment_tx_info_0000.json");
 
-	for( auto itr : loadedP2PKH->ins() ){ // 入力に対する秘密鍵の設定	
+	for( auto itr : loadedP2PKH->ins() ){ // 入力に対する秘密鍵の設定
 		itr->pkey( ecdsaManager.myPkey() );
 	}
 
@@ -277,7 +343,7 @@ int main()
 
 	miya_db::DatabaseManager dbManager;
 
-	// SBコンテナのセットアップ 
+	// SBコンテナのセットアップ
 	std::shared_ptr<StreamBufferContainer> toDBSBContainer = std::make_shared<StreamBufferContainer>();
 	std::shared_ptr<StreamBufferContainer> fromDBSBContainer = std::make_shared<StreamBufferContainer>();
 
@@ -298,7 +364,7 @@ int main()
 
 
 	std::shared_ptr<miya_chain::UTXO> utxo = utxoSet.get( searchTxID , 0 );
-	if( utxo == nullptr ) 
+	if( utxo == nullptr )
 	{
 		std::cout << "utxo is nullptr" << "\n";
 	}
@@ -314,7 +380,7 @@ int main()
 	if( flag ) std::cout << "verify successfully done" << "\n";
 	else std::cout << "verify failure" << "\n";
 
-	// トランザクション入力の検証 
+	// トランザクション入力の検証
 
 
 
@@ -332,7 +398,7 @@ int main()
 
 	miya_db::DatabaseManager dbManager;
 
-	// SBコンテナのセットアップ 
+	// SBコンテナのセットアップ
 	std::shared_ptr<StreamBufferContainer> toDBSBContainer = std::make_shared<StreamBufferContainer>();
 	std::shared_ptr<StreamBufferContainer> fromDBSBContainer = std::make_shared<StreamBufferContainer>();
 
@@ -353,7 +419,7 @@ int main()
 	tx::Coinbase _coinbase( 10 , text, 10 );
 
 
-	std::shared_ptr<unsigned char> pubKeyHash = std::shared_ptr<unsigned char>( new unsigned char[20] ); 
+	std::shared_ptr<unsigned char> pubKeyHash = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	memcpy( pubKeyHash.get() , "aaaaaaaaaaaaaaaaaaaa", 20 );
 
 	std::shared_ptr<tx::TxOut> coinbaseOutput = std::shared_ptr<tx::TxOut>( new tx::TxOut );
@@ -363,7 +429,7 @@ int main()
 	std::shared_ptr<unsigned char> rawCoinbase; unsigned int rawCoinbaseLength;
 	rawCoinbaseLength = _coinbase.exportRaw(&rawCoinbase);
 
-	
+
 	std::shared_ptr<tx::Coinbase> loadedCoinbase = std::shared_ptr<tx::Coinbase>( new tx::Coinbase );
 	loadedCoinbase->importRawSequentially( rawCoinbase );
 
@@ -384,7 +450,7 @@ int main()
 	rawTxLength = loadedP2PKH->exportRaw( &rawTx );
 
 
-	// インポート 
+	// インポート
 
 	std::shared_ptr<tx::P2PKH> importP2PKH = std::make_shared<tx::P2PKH>();
 	importP2PKH->importRawSequentially( rawTx );
@@ -446,7 +512,7 @@ int main()
 
 
 
-	
+
 	MiyaCore miya_core;
 	miya_core.num  = 10;
 
@@ -471,7 +537,7 @@ int main()
 	EVP_PKEY *pkey = NULL;
 	pkey = ecdsa_manager.generatePkey();
 	//ecdsa_manager.printPkey( pkey );
-	
+
 	// ecdsa_manager.saveNewKeyPair( (unsigned char *)("hello") , 5 );
 
 	//ecdsa_manager.readPubKey();
@@ -510,7 +576,7 @@ int main()
 	for( int i=0; i<buffSize; i++){
 		printf("%02x", buff[i]);
 	}
-	
+
 	unsigned int tmp = 100;
 	std::cout << "\n" << static_cast<unsigned char>(tmp & 0xFF )	 << "\n";
 	printf("%02x", tmp);
@@ -570,7 +636,7 @@ int main()
 
 	tx::P2PKH *new_p2pkh = new tx::P2PKH( p2pkhExportBuff , p2pkhExportBuffSize );
 	//std::cout << new_p2pkh->TxInCnt() << "\n";
-	
+
 
 	//new_p2pkh->_body._ins.at(0)->hello();
 
@@ -581,7 +647,7 @@ int main()
 	}
 
 	//std::cout << "トランザクション全体書き出しサイズ :" << p2pkhExportBuffSize << "\n";
-	
+
 
 	std::cout << "\n\n\n\n\n" << " ========================================== "  << "\n\n\n\n\n";
 
@@ -594,7 +660,7 @@ int main()
 
 	tx::P2PKH *_new_p2pkh = new tx::P2PKH;
 	_new_p2pkh = new_p2pkh;
-	
+
 	_new_p2pkh->_body._ins.at(0)->prevOut()->_index = htonl( 20 );
 
 	std::cout << table_manager.add( new_p2pkh ) << "\n";
@@ -606,5 +672,3 @@ int main()
 
 
 }
-
-

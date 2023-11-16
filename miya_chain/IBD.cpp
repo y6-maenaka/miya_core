@@ -46,7 +46,7 @@ void IBDBCB::setErrorFlag()
 std::shared_ptr<unsigned char> IBDBCB::blockHash() const
 {
 	std::shared_ptr<unsigned char> ret;
-	block->blockHash( &ret ); 
+	block->blockHash( &ret );
 	return ret;
 }
 
@@ -87,10 +87,10 @@ void IBDBCB::print()
 IBDHeaderFilter::IBDHeaderFilter( IBDVirtualChain *virtualChain )
 {
 	_virtualChain = virtualChain;
-	assert(_virtualChain != nullptr ); 
+	assert(_virtualChain != nullptr );
 
 	// 受信ヘッダ検証用スレッド
-	std::thread headerValidator([&]()  
+	std::thread headerValidator([&]()
   {
 			for(;;)
 			{
@@ -119,9 +119,9 @@ IBDHeaderFilter::IBDHeaderFilter( IBDVirtualChain *virtualChain )
 				// layer2要素がからでなければvirtualChainに通知する
 				if( this->sizeLayer2() <= 0 ) continue;
 
-				std::function<struct IBDBCB( std::shared_ptr<unsigned char> )> popCallback = std::bind( &Layer2::findPop , 
+				std::function<struct IBDBCB( std::shared_ptr<unsigned char> )> popCallback = std::bind( &Layer2::findPop ,
 																								std::ref(_layer2),
-																								std::placeholders::_1	
+																								std::placeholders::_1
 				);
 				// 検証が完了したら、virtualChainのcallbackを呼び出してチェーンに取り込んでもらう
 				_virtualChain->requestedExtendChain( popCallback );
@@ -189,7 +189,7 @@ void IBDHeaderFilter::add( std::shared_ptr<block::BlockHeader> header ) // こ�
 
     auto ret =  _layer1._um.insert( {key , cb} );
     if( ret.second )  // 要素が存在せず,新たに追加した場合
-    { 
+    {
 		std::cout << "(IBDHeaderFilter) 新規追加" << "\n";
 		_validation.push( ret.first );
         _validation._cv.notify_all(); // leyer2を監視するスレッドが寝ている可能性があるので
@@ -375,9 +375,9 @@ void IBDVirtualChain::blockDownload( IBDVirtualChain *virtualChain , std::shared
 	auto formatGetdataCommand = ([&]( std::vector<VirtualMiyaChain::iterator> itrVector ) -> MiyaChainCommand
 	{
 		MiyaChainMSG_GETDATA getdata;
-		MiyaChainCommand command; 
+		MiyaChainCommand command;
 		MiyaChainMSG_INV inv;
-	
+
 		for( auto itr : itrVector ){
 			struct MiyaChainMSG_INV inv;
 			inv.addBlock( itr->first );
@@ -412,13 +412,13 @@ void IBDVirtualChain::blockDownload( IBDVirtualChain *virtualChain , std::shared
 		requestSB->sendFlag( ekp2p::EKP2P_SEND_BROADCAST );
 		requestSB->forwardingSBCID( DEFAULT_DAEMON_FORWARDING_SBC_ID_REQUESTER );
 		toRequesterSBC->pushOne( std::move(requestSB) ); // リクエスト送信
-	
-		// ちょいと待つ	
+
+		// ちょいと待つ
 		// データが到着していたら検証シーケンスを開始する
 		// 検証シーケンスが終了したら，for先頭に戻る :: データが届かない時の意再送は?
 		std::unique_lock<std::shared_mutex>	lock(virtualChain->_mtx);
 		virtualChain->_cv.wait_for( lock ,std::chrono::seconds(replayCount+1) , [&]{ // trueでwait解除
-			for( auto itr : itrVector ){ 
+			for( auto itr : itrVector ){
 				if( itr->second.status == static_cast<int>(IBDState::BlockBodyReceived) ) return true;
 			}
 			return false;
@@ -440,23 +440,24 @@ void IBDVirtualChain::blockDownload( IBDVirtualChain *virtualChain , std::shared
 			else if( (*itr)->second.status == static_cast<int>(IBDState::BlockNotfound) ){
 				std::cout << "<IBD> ブロックが見つからない" << "\n";
 				return; // 回復メソッドの実行
-			} 
+			}
 
 			std::cout << "ブロック検証成功" << "\n";
 
 			// 検証が完了したブロックをローカルストレージに保存する
 			std::cout << "\x1b[33m" << "ブロック保存" << "\x1b[39m" << "\n";
-			//localStrageManager->writeBlock( (*itr)->second.block );
+			// 順に保存しなくてはいけない
+			// localStrageManager->writeBlock( (*itr)->second.block );
 			(*itr)->second.status = static_cast<int>(IBDState::BlockStored);
 		}
 		itrVector.clear();
 
 		if( !(receiveFlag) && !(itrVector.empty()) )
-		{ 
+		{
 			replayCount++;
 			goto Reply; // 再送する
 		}
-		
+
 		// 繰り返し
 	}
 
@@ -484,7 +485,7 @@ bool MiyaChainManager::startIBD()
 	std::shared_ptr<unsigned char> localChainHead = _chainState->chainHead(); // これで見つからない場合は,自身のチェーンを遡って更新する
 
 	// 仮想チェーンの一番先頭(ベース)はローカルチェーンの先頭に設定する ※ステータスは保存済みんする
-	struct IBDBCB initialiBCB; 
+	struct IBDBCB initialiBCB;
 	initialiBCB.block = _localStrageManager._strageManager->readBlock( localChainHead );
 	initialiBCB.status = static_cast<int>(IBDState::BlockStored);
 	IBDVirtualChain vitrualChain( localChainHead, initialiBCB ); // virtualChain宣言時に初期ブロックをセットしないと内部でheadItrが初期化されないので注意
@@ -508,16 +509,16 @@ bool MiyaChainManager::startIBD()
 	unsigned short timeoutCount = 0;
 	bool completeHeaderDownload = false;
 	// ヘッダ収集終了のトリガーは  getdataに対しての応答がnotfoundだった場合
-	while( !completeHeaderDownload && DEFAULT_IBD_MAX_TIMEOUT_COUNT > timeoutCount )	
+	while( !completeHeaderDownload && DEFAULT_IBD_MAX_TIMEOUT_COUNT > timeoutCount )
 	{
 
 		std::unique_ptr<SBSegment> requestSB = std::make_unique<SBSegment>(); // リクエストメッセージパック用
 		MiyaChainCommand command;
-		MiyaChainMSG_GETBLOCKS getbloksMSG; 
+		MiyaChainMSG_GETBLOCKS getbloksMSG;
 		getbloksMSG.startHash( vitrualChain.chainHead() ); //　ダウンロードと検証が完了した最後尾のヘッダから検索
 
 
-		// 展開用に一旦パックする 
+		// 展開用に一旦パックする
 		command = getbloksMSG;
 		requestSB->options.option1 = command;
 		requestSB->options.option2 = MiyaChainMSG_GETBLOCKS::command;
@@ -526,7 +527,7 @@ bool MiyaChainManager::startIBD()
 		_requesterDaemon._toRequesterSBC->pushOne( std::move(requestSB) );  // Brokerに転送
 
 
-		
+
 		responseSB = incomingSBC->popOne( timeoutCount ); // タイムアウト付き
 		if( responseSB == nullptr ){
 			std::cout << "IBD header request timeouted" << "\n";
@@ -535,11 +536,11 @@ bool MiyaChainManager::startIBD()
 		}  // データを受信できなかった場合
 
 
-		do{ 
+		do{
 			responseMSG = MiyaChainBrocker::parseRawMiyaChainMessage( std::move(responseSB) );
 			if( responseMSG->commandIndex() == static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_HEADERS) ) // 受信したMSGがgetbloksに対する応答(headers)だったら
 			{
-				MiyaChainMSG_HEADERS headers;  
+				MiyaChainMSG_HEADERS headers;
 				std::vector< std::shared_ptr<block::BlockHeader> > headerVector; headerVector.clear();
 				headers = (std::get<MiyaChainMSG_HEADERS>(responseMSG->payload()));
 				headerVector = headers.headersVector(); // ヘッダの取り出し
@@ -553,23 +554,23 @@ bool MiyaChainManager::startIBD()
 		} while( (responseSB = incomingSBC->popOne(0)) != nullptr ); //　一旦全てのレスポンスを受け取る
 	}
 	//  ここまででへっだーがすべて回収されたことになる
-	
+
 
 
 	// ブロック本体のダウンロードシーケンスを開始する
-	// ワーカースレッドを起動する	
+	// ワーカースレッドを起動する
 	std::vector< std::thread > blockDownloadAgentThreads;
-	for( int i=0; i< (vitrualChain.size() / 100) + 1; i++ )	
+	for( int i=0; i< (vitrualChain.size() / 100) + 1; i++ )
 	{
 		blockDownloadAgentThreads.push_back( std::thread(IBDVirtualChain::blockDownload ,
 															 &vitrualChain,
-															  _requesterDaemon._toRequesterSBC , 
+															  _requesterDaemon._toRequesterSBC ,
 															  _utxoSet,
 															  _localStrageManager._strageManager ) );
-		
+
 		blockDownloadAgentThreads.back().detach();
 	}
-	
+
 
 	// ブロックダウンロードシーケンス
 	for(;;)

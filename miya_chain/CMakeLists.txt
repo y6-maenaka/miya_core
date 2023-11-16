@@ -5,7 +5,7 @@ include_directories( ${OPENSSL_INCLUDE_DIRS} )
 
 
 add_library( MIYA_CHAIN STATIC
-							
+
 							miya_chain_manager.cpp
 							miya_chain_state.cpp
 							IBD.cpp
@@ -14,7 +14,7 @@ add_library( MIYA_CHAIN STATIC
 
 							transaction/tx/tx_in.cpp
 							transaction/tx/tx_out.cpp
-							transaction/tx/prev_out.cpp	
+							transaction/tx/prev_out.cpp
 
 							transaction/script/script.cpp
 							transaction/script/script_validator.cpp
@@ -37,7 +37,7 @@ add_library( MIYA_CHAIN STATIC
 							daemon/broker/broker.cpp
 							daemon/requester/requester.cpp
 							daemon/chain_maintainer/chain_maintainer.cpp
-									
+
 
 							#message/protocol_message/block_data_msg.cpp
 							#message/protocol_message/block_header_msg.cpp
@@ -61,13 +61,14 @@ add_library( MIYA_CHAIN STATIC
 							#block_chain_manager/block_local_strage_manager/transaction_store/transaction_store.cpp
 
 							mining/simple_mining.cpp
-							
+
 							miya_coin/local_strage_manager.cpp
 							miya_coin/local_file_controller.cpp
+							miya_coin/block_container.cpp
+							miya_coin/undo_container.cpp
 
 )
 
 
 
 add_definitions( -std=c++20 -w )
-

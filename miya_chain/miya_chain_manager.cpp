@@ -32,7 +32,7 @@ namespace miya_chain
 int MiyaChainManager::init( std::shared_ptr<StreamBufferContainer> toEKP2PBrokerSBC )
 {
 	// はじめに全てのデータベースを起動する
-	
+
 
 	// BlockIndexDBの簡易起動
 	_blockIndexDB._toBlockIndexDBSBC = std::make_shared<StreamBufferContainer>();
@@ -58,7 +58,6 @@ int MiyaChainManager::init( std::shared_ptr<StreamBufferContainer> toEKP2PBroker
 	_brokerDaemon._toBrokerSBC = std::make_shared<StreamBufferContainer>();
 	_requesterDaemon._toRequesterSBC = std::make_shared<StreamBufferContainer>();
 
-  
 	_brokerDaemon._broker = std::make_shared<MiyaChainBrocker>( _brokerDaemon._toBrokerSBC , _toEKP2PBrokerSBC );
 	_requesterDaemon._requester = std::make_shared<MiyaChainRequester>( _requesterDaemon._toRequesterSBC , _brokerDaemon._toBrokerSBC );
 
@@ -119,7 +118,7 @@ void MiyaChainManager::__unitTest( std::vector<std::shared_ptr<block::Block>> bl
 	std::shared_ptr<unsigned char> localChainHead = _chainState->chainHead(); // これで見つからない場合は,自身のチェーンを遡って更新する
 
 	/* 仮想チェーンテスト*/
-	struct IBDBCB initialBCB; 
+	struct IBDBCB initialBCB;
 	initialBCB.block = _localStrageManager._strageManager->readBlock( localChainHead );
 	initialBCB.status = static_cast<int>(IBDState::BlockStored);
 	IBDVirtualChain vitrualChain( localChainHead, initialBCB );
@@ -153,7 +152,7 @@ void MiyaChainManager::__unitTest( std::vector<std::shared_ptr<block::Block>> bl
 	sleep(1);
 	std::cout << "Layer1 size() :: " << headerFilter.sizeLayer1() << "\n";
 	std::cout << "Layer2 size() :: " << headerFilter.sizeLayer2() << "\n";
-	
+
 
 
 	/* ------ HeaderFilter チェックOK -----------------*/
@@ -171,15 +170,15 @@ void MiyaChainManager::__unitTest( std::vector<std::shared_ptr<block::Block>> bl
 		printf("%02X", genesisBlockHash.get()[i]);
 	} std::cout << "\n";
 	std::cout << "--------------" << "\n";
- 
+
 	/* ブロック本体ダウンロードスレッドテスト */
 	std::vector< std::thread > blockDownloadAgentThreads;
 	std::cout << "BlockDownloadAgentThreads count :: " << vitrualChain.size() / 100  << "\n";
-	for( int i=0; i< (vitrualChain.size() / 100) + 1; i++ )	
+	for( int i=0; i< (vitrualChain.size() / 100) + 1; i++ )
 	{
 		blockDownloadAgentThreads.push_back( std::thread(IBDVirtualChain::blockDownload ,
 															 &vitrualChain,
-															  _requesterDaemon._toRequesterSBC , 
+															  _requesterDaemon._toRequesterSBC ,
 															  _utxoSet,
 															  _localStrageManager._strageManager ) );
 		blockDownloadAgentThreads.back().join();

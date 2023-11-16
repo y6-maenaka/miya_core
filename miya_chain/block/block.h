@@ -17,7 +17,7 @@
 #endif
 #ifdef __APPLE__
 	#include <machine/endian.h>
-#endif 
+#endif
 
 
 namespace tx
@@ -50,9 +50,8 @@ private:
 	std::shared_ptr<tx::Coinbase> _coinbase;
 	std::vector< std::shared_ptr<tx::P2PKH> > _txVector;
 
-
 public:
-	Block(); //  
+	Block(); //
 
 	//BlockHeader header(){ return _header; };
 	BlockHeader* header(){ return &_header; };
@@ -77,7 +76,6 @@ public:
 
 	uint32_t time();
 
-
 	bool verify( std::shared_ptr<miya_chain::LightUTXOSet> utxoSet );
 
 };
@@ -87,6 +85,3 @@ public:
 
 
 #endif // F4666B08_7795_43DE_89AA_6D147306F4CA
-
-
-
