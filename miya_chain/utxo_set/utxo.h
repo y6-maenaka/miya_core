@@ -41,17 +41,19 @@ struct UTXO
 		// bool _used; // UTXOの使用状態 ※削除するため不要
 	} _content;
 
-	std::shared_ptr<tx::TxOut> _txOut;
+	std::shared_ptr<tx::TxOut> _txOut = nullptr;
 
 public:
-	UTXO(){}; // 必ずインポートが前提
-	UTXO( std::shared_ptr<tx::TxOut> target , uint32_t index ); // utxoを登録する場合
+	UTXO(); // 必ずインポートが前提
+	UTXO( std::shared_ptr<tx::TxOut> target , std::shared_ptr<unsigned char> txID,  uint32_t index ); // utxoを登録する場合
 	std::vector<uint8_t> dumpToBson();
 	size_t dumpToBson( std::shared_ptr<unsigned char> *retRaw );
 	size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
 
 	size_t amount();
+	size_t outputIndex();
 	std::shared_ptr<tx::PkScript> pkScript();
+	std::shared_ptr<unsigned char> txID();
 
 	// void set( std::shared_ptr<tx::TxOut> target , std::shared_ptr<unsigned char> txID , unsigned short index );
 	bool importFromBson( nlohmann::json fromBson );

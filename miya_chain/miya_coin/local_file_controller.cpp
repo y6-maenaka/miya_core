@@ -77,15 +77,10 @@ long LocalFileController::write( std::shared_ptr<unsigned char> data , size_t da
 	_mapping._addr = mmap( NULL , mappingInOffset + dataLength , PROT_READ | PROT_WRITE , MAP_SHARED , _fd , (offset * _systemPageSize) );
 	_mapping._size = mappingInOffset + dataLength;
 
-	std::cout << "書き込み前" << "\n";
 	memcpy( (static_cast<unsigned char *>(_mapping._addr) + mappingInOffset) , data.get() , dataLength );
-	std::cout << "書き込み後" << "\n";
 	
-	std::cout << "保存前" << "\n";
 	munmap( _mapping._addr , _mapping._size ); // 簡単にマップ・アンマップしないほうがいいのかは不明
-	std::cout << "保存後"	 << "\n";
 	_meta->actualDataSize( dataEnd + dataLength ); // 最後尾を設定
-	std::cout << "すべて完了"	 << "\n";
 
 	return dataEnd;
 }
@@ -94,65 +89,20 @@ long LocalFileController::write( std::shared_ptr<unsigned char> data , size_t da
 
 size_t LocalFileController::read( std::shared_ptr<unsigned char> *data, size_t size,  off_t offset )
 {
-	std::cout << "LocalFileController::read() called" << "\n";
-
 	off_t offsetByPageSize = offset / _systemPageSize; // ページサイズ何個分見送るか
-	off_t mappingInOffset = offset - (_systemPageSize * offset);
+	off_t mappingInOffset = offset - (_systemPageSize * offsetByPageSize);
 
 	*data = std::shared_ptr<unsigned char>( new unsigned char[size] );
 
 	size_t currentPtr = 0;
 	_mapping._addr = mmap( NULL , size + mappingInOffset , PROT_READ | PROT_WRITE , MAP_SHARED , _fd , offsetByPageSize * _systemPageSize  );
 	_mapping._size = size + mappingInOffset;
-	memcpy( (*data).get() , static_cast<unsigned char*>(_mapping._addr) + mappingInOffset , size ); // Metaの取り込み
+	memcpy( (*data).get() , (static_cast<unsigned char*>(_mapping._addr) + mappingInOffset) , size ); // Metaの取り込み
 	currentPtr += size; // 実際に読み込んだのはこのサイズ
 	munmap( _mapping._addr , _mapping._size ); // 一旦アンマップする
 
 	return currentPtr;
 }
-
-
-
-/*
-std::shared_ptr<BlockContainer> LocalFileController::read( off_t offset ) // サイズを指定してもらう
-{
-	std::shared_ptr<BlockContainer> ret = std::make_shared<BlockContainer>();
-	off_t offsetByPageSize = offset / _systemPageSize; // ページサイズ何個分見送るか
-	off_t mappingInOffset = offset % _systemPageSize;
-
-	size_t currentPtr = 0;
-	_mapping._addr = mmap( NULL , sizeof( struct BlockContainer::Meta ) , PROT_READ | PROT_WRITE , MAP_SHARED , _fd , offsetByPageSize * _systemPageSize  );
-	_mapping._size = sizeof( struct BlockContainer::Meta );
-	memcpy( &(ret->_meta) , static_cast<unsigned char*>(_mapping._addr) + mappingInOffset , sizeof(struct BlockContainer::Meta) ); // Metaの取り込み
-	currentPtr += mappingInOffset + sizeof(struct BlockContainer::Meta);
-	munmap( _mapping._addr , _mapping._size ); // 一旦アンマップする
-
-	_mapping._addr = mmap( NULL , ret->size() , PROT_READ | PROT_WRITE , MAP_SHARED , _fd , offsetByPageSize * _systemPageSize  );  // マッピングする
-	_mapping._size = sizeof( ret->size() );
-
-	// ブロックヘッダの取り込み
-	currentPtr += ret->_block->header()->importRawSequentially( static_cast<unsigned char*>(_mapping._addr) + currentPtr );
-
-	// coinbaseの取り込み
-	std::shared_ptr<tx::Coinbase> readedCoinbase = std::make_shared<tx::Coinbase>();
-	currentPtr += readedCoinbase->importRawSequentially( static_cast<unsigned char*>(_mapping._addr) + currentPtr );
-	ret->_block->coinbase( readedCoinbase );
-
-	// トランザクションの取り込み
-	std::cout << ret->txCount()	 << "\n";
-	for( int i=0; i<ret->txCount(); i++ ){
-		std::shared_ptr<tx::P2PKH> readedTx = std::make_shared<tx::P2PKH>();
-		currentPtr += readedTx->importRawSequentially( static_cast<unsigned char*>(_mapping._addr) + currentPtr );
-		ret->_block->add( readedTx );
-	}
-
-	munmap( _mapping._addr , _mapping._size );
-
-	return ret;
-}
-*/
-
-
 
 
 
@@ -182,7 +132,7 @@ std::shared_ptr<BlockContainer> BlkFileManager::read( off_t offset )
 	// ブロックコンテナ保体の読み込み
 	std::shared_ptr<unsigned char> readedContainer; size_t readedContainerLength;
 	// Meta分ずらして取得する
-	readedContainerLength = LocalFileController::read( &readedContainer, container.size() , offset + sizeof(container._meta) );
+	readedContainerLength = LocalFileController::read( &readedContainer, container.size() - sizeof(container._meta) , offset + sizeof(container._meta) );
 
 	container.importBlockSequentially( readedContainer );
 
@@ -195,11 +145,8 @@ std::shared_ptr<BlockContainer> BlkFileManager::read( off_t offset )
 long RevFileManager::write( std::shared_ptr<block::Block> targetBlock )
 {
 	struct UndoContainer undoContainer( targetBlock );
-	std::cout << " --- 1 ---" << "\n";
 	std::shared_ptr<unsigned char> rawUNDOContainer; size_t rawUNDOContainerLength;
-	std::cout << "--- 2 ---" << "\n";
 	rawUNDOContainerLength = undoContainer.exportRawFormated( &rawUNDOContainer );
-	std::cout << "--- 3 ---" << "\n";
 	
 	return LocalFileController::write( rawUNDOContainer , rawUNDOContainerLength );
 }
@@ -216,9 +163,9 @@ std::shared_ptr<UndoContainer> RevFileManager::read( off_t offset )
 
 
 	std::shared_ptr<unsigned char> readedContainer; size_t readedContainerLength;
-	readedContainerLength = LocalFileController::read( &readedContainer , container.size() , offset + sizeof(container._meta) );
+	readedContainerLength = LocalFileController::read( &readedContainer , container.size() - sizeof(container._meta) , offset + sizeof(container._meta) );
 	container.importUndoFromRaw( readedContainer , readedContainerLength );
-	
+
 	return std::make_shared<UndoContainer>(container);
 }
 

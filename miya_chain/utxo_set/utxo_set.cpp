@@ -149,7 +149,7 @@ std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<tx::PrevOut> prevOut )
 bool LightUTXOSet::add( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_ptr<unsigned char> txID, uint32_t index )
 {  // 単一のtxOutを登録する
 
-	std::shared_ptr<UTXO> valueUTXO = std::make_shared<UTXO>( targetTxOut , index ); // 登録するUTXOの作成
+	std::shared_ptr<UTXO> valueUTXO = std::make_shared<UTXO>( targetTxOut , txID ,index ); // 登録するUTXOの作成
 	std::vector<uint8_t> dumpedUTXO = valueUTXO->dumpToBson();
 
 	size_t joinedIDIndexLength = 32 + sizeof(index); // あとで置き換える

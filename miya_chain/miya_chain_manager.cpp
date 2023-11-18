@@ -117,7 +117,8 @@ void MiyaChainManager::__unitTest( std::vector<std::shared_ptr<block::Block>> bl
 {
 	std::shared_ptr<unsigned char> localChainHead = _chainState->chainHead(); // これで見つからない場合は,自身のチェーンを遡って更新する
 
-	/* 仮想チェーンテスト*/
+	// 仮想チェーンテスト
+	/*
 	struct IBDBCB initialBCB;
 	initialBCB.block = _localStrageManager._strageManager->readBlock( localChainHead );
 	initialBCB.status = static_cast<int>(IBDState::BlockStored);
@@ -128,7 +129,7 @@ void MiyaChainManager::__unitTest( std::vector<std::shared_ptr<block::Block>> bl
 	std::cout << "----------------------------" << "\n";
 
 
-	/* リクエストメッセージテスト */
+	// リクエストメッセージテスト
 	MiyaChainCommand command;
 	MiyaChainMSG_GETBLOCKS getblocks;
 	getblocks.startHash( vitrualChain.chainHead() );
@@ -140,7 +141,7 @@ void MiyaChainManager::__unitTest( std::vector<std::shared_ptr<block::Block>> bl
 	IBDHeaderFilter headerFilter( &vitrualChain ); // ヘッダフィルタ
 	sleep(1);
 
-	/* HeaderFilter ヘッダー追加テスト */
+	// HeaderFilter ヘッダー追加テスト
 	std::shared_ptr<block::BlockHeader> header_0 = blocks.at(0)->headerWithSharedPtr();
 	std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
 	header_0->print();
@@ -155,7 +156,7 @@ void MiyaChainManager::__unitTest( std::vector<std::shared_ptr<block::Block>> bl
 
 
 
-	/* ------ HeaderFilter チェックOK -----------------*/
+	// ------ HeaderFilter チェックOK -----------------
 
 	sleep(1);
 	std::cout << "HeaderFilter Check OK" << "\n";
@@ -171,7 +172,7 @@ void MiyaChainManager::__unitTest( std::vector<std::shared_ptr<block::Block>> bl
 	} std::cout << "\n";
 	std::cout << "--------------" << "\n";
 
-	/* ブロック本体ダウンロードスレッドテスト */
+	//ブロック本体ダウンロードスレッドテスト
 	std::vector< std::thread > blockDownloadAgentThreads;
 	std::cout << "BlockDownloadAgentThreads count :: " << vitrualChain.size() / 100  << "\n";
 	for( int i=0; i< (vitrualChain.size() / 100) + 1; i++ )
@@ -190,7 +191,7 @@ void MiyaChainManager::__unitTest( std::vector<std::shared_ptr<block::Block>> bl
 	// filter : layer2チェック
 
 	std::cout << "IBD完了" << "\n";
-
+	*/
 }
 
 

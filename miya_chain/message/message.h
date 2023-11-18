@@ -8,7 +8,7 @@
 #endif
 #ifdef __APPLE__
 	#include <machine/endian.h>
-#endif 
+#endif
 
 #include <iostream>
 #include <memory>
@@ -52,7 +52,7 @@ constexpr unsigned short MIYA_CHAIN_MSG_COMMAND_LENGTH = 12;
  ----------------------------
  protocol | direction
  -----------------------------
- payloadLength | 
+ payloadLength |
  ----------------------------
 */
 
@@ -70,7 +70,7 @@ using MiyaChainCommand = std::variant<
 
 
 
-enum class MiyaChainCommandIndex 
+enum class MiyaChainCommandIndex
 {
 	MiyaChainMSG_INV, // (0)
 	MiyaChainMSG_BLOCK, // (1)
@@ -85,10 +85,10 @@ enum class MiyaChainCommandIndex
 
 
 
-struct MiyaChainMessage 
+struct MiyaChainMessage
 {
 // private:
-	struct 
+	struct
 	{
 		unsigned char _token[4];
 		char _command[12]; // プロトコルタイプ  with ASCII
@@ -115,9 +115,8 @@ public:
 
 	bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );
 	size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
-  
-	size_t exportRawCommand( const char* command , MiyaChainCommand commandBody , std::shared_ptr<unsigned char> *retRaw );
 
+	size_t exportRawCommand( const char* command , MiyaChainCommand commandBody , std::shared_ptr<unsigned char> *retRaw );
 
 } __attribute__((packed));
 
@@ -139,6 +138,3 @@ public:
 
 
 #endif // C5989909_FBC9_41AE_B4AC_2941FA1C329F
-
-
-

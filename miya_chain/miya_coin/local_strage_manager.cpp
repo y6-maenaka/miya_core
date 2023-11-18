@@ -107,23 +107,15 @@ void BlockLocalStrageManager::writeBlock( std::shared_ptr<block::Block> targetBl
 	long revOffset;
 	if( _blkFileManager->file() == blkFilePath ) // 前回使用した(キャッシュ)ファイルマネージャーの管理ファイルが異なる場合
 	{
-		std::cout << "キャッシュが存在します" << "\n";
 		blkOffset = _blkFileManager->write( container );
-		std::cout << "Writing Block DONE" << "\n";
 		revOffset = _revFileManager->write( container->block() ); 
-		std::cout << "Writing Rev DONE" << "\n";
 	}
 	else // 前回使用した(キャッシュ)ファイルマネージャーの管理ファイルが異なる場合
 	{
-		std::cout << "( 1 )" << "\n";
 		_blkFileManager = std::shared_ptr<BlkFileManager>( new BlkFileManager(blkFilePath) );
-		std::cout << "( 2 )" << "\n";
 		_revFileManager = std::shared_ptr<RevFileManager>( new RevFileManager(revFilePath) );
-		std::cout << "( 3 )" << "\n";
 		blkOffset = _blkFileManager->write( container );
-		std::cout << "( 4 )" << "\n";
 		revOffset = _revFileManager->write( container->block() ); 
-		std::cout << "( 5 )" << "\n";
 	}
 
 	if( blkOffset == -1 || revOffset == -1 ) // 新規にblkファイルを作成する必要がある ( 切り替えのベースは基本的にブロックファイルが満帆になった時 )
@@ -135,9 +127,7 @@ void BlockLocalStrageManager::writeBlock( std::shared_ptr<block::Block> targetBl
 		_blkFileManager = std::shared_ptr<BlkFileManager>( new BlkFileManager(blkFilePath) );
 		_revFileManager = std::shared_ptr<RevFileManager>( new RevFileManager(revFilePath) );
 		blkOffset = _blkFileManager->write( container );
-		std::cout << "ブロックの書き込みが終了しました" << "\n";
 		revOffset = _revFileManager->write( container->block() );
-		std::cout << "Revの書き込みが終了しました" << "\n";
 	}
 
 	// インデックスの登録
@@ -221,10 +211,12 @@ std::vector< std::shared_ptr<UTXO> > BlockLocalStrageManager::readUndo( std::sha
 	off_t offset = blockIndex.revOffset();
 	if( _revFileManager->file() == filePath ) // 前回使用した(キャッシュ)ファイルマネージャーの管理ファイルが異なる場合
 	{
+		std::cout << "RevRead キャッシュが存在します" << "\n";
 		container = _revFileManager->read( offset );
 	}
 	else // 前回使用した(キャッシュ)ファイルマネージャーの管理ファイルが異なる場合
 	{
+		std::cout << "新規に作成します" << "\n";
 		std::string filePath = "../miya_chain/miya_coin/blocks/" + std::string("rev") + std::to_string(blockIndex.fileIndex) + ".dat";
 		_revFileManager = std::shared_ptr<RevFileManager>( new RevFileManager(filePath) );
 		container = _revFileManager->read( offset );
@@ -243,6 +235,7 @@ std::vector< std::shared_ptr<UTXO> > BlockLocalStrageManager::releaseBlock( std:
 
 	_miyaDBClient->remove( blockHash );  // 現実装ではデータ削除は行わない将来的には書き込んでいるデータを削除するようにする
 
+	std::cout << "Block Released" << "\n";
 	return utxoVector;
 }
 

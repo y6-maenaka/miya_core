@@ -85,18 +85,31 @@ size_t UTXO::exportRaw( std::shared_ptr<unsigned char> *retRaw ) // 未検証
 
 
 
-UTXO::UTXO( std::shared_ptr<tx::TxOut> target, uint32_t index )
+UTXO::UTXO()
+{
+	_content._txID = std::shared_ptr<unsigned char>( new unsigned char[32] );
+}
+
+UTXO::UTXO( std::shared_ptr<tx::TxOut> target, std::shared_ptr<unsigned char> txID ,uint32_t index )
 {
 	_txOut = target;
 	_content._txID = std::shared_ptr<unsigned char>( new unsigned char[32] ); // あとで定数に置き換える
+	// _content._txID = txID;
+	memcpy( _content._txID.get() , txID.get() , 32 );
 	_content._outputIndex = index;
 	_content._pkScript = std::shared_ptr<tx::PkScript>( new tx::PkScript );
 }
 
 
+size_t UTXO::outputIndex()
+{
+	return static_cast<size_t>( _content._outputIndex );
+}
+
 size_t UTXO::amount()
 {
 	return static_cast<size_t>(ntohll(_content._amount));
+	// return static_cast<size_t>(_content._amount);
 }
 
 
@@ -105,7 +118,13 @@ std::shared_ptr<tx::PkScript> UTXO::pkScript()
 	return _content._pkScript;
 }
 
+std::shared_ptr<unsigned char> UTXO::txID()
+{
+	return _content._txID;
+}
 
+
+/*
 bool UTXO::importFromBson( nlohmann::json fromBson )
 {
 	if( !(fromBson.contains("value")) ) return false;
@@ -113,12 +132,18 @@ bool UTXO::importFromBson( nlohmann::json fromBson )
 	nlohmann::json valueJson = nlohmann::json::from_bson( fromBson["value"].get_binary() );
 	return this->importFromBson( valueJson );
 }
+*/
+
+
+bool UTXO::importFromBson( nlohmann::json fromBson )
+{
+	nlohmann::json valueJson = nlohmann::json::from_bson( fromBson.get_binary() );
+	return this->importFromJson( valueJson );
+}
 
 
 bool UTXO::importFromJson( nlohmann::json fromJson )
 {
-	//if( !(fromJson.contains("used")) ) return false;
-	//_content._used = fromJson["used"];
 
 	if( !(fromJson.contains("TxID")) ) return false;
 	if( !(fromJson["TxID"].is_binary()) )  return false;

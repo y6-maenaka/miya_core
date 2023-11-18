@@ -153,8 +153,6 @@ int main()
 
 
 
-
-
 	std::shared_ptr<miya_chain::BlockLocalStrageManager> localStrageManager;
 	localStrageManager = miyaChainManager.localStrageManager();
 
@@ -165,8 +163,16 @@ int main()
 	}
 	std::cout << "p2pkh_0001 sign :: " << p2pkh_0001->sign() << "\n";
 	std::cout << "p2pkh_0001 txout count :: " << p2pkh_0001->outCount() << "\n";
+	std::shared_ptr<unsigned char> p2pkh_0001_ID; 
+	p2pkh_0001->calcTxID( &p2pkh_0001_ID );
 
-
+	
+	std::shared_ptr<miya_chain::UTXO> dummyUTXO = std::make_shared<miya_chain::UTXO>( p2pkh_0001->outs().at(0) , p2pkh_0001_ID  ,0 );
+	std::cout << "dummy UTXO amout :: " << dummyUTXO->amount() << "\n";
+	std::cout << "dummy UTXO txID :: ";
+	for( int i=0; i<32; i++){
+		printf("%02X", dummyUTXO->txID().get()[i]);
+	} std::cout << "\n";
 
 
 	std::shared_ptr<tx::P2PKH> p2pkh_0002 = interface.createTxFromJsonFile("../control_interface/tx_origin/payment_tx_info_0002.json");
@@ -197,11 +203,47 @@ int main()
 	uint32_t nonce_0002 = miya_chain::simpleMining( nBits_0002 , block_0002.header(), false );
 	block_0002.header()->nonce( nonce_0002 );
 	block_0002.header()->print();
+	
+	std::shared_ptr<unsigned char> block_0002Hash;
+	block_0002.blockHash( &block_0002Hash );
 
 	
-
 	localStrageManager->writeBlock( std::make_shared<block::Block>(block_0002) );
+	auto readedBlock = localStrageManager->readBlock( block_0002Hash );
+	auto utxoVector = localStrageManager->readUndo( block_0002Hash );
 
+
+
+	std::cout << "------------------------------------------" << "\n";
+	
+	
+	std::shared_ptr<unsigned char> temp;
+	readedBlock->blockHash( &temp );
+	for( int i=0; i<32; i++) {
+		printf("%02X", temp.get()[i]);
+	} std::cout << "\n";
+	
+
+	for( auto itr : utxoVector )
+	{
+		std::cout << "amount :: " << itr->amount() << "\n";
+		std::cout << "outpoutIndex :: " << itr->outputIndex() << "\n";
+			std::cout << "txID :: ";
+			for( int i=0; i<32; i++ ){
+				printf("%02X", itr->txID().get()[i]);
+			} std::cout << "\n";
+	} std::cout << "\n";
+	std::cout << utxoVector.size() << "\n";
+
+	localStrageManager->releaseBlock( block_0002Hash );
+
+
+	auto readedBlock_2 = localStrageManager->readBlock( block_0002Hash );
+	auto utxoVector_2 = localStrageManager->readUndo( block_0002Hash );
+
+
+	if( readedBlock_2 == nullptr ) std::cout << "readedBlock_2 is nullptr" << "\n";
+	std::cout << utxoVector_2.size() << "\n";
 
 	std::mutex mtx;
 	std::condition_variable cv;

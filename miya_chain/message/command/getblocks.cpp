@@ -48,6 +48,22 @@ void MiyaChainMSG_GETBLOCKS::startHash( std::shared_ptr<unsigned char> blockHash
 
 
 
+void MiyaChainMSG_GETBLOCKS::endHash( const void* blockHash )
+{
+	if( blockHash == nullptr ){
+		memset( _body._stopHash , 0x00 , sizeof(_body._stopHash) );
+		return;
+	}
+
+	memcpy( _body._stopHash , blockHash , sizeof(_body._stopHash) );
+}
+
+
+void MiyaChainMSG_GETBLOCKS::endHash( std::shared_ptr<unsigned char> blocHash )
+{
+	this->endHash( blocHash.get() );
+}
+
 
 size_t MiyaChainMSG_GETBLOCKS::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 {
@@ -79,7 +95,7 @@ void MiyaChainMSG_GETBLOCKS::print()
 	for( int i=0; i<sizeof(hashCountBuff); i++ ){
 		printf("%02X", hashCountBuff[i] );
 	} std::cout << "\n";
-	
+
 	std::cout << "startHash :: ";
 	for( int i=0; i<sizeof(_body._blockHeaderHash); i++ ){
 		printf("%02X", _body._blockHeaderHash[i]);
@@ -96,4 +112,3 @@ void MiyaChainMSG_GETBLOCKS::print()
 
 
 };
-

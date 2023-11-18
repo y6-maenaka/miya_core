@@ -75,6 +75,7 @@ void BlockContainer::importBlockSequentially( std::shared_ptr<unsigned char> fro
 		_block->add( readedTx );
 	}
 
+	std::cout << "importBLock currentPtr :: " << currentPtr << "\n";
   return;
 }
 
@@ -109,10 +110,10 @@ size_t BlockContainer::exportRawFormated( std::shared_ptr<unsigned char> *retRaw
 		std::cout << "exportedTx Length :: " << rawTxLength << "\n";
 	}
 
+
 	_meta._txCount = static_cast<uint32_t>(rawTxVector.size());
 
-
-	size_t retLength = sizeof(_meta) + rawBlockHeaderLength + rawTxsLength;
+	size_t retLength = sizeof(_meta) + rawBlockHeaderLength + rawTxsLength + rawCoinbaseLength; 
 	_meta._size = static_cast<uint32_t>(retLength);
 
 	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[retLength] );

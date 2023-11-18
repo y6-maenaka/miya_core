@@ -67,6 +67,11 @@ add_library( MIYA_CHAIN STATIC
 							miya_coin/block_container.cpp
 							miya_coin/undo_container.cpp
 
+							virtual_chain/virtual_chain.cpp
+							virtual_chain/bd_filter.cpp
+							virtual_chain/block_hash_as_key.cpp
+							virtual_chain/prev_block_hash_as_key.cpp
+
 )
 
 
