@@ -53,6 +53,7 @@ namespace miya_chain
 constexpr long long DEFAULT_BLK_REV_MAX_BYTES = 128 * 1024 * 1024; // std::pow(2,27); // 128MB
 constexpr unsigned short BLK_REV_META_BLOCK_SIZE = 100; // メタ情報の領域(先頭から)
 
+
 struct UTXO;
 
 
@@ -269,7 +270,7 @@ public:
 	BlockLocalStrageManager( std::shared_ptr<StreamBufferContainer> toIndexDBSBC , std::shared_ptr<StreamBufferContainer> fromIndexDBSBC );
 
 	// ブロック操作
-	void writeBlock( std::shared_ptr<block::Block> targetBlock ); // 保存はブロック単位  Revファイルも同時に作成される
+	std::vector<std::shared_ptr<UTXO>> writeBlock( std::shared_ptr<block::Block> targetBlock ); // 保存はブロック単位  Revファイルも同時に作成される
 	std::shared_ptr<block::Block> readBlock( std::shared_ptr<unsigned char> blockHash );
 	// トランザクション操作
 	std::shared_ptr<tx::P2PKH> readTx( std::shared_ptr<unsigned char> txHash );

@@ -23,14 +23,26 @@ std::vector<uint8_t> UTXO::dumpToBson()
 	nlohmann::json retJson;
 	std::vector<uint8_t> txIDVector; txIDVector.assign( _content._txID.get() , _content._txID.get() + 32 );
 
+	std::cout << "( 1 )" << "\n";
 	retJson["TxID"] = nlohmann::json::binary( txIDVector );
 	retJson["index"] = _content._outputIndex;
 	retJson["amount"] = _content._amount;
 
+	printf("%p\n", _txOut.get() );
+	// printf("%p\n", _txOut->pubKeyHash().get() );
+	std::cout << "pubkey hash :: ";
+	for( int i=0; i<20; i++ ){
+		printf("%02X" ,_txOut->pubKeyHash().get()[i] );
+	} std::cout << "\n";
+
+	std::cout << "( 2 )" << "\n";
 	std::shared_ptr<unsigned char> exportedRawPkScript; size_t exportedRawPkScriptLength;
 	exportedRawPkScriptLength = _txOut->pkScript()->exportRawWithP2PKHPkScript( &exportedRawPkScript , _txOut->pubKeyHash() );
+	std::cout << "( 3 )" << "\n";
 	std::vector<uint8_t> pkScriptVector; pkScriptVector.assign( exportedRawPkScript.get() , exportedRawPkScript.get() + exportedRawPkScriptLength );
+	std::cout << "( 3.1 )" << "\n";
 	retJson["PkScript"] = nlohmann::json::binary( pkScriptVector );
+	std::cout << "( 4 )" << "\n";
 	//retJson["used"] = isUsed;
 
 

@@ -46,13 +46,15 @@
 #include "../../miya_db/miya_db/database_manager.h"
 
 #include "../../miya_core/miya_core.h"
+#include "../../miya_chain/virtual_chain/virtual_chain.h"
 
 
 int main()
 {
 	std::cout << " WELCOME TO MIYA COIN CLIENT [ MIYA_CORE ] " << "\n";
 
-	/*c
+	
+	/*
 	miya_core::MiyaCore	miyaCore;
 	cipher::ECDSAManager ecdsaManager;
 	std::shared_ptr<unsigned char> pemPass; size_t pemPassLength;
@@ -67,6 +69,9 @@ int main()
 
 	std::shared_ptr<unsigned char> rawPubKeyHash; size_t rawPubKeyHashLength;
 	rawPubKeyHashLength = hash::SHAHash( rawPubKey , rawPubKeyLength , &rawPubKeyHash , "sha1" );
+
+
+
 
 	// ジェネシスブロックの作成
 	std::shared_ptr<unsigned char> coinbaseText = std::shared_ptr<unsigned char>( new unsigned char[43] );
@@ -127,7 +132,7 @@ int main()
 
 
 
-
+	
 	// -------- [ 必須セットアップ ] ------------------------------------------------------------------------------------------------------
 	miya_core::MiyaCore miyaCore;
 
@@ -145,14 +150,187 @@ int main()
 	miya_chain::MiyaChainManager miyaChainManager;
 	std::shared_ptr<StreamBufferContainer> toEKP2PBrokerDummySBC = std::make_shared<StreamBufferContainer>();
 	miyaChainManager.init( toEKP2PBrokerDummySBC );
+
+	std::shared_ptr<miya_chain::BlockLocalStrageManager> localStrageManager;
+	localStrageManager = miyaChainManager.localStrageManager();
+
+	std::shared_ptr<miya_chain::LightUTXOSet> utxoSet;
+	utxoSet = miyaChainManager.utxoSet();
 	// ------------------------------------------------------------------------------------------------------------------
 
 
 
+	// --------------------------------------------------------------------------------------------------------------------------
+	std::cout << "\n\n\n\n\n \x1b[32m";
+    printf(
+        " M   M III Y   Y   A     CCCC  OOO  III  N   N\n"
+        "  MM MM  I   Y Y   A A   C     O   O  I   NN  N\n"
+        "  M M M  I    Y   A A A  C     O   O  I   N N N\n"
+        "  M   M III   Y  A     A  CCCC  OOO  III  N   N\n"
+    );
+	std::cout << "\x1b[39m \n\n";
+	std::cout << "[ PUBKEY ] (" << selfAddressLength << "):: ";
+	for( int i=0; i<selfAddressLength; i++ )
+		printf("%02X", selfAddress.get()[i] );
+	std::cout << "\n";
+	std::shared_ptr<unsigned char> pubKeyHash; size_t pubKeyHashLength;
+	pubKeyHashLength = hash::SHAHash( selfAddress , selfAddressLength , &pubKeyHash , "sha1" );
+	std::cout << "[ ADDRESS ] (" << pubKeyHashLength << ") :: " ;
+	for( int i=0; i<pubKeyHashLength; i++ )
+		printf("%02X", pubKeyHash.get()[i] );
+	std::cout << "\n\n\n\n\n";
+	// --------------------------------------------------------------------------------------------------------------------------
+
+
+
+	
+	std::shared_ptr<tx::P2PKH> p2pkh_0001 = interface.createTxFromJsonFile("../control_interface/tx_origin/payment_genesis.json");
+	for( auto itr : p2pkh_0001->ins() ){
+		itr->pkey( ecdsaManager.myPkey() );
+	}
+	p2pkh_0001->sign();
+
+	std::shared_ptr<unsigned char> coinbase_0001_text = std::shared_ptr<unsigned char>( new unsigned char[10] );
+	memcpy( coinbase_0001_text.get() , "HelloWorld" , 10 );
+	tx::Coinbase coinbase_0001( 0 , coinbase_0001_text , 10 , selfAddress , miyaCore.context() );
+	
+	block::Block block_0001;
+	block_0001.coinbase( std::make_shared<tx::Coinbase>(coinbase_0001) );
+	block_0001.add( p2pkh_0001 );
+
+	std::shared_ptr<unsigned char> merkleRoot_0001; size_t merkleRoot_0001Length;
+	merkleRoot_0001Length = block_0001.calcMerkleRoot( &merkleRoot_0001 );
+	block_0001.header()->merkleRoot( merkleRoot_0001 );
+
+	uint32_t nBits_0001 = 532390001;
+	block_0001.header()->nBits( nBits_0001 );
+	block_0001.header()->previousBlockHeaderHash( nullptr );
+	uint32_t nonce_0001 = miya_chain::simpleMining( nBits_0001 , block_0001.header(), false );
+	block_0001.header()->nonce( nonce_0001 );
+
+	std::shared_ptr<unsigned char> blockHash_0001;
+	block_0001.blockHash( &blockHash_0001  );
 
 
 
 
+
+
+	std::shared_ptr<tx::P2PKH> p2pkh_0002 = interface.createTxFromJsonFile("../control_interface/tx_origin/payment_tx_info_0001.json");
+	for( auto itr : p2pkh_0002->ins() ){
+		itr->pkey( ecdsaManager.myPkey() );
+	}
+	p2pkh_0002->sign();
+	std::shared_ptr<unsigned char> coinbase_0002_text = std::shared_ptr<unsigned char>( new unsigned char[11] );
+	memcpy( coinbase_0002_text.get() , "HelloWorld2", 11 );
+	tx::Coinbase coinbase_0002( 1 , coinbase_0002_text , 11 , selfAddress , miyaCore.context() );
+	block::Block block_0002;
+	block_0002.coinbase( std::make_shared<tx::Coinbase>(coinbase_0002) );
+	block_0002.add( p2pkh_0002 );
+	std::shared_ptr<unsigned char> merkleRoot_0002; size_t merkleRoot_0002Length;
+	merkleRoot_0002Length = block_0002.calcMerkleRoot( &merkleRoot_0002 );
+	block_0002.header()->merkleRoot( merkleRoot_0002 );
+	uint32_t nBits_0002 = 532390001;
+	block_0002.header()->nBits( nBits_0002 );
+	block_0002.header()->previousBlockHeaderHash( blockHash_0001 );
+	uint32_t nonce_0002 = miya_chain::simpleMining( nBits_0002 , block_0002.header(), false );
+	block_0002.header()->nonce( nonce_0002 );
+
+	std::shared_ptr<unsigned char> blockHash_0002;
+	block_0002.blockHash( &blockHash_0002 );
+
+
+	std::shared_ptr<tx::P2PKH> p2pkh_0003 = interface.createTxFromJsonFile("../control_interface/tx_origin/payment_tx_info_0002.json");
+	for( auto itr : p2pkh_0003->ins() ){
+		itr->pkey( ecdsaManager.myPkey() );
+	}
+	p2pkh_0003->sign();
+	std::shared_ptr<unsigned char> coinbase_0003_text = std::shared_ptr<unsigned char>( new unsigned char[11] );
+	memcpy( coinbase_0003_text.get() , "HelloWorld3", 11 );
+	tx::Coinbase coinbase_0003( 2 , coinbase_0003_text , 11 , selfAddress , miyaCore.context() );
+	block::Block block_0003;
+	block_0003.coinbase( std::make_shared<tx::Coinbase>(coinbase_0003) );
+	block_0003.add( p2pkh_0003 );
+	std::shared_ptr<unsigned char> merkleRoot_0003; size_t merkleRoot_0003Length;
+	merkleRoot_0003Length = block_0003.calcMerkleRoot( &merkleRoot_0003 );
+	block_0003.header()->merkleRoot( merkleRoot_0003 );
+	uint32_t nBits_0003 = 532390001;
+	block_0003.header()->nBits( nBits_0003 );
+	block_0003.header()->previousBlockHeaderHash( blockHash_0002 );
+	uint32_t nonce_0003 = miya_chain::simpleMining( nBits_0003 , block_0003.header(), false );
+	block_0003.header()->nonce( nonce_0003 );
+
+	std::shared_ptr<unsigned char> blockHash_0003;
+	block_0003.blockHash( &blockHash_0003 );
+
+
+
+
+
+	/*
+	auto writedUTxOVector = localStrageManager->writeBlock( std::make_shared<block::Block>(block_0001) );
+
+	std::cout << "utxo count :: " << writedUTxOVector.size() << "\n";
+	std::shared_ptr<unsigned char> searchTxID; size_t searchTxIndex;
+	int i = 0;
+	for( auto itr : writedUTxOVector ){
+		std::cout << "*" << i << "*" << "\n";
+		utxoSet->add( itr );
+		searchTxID = itr->txID();
+		searchTxIndex = itr->outputIndex();
+		utxoSet->get( searchTxID , searchTxIndex);
+		i++;
+	}
+
+	std::cout << "==============================" << "\n";
+
+	localStrageManager->readBlock( blockHash_0001 );
+	localStrageManager->readUndo( blockHash_0001 );
+	*/
+
+	std::cout << "\n\n\n\n========================================================" << "\n";
+
+
+	miya_chain::BDVirtualChain virtuahChain( std::make_shared<block::Block>(block_0001)  );
+
+
+	virtuahChain.printFilter();
+	std::cout << "\n\n\n\n========================================================" << "\n";
+
+
+	virtuahChain.add( std::make_shared<block::BlockHeader>(*(block_0002.header())) );
+	virtuahChain.add( std::make_shared<block::BlockHeader>(*(block_0003.header())) );
+
+	std::cout << "\n\n\n\n========================================================" << "\n";
+
+	std::cout << "chainLength :: " << virtuahChain.chainLength() << "\n";
+	virtuahChain.printFilter();
+	virtuahChain.printHeaderValidationPendingQueue();
+	virtuahChain.printMergePendingQueue();
+	virtuahChain.printVirtualChain();
+
+	std::cout << "\n\n\n\n========================================================" << "\n";
+
+	virtuahChain.add( std::make_shared<block::Block>(block_0002) );
+	virtuahChain.add( std::make_shared<block::Block>(block_0003) );
+
+	std::cout << "\n\n\n\n========================================================" << "\n";
+	virtuahChain.printFilter();
+
+	std::mutex mtx;
+	std::condition_variable cv;
+	std::unique_lock<std::mutex> lock(mtx);
+	cv.wait( lock );
+
+
+	return 0;
+
+
+
+
+
+
+	/*
 	std::shared_ptr<miya_chain::BlockLocalStrageManager> localStrageManager;
 	localStrageManager = miyaChainManager.localStrageManager();
 
@@ -249,12 +427,8 @@ int main()
 	std::condition_variable cv;
 	std::unique_lock<std::mutex> lock(mtx);
 	cv.wait( lock );
+	*/
 
-
-
-
-
-	return 0;
 
 
 	/*

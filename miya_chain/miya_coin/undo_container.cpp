@@ -32,13 +32,13 @@ UndoContainer::UndoContainer( std::shared_ptr<block::Block> blockFrom )
 	std::shared_ptr<unsigned char> coinbaseTxID;
 	blockFrom->coinbase()->calcTxID( &coinbaseTxID );
 	std::shared_ptr<UTXO> coinbaseUTXO = std::make_shared<UTXO>( blockFrom->coinbase()->txOut() , coinbaseTxID ,static_cast<uint32_t>(outputIndex) ); // コインベースのインデックスは0
-	outputIndex += 1;
 	_utxoVector.push_back( coinbaseUTXO );
 
 
 	// ブロックに含まれる通常トランザクションのundoを作成
 	std::shared_ptr<unsigned char>	txID;
 	std::vector< std::shared_ptr<tx::P2PKH> > txVector = blockFrom->txVector();
+	outputIndex = 0;
 	for( auto txItr : txVector )
 	{
 		txItr->calcTxID( &txID );

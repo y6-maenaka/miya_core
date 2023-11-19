@@ -144,6 +144,7 @@ private:
 			std::mutex _mtx;
 			std::unordered_map< BlockHashAsKey , std::pair<struct BDBCB, std::shared_ptr<struct BDBCB>> , BlockHashAsKey::Hash > _filterMap; // layer 1(全てのヘッダ)
  			bool _closeing = false; // 現時点でフィルターに登録していない要素は追加しない（破棄する）
+			
   } _filter; // ダウンロードしなければならない全てのヘッダ情報
     /* ヘッダの検証スレッドも宣言と同時に起動される */
 
@@ -188,6 +189,10 @@ public:
 		void updateBlockPtr( std::shared_ptr<struct BDBCB> destination );
 		bool isClosing() const;
 
+		void printFilter();
+		void printHeaderValidationPendingQueue();
+		void printMergePendingQueue();
+
 };
 
 
@@ -212,6 +217,7 @@ private:
 	std::vector< VirtualMiyaChain::iterator > _unVector; // チェーンに繋がれたがブロック本体のダウンロードが完了していない要素イテレータのベクター
 	void push( VirtualMiyaChain::iterator target );
 	std::vector< VirtualMiyaChain::iterator > pop( size_t size = DEFAULT_DOWNLOAD_BLOCK_WINDOW_SIZE );
+	size_t size();
   } _undownloadedBlockVector;
 
 
@@ -236,13 +242,20 @@ protected:
 public:
   BDVirtualChain( std::shared_ptr<block::Block> startBlock , std::shared_ptr<unsigned char> stopHash = nullptr );
 
-  void requestedExtendChain( std::function<struct BDBCB( std::shared_ptr<unsigned char> )> popCallback ); // 仮想チェーンの最先端ブロックハッシュを元にポップする
+  void requestedExtendChain( std::function<struct BDBCB( std::shared_ptr<unsigned char> )> findPopCallback ); // 仮想チェーンの最先端ブロックハッシュを元にポップする
 
 	bool startSequentialAssemble(); // 主にIBD　ローカルファイルに書き込みながらチェーンを組み立てる
 	bool startParallelAssemble(); // 主にマージ ローカルファイルには保存せずブロックをすべてダウンロードする
 
 	bool add( std::shared_ptr<block::BlockHeader> header );
+	bool add( std::vector< std::shared_ptr<block::BlockHeader> > headerVector );
 	bool add( std::shared_ptr<block::Block> block );
+
+	size_t chainLength();
+	void printVirtualChain();
+	void printFilter();
+	void printHeaderValidationPendingQueue();
+	void printMergePendingQueue();
 };
 
 

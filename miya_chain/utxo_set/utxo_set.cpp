@@ -195,9 +195,7 @@ bool LightUTXOSet::add( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_ptr<
 	std::unique_ptr<SBSegment> query = std::make_unique<SBSegment>();
 	query->body( dumpedQuery , dumpedQueryVector.size() );
 
-
 	_pushSBContainer->pushOne( std::move(query) );
-
 
 	std::unique_ptr<SBSegment> responseSB;
 	std::vector<uint8_t> responseVector;
@@ -215,6 +213,26 @@ bool LightUTXOSet::add( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_ptr<
 	if( !(responseJson.contains("status")) ) return false;
 	return (responseJson["status"] == 0 );
 }
+
+
+
+bool LightUTXOSet::add( std::shared_ptr<UTXO> target )
+{
+	std::cout << "< 1 >" << "\n";
+	std::shared_ptr<unsigned char> rawKey; size_t rawKeyLength;
+	rawKey = generateUTxOKey( target->txID() , target->outputIndex() );
+	std::cout << "< 2 >" << "\n";
+
+	std::cout << "< 3 >" << "\n";
+	std::shared_ptr<unsigned char> rawUTxO; size_t rawUTxOLength;
+	rawUTxOLength = target->dumpToBson( &rawUTxO );
+	std::cout << "< 4 >" << "\n";
+
+	return _miyaDBClient->add( rawKey ,rawUTxO , rawUTxOLength );
+}
+
+
+
 
 
 bool LightUTXOSet::add( std::shared_ptr<tx::Coinbase> targetCoinbase )

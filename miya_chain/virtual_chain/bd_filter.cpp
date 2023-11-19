@@ -86,14 +86,33 @@ bool BDFilter::add( std::shared_ptr<block::Block> block ) // フィルタにブ�
 	struct BlockHashAsKey key( blockHash );
 
 	auto ret = _filter._filterMap.find( key );
-	if( ret == _filter._filterMap.end() ) return false; // 対象が存在しない場合は破棄
-	if( ret->second.first.status != static_cast<int>(BDState::BlockHeaderValidated) ) return false; // ブロックヘッダの検証が済んでいない,もしくはブロック本体が既に到着している場合は破棄
+	if( ret == _filter._filterMap.end() ){
+		std::cout << "直ポインタが存在しません" << "\n";
+		return false; // 対象が存在しない場合は破棄
+	} 
+	if( ret->second.second->status != static_cast<int>(BDState::BlockHeaderValidated) ){
+		std::cout << ret->second.first.status << "\n";
+		std::cout << "ブロックヘッダの検証が済んでいません" << "\n";
+		return false; // ブロックヘッダの検証が済んでいない,もしくはブロック本体が既に到着している場合は破棄
+	} 
 
+	std::cout << "直ポインタを上書きします" << "\n";
+	for( int i=0; i<32; i++){
+		printf("%02X", ret->first._blockHash[i] );
+	} std::cout << "\n";
 	// 直接チェーンに繋がれているBCBDBを操作する
-	ret->second.first.block = block; // 到着したブロックで上書きする
-	ret->second.first.status = static_cast<int>(BDState::BlockBodyReceived); // ステータスを変更する
+	ret->second.second->block = block; // 到着したブロックで上書きする
+	ret->second.second->status = static_cast<int>(BDState::BlockBodyReceived); // ステータスを変更する
 
 	return true;
+}
+
+void BDFilter::updateBlockPtr( std::shared_ptr<struct BDBCB> destination )
+{
+	struct BlockHashAsKey key( *destination );
+	auto mached = _filter._filterMap.find( key );
+	if( mached == _filter._filterMap.end() ) return;
+	mached->second.second = destination;
 }
 
 
@@ -104,7 +123,81 @@ bool BDFilter::isClosing() const
 
 
 
+void BDFilter::printFilter()
+{
+	int i = 0;
+	for( auto itr : _filter._filterMap )
+	{
+		std::cout << "\n";
+		std::cout << "(" << i << ") " << "\n";
+		std::cout << " [key] : ";
+		for( int i=0; i<32; i ++ ) 
+			printf("%02X", itr.first._blockHash[i] );
+		std::cout << "\n";
 
+		std::cout <<  " [block hash] :: ";
+		for( int i=0; i<32; i++ )
+			printf("%02X", itr.second.first.blockHash().get()[i]);
+		std::cout << "\n";
+
+		if( itr.second.second == nullptr ) std::cout << " [cache] :: None" << "\n";
+		else std::cout << "[cache] :: active" << "\n";
+		std::cout << "\n";
+		i++;
+	}
+}
+
+
+void BDFilter::printHeaderValidationPendingQueue()
+{
+	std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << "\n";
+	std::cout << "[ Header Validation Pending Queue ]" << "\n";
+	std::cout << "Pending Count :: " << _validationHeaderQueue._pendingQueue.size() << "\n";
+	int i=0;
+	for( auto itr : _validationHeaderQueue._pendingQueue )
+	{
+		std::cout << "\n";
+		std::cout << "(" << i << ") " << "\n";
+		std::cout << " [key] : ";
+		for( int i=0; i<32; i ++ ) 
+			printf("%02X", itr.first._blockHash[i] );
+		std::cout << "\n";
+
+		std::cout <<  " [block hash] :: ";
+		for( int i=0; i<32; i++ )
+			printf("%02X", itr.second.blockHash().get()[i]);
+		std::cout << "\n";
+
+		i++	;
+	}
+	std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << "\n";
+}
+
+
+void BDFilter::printMergePendingQueue()
+{
+	std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
+	std::cout << "[ Merge Pending Queue ]" << "\n";
+	std::cout << "Pending Count :: " << _pendingMergeQueue._pendingMap.size() << "\n";
+	int i=0;
+	for( auto itr : _pendingMergeQueue._pendingMap )
+	{
+		std::cout << "\n";
+		std::cout << "(" << i << ") " << "\n";
+		std::cout << " [key] : ";
+		for( int i=0; i<32; i ++ ) 
+			printf("%02X", itr.first._prevBlockHash[i] );
+		std::cout << "\n";
+
+		std::cout <<  " [block hash] :: ";
+		for( int i=0; i<32; i++ )
+			printf("%02X", itr.second.blockHash().get()[i]);
+		std::cout << "\n";
+
+		i++	;
+	}
+	std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
+}
 
 
 
@@ -212,11 +305,14 @@ BDFilter::BDFilter( BDVirtualChain* virtualChain )
 	{
 		std::pair< BlockHashAsKey , struct BDBCB > frontCBSet;
 		frontCBSet = (_validationHeaderQueue._pendingQueue.front()); // キュー先頭から検証する
-		itr++; // eraseする前に先に進めとく
-		_validationHeaderQueue._pendingQueue.erase( _validationHeaderQueue._pendingQueue.begin() ); // ここでeraseしたらauto itrバグらない？
-
+		// itr++; // eraseする前に先に進めとく
+		itr = _validationHeaderQueue._pendingQueue.erase( itr ); // ここでeraseしたらauto itrバグらない？
+		
 		// 既に保存済みの場合は検証もlayer2への追加もしない( ただフィルターに追加するだけに留める )
-		if( frontCBSet.second.status == static_cast<int>(BDState::BlockStored) ) continue;
+		if( frontCBSet.second.status == static_cast<int>(BDState::BlockStored) ){
+			std::cout << "フィルタに追加します" << "\n";
+			continue;
+		} 
 
 		if( !(frontCBSet.second.block->header()->verify()) ){ // ブロックヘッダのみを簡易的に検証する
 			std::cout << "(BDFilter) ブロックヘッダ検証失敗" << "\n";

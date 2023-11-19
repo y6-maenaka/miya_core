@@ -95,7 +95,7 @@ BlockLocalStrageManager::BlockLocalStrageManager( std::shared_ptr<StreamBufferCo
 
 
 
-void BlockLocalStrageManager::writeBlock( std::shared_ptr<block::Block> targetBlock )
+std::vector< std::shared_ptr<UTXO> > BlockLocalStrageManager::writeBlock( std::shared_ptr<block::Block> targetBlock )
 {
 	std::shared_ptr<BlockContainer> container = std::make_shared<BlockContainer>(targetBlock); // pack block to blockContainer
 
@@ -149,7 +149,8 @@ void BlockLocalStrageManager::writeBlock( std::shared_ptr<block::Block> targetBl
 	std::cout << "Block Writed" << "\n";
 	std::cout << "Rev Writed" << "\n";
 
-	return;
+	UndoContainer writedUndoContainer( container->block() );
+	return writedUndoContainer.utxoVector();
 }
 
 

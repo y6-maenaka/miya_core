@@ -38,7 +38,7 @@ private:
 	std::shared_ptr<miya_core::MiyaCoreContext> _mcContext;
 
 public:
-	Coinbase( unsigned int height , std::shared_ptr<unsigned char> text , unsigned int textLength , std::shared_ptr<unsigned char> pubkeyHash , const std::shared_ptr<miya_core::MiyaCoreContext> mcContext );
+	Coinbase( unsigned int height /*inに埋め込む*/ , std::shared_ptr<unsigned char> text , unsigned int textLength , std::shared_ptr<unsigned char> pubkeyHash , const std::shared_ptr<miya_core::MiyaCoreContext> mcContext );
 	Coinbase();
 
 	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );

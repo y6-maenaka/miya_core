@@ -93,23 +93,34 @@ std::vector< VirtualMiyaChain::iterator > BDVirtualChain::UndownloadedBlockVecto
 	return itrVector;
 }
 
+size_t BDVirtualChain::UndownloadedBlockVector::size()
+{
+	std::unique_lock<std::shared_mutex> lock(_mtx);
+	return _unVector.size();
+}
+
 
 
 BDVirtualChain::BDVirtualChain( std::shared_ptr<block::Block> startBlock, std::shared_ptr<unsigned char> stopHash )
 {
+	std::cout << "--- 1 ---" << "\n";
 	_bdFilter = std::make_shared<BDFilter>( this );
+	std::this_thread::sleep_for(std::chrono::milliseconds(300)); 
 
 	// 仮想チェーンの初期化 : 基準となるブロックを追加する これ以降のブロックが収集&検証される
 	struct BDBCB initialBCB;
 	initialBCB.block = startBlock;
 	initialBCB.status = static_cast<int>(BDState::BlockStored); // BlockStored状態であればフィルター止まりに制御できる
+	std::cout << "--- 2 ---" << "\n";
 	_bdFilter->add( initialBCB ); // フィルターに追加する
 	_chainVector.push_back( std::make_pair( initialBCB.blockHash() , std::make_shared<struct BDBCB>(initialBCB)) ); // チェーンの先頭にも追加しておく
 
+	std::cout << "--- 3 ---" << "\n";
 	std::shared_ptr<unsigned char> startHash;
 	startBlock->blockHash( &startHash );
 	_currentStartHash = startHash;
 	_stopHash = stopHash;
+	std::cout << "--- 4 ---" << "\n";
 }
 
 
@@ -131,7 +142,6 @@ const std::pair< std::shared_ptr<unsigned char> , std::shared_ptr<struct BDBCB> 
 	std::unique_lock<std::shared_mutex> lock(_mtx);
 	return _chainVector.back();
 }
-
 
 
 void BDVirtualChain::requestedExtendChain( std::function<struct BDBCB( std::shared_ptr<unsigned char> )> findPopCallback )
@@ -267,8 +277,7 @@ void BDVirtualChain::blockDownloader( std::shared_ptr<StreamBufferContainer> toR
 			{
 				if( (*itr)->second->status == static_cast<int>(BDState::BlockBodyReceived) ){
 					auto eraseTarget = itr;
-					itr++;
-					itrVector.erase(eraseTarget);
+					itr = itrVector.erase(eraseTarget);
 				}
 			}
 
@@ -287,9 +296,68 @@ void BDVirtualChain::blockDownloader( std::shared_ptr<StreamBufferContainer> toR
 
 
 
+bool BDVirtualChain::add( std::shared_ptr<block::BlockHeader> header )
+{
+	if( _bdFilter->isClosing() ) return false;
+	_bdFilter->add( header );
+}
+
+bool BDVirtualChain::add( std::vector< std::shared_ptr<block::BlockHeader> > headerVector )
+{
+	if( _bdFilter->isClosing() ) return false;
+	_bdFilter->add( headerVector );
+}
 
 
+bool BDVirtualChain::add( std::shared_ptr<block::Block> block )
+{
+	_bdFilter->add( block );
+}
 
+
+void BDVirtualChain::printVirtualChain()
+{
+	std::unique_lock<std::shared_mutex> lock(_mtx);
+	for( auto itr : _chainVector )
+	{
+		std::cout << "\n------------------------" << "\n";
+		std::cout << "(Key) - ";
+		for( int i=0; i<32; i++ ) printf("%02X", itr.first.get()[i] );
+		std::cout << "\n";
+		std::cout << "(PrevBlockHash) - ";
+		for( int i=0; i<32; i++ ) printf("%02X", itr.second->prevBlockHash().get()[i] );
+		std::cout << "\n";
+		std::cout << "(BlockHash) - ";
+		for( int i=0; i<32; i++ ) printf("%02X", itr.second->blockHash().get()[i] );
+		std::cout << "\n";
+		std::cout << "(Status) - " << itr.second->status << "\n";
+		std::cout << "\n------------------------" << "\n";
+		std::cout << "  || " << "\n";
+		std::cout << "  || " << "\n";
+
+	}
+}
+
+
+size_t BDVirtualChain::chainLength()
+{
+	return _undownloadedBlockVector.size();
+}
+
+void BDVirtualChain::printFilter()
+{
+	return _bdFilter->printFilter();
+}
+
+void BDVirtualChain::printHeaderValidationPendingQueue()
+{
+	return _bdFilter->printHeaderValidationPendingQueue();
+}
+
+void BDVirtualChain::printMergePendingQueue()
+{
+	return _bdFilter->printMergePendingQueue();
+}
 
 
 

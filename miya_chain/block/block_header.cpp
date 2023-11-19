@@ -110,6 +110,10 @@ void BlockHeader::nonce( uint32_t target )
 
 void BlockHeader::previousBlockHeaderHash( std::shared_ptr<unsigned char> target )
 {
+	if( target == nullptr ){
+		memset( _previousBlockHeaderHash , 0x00 , sizeof(_previousBlockHeaderHash) );
+		return;
+	}
 	memcpy( _previousBlockHeaderHash, target.get() , sizeof(_previousBlockHeaderHash));
 }
 
@@ -173,7 +177,8 @@ bool BlockHeader::verify()
 	std::shared_ptr<unsigned char> ret; 
 	hash::SHAHash( exportedRawHeader , exportedRawHeaderLength, &ret , "sha256" );
 
-	
+
+	/*
 	std::cout << "------------------------------------"	 << "\n";
 	std::cout << "hash :: ";
 	for( int i=0; i<32; i++)
@@ -187,7 +192,7 @@ bool BlockHeader::verify()
 		printf("%02X", rawNBitMask.get()[i]);
 	} std::cout << "\n";
 	std::cout << "------------------------------------"	 << "\n";
-
+	*/
 
 	return miya_chain::mbitcmp( rawNBitMask.get() , ret.get() );
 }
