@@ -193,26 +193,36 @@ int main()
 	std::shared_ptr<unsigned char> coinbase_0001_text = std::shared_ptr<unsigned char>( new unsigned char[10] );
 	memcpy( coinbase_0001_text.get() , "HelloWorld" , 10 );
 	tx::Coinbase coinbase_0001( 0 , coinbase_0001_text , 10 , selfAddress , miyaCore.context() );
+
 	
 	block::Block block_0001;
 	block_0001.coinbase( std::make_shared<tx::Coinbase>(coinbase_0001) );
 	block_0001.add( p2pkh_0001 );
 
-	std::shared_ptr<unsigned char> merkleRoot_0001; size_t merkleRoot_0001Length;
-	merkleRoot_0001Length = block_0001.calcMerkleRoot( &merkleRoot_0001 );
-	block_0001.header()->merkleRoot( merkleRoot_0001 );
+	std::cout << "チェックポイント" << "\n";
 
+	std::shared_ptr<unsigned char> merkleRoot_0001; size_t merkleRoot_0001Length;
+	std::cout << "< 1 >" << "\n";
+	merkleRoot_0001Length = block_0001.calcMerkleRoot( &merkleRoot_0001 );
+	std::cout << "< 2 >" << "\n";
+	printf("%p\n", block_0001.header().get() );
+	block_0001.header()->merkleRoot( merkleRoot_0001 );
+	std::cout << "< 3 >" << "\n";
+
+	std::cout << "チェックポイント0" << "\n";
 	uint32_t nBits_0001 = 532390001;
 	block_0001.header()->nBits( nBits_0001 );
 	block_0001.header()->previousBlockHeaderHash( nullptr );
+	std::cout << "マイングbefore" << "\n";
 	uint32_t nonce_0001 = miya_chain::simpleMining( nBits_0001 , block_0001.header(), false );
+	std::cout << "マイニングafter" << "\n";
 	block_0001.header()->nonce( nonce_0001 );
 
 	std::shared_ptr<unsigned char> blockHash_0001;
 	block_0001.blockHash( &blockHash_0001  );
 
 
-
+	std::cout << "チェックポイント2" << "\n";
 
 
 
@@ -299,13 +309,22 @@ int main()
 	virtuahChain.printFilter();
 	std::cout << "\n\n\n\n========================================================" << "\n";
 
+	std::vector< std::shared_ptr<block::BlockHeader> > addHeaderVector;
+	addHeaderVector.push_back( block_0002.header() );
+	virtuahChain.add( addHeaderVector );
 
-	virtuahChain.add( std::make_shared<block::BlockHeader>(*(block_0002.header())) );
-	virtuahChain.add( std::make_shared<block::BlockHeader>(*(block_0003.header())) );
+
+
+
+	std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << "\n";
+
+	addHeaderVector.clear();
+	addHeaderVector.push_back( block_0003.header() );
+	virtuahChain.add( addHeaderVector );
+
 
 	std::cout << "\n\n\n\n========================================================" << "\n";
 
-	std::cout << "chainLength :: " << virtuahChain.chainLength() << "\n";
 	virtuahChain.printFilter();
 	virtuahChain.printHeaderValidationPendingQueue();
 	virtuahChain.printMergePendingQueue();
@@ -313,8 +332,13 @@ int main()
 
 	std::cout << "\n\n\n\n========================================================" << "\n";
 
-	virtuahChain.add( std::make_shared<block::Block>(block_0002) );
-	virtuahChain.add( std::make_shared<block::Block>(block_0003) );
+	std::vector< std::shared_ptr<block::Block> > addBlockVector;
+	addBlockVector.push_back( std::make_shared<block::Block>(block_0002) );
+	virtuahChain.add( addBlockVector );
+
+	addBlockVector.clear();
+	addBlockVector.push_back( std::make_shared<block::Block>(block_0003) );
+	virtuahChain.add( addBlockVector );
 
 	std::cout << "\n\n\n\n========================================================" << "\n";
 	virtuahChain.printFilter();
@@ -326,6 +350,7 @@ int main()
 
 
 	return 0;
+
 
 
 

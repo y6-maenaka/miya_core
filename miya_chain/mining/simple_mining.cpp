@@ -43,7 +43,7 @@ std::array<uint8_t,32> generatenBitMask( uint32_t nBits )
 
 
 
-uint32_t simpleMining( uint32_t nBits , block::BlockHeader* blockHeader , bool showHistory )
+uint32_t simpleMining( uint32_t nBits , std::shared_ptr<block::BlockHeader> blockHeader , bool showHistory )
 {
 
 	

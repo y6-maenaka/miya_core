@@ -16,6 +16,7 @@ namespace block
 
 Block::Block()
 {
+	_header = std::make_shared<BlockHeader>();
 	_coinbase = nullptr;
 }
 
@@ -23,15 +24,17 @@ Block::Block()
 
 void Block::header( std::shared_ptr<BlockHeader> target )
 {
-	_header = *target;
+	// _header = *target;
+	_header = target;
 }
 
 
-
+/*
 void Block::header( BlockHeader target )
 {
 	_header = target;
 }
+*/
 
 
 std::shared_ptr<tx::Coinbase> Block::coinbase()
@@ -124,26 +127,26 @@ unsigned int Block::calcMerkleRoot( std::shared_ptr<unsigned char> *ret )
 
 void Block::merkleRoot( std::shared_ptr<unsigned char> target )
 {
-	return _header.merkleRoot( target );
+	return _header->merkleRoot( target );
 }
 
 
 unsigned int Block::exportHeader( std::shared_ptr<unsigned char> *retRaw )
 {
-	return _header.exportRaw( retRaw );
+	return _header->exportRaw( retRaw );
 }
 
 
 size_t Block::blockHash( std::shared_ptr<unsigned char> *ret )
 {
-	return _header.headerHash( ret );
+	return _header->headerHash( ret );
 }
 
 
 
 uint32_t Block::time()
 {
-	return _header.time();
+	return _header->time();
 }
 
 
@@ -151,13 +154,13 @@ uint32_t Block::time()
 bool Block::verify( std::shared_ptr<miya_chain::LightUTXOSet> utxoSet )
 {
 	bool flag;
-	flag = _header.verify();
+	flag = _header->verify();
 	if( !flag ) return false;
 
 	// マークルルートを計算して,ヘッダのマークルルートと一致しているか確認
 	std::shared_ptr<unsigned char> merkle;
 	calcMerkleRoot( &merkle );
-	flag = _header.cmpMerkleRoot( merkle );
+	flag = _header->cmpMerkleRoot( merkle );
 	if( !flag ) return false;
 
 	// 正常に残高を参照しているか否かの検証(内部でscriptが実行される)

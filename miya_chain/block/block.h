@@ -46,7 +46,7 @@ struct Block
 {
 private:
 //public:
-	BlockHeader _header;
+	std::shared_ptr<BlockHeader> _header;
 	std::shared_ptr<tx::Coinbase> _coinbase;
 	std::vector< std::shared_ptr<tx::P2PKH> > _txVector;
 
@@ -54,10 +54,11 @@ public:
 	Block(); //
 
 	//BlockHeader header(){ return _header; };
-	BlockHeader* header(){ return &_header; };
-	std::shared_ptr<BlockHeader> headerWithSharedPtr(){ return std::make_shared<BlockHeader>(_header); };
+	// BlockHeader* header(){ return &_header; };
+	std::shared_ptr<BlockHeader> header(){ return _header; };
+	// std::shared_ptr<BlockHeader> headerWithSharedPtr(){ return std::make_shared<BlockHeader>(_header); };
 	void header( std::shared_ptr<BlockHeader> target );
-	void header( BlockHeader target );
+	// void header( BlockHeader target );
 
 	std::shared_ptr<tx::Coinbase> coinbase();
 	std::vector< std::shared_ptr<tx::P2PKH> > txVector();

@@ -28,8 +28,6 @@ namespace miya_chain
 
 int ChainMaintainer::start()
 {
-
-	
 	std::unique_ptr<SBSegment> popedSB;
 
 	struct ReceivedBlock
@@ -79,6 +77,10 @@ int ChainMaintainer::start()
 
 	return 0;
 }
+/*
+	基本的にChainMaintainerに流入していくるSBSegmentは自身で発掘したブロック もしくは 外部からのブロック
+	// ブロック先頭が変更になると,マイニングモジュールに通知し,マイニング対象を変更する
+*/
 
 
 

@@ -1,5 +1,7 @@
 #include "virtual_chain.h"
 
+#include "./bd_filter.h"
+
 #include "../miya_chain_manager.h"
 
 #include "../../shared_components/stream_buffer/stream_buffer.h"
@@ -116,11 +118,14 @@ BDVirtualChain::BDVirtualChain( std::shared_ptr<LightUTXOSet> utxoSet , std::sha
 	std::this_thread::sleep_for(std::chrono::milliseconds(300)); 
 
 	// 仮想チェーンの初期化 : 基準となるブロックを追加する これ以降のブロックが収集&検証される
+	std::vector<struct BDBCB> initialBCBVector;
 	struct BDBCB initialBCB;
 	initialBCB.block = startBlock;
 	initialBCB.status = static_cast<int>(BDState::BlockStored); // BlockStored状態であればフィルター止まりに制御できる
-	_bdFilter->add( initialBCB ); // フィルターに追加する
 	_chainVector.push_back( std::make_pair( initialBCB.blockHash() , std::make_shared<struct BDBCB>(initialBCB)) ); // チェーンの先頭にも追加しておく
+
+	initialBCBVector.push_back( initialBCB );
+	_bdFilter->add( initialBCBVector ); // フィルターに追加する
 
 	std::shared_ptr<unsigned char> startHash;
 	startBlock->blockHash( &startHash );
@@ -145,15 +150,19 @@ BDVirtualChain::BDVirtualChain( std::shared_ptr<LightUTXOSet> utxoSet , std::sha
 	_bdFilter = std::make_shared<BDFilter>( this );
 	std::this_thread::sleep_for(std::chrono::milliseconds(300)); 
 
+	std::vector< struct BDBCB > initialBCBVector;
 	struct BDBCB initialBCB;
 	initialBCB.block = startBlock;
 	initialBCB.status = static_cast<int>(BDState::BlockStored);
-	_bdFilter->add( initialBCB );
 	_chainVector.push_back( std::make_pair( initialBCB.blockHash() , std::make_shared<struct BDBCB>(initialBCB)) );
 
 	// 終端までのブロックヘッダを追加する　
-	_bdFilter->add( headerVector );
+	initialBCBVector.push_back( initialBCB );
+	_bdFilter->add( initialBCBVector );
 
+
+	// 初期で与えれれたヘッダの追加
+	this->add( headerVector , static_cast<int>(BDState::BlockHeaderReceived) ); // 一応検証をする
 
 	// 一応スタートハッシュ、ストップハッシュもセットしておく
 	std::shared_ptr<unsigned char> startHash;
@@ -174,7 +183,7 @@ BDVirtualChain::BDVirtualChain( std::shared_ptr<LightUTXOSet> utxoSet , std::sha
 	_utxoSet = utxoSet;
 	_utxoSet->toVirtual();
 
-	_bdFilter->isClosing( true ); // ストップヘッダハッシュが
+	_bdFilter->isHeaderDownloadClosing( true ); // ストップヘッダハッシュが
 }
 
 
@@ -210,13 +219,19 @@ void BDVirtualChain::requestedExtendChain( std::function<struct BDBCB( std::shar
 	std::cout << "<BDVitrualChain> requestedExtendChain::called()" << "\n";
 	struct BDBCB popedCB;
 
+	std::cout << "--- 1 ---" << "\n";
 	// 仮想チェーンの最先端ハッシュを取得して,prevが一致するcbを取得する
 	std::shared_ptr<unsigned char> chainHeadHash = this->chainHeadHash();
-	if( memcmp( chainHeadHash.get(), _stopHash.get() , 32 ) == 0  ) return; // 仮想チェーンがストップハッシュに達していたら何もしない
-
+	printf("%p\n", _currentStartHash.get() );
+	printf("%p\n", _stopHash.get() );
+	if( _stopHash != nullptr )
+		if( memcmp( chainHeadHash.get(), _stopHash.get() , 32 ) == 0  ) return; // 仮想チェーンがストップハッシュに達していたら何もしない
+	
+	std::cout << "--- 2 ---" << "\n";
 	popedCB = findPopCallback( chainHeadHash ); //prevがchainHeadHashを指すブロックを取得する
 	if( popedCB.status == static_cast<int>(BDState::Empty) ) return;
 
+	std::cout << "--- 3 ---" << "\n";
 	std::unique_lock<std::shared_mutex> lock(_mtx);
 
 	std::shared_ptr<unsigned char> blockHash;
@@ -254,7 +269,7 @@ void BDVirtualChain::blockHeaderDownloader( std::shared_ptr<StreamBufferContaine
 
 	unsigned short timeoutCount = 0;
 
-	while( DEFAULT_BD_MAX_TIMEOUT_COUNT > timeoutCount && !(_bdFilter->isClosing())  )
+	while( DEFAULT_BD_MAX_TIMEOUT_COUNT > timeoutCount && !(_bdFilter->isHeaderDownloadClosing())  )
 	{
 		std::unique_ptr<SBSegment> requestSB = std::make_unique<SBSegment>();
 		std::shared_ptr<unsigned char> requestStartHash = _currentStartHash;
@@ -359,7 +374,7 @@ void BDVirtualChain::blockDownloader( std::shared_ptr<StreamBufferContainer> toR
 
 bool BDVirtualChain::mergeToLocalChain()
 {
-	if( !(_bdFilter->isClosing()) )  return false; // フィルタの受付を終了していないとマージはしない
+	if( !(_bdFilter->isHeaderDownloadClosing()) )  return false; // フィルタの受付を終了していないとマージはしない
 
 	_utxoSet->virtualCommit(); // 仮想インデックスツリーをローカルインデックスツリーにマージする
 
@@ -397,7 +412,7 @@ bool BDVirtualChain::startSequentialAssemble( std::shared_ptr<StreamBufferContai
 	std::cout << "検証プロセスを実行します" << "\n";
 	for( auto itr = _incompleteBlockVector._validateBlockHead ; itr != _chainVector.end() ;)
 	{
-		if( !(itr->second->block->verify(_utxoSet)) ) return false;
+		if( !(itr->second->block->verify(_utxoSet)) ) return false; // 実際にはここでfalutだとブロック本体の再送を要求する
 		itr->second->status = static_cast<int>(BDState::BlockBodyValidated);
 	}
 	
@@ -414,22 +429,34 @@ bool BDVirtualChain::startParallelAssemble( std::shared_ptr<StreamBufferContaine
 
 
 
-bool BDVirtualChain::add( std::shared_ptr<block::BlockHeader> header )
+
+bool BDVirtualChain::add( std::vector< std::shared_ptr<block::BlockHeader> > headerVector , int defaultStatus )
 {
-	if( _bdFilter->isClosing() ) return false;
-	_bdFilter->add( header );
+	std::vector<struct BDBCB> targetVector;
+	for( auto itr : headerVector ){
+		struct BDBCB target;
+		target.block->header(itr);
+		if( defaultStatus == static_cast<int>(BDState::None) )
+			target.status = static_cast<int>(BDState::BlockHeaderReceived);
+		targetVector.push_back(target);
+	}
+
+	_bdFilter->add( targetVector );
 }
 
-bool BDVirtualChain::add( std::vector< std::shared_ptr<block::BlockHeader> > headerVector )
+bool BDVirtualChain::add( std::vector<std::shared_ptr<block::Block>> blockVector, int defaultStatus )
 {
-	if( _bdFilter->isClosing() ) return false;
-	_bdFilter->add( headerVector );
-}
+	std::vector<struct BDBCB> targetVector;
+	for( auto itr : blockVector ){
+		struct BDBCB target;
+		target.block = itr;
+		if( defaultStatus == static_cast<int>(BDState::None) )
+			target.status = static_cast<int>(BDState::BlockBodyReceived);
+		targetVector.push_back(target);
+	}
 
+	_bdFilter->add( targetVector );
 
-bool BDVirtualChain::add( std::shared_ptr<block::Block> block )
-{
-	_bdFilter->add( block );
 }
 
 
