@@ -288,10 +288,12 @@ int main()
 	localStrageManager->readUndo( blockHash_0001 );
 	*/
 
+
+
 	std::cout << "\n\n\n\n========================================================" << "\n";
 
 
-	miya_chain::BDVirtualChain virtuahChain( std::make_shared<block::Block>(block_0001)  );
+	miya_chain::BDVirtualChain virtuahChain( miyaChainManager.utxoSet() , localStrageManager ,std::make_shared<block::Block>(block_0001)  );
 
 
 	virtuahChain.printFilter();

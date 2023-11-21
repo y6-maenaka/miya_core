@@ -103,6 +103,7 @@ bool BDFilter::add( std::shared_ptr<block::Block> block ) // フィルタにブ�
 	// 直接チェーンに繋がれているBCBDBを操作する
 	ret->second.second->block = block; // 到着したブロックで上書きする
 	ret->second.second->status = static_cast<int>(BDState::BlockBodyReceived); // ステータスを変更する
+	std::cout << "直ポインタを上書きしました" << "\n";
 
 	return true;
 }
@@ -119,6 +120,12 @@ void BDFilter::updateBlockPtr( std::shared_ptr<struct BDBCB> destination )
 bool BDFilter::isClosing() const
 {
   return _filter._closeing;
+}
+
+
+void BDFilter::isClosing( bool target )
+{
+	_filter._closeing = target;
 }
 
 
@@ -162,6 +169,9 @@ void BDFilter::printHeaderValidationPendingQueue()
 		for( int i=0; i<32; i ++ ) 
 			printf("%02X", itr.first._blockHash[i] );
 		std::cout << "\n";
+
+		printf("%p\n", itr.second.block.get() );
+		printf("%p\n", itr.second.blockHash().get() );
 
 		std::cout <<  " [block hash] :: ";
 		for( int i=0; i<32; i++ )
@@ -297,7 +307,9 @@ BDFilter::BDFilter( BDVirtualChain* virtualChain )
 		std::cout << "BDFilter::Constructor headerValidator started" << "\n";
 		std::unique_lock<std::mutex> lock(_validationHeaderQueue._mtx);
 		_validationHeaderQueue._cv.wait( lock , [&]{
-				return !(_validationHeaderQueue._pendingQueue.empty()); // 空でなければ解除
+				bool ret =  !(_validationHeaderQueue._pendingQueue.empty());
+				std::cout << "検証完了" << "\n";
+				return ret;
 		});
 		std::cout << "(BDFilter) Layer1検証プロセス起動" << "\n";
 

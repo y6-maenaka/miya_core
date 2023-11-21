@@ -36,6 +36,7 @@ class BlockLocalStrageManager;
 
 
 
+constexpr unsigned int DEFAULT_BLOCK_HEADER_DOWNLOAD_AGENT_COUNT = 1;
 constexpr unsigned int DEFAULT_BLOCK_DOWNLOAD_AGENT_COUNT = 3; // ブロックダウンロードエージェントの起動数
 constexpr unsigned int DEFAULT_DOWNLOAD_BLOCK_WINDOW_SIZE = 10; // 一つのブロックダウンロードエージェントが一回で担当するブロック数
 constexpr unsigned int DEFAULT_BD_MAX_TIMEOUT_COUNT = 4;
@@ -188,6 +189,7 @@ public:
 		// 仮想チェーンにブロックヘッダが取り込まれ,ブロック本体ダウンロードする際は,フィルタの中間層を飛ばして直接仮想チェーンで管理されているBDBに変更を加える
 		void updateBlockPtr( std::shared_ptr<struct BDBCB> destination );
 		bool isClosing() const;
+		void isClosing( bool target );
 
 		void printFilter();
 		void printHeaderValidationPendingQueue();
@@ -207,18 +209,25 @@ class BDVirtualChain : public std::enable_shared_from_this<BDVirtualChain>
 {
 private:
   std::shared_ptr<BDFilter> _bdFilter;
+  std::shared_ptr<LightUTXOSet> _utxoSet;
+	std::shared_ptr<BlockLocalStrageManager> _localStrageManager;
 
   VirtualMiyaChain _chainVector;// チェーン順に並んだBDリスト
-  struct UndownloadedBlockVector
+  
+	struct IncompleteBlockVector
    {
-	std::shared_mutex _mtx;
-	std::condition_variable _cv;
+		std::shared_mutex _mtx;
+		std::condition_variable _cv;
 
-	std::vector< VirtualMiyaChain::iterator > _unVector; // チェーンに繋がれたがブロック本体のダウンロードが完了していない要素イテレータのベクター
-	void push( VirtualMiyaChain::iterator target );
-	std::vector< VirtualMiyaChain::iterator > pop( size_t size = DEFAULT_DOWNLOAD_BLOCK_WINDOW_SIZE );
-	size_t size();
-  } _undownloadedBlockVector;
+		std::vector< VirtualMiyaChain::iterator > _undownloadBlockVector; // チェーンに繋がれたがブロック本体のダウンロードが完了していない要素イテレータのベクター
+		VirtualMiyaChain::iterator _validateBlockHead;
+
+		void push( VirtualMiyaChain::iterator target );
+		std::vector< VirtualMiyaChain::iterator > pop( size_t size = DEFAULT_DOWNLOAD_BLOCK_WINDOW_SIZE );
+		size_t size();
+		VirtualMiyaChain::iterator popUnvalidateBlockHead();
+  } _incompleteBlockVector;
+
 
 
 	std::shared_ptr<unsigned char> _currentStartHash;
@@ -226,6 +235,7 @@ private:
 
 	std::shared_mutex _mtx;
 	std::condition_variable_any _cv; // 多少のオーバーヘッドを伴うらしい
+
 
 protected:
 
@@ -237,15 +247,31 @@ protected:
 	// めっそ度変数の_currentStartHash(startBlockHash)から_stopHashまでのブロックヘッダを収集する あくまで集めるだけのメソッド, 検証はしない(Filterで自動的に行う)
 	void blockHeaderDownloader( std::shared_ptr<StreamBufferContainer> toRequesterSBC );
 	void blockDownloader( std::shared_ptr<StreamBufferContainer> toRequesterSBC ); // ブロックヘッダよりブロック本体をダウンロードする処理
-	void validate( std::shared_ptr<block::Block> target );
+
+	
+	bool mergeToLocalChain(); // 仮想チェーンの全てをローカルの本番チェーンにマージする // 並列保存しない場合
 
 public:
-  BDVirtualChain( std::shared_ptr<block::Block> startBlock , std::shared_ptr<unsigned char> stopHash = nullptr );
+  BDVirtualChain( std::shared_ptr<LightUTXOSet> utxoSet , 
+									std::shared_ptr<BlockLocalStrageManager> localStrageManager ,
+									std::shared_ptr<block::Block> startBlock ,
+									std::shared_ptr<unsigned char> stopHash = nullptr );
+
+	BDVirtualChain(
+									std::shared_ptr<LightUTXOSet> utxoSet,
+									std::shared_ptr<BlockLocalStrageManager> localStrageManager,
+									std::shared_ptr<block::Block> startBlock,
+									std::vector< std::shared_ptr<block::BlockHeader>> _headerVector // チェーンの順に並んでいること
+									
+									);
+
+	~BDVirtualChain();
 
   void requestedExtendChain( std::function<struct BDBCB( std::shared_ptr<unsigned char> )> findPopCallback ); // 仮想チェーンの最先端ブロックハッシュを元にポップする
 
-	bool startSequentialAssemble(); // 主にIBD　ローカルファイルに書き込みながらチェーンを組み立てる
-	bool startParallelAssemble(); // 主にマージ ローカルファイルには保存せずブロックをすべてダウンロードする
+	bool startSequentialAssemble( std::shared_ptr<StreamBufferContainer> toRequesterSBC ); // 主にIBD　ローカルファイルに書き込みながらチェーンを組み立てる
+	bool startParallelAssemble( std::shared_ptr<StreamBufferContainer> toRequesterSBC ); // 主にマージ ローカルファイルには保存せずブロックをすべてダウンロードする
+	
 
 	bool add( std::shared_ptr<block::BlockHeader> header );
 	bool add( std::vector< std::shared_ptr<block::BlockHeader> > headerVector );
