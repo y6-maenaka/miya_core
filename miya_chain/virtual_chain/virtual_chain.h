@@ -123,7 +123,6 @@ private:
 	std::shared_mutex _mtx;
 	std::condition_variable_any _cv; // 多少のオーバーヘッドを伴うらしい
 
-
 protected:
 
 	std::shared_ptr<unsigned char> chainHeadHash();
@@ -139,17 +138,18 @@ protected:
 	bool mergeToLocalChain(); // 仮想チェーンの全てをローカルの本番チェーンにマージする // 並列保存しない場合
 
 public:
-  BDVirtualChain( std::shared_ptr<LightUTXOSet> utxoSet , 
+  BDVirtualChain(   // 自身チェーンとの分岐点,目標ハッシュ(nullは最先端)をセットする
+									std::shared_ptr<LightUTXOSet> utxoSet , 
 									std::shared_ptr<BlockLocalStrageManager> localStrageManager ,
 									std::shared_ptr<block::Block> startBlock ,
-									std::shared_ptr<unsigned char> stopHash = nullptr );
+									std::shared_ptr<unsigned char> stopHash = nullptr 
+									);
 
-	BDVirtualChain(
+	BDVirtualChain( // 自身チェーンとの分岐点,最終譚までのブロックヘッダをセットする
 									std::shared_ptr<LightUTXOSet> utxoSet,
 									std::shared_ptr<BlockLocalStrageManager> localStrageManager,
 									std::shared_ptr<block::Block> startBlock,
 									std::vector< std::shared_ptr<block::BlockHeader>> _headerVector // チェーンの順に並んでいること
-									
 									);
 
 	~BDVirtualChain();

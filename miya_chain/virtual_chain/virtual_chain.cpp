@@ -50,7 +50,7 @@ std::shared_ptr<unsigned char> BDBCB::blockHash() const
 
 std::shared_ptr<unsigned char> BDBCB::prevBlockHash() const
 {
-	return block->header()->previousBlockHeaderHash();
+	return block->header()->prevBlockHash();
 }
 
 void BDBCB::print()

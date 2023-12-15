@@ -108,7 +108,7 @@ void BlockHeader::nonce( uint32_t target )
 }
 
 
-void BlockHeader::previousBlockHeaderHash( std::shared_ptr<unsigned char> target )
+void BlockHeader::prevBlockHash( std::shared_ptr<unsigned char> target )
 {
 	if( target == nullptr ){
 		memset( _previousBlockHeaderHash , 0x00 , sizeof(_previousBlockHeaderHash) );
@@ -118,9 +118,13 @@ void BlockHeader::previousBlockHeaderHash( std::shared_ptr<unsigned char> target
 }
 
 
-std::shared_ptr<unsigned char> BlockHeader::previousBlockHeaderHash()
+std::shared_ptr<unsigned char> BlockHeader::prevBlockHash()
 {
 	std::shared_ptr<unsigned char> ret = std::shared_ptr<unsigned char>( new unsigned char[sizeof(_previousBlockHeaderHash)] );
+
+	unsigned char addrZero[32]; memset( addrZero, 0x00 , sizeof(addrZero));
+	if( memcpy( _previousBlockHeaderHash , addrZero , 32 ) == 0 )  return nullptr;
+
 	memcpy( ret.get() , _previousBlockHeaderHash, sizeof(_previousBlockHeaderHash) );
 	return ret;
 }
@@ -135,6 +139,15 @@ size_t BlockHeader::headerHash( std::shared_ptr<unsigned char> *ret )
 	hashLength = hash::SHAHash( exportedHeader , exportedHeaderLength , ret , "sha256" );
 
 	return hashLength;
+}
+
+
+
+std::shared_ptr<unsigned char> BlockHeader::headerHash()
+{
+	std::shared_ptr<unsigned char> ret;
+	this->headerHash( &ret );
+	return ret;
 }
 
 

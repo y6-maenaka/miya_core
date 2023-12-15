@@ -7,6 +7,7 @@
 #include <chrono>
 #include <vector>
 #include <unordered_map>  
+#include <cassert>
 
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -14,6 +15,7 @@
 #include <unistd.h>
 
 #include "../miya_db/miya_db/database_manager.h"
+#include "./block/block_c_iterator.h"
 #include "./IBD.h"
 
 
@@ -76,9 +78,13 @@ private:
 	int _stateFileFD;
 	struct stat _filestat;
 
+	std::shared_ptr<BlockLocalStrageManager> _localStrageManager; // block_c_iterator生成よ用
+
 public:
-	MiyaChainState(); // 寄贈時にchain_stateファイルを読み込む
+	MiyaChainState( std::shared_ptr<BlockLocalStrageManager> localStrageManager ); // 寄贈時にchain_stateファイルを読み込む
 	void update( std::shared_ptr<unsigned char> blockHash , unsigned short height ); // ファイルにも書き込む
+
+	block::BlockCIterator citerator(); // チェーン先頭のブロックイテレータを取得する
 
 	std::shared_ptr<unsigned char> chainHead();
 	unsigned int height();
@@ -110,7 +116,6 @@ private:
 		std::shared_ptr<StreamBufferContainer> _toRequesterSBC;
 		std::shared_ptr<MiyaChainRequester> _requester;
 	} _requesterDaemon;
-
 
 
 	/* データベース関連 */

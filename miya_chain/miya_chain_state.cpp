@@ -1,5 +1,9 @@
 #include "miya_chain_manager.h"
+#include "./miya_chain_state.h"
 
+#include "./block/block.h"
+#include "./block/block_header.h"
+#include "./miya_coin/local_strage_manager.h"
 
 
 
@@ -11,9 +15,23 @@ namespace miya_chain
 
 
 
-MiyaChainState::MiyaChainState()
+
+
+
+
+
+
+
+MiyaChainState::MiyaChainState( std::shared_ptr<BlockLocalStrageManager> localStrageManager )
 {
 	std::cout << "This is MiyaChainState コンストラクタ" << "\n";
+
+	assert(localStrageManager != nullptr );
+	_localStrageManager = localStrageManager;
+
+
+	// MiyaChainState( std::shared_ptr<BlockLocalStrageManager> localStrageManager ); // 寄贈時にchain_stateファイルを読み込む
+
 
 	_systemPageSize = sysconf (_SC_PAGESIZE); // 本アーキテクチャのページサイズを取得
 
@@ -56,6 +74,14 @@ void MiyaChainState::update( std::shared_ptr<unsigned char> blockHash , unsigned
 
 	std::cout << "updated" << "\n";
 }
+
+
+block::BlockCIterator MiyaChainState::citerator()
+{
+	struct block::BlockCIterator ret( _localStrageManager , this->chainHead() );
+	return ret;
+}
+
 
 MiyaChainState::~MiyaChainState()
 {

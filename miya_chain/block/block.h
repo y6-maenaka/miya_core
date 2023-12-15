@@ -73,6 +73,7 @@ public:
 	/* ヘッダー関連 */
 	unsigned int exportHeader( std::shared_ptr<unsigned char> *retRaw );
 	size_t blockHash( std::shared_ptr<unsigned char> *ret );
+	std::shared_ptr<unsigned char> blockHash();
 	//size_t exportRaw( std::shared_ptr<unsigned char> *retRaw ); // ヘッダとトランザクション部まとめて書き出すようなことはしない
 
 	uint32_t time();

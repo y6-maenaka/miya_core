@@ -142,6 +142,12 @@ size_t Block::blockHash( std::shared_ptr<unsigned char> *ret )
 	return _header->headerHash( ret );
 }
 
+std::shared_ptr<unsigned char> Block::blockHash()
+{
+	std::shared_ptr<unsigned char> ret;
+	_header->headerHash( &ret );
+	return ret;
+}
 
 
 uint32_t Block::time()

@@ -79,12 +79,13 @@ public:
 	uint32_t nBits();
 	void nBits( uint32_t target );
 	void nonce( uint32_t target );
-	void previousBlockHeaderHash( std::shared_ptr<unsigned char> target );
-	std::shared_ptr<unsigned char> previousBlockHeaderHash();
+	void prevBlockHash( std::shared_ptr<unsigned char> target );
+	std::shared_ptr<unsigned char> prevBlockHash();
 
 	bool verify();
 
 	size_t headerHash( std::shared_ptr<unsigned char> *ret );
+	std::shared_ptr<unsigned char> headerHash();
 	void print();
 
     bool cmpMerkleRoot( std::shared_ptr<unsigned char> target ); // ヘッダに格納されているマークルルートとの比較メソッド

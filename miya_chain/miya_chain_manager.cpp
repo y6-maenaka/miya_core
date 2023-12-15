@@ -50,7 +50,7 @@ int MiyaChainManager::init( std::shared_ptr<StreamBufferContainer> toEKP2PBroker
 	_localStrageManager._strageManager = std::make_shared<BlockLocalStrageManager>( _blockIndexDB._toBlockIndexDBSBC , _blockIndexDB._fromBlockIndexDBSBC );
 
 	// ChainStateのセットアップ
-	_chainState = std::make_shared<MiyaChainState>();
+	_chainState = std::make_shared<MiyaChainState>( _localStrageManager._strageManager );
 
 	_toEKP2PBrokerSBC = toEKP2PBrokerSBC;
 
