@@ -212,7 +212,7 @@ int main()
 	std::cout << "チェックポイント0" << "\n";
 	uint32_t nBits_0001 = 532390001;
 	block_0001.header()->nBits( nBits_0001 );
-	block_0001.header()->previousBlockHeaderHash( nullptr );
+	block_0001.header()->prevBlockHash( nullptr );
 	std::cout << "マイングbefore" << "\n";
 	uint32_t nonce_0001 = miya_chain::simpleMining( nBits_0001 , block_0001.header(), false );
 	std::cout << "マイニングafter" << "\n";
@@ -242,7 +242,7 @@ int main()
 	block_0002.header()->merkleRoot( merkleRoot_0002 );
 	uint32_t nBits_0002 = 532390001;
 	block_0002.header()->nBits( nBits_0002 );
-	block_0002.header()->previousBlockHeaderHash( blockHash_0001 );
+	block_0002.header()->prevBlockHash( blockHash_0001 );
 	uint32_t nonce_0002 = miya_chain::simpleMining( nBits_0002 , block_0002.header(), false );
 	block_0002.header()->nonce( nonce_0002 );
 
@@ -266,7 +266,7 @@ int main()
 	block_0003.header()->merkleRoot( merkleRoot_0003 );
 	uint32_t nBits_0003 = 532390001;
 	block_0003.header()->nBits( nBits_0003 );
-	block_0003.header()->previousBlockHeaderHash( blockHash_0002 );
+	block_0003.header()->prevBlockHash( blockHash_0002 );
 	uint32_t nonce_0003 = miya_chain::simpleMining( nBits_0003 , block_0003.header(), false );
 	block_0003.header()->nonce( nonce_0003 );
 

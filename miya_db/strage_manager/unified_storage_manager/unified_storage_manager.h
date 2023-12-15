@@ -12,7 +12,7 @@ namespace miya_db
 struct QueryContext;
 
 
-class UnifiedStorageManager // どのストレージマネージャーを使っても
+class UnifiedStorageManager //　どのストレージエンジンを使ってもインターフェースは統一する
 {
 
 public:

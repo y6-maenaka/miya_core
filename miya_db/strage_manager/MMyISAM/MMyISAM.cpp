@@ -52,19 +52,6 @@ bool MMyISAM::add( std::shared_ptr<QueryContext> qctx )
 		printf("%02X", qctx->key().get()[i]);
 	} std::cout << "\x1b[39m" << "\n";
 
-
-	/*
-	std::cout << "-----------------------------------------------------------------------" << "\n";
-	std::cout << "( add )" << "\n";
-	std::cout << "[ NormalIndexManager ]" << "\n";
-	_indexManager->printIndexTree();
-	std::cout << "-----------------------------------------------------------------------" << "\n";
-	std::cout << "[ IndexManager ( Normal or Safe ) ] :: ";
-	if( _isSafeMode ) std::cout << "safe" << "\n";
-	else std::cout << "normal"  << "\n";
-	std::cout << "-----------------------------------------------------------------------" << "\n";
-	*/
-
 	return true;
 }
 
@@ -78,7 +65,6 @@ bool MMyISAM::get( std::shared_ptr<QueryContext> qctx )
 	for( int i=0; i<20; i++){
 		printf("%02X", qctx->key().get()[i]);
 	} std::cout << "\x1b[39m" << "\n";
-
 
 	if( dataOptr.first == nullptr ) return false;
 	size_t dataLength; std::shared_ptr<unsigned char> data;
@@ -108,19 +94,6 @@ bool MMyISAM::remove( std::shared_ptr<QueryContext> qctx )
 	_indexManager->remove( qctx->key() );
  // 本来はvalueStoreからも削除する
 
-	/*
-	std::cout << "-----------------------------------------------------------------------" << "\n";
-	std::cout << "( REMOVE )" << "\n";
-	std::cout << "[ NormalIndexManager ]" << "\n";
-	_indexManager->printIndexTree();
-	std::cout << "-----------------------------------------------------------------------" << "\n";
-	std::cout << "[ IndexManager ( Normal or Safe ) ] :: ";
-	if( _isSafeMode ) std::cout << "safe" << "\n";
-	else std::cout << "normal"  << "\n";
-	std::cout << "-----------------------------------------------------------------------" << "\n";
-	*/
-
-
 	return true;
 }
 
@@ -147,7 +120,7 @@ bool MMyISAM::switchToSafeMode()
 	/* SafeIndexManager は内部で関連ファイルを削除&フォーマットするので明示的にclearする必要はない */
 
 	// あとでファイル名はハードコードする
-	ValueStoreManager* valueStoreManager = new ValueStoreManager{std::string("../miya_db/table_files/.system/safe/safe")};
+	ValueStoreManager* valueStoreManager = new ValueStoreManager{ std::string("../miya_db/table_files/.system/safe/safe") };
 	valueStoreManager->clear();
 
 	_indexManager = dynamic_cast<IndexManager*>( safeIndexManager );

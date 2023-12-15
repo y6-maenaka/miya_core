@@ -408,8 +408,9 @@ std::shared_ptr<SafeONode> SafeONode::recursiveAdd( std::shared_ptr<unsigned cha
 			}
 
 			splitONode->itemSet()->keyCount( (DEFAULT_KEY_COUNT+1)-separatorKeyIndex-1 );
-			for( int i=0; i<(DEFAULT_DATA_OPTR_COUNT+1)-separatorKeyIndex-1;i++)	{
-        viewItemSet._dataOPtr.at(i+separatorKeyIndex+1) ;
+			for( int i=0; i<(DEFAULT_DATA_OPTR_COUNT+1)-separatorKeyIndex-1;i++)	
+			{
+				viewItemSet._dataOPtr.at(i+separatorKeyIndex+1) ;
 				splitONode->itemSet()->dataOptr( i , viewItemSet._dataOPtr.at(i+separatorKeyIndex+1));
 			}
 			splitONode->itemSet()->dataOptrCount( (DEFAULT_DATA_OPTR_COUNT+1)-separatorKeyIndex-1 );
@@ -418,6 +419,7 @@ std::shared_ptr<SafeONode> SafeONode::recursiveAdd( std::shared_ptr<unsigned cha
 			for( int i=0; i<separatorKeyIndex; i++)
 				itemSet()->key( i , viewItemSet._key.at(i) );
 			itemSet()->keyCount(separatorKeyIndex);
+
 			for( int i=0; i<separatorKeyIndex; i++)
 				itemSet()->dataOptr( i , viewItemSet._dataOPtr.at(i) );
 			itemSet()->dataOptrCount(separatorKeyIndex);

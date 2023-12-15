@@ -1,18 +1,21 @@
-cmake_minimum_required( VERSION 3.2 )
+cmake_minimum_required( VERSION 3.12 )
 
 
-
-find_package(PkgConfig REQUIRED)
-pkg_search_module(OPENSSL REQUIRED openssl)
-
+ 
+find_package(PkgConfig REQUIRED) # 外部パッケージを検出する準備(opensslは外部パッケージ(?))
+# pkg_check_modules(OPENSSL REQUIRED openssl)
+# pkg_search_module(OPENSSL REQUIRED openssl)
+find_package( OPENSSL REQUIRED )
 
 
 if( OPENSSL_FOUND )
 	include_directories( ${OPENSSL_INCLUDE_DIRS} )
 	message(STATUS "Using OpenSSL ${OPENSSL_VERSION}")
+	message(STATUS "Openssl IncludeDir :: ${OPENSSL_INCLUDE_DIRS}")
 else()
 	# Error; with REQUIRED, pkg_search_module() will throw an error by it's own
 endif()
+
 
 
 
@@ -38,8 +41,6 @@ target_link_libraries( SHARED_COMPONENTS PUBLIC
 												${OPENSSL_LIBRARIES}
 												EKP2P #SBSegmentをekp2p::headerから作成するために必要
 )
-
-
 
 
 

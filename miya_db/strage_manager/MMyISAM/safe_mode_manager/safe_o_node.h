@@ -28,7 +28,7 @@ struct SafeOItemSet;
 
 
 
-// 分割用の仮想アイテムセット
+// 分割用の仮想アイテムセット(ノードスプリットが発生する時以外は特に使用しない)
 struct SafeViewItemSet : ViewItemSet
 {
 	std::array< DataOptrEx , DEFAULT_DATA_OPTR_COUNT + 1> _dataOPtr;
@@ -39,8 +39,13 @@ struct SafeViewItemSet : ViewItemSet
 
 
 
-struct SafeOCItemSet : public OCItemSet
+struct SafeOCItemSet : public OCItemSet // Safe ONode Const ItemSet
 {
+private:
+  std::shared_ptr<ONodeConversionTable> _conversionTable;
+
+public:
+
 	// dataOptr返却時にConversionTable/DataOptrLocationを取得し,データの所在を付与する
 	const DataOptrEx dataOptr( unsigned short index );
 	std::array< DataOptrEx, DEFAULT_DATA_OPTR_COUNT > *exportDataOptrArray(); // DataOptrExで書き出す
@@ -49,8 +54,11 @@ struct SafeOCItemSet : public OCItemSet
 
 
 
-struct SafeOItemSet : public OItemSet
+struct SafeOItemSet : public OItemSet // Safe ONode ItemSet 
 {
+private:
+  std::shared_ptr<ONodeConversionTable> _conversionTable;
+
 public:
 	// データポインタ保存・変更時にConversionTable/DataOptrLocationも変更する
 	void dataOptr( unsigned short index , DataOptrEx target );
