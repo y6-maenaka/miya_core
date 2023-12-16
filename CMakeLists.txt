@@ -8,6 +8,7 @@ add_subdirectory( miya_db )
 add_subdirectory( control_interface )
 add_subdirectory( shared_components )
 
+add_subdirectory( test/miya_db )
 
 
 include_directories( ${OPENSSL_INCLUDE_DIRS} )
@@ -23,6 +24,7 @@ target_link_libraries( db_ver_0 PRIVATE
 												MIYA_DB
 												SHARED_COMPONENTS
 												MIYA_CHAIN
+												TEST_MIYA_DB
 )
 target_compile_options( db_ver_0 PUBLIC -Wall )
 endif()

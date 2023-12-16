@@ -34,10 +34,10 @@ void DatabaseManager::hello()
 }
 
 
-void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer> incomingSBC, std::shared_ptr<StreamBufferContainer> outgoingSBC ,std::string filePath )
+void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer> incomingSBC, std::shared_ptr<StreamBufferContainer> outgoingSBC ,std::string dbName )
 {
 	std::cout << "Launching MiyaDB [ Light Mode ]" << "\n";
-	std::shared_ptr<MMyISAM> mmyisam = std::shared_ptr<MMyISAM>( new MMyISAM(filePath) ); // 簡易的に指定のストレージエンジンを使用
+	std::shared_ptr<MMyISAM> mmyisam = std::shared_ptr<MMyISAM>( new MMyISAM(dbName) ); // 簡易的に指定のストレージエンジンを使用
 
 
 	// respondスレッドを用意する &(参照)でキャプチャするとスマートポインタのアドレスが変わる ※ 呼び出し元スレッドが死んでいる
@@ -177,7 +177,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 				{
 					std::cout << "## (HANDLE) QUERY_SWITCH_TO_SAFE_MODE" << "\n";
 
-					flag = mmyisam->switchToSafeMode();
+					flag = mmyisam->switchToSafeMode( 0 );
 					responseJson["QueryID"] = qctx->id();
 					responseJson["status"] = flag;
 					break;
@@ -187,7 +187,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 				{
 					std::cout << "## (HANDLE) QUERY_SAFE_MODE_COMMIT" << "\n";
 
-					flag = mmyisam->safeCommitExit();
+					flag = mmyisam->safeCommitExit( 0 );
 					responseJson["QueryID"] = qctx->id();
 					responseJson["status"] = flag;
 					break;
@@ -197,7 +197,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 				{
 					std::cout << "## (HANDLE) QUERY_SAFE_MODE_ABORT" << "\n";
 
-					flag = mmyisam->safeAbortExit();
+					flag = mmyisam->safeAbortExit( 0 );
 					responseJson["QueryID"] = qctx->id();
 					responseJson["status"] = flag;
 					break;
@@ -208,7 +208,6 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 	
 			direct:
 			outgoingSBC->pushOne( std::move(sbSegment) );
-			
 		}
 		
 		//

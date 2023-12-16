@@ -384,6 +384,10 @@ OItemSet::OItemSet( std::shared_ptr<ONodeItemSet> base )
 {
 	_base = base;
 }
+std::shared_ptr<ONodeItemSet> OItemSet::oNodeItemSet()
+{
+	return _base;
+}
 const std::shared_ptr<optr> OCItemSet::Optr(){
 	return _base->Optr();
 }
@@ -429,7 +433,10 @@ OCItemSet::OCItemSet( std::shared_ptr<ONodeItemSet> base )
 {
 	_base = base;
 }
-
+std::shared_ptr<ONodeItemSet> OCItemSet::oNodeItemSet()
+{
+	return _base;
+}
 const std::shared_ptr<optr> OItemSet::Optr(){
 	return _base->Optr();
 }
@@ -514,8 +521,6 @@ std::shared_ptr<OItemSet> ItemSet::itemSet()
 	return __itemSet;
 }
 
-
-
 std::shared_ptr<OCItemSet> ItemSet::citemSet()
 {
 	return __citemSet;
@@ -524,25 +529,23 @@ std::shared_ptr<OCItemSet> ItemSet::citemSet()
 
 
 
-
-ONode::ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager ) // 新規作成
-{
-	_oMemoryManager = oMemoryManager;
-	if( oMemoryManager == nullptr ) return;
-
-	std::shared_ptr<optr> baseOptr = oMemoryManager->allocate( O_NODE_ITEMSET_SIZE ); // 新規作成の場合
-	itemSet( std::make_shared<ONodeItemSet>(baseOptr) );
-	itemSet()->clear();
-}
-
-
-
 // ラップコンストラクタ
 ONode::ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared_ptr<optr> baseOptr ) // アドレスの引き継ぎ
 {
+	if( oMemoryManager == nullptr ) return;
 	_oMemoryManager = oMemoryManager;
-	itemSet( std::make_shared<ONodeItemSet>(baseOptr) );
-	//_itemSet = std::make_shared<ONodeItemSet>( baseOptr );
+
+	if( baseOptr == nullptr ) // baseOptrが指定されていない場合は,itemSetを新規作成(割り当て)する
+	{
+		std::shared_ptr<optr> baseOptr = oMemoryManager->allocate( O_NODE_ITEMSET_SIZE ); // 新規作成の場合
+		itemSet( std::make_shared<ONodeItemSet>(baseOptr) );
+		itemSet()->clear();
+	} 
+	else // baseOptrが指定されいる場合は,baseOptrのitemSetを使用する
+	{
+		itemSet( std::make_shared<ONodeItemSet>(baseOptr) );
+	}
+	return;
 }
 
 
@@ -555,7 +558,6 @@ std::shared_ptr<OItemSet> ONode::itemSet()
 	// std::cout << "\x1b[33m" << "ONode::itemSet()" << "\x1b[39m" << "\n";
 	return _itemSet->itemSet();
 }
-
 
 std::shared_ptr<OCItemSet> ONode::citemSet()
 {

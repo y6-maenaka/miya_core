@@ -22,7 +22,7 @@ OverlayMemoryManager::OverlayMemoryManager( std::string filePath )
 	//std::shared_ptr<char> freeListFilePath = std::shared_ptr<char>( new char[PATH_MAX] );
 	//sprintf( dataFilePath.get() ,  "../miya_db/table_files/%s/%s.oswap", filePath.c_str(), filePath.c_str() );
 	//sprintf( freeListFilePath.get() ,  "../miya_db/table_files/%s/%s.ofl", filePath.c_str(), filePath.c_str() );
-
+	
 	std::string dataFilePath = filePath + ".oswap";
 	std::string freeListFilePath = filePath + ".ofl";
 

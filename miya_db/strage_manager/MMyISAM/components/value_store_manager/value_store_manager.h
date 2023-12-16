@@ -19,6 +19,7 @@ class optr;
 class OverlayMemoryManager;
 struct QueryContext;
 class CacheTable;
+struct ONodeConversionTable;
 
 
 /*
@@ -96,7 +97,7 @@ public:
 	size_t get( std::shared_ptr<optr> targetOptr ,std::shared_ptr<unsigned char> *ret );
 
 	// Safeモードでセーフファイルに割り付けてあるファイルを本ファイルに移動する // ConvertsionTableにアクセスするためにIndex関連ファイルのインポートが必要なのは仕方ない
-	void mergeDataOptr( ValueStoreManager* safeValueStoreManager );
+	void mergeDataOptr( std::shared_ptr<ONodeConversionTable> conversionTable ,ValueStoreManager* safeValueStoreManager );
 
 	void clear(); // 管理ファイルを完全にリフレッシュする
 	const std::shared_ptr<OverlayMemoryManager> overlayMemoryManager();

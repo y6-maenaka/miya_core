@@ -14,6 +14,7 @@ namespace miya_db
 
 struct OCItemSet;
 struct OItemSet;
+struct ItemSet;
 
 
 
@@ -101,13 +102,15 @@ public:
 
 
 
-struct OItemSet
+struct OItemSet // ONodeItemSetのラッパー
 {
 protected:
 	std::shared_ptr<ONodeItemSet> _base;
 
 public:
 	OItemSet( std::shared_ptr<ONodeItemSet> base );
+	virtual ~OItemSet(){return;};
+	std::shared_ptr<ONodeItemSet> oNodeItemSet(); // 滅多に使用しないようにする
 
 	const std::shared_ptr<optr> Optr();
 
@@ -136,13 +139,15 @@ public:
 
 
 
-struct OCItemSet
+struct OCItemSet // ONodeItemSetのConstモードラッパー
 {
 protected:
 	std::shared_ptr<ONodeItemSet> _base;
 
 public:
 	OCItemSet( std::shared_ptr<ONodeItemSet> base );
+	virtual ~OCItemSet(){return;};
+	std::shared_ptr<ONodeItemSet> oNodeItemSet(); // 滅多に使用しないようにする
 
 	const std::shared_ptr<optr> Optr();
 	const std::shared_ptr<optr> parent();
@@ -156,6 +161,8 @@ public:
 
 	unsigned short dataOptrCount();
 	const std::shared_ptr<optr> dataOptr( unsigned short index );
+
+	void hello(){ std::cout << "Hello :: OCItemSet" << "\n";};
 
 	std::array< std::shared_ptr<unsigned char> , DEFAULT_KEY_COUNT> *exportKeyArray();
 	std::array< std::shared_ptr<optr> , DEFAULT_CHILD_COUNT> *exportChildOptrArray();
@@ -198,11 +205,8 @@ protected:
 public:
 	std::shared_ptr<ItemSet> _itemSet;
 
-
-	// ノード新規作成(新規割り当て)
-	ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager );
 	// ノードラップ(新規作成はしない)
-	ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared_ptr<optr> baseOptr );
+	ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared_ptr<optr> baseOptr = nullptr );
 
 	void overlayMemoryManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager );
 	std::shared_ptr<OverlayMemoryManager> overlayMemoryManager();

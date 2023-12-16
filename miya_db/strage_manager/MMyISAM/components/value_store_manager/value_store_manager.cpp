@@ -216,12 +216,13 @@ size_t ValueStoreManager::get( std::shared_ptr<optr> targetOptr ,std::shared_ptr
 
 
 
-void ValueStoreManager::mergeDataOptr( ValueStoreManager* safeValueStoreManager )
+void ValueStoreManager::mergeDataOptr( std::shared_ptr<ONodeConversionTable> conversionTable ,ValueStoreManager* safeValueStoreManager )
 {
 	std::shared_ptr<unsigned char> data; size_t dataLength;
-	for( auto itr : SafeONode::_conversionTable.entryMap() )
+	for( auto itr : conversionTable->entryMap() )
 	{
-		std::shared_ptr<SafeONode> targetSafeONode = std::make_shared<SafeONode>( SafeONode::_conversionTable.safeOMemoryManager(), std::make_shared<optr>(itr.first) );
+		// Entryに存在する要素のSafeONodeを作成する為第2引数のOMemoryManagerは必ずSafeOMemoryManagerになる
+		std::shared_ptr<SafeONode> targetSafeONode = std::make_shared<SafeONode>( conversionTable , conversionTable->safeOMemoryManager() , std::make_shared<optr>(itr.first) ); // エントリに存在するSafeONodeの呼び出し
 		for( int i=0; i< targetSafeONode->citemSet()->dataOptrCount() ; i++ )
 		{
 			if( itr.second._dataOptrLocation[i] == DATA_OPTR_LOCATED_AT_SAFE )
@@ -234,7 +235,7 @@ void ValueStoreManager::mergeDataOptr( ValueStoreManager* safeValueStoreManager 
 					// itr.second._dataOptrLocation[i] = DATA_OPTR_LOCATED_AT_NORMAL; // 明示的に変更説ともdataOptr呼び出し時に変更される
 			}
 		}
-		SafeONode::_conversionTable.update( std::make_shared<optr>(itr.first) , std::make_shared<MappingContext>(itr.second) );
+		conversionTable->update( std::make_shared<optr>(itr.first) , std::make_shared<MappingContext>(itr.second) );
 	}
 }
 

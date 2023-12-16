@@ -35,14 +35,21 @@ void SafeViewItemSet::moveInsertDataOptr( unsigned short index , DataOptrEx targ
 
 
 
+SafeOCItemSet::SafeOCItemSet( std::shared_ptr<ONodeItemSet> base , std::shared_ptr<ONodeConversionTable> conversionTable ) : OCItemSet(base)
+{
+  _conversionTable = conversionTable;
+}
 
-
+void SafeOCItemSet::conversionTable( std::shared_ptr<ONodeConversionTable> target )
+{
+	_conversionTable = target;
+}
 
 // データ格納先ファイルインデックスを付与する
 const DataOptrEx SafeOCItemSet::dataOptr( unsigned short index )
 {
   DataOptrEx ret;
-  ONodeConversionTableEntryDetail refRet = SafeONode::_conversionTable.refEx( this->Optr() );
+  ONodeConversionTableEntryDetail refRet = _conversionTable->refEx( this->Optr() );
   ret.first = OCItemSet::dataOptr( index );
 
   if( !(refRet.isExists) ) // マッピング情報が存在しない場合はONodeに保存されている
@@ -68,18 +75,32 @@ std::array< DataOptrEx, DEFAULT_DATA_OPTR_COUNT > *SafeOCItemSet::exportDataOptr
 
 
 
+
+
+
+SafeOItemSet::SafeOItemSet( std::shared_ptr<ONodeItemSet> base , std::shared_ptr<ONodeConversionTable> conversionTable ) : OItemSet(base)
+{
+  _conversionTable = conversionTable;
+}
+
+void SafeOItemSet::conversionTable( std::shared_ptr<ONodeConversionTable> target )
+{
+	std::cout << "BEFORE" << "\n";
+	_conversionTable = target;
+}
+
 // データポインタの保存・更新とentryへの反映
 void SafeOItemSet::dataOptr( unsigned short index , DataOptrEx target )
 {
   OItemSet::dataOptr( index , target.first ); // データポインタの保存
 
   // 正常動作であればSafeOItmSet::dataOptrが呼ばれた時点でエントリが作成されていないことはない
-  ONodeConversionTableEntryDetail refRet = SafeONode::_conversionTable.refEx( this->Optr() );
+  ONodeConversionTableEntryDetail refRet = _conversionTable->refEx( this->Optr() );
   if( !(refRet.isExists) )
     return; // 特に変更はしない
   else{
     refRet.value->_dataOptrLocation[index] = target.second; // エントリに変更を加える
-    SafeONode::_conversionTable.update( this->Optr(), refRet.value );
+    _conversionTable->update( this->Optr(), refRet.value );
   }
   return;
 }
@@ -113,21 +134,27 @@ void ONodeConversionTable::init()
 
 std::pair< std::shared_ptr<SafeONode> , bool > ONodeConversionTable::ref( std::shared_ptr<optr> target )
 {
+	std::cout << "< 1 >" << "\n";
 	optr* targetOptr = target.get();
-  auto itr = _entryMap.find( *targetOptr );
-  if( itr == _entryMap.end() )
-  {
+	std::cout << "< 2 >" << "\n";
+	printf("%ld\n", _entryMap.size() );
+  	auto itr = _entryMap.find( *targetOptr );
+	std::cout << "< 3 >" << "\n";
+  	if( itr == _entryMap.end() ) // エントリ情報が存在しない場合はノーマルOMemManagerを持ったSafeONodeを返却する
+  	{
+		std::cout << "< 4 >" << "\n";
 	   std::shared_ptr<optr> retOptr = target;
 	   retOptr->cacheTable( _normalOMemoryManager->dataCacheTable() );
-	   return std::make_pair( std::make_shared<SafeONode>( _normalOMemoryManager , retOptr ), false );
+		std::cout << "< 5 >" << "\n";
+	   return std::make_pair( std::make_shared<SafeONode>( shared_from_this() ,_normalOMemoryManager , retOptr ), false );
 	}
 
+	std::cout << "< 6 >" << "\n";
 	std::shared_ptr<optr> retOptr = std::make_shared<optr>(itr->second._optr);
 	retOptr->cacheTable( _safeOMemoryManager->dataCacheTable() );
-  return std::make_pair( std::make_shared<SafeONode>( _safeOMemoryManager ,retOptr ), true ); // 変換テーブルに要素が存在した場合
+	std::cout << "< 7 >" << "\n";
+  	return std::make_pair( std::make_shared<SafeONode>( shared_from_this() ,_safeOMemoryManager ,retOptr ), true ); // 変換テーブルに要素が存在した場合
 }
-
-
 
 
 ONodeConversionTableEntryDetail ONodeConversionTable::refEx( std::shared_ptr<optr> target)
@@ -140,7 +167,7 @@ ONodeConversionTableEntryDetail ONodeConversionTable::refEx( std::shared_ptr<opt
 	 {
 		std::shared_ptr<optr> retOptr = target;
 		retOptr->cacheTable( _normalOMemoryManager->dataCacheTable() );
-		retDetail.convertedONode = std::make_shared<SafeONode>( _normalOMemoryManager , retOptr );
+		retDetail.convertedONode = std::make_shared<SafeONode>( shared_from_this(), _normalOMemoryManager , retOptr );
 		retDetail.isExists = false; // 存在しないフラグ
 		retDetail.key = nullptr;
 		return retDetail;
@@ -148,7 +175,7 @@ ONodeConversionTableEntryDetail ONodeConversionTable::refEx( std::shared_ptr<opt
 
 	std::shared_ptr<optr> retOptr = std::make_shared<optr>(itr->second._optr);
 	retOptr->cacheTable( _safeOMemoryManager->dataCacheTable() );
-	retDetail.convertedONode = std::make_shared<SafeONode>( _safeOMemoryManager , retOptr );
+	retDetail.convertedONode = std::make_shared<SafeONode>( shared_from_this() ,_safeOMemoryManager , retOptr );
 	retDetail.isExists = true;
 	retDetail.key = target;
   retDetail.value = std::make_shared<MappingContext>(itr->second);
@@ -265,32 +292,29 @@ int SafeONode::findIndex( std::shared_ptr<unsigned char> targetKey )
 }
 
 
-
-
-
-SafeONode::SafeONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager ) : ONode( nullptr ) // nullptrを渡して新規に割り当てさせないようにする
+SafeONode::SafeONode( std::shared_ptr<ONodeConversionTable> conversionTable, std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared_ptr<optr> baseOptr ) : ONode( oMemoryManager ,baseOptr)
 {
-    // セーフモードファイルのメモリマネージャーをセット
-	if( oMemoryManager == nullptr )
-		_oMemoryManager = _conversionTable.safeOMemoryManager();
+	if( !(conversionTable) ) return;
+	_conversionTable = conversionTable;
+
+	if( oMemoryManager == nullptr ) // conversionTableにoMemoryManagerがセットされていない(=SafeMode)場合は
+		_oMemoryManager = _conversionTable->safeOMemoryManager(); 
 	else
 		_oMemoryManager = oMemoryManager;
 
-	// SafeONodeを新規作成なので,ONodeファイルからコピーする必要はない
-	std::shared_ptr<optr> baseOptr = _oMemoryManager->allocate( O_NODE_ITEMSET_SIZE ); // 新規作成の場合
-	ONode::itemSet( std::make_shared<ONodeItemSet>(baseOptr) );
-	ONode::itemSet()->clear(); // ゼロ埋め
+	if( baseOptr == nullptr ) // baseOptrがnull出ない場合は新規作成
+	{
+		// SafeONodeを新規作成なので,ONodeファイルからコピーする必要はない
+		std::shared_ptr<optr> baseOptr = _oMemoryManager->allocate( O_NODE_ITEMSET_SIZE ); // 新規作成の場合
+		ONode::itemSet( std::make_shared<ONodeItemSet>(baseOptr) );
+		ONode::itemSet()->clear(); // ゼロ埋め
 
-	_conversionTable.regist( baseOptr  , baseOptr );
-    std::cout << "\x1b[35m" << "SafeONodeが初期化されました" << "\x1b[39m" << "\n";
+		_conversionTable->regist( baseOptr  , baseOptr );
+    	std::cout << "\x1b[35m" << "SafeONodeが初期化されました" << "\x1b[39m" << "\n";
+	}
+	return;
 }
 
-
-
-SafeONode::SafeONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared_ptr<optr> baseOptr ) : ONode( oMemoryManager , baseOptr )
-{
-    return;
-}
 
 
 std::shared_ptr<SafeONode> SafeONode::parent()
@@ -298,7 +322,7 @@ std::shared_ptr<SafeONode> SafeONode::parent()
   std::shared_ptr<optr> retOptr = SafeONode::citemSet()->parent();
   if( retOptr == nullptr ) return nullptr;
 
-  std::shared_ptr<SafeONode> ret = std::make_shared<SafeONode>( SafeONode::_conversionTable.safeOMemoryManager(), retOptr );
+  std::shared_ptr<SafeONode> ret = std::make_shared<SafeONode>( _conversionTable ,_conversionTable->safeOMemoryManager(), retOptr );
   return ret;
 }
 
@@ -306,51 +330,54 @@ std::shared_ptr<SafeONode> SafeONode::parent()
 
 std::shared_ptr<SafeONode> SafeONode::child( unsigned short index )
 {
-  /*
-	std::shared_ptr<ONode> retONode = ONode::child(index);
-	if( retONode == nullptr ) return nullptr;
-	return std::make_shared<SafeONode>( *(static_cast<SafeONode*>(retONode.get())) );
-  */
-
   std::shared_ptr<optr> retOptr = SafeONode::citemSet()->childOptr(index);
   if( retOptr == nullptr ) return nullptr;
 
-  return std::make_shared<SafeONode>( SafeONode::_conversionTable.safeOMemoryManager(), retOptr );
+  return std::make_shared<SafeONode>( _conversionTable ,_conversionTable->safeOMemoryManager(), retOptr );
 }
 
 
 std::shared_ptr<SafeOCItemSet> SafeONode::citemSet()
 {
-	std::shared_ptr<SafeONode> convertedONode = (_conversionTable.ref( shared_from_this()->ONode::citemSet()->Optr() )).first;
+	// ONode又はSafeONodeを取得(変換情報が存在していればSafeONodeが取得される)
+	std::shared_ptr<SafeONode> convertedONode = ( _conversionTable->ref( shared_from_this()->ONode::citemSet()->Optr() )).first;
 
-	//std::cout << "変換情報を取得しました" << "\n";
-
-  SafeOCItemSet* retRawPtr = static_cast<SafeOCItemSet*>(convertedONode->ONode::citemSet().get());
-	return std::make_shared<SafeOCItemSet>( *retRawPtr );
+	std::shared_ptr<SafeOCItemSet> ret = std::shared_ptr<SafeOCItemSet>( new SafeOCItemSet( convertedONode->ONode::citemSet()->oNodeItemSet() , _conversionTable ) );
+	
+	return ret;
 }
 
 
 std::shared_ptr<SafeOItemSet> SafeONode::itemSet()
 {
-	std::pair< std::shared_ptr<SafeONode>, bool > refRet = _conversionTable.ref( ONode::citemSet()->Optr() );
+	std::pair< std::shared_ptr<SafeONode>, bool > refRet = _conversionTable->ref( ONode::citemSet()->Optr() );
 	std::shared_ptr<SafeONode> convertedONode = refRet.first;
 
 	if( !(refRet.second) ) // 変換テーブルエントリが作成されていない場合 -> コピーを作成してエントリを追加する
 	{
-		std::shared_ptr<optr> baseOptr = _conversionTable.safeOMemoryManager()->allocate( O_NODE_ITEMSET_SIZE ); // Safeファイルにインデックスを作成する
-    omemcpy( baseOptr.get() ,  convertedONode->ONode::citemSet()->Optr().get() , O_NODE_ITEMSET_SIZE ); // コピーを作成する
-		std::shared_ptr<SafeONode> newSafeONode = std::make_shared<SafeONode>( _conversionTable.safeOMemoryManager(), baseOptr ); // 新たにSafeNodeとして作成する
+		std::shared_ptr<optr> baseOptr = _conversionTable->safeOMemoryManager()->allocate( O_NODE_ITEMSET_SIZE ); // Safeファイルにインデックスを作成する
+    	omemcpy( baseOptr.get() ,  convertedONode->ONode::citemSet()->Optr().get() , O_NODE_ITEMSET_SIZE ); // コピーを作成する
+		std::shared_ptr<SafeONode> newSafeONode = std::make_shared<SafeONode>( _conversionTable , _conversionTable->safeOMemoryManager(), baseOptr ); // 新たにSafeNodeとして作成する
 
-    //if( memcmp( ONode::citemSet()->Optr()->addr() , baseOptr->addr() , 5 ) == 0 )
-		  _conversionTable.regist( baseOptr , baseOptr ); // 同じvalueのエントリが2つ作成されるので，同期してないといけないが,
-
-		_conversionTable.regist( shared_from_this()->ONode::citemSet()->Optr() , baseOptr );
+    	//if( memcmp( ONode::citemSet()->Optr()->addr() , baseOptr->addr() , 5 ) == 0 )
+		_conversionTable->regist( baseOptr , baseOptr ); // 同じvalueのエントリが2つ作成されるので，同期してないといけないが,
+		_conversionTable->regist( shared_from_this()->ONode::citemSet()->Optr() , baseOptr ); 
 
 		convertedONode = newSafeONode;
 	}
 
-  SafeOItemSet* retRawPtr = static_cast<SafeOItemSet*>( convertedONode->ONode::itemSet().get() );
-  return std::make_shared<SafeOItemSet>( *retRawPtr );
+	std::shared_ptr<SafeOItemSet> ret = std::shared_ptr<SafeOItemSet>( new SafeOItemSet( convertedONode->ONode::itemSet()->oNodeItemSet() , _conversionTable ) );
+	return ret;
+}
+
+std::shared_ptr<ONodeConversionTable> SafeONode::conversionTable()
+{
+	return _conversionTable;
+}
+
+void SafeONode::conversionTable( std::shared_ptr<ONodeConversionTable> target )
+{
+	_conversionTable = target;
 }
 
 
@@ -393,19 +420,27 @@ std::shared_ptr<SafeONode> SafeONode::recursiveAdd( std::shared_ptr<unsigned cha
 				}
 			}
 
+			std::cout << "## 1 " << "\n";
+
 			viewItemSet.moveInsertDataOptr( keyInsertedIndex, *((*_targetDataOptr).get()) );
 
 			if( *_targetONode != nullptr ){
 				viewItemSet.moveInsertChildOptr( keyInsertedIndex + 1 , (*_targetONode)->citemSet()->Optr() );
 			}
 
+			std::cout << "## 2 " << "\n";
+
 			std::shared_ptr<unsigned char> separatorKey = viewItemSet._key.at( separatorKeyIndex );
 			std::shared_ptr<DataOptrEx> separatorDataOptr = std::make_shared<DataOptrEx>(viewItemSet._dataOPtr.at( separatorKeyIndex ));
-			std::shared_ptr<SafeONode> splitONode = std::make_shared<SafeONode>( nullptr );  // 新規作成
+			std::shared_ptr<SafeONode> splitONode = std::shared_ptr<SafeONode>( new SafeONode( _conversionTable ) );  // 新規作成
+
+			std::cout << "## 3 " << "\n";
 
 			for( int i=0; i<(DEFAULT_KEY_COUNT+1)-separatorKeyIndex-1;i++)	{
 				splitONode->itemSet()->key( i , viewItemSet._key.at(i+separatorKeyIndex+1) );
 			}
+
+			std::cout << "## 4 " << "\n";
 
 			splitONode->itemSet()->keyCount( (DEFAULT_KEY_COUNT+1)-separatorKeyIndex-1 );
 			for( int i=0; i<(DEFAULT_DATA_OPTR_COUNT+1)-separatorKeyIndex-1;i++)	
@@ -413,16 +448,23 @@ std::shared_ptr<SafeONode> SafeONode::recursiveAdd( std::shared_ptr<unsigned cha
 				viewItemSet._dataOPtr.at(i+separatorKeyIndex+1) ;
 				splitONode->itemSet()->dataOptr( i , viewItemSet._dataOPtr.at(i+separatorKeyIndex+1));
 			}
+			std::cout << "## 5 " << "\n";
 			splitONode->itemSet()->dataOptrCount( (DEFAULT_DATA_OPTR_COUNT+1)-separatorKeyIndex-1 );
 			splitONode->itemSet()->parent( this->parent() );
+
+			std::cout << "## 6 " << "\n";
 
 			for( int i=0; i<separatorKeyIndex; i++)
 				itemSet()->key( i , viewItemSet._key.at(i) );
 			itemSet()->keyCount(separatorKeyIndex);
 
+			std::cout << "## 7 "  << "\n";
+
 			for( int i=0; i<separatorKeyIndex; i++)
 				itemSet()->dataOptr( i , viewItemSet._dataOPtr.at(i) );
 			itemSet()->dataOptrCount(separatorKeyIndex);
+
+			std::cout << "## 8" << "\n";
 
 			if( citemSet()->childOptrCount() > 0 )
 			{
@@ -443,6 +485,7 @@ std::shared_ptr<SafeONode> SafeONode::recursiveAdd( std::shared_ptr<unsigned cha
 				splitONode->itemSet()->childOptrCount( viewItemSet._childOptr.size() - center );
 			}
 
+			std::cout << "## 9" << "\n";
 			*_targetKey = separatorKey;
 			*_targetDataOptr = separatorDataOptr;
 			*_targetONode = splitONode;
@@ -457,13 +500,14 @@ std::shared_ptr<SafeONode> SafeONode::recursiveAdd( std::shared_ptr<unsigned cha
 
 		if( memcmp( parentONode->citemSet()->Optr()->addr(), oAddrZero, 5  )  == 0 )  // 自身がルートノード場合
 		{
-			auto newRootNode = std::make_shared<SafeONode>( nullptr );
+			// auto newRootNode = std::make_shared<SafeONode>( _conversionTable );
+			auto newRootNode = std::shared_ptr<SafeONode>( new SafeONode(_conversionTable) );
 
 			/* ルートノード情報の上書き */
 			std::cout << "[ @ ] (Btree::ルートノードが上書きされました)" << "\n";
 
 			std::shared_ptr<unsigned char> metaHeadOAddr = std::shared_ptr<unsigned char>( new unsigned char[5] ); memset( metaHeadOAddr.get() , 0x00 , 5 );
-			std::shared_ptr<optr> metaHeadOptr = std::shared_ptr<optr>( new optr(metaHeadOAddr.get() , _conversionTable.safeOMemoryManager()->dataCacheTable() ) );
+			std::shared_ptr<optr> metaHeadOptr = std::shared_ptr<optr>( new optr(metaHeadOAddr.get() , _conversionTable->safeOMemoryManager()->dataCacheTable() ) );
 			omemcpy( (*metaHeadOptr) + META_ROOT_NODE_OFFSET ,  newRootNode->citemSet()->Optr()->addr() , NODE_OPTR_SIZE ); // Meta領域のルートノードの変更
 
 			newRootNode->isLeaf( false );

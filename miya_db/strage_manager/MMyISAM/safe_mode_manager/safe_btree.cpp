@@ -10,19 +10,25 @@ namespace miya_db
 
 
 
-
-SafeOBtree::SafeOBtree( std::shared_ptr<ONode> normalRootONode ) : OBtree( SafeONode::_conversionTable.normalOMemoryManager() ,normalRootONode )
+// SafeOBtree初期化時のツリーはノーマルモードのコピーで良い
+SafeOBtree::SafeOBtree( std::shared_ptr<ONodeConversionTable> conversionTable ,std::shared_ptr<ONode> normalRootONode ) : OBtree( conversionTable->normalOMemoryManager() ,normalRootONode )
 {
+	_conversionTable = conversionTable;
+
     // static_pointer_castを使用すると基底クラスポインタとなり，SafeNodeでオーバーロードしているメソッドが使えない
     SafeONode *castedNormalONode = static_cast<SafeONode*>( normalRootONode.get() );
     _rootONode = std::make_shared<SafeONode>( *castedNormalONode );
+	_rootONode->conversionTable( _conversionTable );
 }
 
+std::shared_ptr<ONodeConversionTable> SafeOBtree::conversionTable()
+{
+	return _conversionTable;
+}
 
 const std::shared_ptr<SafeONode> SafeOBtree::rootONode()
 {
     return _rootONode;
-
 }
 
 
@@ -31,6 +37,17 @@ void SafeOBtree::add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr
 {
 	auto currentONode = _rootONode;
   	std::cout << "add with :: "; currentONode->hello();
+
+	std::cout << "########" << "\n";
+	printf("%p\n", currentONode.get() ); 
+	puts("$$$$$$$$");
+	printf("this conversionTable pointer :: %p\n", _conversionTable.get() );
+	printf("currentONode coinversionTable pointer :: %p\n", currentONode->conversionTable().get() );
+	printf("currentONode conversintaTable entry count :: %ld\n", currentONode->conversionTable()->_entryMap.size() );
+	std::cout << "************" << "\n";
+	currentONode->citemSet();
+	std::cout << "@@@@@@@@" << "\n";
+
 
 	while( (currentONode->citemSet()->childOptrCount() >= 1 ) )
 	{
@@ -51,13 +68,17 @@ void SafeOBtree::add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr
 
 		direct:;
 	}
+	std::cout << "HERE 11" << "\n";
 
 	DataOptrEx dataOptrEx = std::make_pair( dataOptr, DATA_OPTR_LOCATED_AT_SAFE  );
+	std::cout << "check point 0" << "\n";
 	auto newRootNode = currentONode->recursiveAdd( targetKey , std::make_shared<DataOptrEx>(dataOptrEx) , nullptr );
+	std::cout << "check point 1 " << "\n";
 	if( newRootNode != nullptr )
 		_rootONode = newRootNode;
 
 	// SafeONode::_conversionTable.printEntryMap();
+	std::cout << "ADD from OBtree DONE" << "\n";
 	return;
 }
 
@@ -124,7 +145,7 @@ std::shared_ptr<ONode> SafeOBtree::mergeSafeBtree( std::shared_ptr<SafeONode> su
 	std::shared_ptr<ONode> swapONode;
 
 	struct ONodeConversionTableEntryDetail retDetail;
-  retDetail = SafeONode::_conversionTable.refEx( subtreeRootONode->ONode::citemSet()->Optr() );
+  	retDetail = _conversionTable->refEx( subtreeRootONode->ONode::citemSet()->Optr() );
 
 
 	if( !(retDetail.isExists) ) // 変更が一切無かった場合は特に何もしなくて良い
@@ -132,8 +153,8 @@ std::shared_ptr<ONode> SafeOBtree::mergeSafeBtree( std::shared_ptr<SafeONode> su
 		// subtreeRootONodeが持っているoptrはONodeに属するもののはず
     std::cout << "操作なし" << "\n";
     std::shared_ptr<optr> onodeOptr = subtreeRootONode->ONode::citemSet()->Optr();
-    onodeOptr->cacheTable( SafeONode::_conversionTable.normalOMemoryManager()->dataCacheTable() );
-		swapONode = std::make_shared<ONode>( SafeONode::_conversionTable.normalOMemoryManager() , onodeOptr );
+    onodeOptr->cacheTable( _conversionTable->normalOMemoryManager()->dataCacheTable() );
+		swapONode = std::make_shared<ONode>( _conversionTable->normalOMemoryManager() , onodeOptr );
   }
 
   else{
@@ -141,20 +162,20 @@ std::shared_ptr<ONode> SafeOBtree::mergeSafeBtree( std::shared_ptr<SafeONode> su
   	{
       // 新たなコピー領域の割り当て
       std::cout << "SafeONode <==> SafeONode" << "\n";
-  		swapToONodeOptr = SafeONode::_conversionTable.normalOMemoryManager()->allocate( O_NODE_ITEMSET_SIZE );
+  		swapToONodeOptr = _conversionTable->normalOMemoryManager()->allocate( O_NODE_ITEMSET_SIZE );
       std::cout << "New Allocated :: "; swapToONodeOptr->printAddr(); std::cout << "\n";
   		omemcpy( swapToONodeOptr.get(), &(retDetail.value->_optr) , O_NODE_ITEMSET_SIZE );
 
-  		swapONode = std::make_shared<SafeONode>( SafeONode::_conversionTable.normalOMemoryManager() , swapToONodeOptr );
+  		swapONode = std::make_shared<SafeONode>( _conversionTable , _conversionTable->normalOMemoryManager() , swapToONodeOptr );
   	}
   	else // ONode < == > SafeONode ( 既に存在する領域に上書き )
   	{
   		// ここでretDetail.entyr.firstのoptrのdataCacheが通常モードの場合でないと正常に処理が行われない
       std::cout << "ONode <==> SafeONode" << "\n";
       std::shared_ptr<optr> onodeOptr = retDetail.key; // 本来は初めからNormalのcacheTableが格納されているはずなのだが
-      onodeOptr->cacheTable( SafeONode::_conversionTable.normalOMemoryManager()->dataCacheTable() );
+      onodeOptr->cacheTable( _conversionTable->normalOMemoryManager()->dataCacheTable() );
   		omemcpy( onodeOptr.get() , &(retDetail.value->_optr) , O_NODE_ITEMSET_SIZE );
-  		swapONode = std::make_shared<ONode>( SafeONode::_conversionTable.normalOMemoryManager() , onodeOptr );
+  		swapONode = std::make_shared<ONode>( _conversionTable->normalOMemoryManager() , onodeOptr );
   	}
   }
 
@@ -190,7 +211,6 @@ std::shared_ptr<ONode> SafeOBtree::mergeSafeBtree( std::shared_ptr<SafeONode> su
 
 int SafeOBtree::printSubTree( std::shared_ptr<SafeONode> subtreeRoot )
 {
-
 	SafeOBtree::printONode( subtreeRoot );
 
 	for( int i=0; i<subtreeRoot->citemSet()->childOptrCount(); i++ )
@@ -206,7 +226,7 @@ int SafeOBtree::printSubTree( std::shared_ptr<SafeONode> subtreeRoot )
 int SafeOBtree::printONode( std::shared_ptr<SafeONode> targetONode )
 {
 	std::cout << "\n\n============================================" << "\n";
-	auto refRet = SafeONode::_conversionTable.ref( targetONode->ONode::citemSet()->Optr() );
+	auto refRet = targetONode->conversionTable()->ref( targetONode->ONode::citemSet()->Optr() );
 	if( refRet.second ) std::cout << "\x1b[32m";
 	else std::cout << "\x1b[33m";
 	targetONode->hello(); std::cout << "\n";

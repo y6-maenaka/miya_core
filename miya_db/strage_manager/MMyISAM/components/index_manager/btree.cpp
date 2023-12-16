@@ -88,7 +88,9 @@ const std::shared_ptr<ONode> OBtree::rootONode()
 
 void OBtree::add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<optr> dataOptr )
 {
+	std::cout << "before_btree" << "\n";
 	std::cout << "add with :: "; _rootONode->hello();
+	std::cout << "after_btree" << "\n";
 	auto currentONode = _rootONode;
 
 	while( (currentONode->citemSet()->childOptrCount() >= 1 ) )

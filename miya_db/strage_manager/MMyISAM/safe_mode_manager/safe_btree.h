@@ -11,6 +11,7 @@ namespace miya_db
 {
 
 class SafeONode;
+struct ONodeConversionTable;
 
 
 using DataOptrEx = std::pair< std::shared_ptr<optr> , int >; // データ本体先頭Optrとデータファイルインデックス
@@ -19,10 +20,12 @@ class SafeOBtree : public OBtree
 {
 private:
     std::shared_ptr<SafeONode> _rootONode;
+    std::shared_ptr<ONodeConversionTable> _conversionTable;
 
 public:
-    SafeOBtree( std::shared_ptr<ONode> normalRootONode );
+    SafeOBtree( std::shared_ptr<ONodeConversionTable> conversionTable ,std::shared_ptr<ONode> normalRootONode );
     const std::shared_ptr<SafeONode> rootONode();
+    std::shared_ptr<ONodeConversionTable> conversionTable();
 
     void add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr<optr> dataOptr ) override;
 		void remove( std::shared_ptr<unsigned char> targetKey ) override;

@@ -21,6 +21,10 @@
 #include "../../miya_chain/transaction/p2pkh/p2pkh.h"
 #include "../../miya_chain/transaction/tx/tx_out.h"
 
+#include "../../test/miya_db/db_append_normal_p1.cpp"
+#include "../../test/miya_db/db_remove_normal_p1.cpp"
+#include "../../test/miya_db/db_safe_p1.cpp"
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <filesystem>
@@ -35,6 +39,16 @@
 
 int main()
 {
+
+	std::cout << "Hello World" << "\n";
+	// db_append_normal_p1("sample");
+	// db_remove_normal_p1("sample");
+	db_safe_p1( "sample" );
+
+
+	return 0;
+
+
 
 	auto generateKey = ([&]( const char *key ) -> std::shared_ptr<unsigned char>
 	{
@@ -125,7 +139,7 @@ int main()
 	dbClient->add( key_11 , value_11, 12 );
 
 
-		/*
+	/*
 	dbClient->remove( key_1 );
 	dbClient->remove( key_9 );
 	dbClient->remove( key_11 );

@@ -21,7 +21,7 @@ constexpr unsigned short SAFE_MODE_COLLICION_OFFSET = (O_NODE_ITEMSET_SIZE / 2);
 class SafeOBtree;
 class ONode;
 class OBtree;
-
+struct ONodeConversionTable;
 
 
 
@@ -30,13 +30,15 @@ class SafeIndexManager : public IndexManager
 {
 private:
 	std::shared_ptr<SafeOBtree> _masterBtree;
+	std::shared_ptr<ONodeConversionTable> _conversionTable;
 
 public:
 	 // コンストラクタ実行時に必ずNormalIndexManagerのマッピング位置の倍数にならない様にダミー領域をはじめに確保する
-	SafeIndexManager( const std::shared_ptr<OBtree> normalBtree );
+	SafeIndexManager( std::string indexFilePath ,const std::shared_ptr<OBtree> normalBtree );
 	virtual ~SafeIndexManager(){};
 
 	const std::shared_ptr<SafeOBtree> masterBtree();
+	std::shared_ptr<ONodeConversionTable> conversionTable();
 
 	void add( std::shared_ptr<unsigned char> key , std::shared_ptr<optr> dataOptr ) override;
 	void remove( std::shared_ptr<unsigned char> key ) override;
