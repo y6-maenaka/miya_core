@@ -9,6 +9,7 @@ add_subdirectory( control_interface )
 add_subdirectory( shared_components )
 
 add_subdirectory( test/miya_db )
+add_subdirectory( test/ekp2p )
 
 
 include_directories( ${OPENSSL_INCLUDE_DIRS} )
@@ -24,6 +25,7 @@ target_link_libraries( db_ver_0 PRIVATE
 												MIYA_DB
 												SHARED_COMPONENTS
 												MIYA_CHAIN
+
 												TEST_MIYA_DB
 )
 target_compile_options( db_ver_0 PUBLIC -Wall )
@@ -51,8 +53,11 @@ endif()
 
 
 
-if( BUILD_EKP2P_TEST )
-add_executable( node_0 ./release/ekp2p_test/node_0.cpp )
+
+
+
+if( BUILD_EKP2P )
+add_executable( node_0 ./release/ekp2p/node_0.cpp )
 target_link_libraries( node_0 PRIVATE
 												MIYA_CORE
 												MIYA_DB
@@ -60,10 +65,12 @@ target_link_libraries( node_0 PRIVATE
 												MIYA_CHAIN
 												CONTROL_INTERFACE
 												SHARED_COMPONENTS
+
+												TEST_EKP2P
 )
 target_compile_options( node_0 PUBLIC -Wall )
 
-add_executable( node_1 ./release/ekp2p_test/node_1.cpp )
+add_executable( node_1 ./release/ekp2p/node_1.cpp )
 target_link_libraries( node_1 PRIVATE
 												MIYA_CORE
 												MIYA_DB
