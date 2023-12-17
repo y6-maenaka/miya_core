@@ -25,11 +25,7 @@ MiyaDBSBClient::MiyaDBSBClient( std::shared_ptr<StreamBufferContainer> pushSBCon
 }
 
 
-
-
-
-
-size_t MiyaDBSBClient::get( std::shared_ptr<unsigned char> rawKey ,std::shared_ptr<unsigned char> *retRaw )
+size_t MiyaDBSBClient::get( std::shared_ptr<unsigned char> rawKey ,std::shared_ptr<unsigned char> *retRaw , short registryIndex )
 {
 	if( _popSBContainer == nullptr || _popSBContainer == nullptr ){
 		*retRaw = nullptr;
@@ -43,6 +39,7 @@ size_t MiyaDBSBClient::get( std::shared_ptr<unsigned char> rawKey ,std::shared_p
 	queryJson["QueryID"] = miya_db::generateQueryID();
 	queryJson["query"] = miya_db::MIYA_DB_QUERY_GET;
 	queryJson["key"] = nlohmann::json::binary( keyVector );
+	queryJson["registryIndex"] = registryIndex;
 
 	std::vector<uint8_t> dumpedQueryVector; 
 	dumpedQueryVector = nlohmann::json::to_bson( queryJson );
@@ -54,9 +51,7 @@ size_t MiyaDBSBClient::get( std::shared_ptr<unsigned char> rawKey ,std::shared_p
 	std::unique_ptr<SBSegment> querySB = std::make_unique<SBSegment>();
 	querySB->body( dumpedRawQuery, dumpedQueryVector.size() ); 
 
-
 	_pushSBContainer->pushOne( std::move(querySB) ); // Request
-
 
 	std::unique_ptr<SBSegment> responseSB;
 	std::vector<uint8_t> responseVector;
@@ -89,12 +84,7 @@ size_t MiyaDBSBClient::get( std::shared_ptr<unsigned char> rawKey ,std::shared_p
 }
 
 
-
-
-
-
-
-bool MiyaDBSBClient::add( std::shared_ptr<unsigned char> rawKey , std::shared_ptr<unsigned char> rawValue , size_t rawValueLength )
+bool MiyaDBSBClient::add( std::shared_ptr<unsigned char> rawKey , std::shared_ptr<unsigned char> rawValue , size_t rawValueLength, short registryIndex )
 {
 	if( _popSBContainer == nullptr || _popSBContainer == nullptr ) return false;
 
@@ -109,6 +99,7 @@ bool MiyaDBSBClient::add( std::shared_ptr<unsigned char> rawKey , std::shared_pt
 	queryJson["query"] = miya_db::MIYA_DB_QUERY_ADD;
 	queryJson["key"] = nlohmann::json::binary( keyVector );
 	queryJson["value"] = nlohmann::json::binary( valueVector );
+	queryJson["registryIndex"] = registryIndex;
 
 	std::vector<uint8_t> dumpedQueryVector; 
 	dumpedQueryVector = nlohmann::json::to_bson( queryJson );
@@ -141,10 +132,7 @@ bool MiyaDBSBClient::add( std::shared_ptr<unsigned char> rawKey , std::shared_pt
 }
 
 
-
-
-
-bool MiyaDBSBClient::remove( std::shared_ptr<unsigned char> rawKey )
+bool MiyaDBSBClient::remove( std::shared_ptr<unsigned char> rawKey, short registryIndex )
 {
 	if( _popSBContainer == nullptr || _popSBContainer == nullptr ) return false;
 
@@ -155,6 +143,7 @@ bool MiyaDBSBClient::remove( std::shared_ptr<unsigned char> rawKey )
 	queryJson["QueryID"] = miya_db::generateQueryID();
 	queryJson["query"] = miya_db::MIYA_DB_QUERY_REMOVE;
 	queryJson["key"] = nlohmann::json::binary( keyVector );
+	queryJson["registryIndex"] = registryIndex;
 
 
 	std::vector<uint8_t> dumpedQueryVector; 
@@ -186,16 +175,16 @@ bool MiyaDBSBClient::remove( std::shared_ptr<unsigned char> rawKey )
 }
 
 
-
-
-
-bool MiyaDBSBClient::safeMode()
+bool MiyaDBSBClient::safeMode( short registryIndex )
 {
 	if( _popSBContainer == nullptr || _popSBContainer == nullptr ) return false;
 
 	nlohmann::json queryJson;
 	queryJson["QueryID"] = miya_db::generateQueryID();
 	queryJson["query"] = miya_db::MIYA_DB_QUERY_SAFE_MODE;
+	queryJson["registryIndex"] = registryIndex;
+
+	std::cout << "ResigtryIndex(SBClient) :: " << queryJson["registryIndex"] << "\n";
 
 	std::unique_ptr<SBSegment> querySB = generateQuerySB( queryJson );
 	_pushSBContainer->pushOne( std::move(querySB) );
@@ -208,14 +197,14 @@ bool MiyaDBSBClient::safeMode()
 }
 
 
-
-bool MiyaDBSBClient::abort()
+bool MiyaDBSBClient::abort( short registryIndex )
 {
 	if( _popSBContainer == nullptr || _popSBContainer == nullptr ) return false;
 
 	nlohmann::json queryJson;
 	queryJson["QueryID"] = miya_db::generateQueryID();
 	queryJson["query"] = miya_db::MIYA_DB_QUERY_ABORT;
+	queryJson["registryIndex"] = registryIndex;
 
 	std::unique_ptr<SBSegment> querySB = generateQuerySB( queryJson );
 	_pushSBContainer->pushOne( std::move(querySB) );
@@ -228,14 +217,14 @@ bool MiyaDBSBClient::abort()
 }
 
 
-
-bool MiyaDBSBClient::commit()
+bool MiyaDBSBClient::commit( short registryIndex )
 {
 	if( _popSBContainer == nullptr || _popSBContainer == nullptr ) return false;
 
 	nlohmann::json queryJson;
 	queryJson["QueryID"] = miya_db::generateQueryID();
 	queryJson["query"] = miya_db::MIYA_DB_QUERY_COMMIT;
+	queryJson["registryIndex"] = registryIndex;
 
 	std::unique_ptr<SBSegment> querySB = generateQuerySB( queryJson );
 	_pushSBContainer->pushOne( std::move(querySB) );
@@ -246,10 +235,6 @@ bool MiyaDBSBClient::commit()
 	if( !(responseJson.contains("status")) ) return false;
 	return (responseJson["status"] == miya_db::MIYA_DB_STATUS_OK );
 }
-
-
-
-
 
 
 size_t MiyaDBSBClient::dumpRaw( nlohmann::json queryJson , std::shared_ptr<unsigned char> *retRaw )

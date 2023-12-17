@@ -15,24 +15,25 @@ namespace miya_db
 
 
 
-SafeIndexManager::SafeIndexManager( std::string indexFilePath ,const std::shared_ptr<OBtree> normalOBtree )
-{
+SafeIndexManager::SafeIndexManager( std::string indexFilePath ,const std::shared_ptr<OBtree> normalOBtree , std::shared_ptr<unsigned char> migrationDBState ) : IndexManager( indexFilePath )
+{ 
     std::cout << "THIS IS SAFE INDEX MANAGER CONSTRUCTOR" << "\n";
+	_migrationDBState = migrationDBState;
 
     // std::string systemSafeDirectories = "../miya_db/table_files/.system/safe/safe_index"; // あとでグローバルに静的に定義する
     // OverlayMemoryManagerの作成
-    std::shared_ptr<OverlayMemoryManager> safeOverlayMemoryManager = std::make_shared<OverlayMemoryManager>( indexFilePath );
+    // std::shared_ptr<OverlayMemoryManager> safeOverlayMemoryManager = std::make_shared<OverlayMemoryManager>( indexFilePath );
 
-    _conversionTable = std::shared_ptr<ONodeConversionTable>( new ONodeConversionTable(safeOverlayMemoryManager) );
-    _conversionTable->safeOMemoryManager( safeOverlayMemoryManager ); // 変換テーブルにSafe用のOverlayMemoryManagerをセットする
+    _conversionTable = std::shared_ptr<ONodeConversionTable>( new ONodeConversionTable(_oMemoryManager) );
+    _conversionTable->safeOMemoryManager(_oMemoryManager); // 変換テーブルにSafe用のOverlayMemoryManagerをセットする
 		_conversionTable->normalOMemoryManager( normalOBtree->overlayMemoryManager() );
 
     // ノーマルモードのOBtreeからSafeModeの基準となるOBtreeを作成する
     _masterBtree = std::make_shared<SafeOBtree>(  _conversionTable ,normalOBtree->rootONode() ); // rootONodeが存在しない場合は
     _conversionTable->init(); // entryMapを削除する
 
-    safeOverlayMemoryManager->clear(); // セーフファイルはセーフモードが終了するまでの一時的なファイルなので都度削除する
-		safeOverlayMemoryManager->allocate( 100 );
+    _oMemoryManager->clear(); // セーフファイルはセーフモードが終了するまでの一時的なファイルなので都度削除する
+		_oMemoryManager->allocate( 100 );
 
 		/* 雑だがMeta領域をコピーしておく */
 		unsigned char addrZero[5]; memset( addrZero , 0x00 , sizeof(addrZero) );
@@ -41,11 +42,10 @@ SafeIndexManager::SafeIndexManager( std::string indexFilePath ,const std::shared
 		omemcpy( safeMetaOptr.get() , normalMetaOptr.get() , 100 );
 
 
-		safeOverlayMemoryManager->allocate( SAFE_MODE_COLLICION_OFFSET );
+		_oMemoryManager->allocate( SAFE_MODE_COLLICION_OFFSET );
 
     /* 重要な操作 ※この操作をしないと,ConversionTableでNormalIndexかSafeIndexのアドレスが重複した場合変換ループが発生してしまう */
 }
-
 
 
 const std::shared_ptr<SafeOBtree> SafeIndexManager::masterBtree()
@@ -58,13 +58,23 @@ std::shared_ptr<ONodeConversionTable> SafeIndexManager::conversionTable()
   return _conversionTable;
 }
 
+void SafeIndexManager::migrationDBState( std::shared_ptr<unsigned char> target )
+{
+  _migrationDBState = target;
+}
+
+std::shared_ptr<unsigned char> SafeIndexManager::migrationDBState()
+{
+  return _migrationDBState;
+}
+
+
 void SafeIndexManager::add( std::shared_ptr<unsigned char> key , std::shared_ptr<optr> dataOptr )
 {
   std::cout << "SafeInDexManager::add() called"  << "\n";
   _masterBtree->rootONode()->hello();
   return _masterBtree->add( key, dataOptr );
 }
-
 
 
 void SafeIndexManager::remove( std::shared_ptr<unsigned char> key )
@@ -80,7 +90,6 @@ std::pair< std::shared_ptr<optr> ,int> SafeIndexManager::find( std::shared_ptr<u
 }
 
 
-
 std::shared_ptr<ONode> SafeIndexManager::mergeSafeBtree()
 {
   return _masterBtree->mergeSafeBtree( _masterBtree->SafeOBtree::rootONode() );
@@ -91,6 +100,10 @@ void SafeIndexManager::printIndexTree()
 {
     SafeOBtree::printSubTree( _masterBtree->rootONode() );
 }
+
+
+
+
 
 
 };

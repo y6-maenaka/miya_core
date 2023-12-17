@@ -1,6 +1,5 @@
 cmake_minimum_required( VERSION 3.12 )
 
-
  
 find_package(PkgConfig REQUIRED) # 外部パッケージを検出する準備(opensslは外部パッケージ(?))
 # pkg_check_modules(OPENSSL REQUIRED openssl)
@@ -15,7 +14,6 @@ if( OPENSSL_FOUND )
 else()
 	# Error; with REQUIRED, pkg_search_module() will throw an error by it's own
 endif()
-
 
 
 

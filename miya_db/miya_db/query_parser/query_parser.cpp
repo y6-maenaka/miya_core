@@ -7,16 +7,16 @@
 
 namespace miya_db
 {
-	
+
 
 UnifiedStrageManager *QueryParser::suggestTable()
 {
 
-	/*	
+	/*
 	switch( command ) // すでにメモリ上にテーブルが展開されていたら,それを返す
 	{
-		case 1:		
-			UnifiedStrageManager *MMyISAMStrageManager = new MMyISAM; 
+		case 1:
+			UnifiedStrageManager *MMyISAMStrageManager = new MMyISAM;
 			return MMyISAMStrageManager;
 
 			break;
@@ -62,7 +62,7 @@ std::shared_ptr<QueryContext> QueryParser::parseQuery( std::shared_ptr<unsigned 
 			keyVector = serializedQuery["key"].get_binary();
 
 			if( !(serializedQuery["value"].is_binary()) ) return nullptr;
-			std::vector<uint8_t> valueVector; 
+			std::vector<uint8_t> valueVector;
 			valueVector = serializedQuery["value"].get_binary();
 
 			std::shared_ptr<unsigned char> value = std::shared_ptr<unsigned char>( new unsigned char[valueVector.size()] );
@@ -72,10 +72,9 @@ std::shared_ptr<QueryContext> QueryParser::parseQuery( std::shared_ptr<unsigned 
 			std::shared_ptr<unsigned char> key = std::shared_ptr<unsigned char>( new unsigned char[keyVector.size()] );
 			std::copy( keyVector.begin() , keyVector.begin() + keyVector.size() , key.get() );
 			queryContext->key( key , keyVector.size() );
+
 			break;
 		}
-
-
 
 		case QUERY_SELECT: // GET
 		{
@@ -84,14 +83,12 @@ std::shared_ptr<QueryContext> QueryParser::parseQuery( std::shared_ptr<unsigned 
 			std::vector<uint8_t> keyVector;
 			keyVector = serializedQuery["key"].get_binary();
 
-
-			std::shared_ptr<unsigned char> key = std::shared_ptr<unsigned char>( new unsigned char[keyVector.size()] ); 
+			std::shared_ptr<unsigned char> key = std::shared_ptr<unsigned char>( new unsigned char[keyVector.size()] );
 			std::copy( keyVector.begin() , keyVector.begin() + keyVector.size() , key.get() );
 			queryContext->key( key , keyVector.size() );
 
 			break;
 		}
-		
 
 		case QUERY_REMOVE: // remove
 		{
@@ -99,14 +96,14 @@ std::shared_ptr<QueryContext> QueryParser::parseQuery( std::shared_ptr<unsigned 
 
 			std::vector<uint8_t> keyVector;
 			keyVector = serializedQuery["key"].get_binary();
-			std::shared_ptr<unsigned char> key = std::shared_ptr<unsigned char>( new unsigned char[keyVector.size()] ); 
+			std::shared_ptr<unsigned char> key = std::shared_ptr<unsigned char>( new unsigned char[keyVector.size()] );
 			std::copy( keyVector.begin() , keyVector.begin() + keyVector.size() , key.get() );
 			queryContext->key( key , keyVector.size() );
 
 			break;
 		}
 
-		case QUERY_SWITCH_TO_SAFE_MODE:
+		case QUERY_MIGRATE_SAFE_MODE:
 		{
 			break;
 		}
@@ -127,7 +124,10 @@ std::shared_ptr<QueryContext> QueryParser::parseQuery( std::shared_ptr<unsigned 
 		}
 	};
 
+	if( !(serializedQuery.contains("registryIndex") )) queryContext->registryIndex(-1);
+	else queryContext->registryIndex( serializedQuery["registryIndex"] );
 	std::cout << "queryContext retuend" << "\n";
+	std::cout << "SafeModeRegistry :: " << queryContext->registryIndex() << "\n";
 	return queryContext;
 }
 

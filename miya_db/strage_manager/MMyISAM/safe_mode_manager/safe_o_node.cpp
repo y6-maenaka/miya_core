@@ -85,7 +85,6 @@ SafeOItemSet::SafeOItemSet( std::shared_ptr<ONodeItemSet> base , std::shared_ptr
 
 void SafeOItemSet::conversionTable( std::shared_ptr<ONodeConversionTable> target )
 {
-	std::cout << "BEFORE" << "\n";
 	_conversionTable = target;
 }
 
@@ -134,25 +133,17 @@ void ONodeConversionTable::init()
 
 std::pair< std::shared_ptr<SafeONode> , bool > ONodeConversionTable::ref( std::shared_ptr<optr> target )
 {
-	std::cout << "< 1 >" << "\n";
 	optr* targetOptr = target.get();
-	std::cout << "< 2 >" << "\n";
-	printf("%ld\n", _entryMap.size() );
   	auto itr = _entryMap.find( *targetOptr );
-	std::cout << "< 3 >" << "\n";
   	if( itr == _entryMap.end() ) // エントリ情報が存在しない場合はノーマルOMemManagerを持ったSafeONodeを返却する
   	{
-		std::cout << "< 4 >" << "\n";
 	   std::shared_ptr<optr> retOptr = target;
 	   retOptr->cacheTable( _normalOMemoryManager->dataCacheTable() );
-		std::cout << "< 5 >" << "\n";
 	   return std::make_pair( std::make_shared<SafeONode>( shared_from_this() ,_normalOMemoryManager , retOptr ), false );
 	}
 
-	std::cout << "< 6 >" << "\n";
 	std::shared_ptr<optr> retOptr = std::make_shared<optr>(itr->second._optr);
 	retOptr->cacheTable( _safeOMemoryManager->dataCacheTable() );
-	std::cout << "< 7 >" << "\n";
   	return std::make_pair( std::make_shared<SafeONode>( shared_from_this() ,_safeOMemoryManager ,retOptr ), true ); // 変換テーブルに要素が存在した場合
 }
 
@@ -420,27 +411,19 @@ std::shared_ptr<SafeONode> SafeONode::recursiveAdd( std::shared_ptr<unsigned cha
 				}
 			}
 
-			std::cout << "## 1 " << "\n";
-
 			viewItemSet.moveInsertDataOptr( keyInsertedIndex, *((*_targetDataOptr).get()) );
 
 			if( *_targetONode != nullptr ){
 				viewItemSet.moveInsertChildOptr( keyInsertedIndex + 1 , (*_targetONode)->citemSet()->Optr() );
 			}
 
-			std::cout << "## 2 " << "\n";
-
 			std::shared_ptr<unsigned char> separatorKey = viewItemSet._key.at( separatorKeyIndex );
 			std::shared_ptr<DataOptrEx> separatorDataOptr = std::make_shared<DataOptrEx>(viewItemSet._dataOPtr.at( separatorKeyIndex ));
 			std::shared_ptr<SafeONode> splitONode = std::shared_ptr<SafeONode>( new SafeONode( _conversionTable ) );  // 新規作成
 
-			std::cout << "## 3 " << "\n";
-
 			for( int i=0; i<(DEFAULT_KEY_COUNT+1)-separatorKeyIndex-1;i++)	{
 				splitONode->itemSet()->key( i , viewItemSet._key.at(i+separatorKeyIndex+1) );
 			}
-
-			std::cout << "## 4 " << "\n";
 
 			splitONode->itemSet()->keyCount( (DEFAULT_KEY_COUNT+1)-separatorKeyIndex-1 );
 			for( int i=0; i<(DEFAULT_DATA_OPTR_COUNT+1)-separatorKeyIndex-1;i++)	
@@ -448,23 +431,16 @@ std::shared_ptr<SafeONode> SafeONode::recursiveAdd( std::shared_ptr<unsigned cha
 				viewItemSet._dataOPtr.at(i+separatorKeyIndex+1) ;
 				splitONode->itemSet()->dataOptr( i , viewItemSet._dataOPtr.at(i+separatorKeyIndex+1));
 			}
-			std::cout << "## 5 " << "\n";
 			splitONode->itemSet()->dataOptrCount( (DEFAULT_DATA_OPTR_COUNT+1)-separatorKeyIndex-1 );
 			splitONode->itemSet()->parent( this->parent() );
-
-			std::cout << "## 6 " << "\n";
 
 			for( int i=0; i<separatorKeyIndex; i++)
 				itemSet()->key( i , viewItemSet._key.at(i) );
 			itemSet()->keyCount(separatorKeyIndex);
 
-			std::cout << "## 7 "  << "\n";
-
 			for( int i=0; i<separatorKeyIndex; i++)
 				itemSet()->dataOptr( i , viewItemSet._dataOPtr.at(i) );
 			itemSet()->dataOptrCount(separatorKeyIndex);
-
-			std::cout << "## 8" << "\n";
 
 			if( citemSet()->childOptrCount() > 0 )
 			{
@@ -485,7 +461,6 @@ std::shared_ptr<SafeONode> SafeONode::recursiveAdd( std::shared_ptr<unsigned cha
 				splitONode->itemSet()->childOptrCount( viewItemSet._childOptr.size() - center );
 			}
 
-			std::cout << "## 9" << "\n";
 			*_targetKey = separatorKey;
 			*_targetDataOptr = separatorDataOptr;
 			*_targetONode = splitONode;

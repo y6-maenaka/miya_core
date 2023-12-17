@@ -26,10 +26,9 @@ void DatabaseManager::loadInformationSchema( char *path )
 }
 
 
-
 void DatabaseManager::hello()
 {
-	
+
 	std::cout << "Hello" << "\n";
 }
 
@@ -41,12 +40,12 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 
 
 	// respondスレッドを用意する &(参照)でキャプチャするとスマートポインタのアドレスが変わる ※ 呼び出し元スレッドが死んでいる
-	std::thread lightMiyaDBThread([mmyisam, incomingSBC, outgoingSBC, this]() 
+	std::thread lightMiyaDBThread([mmyisam, incomingSBC, outgoingSBC, this]()
 	{
 		std::unique_ptr<SBSegment> sbSegment;
 		std::vector<uint8_t> dumpedJson;
-		std::shared_ptr<unsigned char> dumpedJsonRaw; 
-		
+		std::shared_ptr<unsigned char> dumpedJsonRaw;
+
 		int flag;
 		std::shared_ptr<QueryContext> qctx;
 
@@ -55,7 +54,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 			std::cout << "Sorry. FailureSB Generated" << "\n";
 
 			std::unique_ptr<SBSegment> ret = std::make_unique<SBSegment>();
-			nlohmann::json failureMSG; 
+			nlohmann::json failureMSG;
 			failureMSG["QueryID"] = qctx->id();
 			failureMSG["status"] = -1;
 
@@ -113,7 +112,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 					sbSegment->body( dumpedJsonRaw , dumpedJson.size() );
 					break;
 				}
-			
+
 
 				case QUERY_SELECT: // 2 get
 				{
@@ -138,7 +137,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 					dumpedJsonRaw = std::shared_ptr<unsigned char>( new unsigned char[dumpedJson.size()] );
 					std::copy( dumpedJson.begin() , dumpedJson.begin() + dumpedJson.size() ,  dumpedJsonRaw.get() );
 					sbSegment->body( dumpedJsonRaw , dumpedJson.size() );
-					
+
 					break;
 				}
 
@@ -173,11 +172,11 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 				}
 
 
-				case QUERY_SWITCH_TO_SAFE_MODE:
+				case QUERY_MIGRATE_SAFE_MODE:
 				{
 					std::cout << "## (HANDLE) QUERY_SWITCH_TO_SAFE_MODE" << "\n";
 
-					flag = mmyisam->switchToSafeMode( 0 );
+					flag = mmyisam->migrateToSafeMode( qctx );
 					responseJson["QueryID"] = qctx->id();
 					responseJson["status"] = flag;
 					break;
@@ -187,7 +186,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 				{
 					std::cout << "## (HANDLE) QUERY_SAFE_MODE_COMMIT" << "\n";
 
-					flag = mmyisam->safeCommitExit( 0 );
+					flag = mmyisam->safeCommitExit(qctx);
 					responseJson["QueryID"] = qctx->id();
 					responseJson["status"] = flag;
 					break;
@@ -197,25 +196,23 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 				{
 					std::cout << "## (HANDLE) QUERY_SAFE_MODE_ABORT" << "\n";
 
-					flag = mmyisam->safeAbortExit( 0 );
+					flag = mmyisam->safeAbortExit(qctx);
 					responseJson["QueryID"] = qctx->id();
 					responseJson["status"] = flag;
 					break;
 				}
-
 			}
-			
-	
+
+
 			direct:
 			outgoingSBC->pushOne( std::move(sbSegment) );
 		}
-		
+
 		//
 	});
 
 	lightMiyaDBThread.detach();
 	std::cout << "LightMiyaDBThread Detached" << "\n";
-
 }
 
 
@@ -223,4 +220,3 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 
 
 }; // close miya_db namespace
-

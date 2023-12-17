@@ -30,15 +30,19 @@ class SafeIndexManager : public IndexManager
 {
 private:
 	std::shared_ptr<SafeOBtree> _masterBtree;
-	std::shared_ptr<ONodeConversionTable> _conversionTable;
+	std::shared_ptr<ONodeConversionTable> _conversionTable; 
 
+	std::shared_ptr<unsigned char> _migrationDBState; // SafeModeに移行した際のNormalDBの状態を保持する変数
 public:
 	 // コンストラクタ実行時に必ずNormalIndexManagerのマッピング位置の倍数にならない様にダミー領域をはじめに確保する
-	SafeIndexManager( std::string indexFilePath ,const std::shared_ptr<OBtree> normalBtree );
-	virtual ~SafeIndexManager(){};
+	SafeIndexManager( std::string indexFilePath ,const std::shared_ptr<OBtree> normalBtree , std::shared_ptr<unsigned char> migrationDBState );
+	~SafeIndexManager(){};
 
 	const std::shared_ptr<SafeOBtree> masterBtree();
 	std::shared_ptr<ONodeConversionTable> conversionTable();
+
+	void migrationDBState( std::shared_ptr<unsigned char> target ); 
+	std::shared_ptr<unsigned char> migrationDBState();
 
 	void add( std::shared_ptr<unsigned char> key , std::shared_ptr<optr> dataOptr ) override;
 	void remove( std::shared_ptr<unsigned char> key ) override;

@@ -33,9 +33,9 @@ constexpr unsigned int FREE_BLOCK_END_OPTR_OFFSET = MAPPING_OPTR_OFFSET + MAPPIN
 
 constexpr unsigned int FREE_BLOCK_CONTROL_BLOCK_LENGTH = PREV_FREE_BLOCK_OPTR_LENGTH + NEXT_FREE_BLOCK_OPTR_LENGTH + MAPPING_OPTR_LENGTH + FREE_BLOCK_END_OPTR_LENGTH;
 
-
-
 constexpr unsigned int CONTROL_BLOCK_LENGTH = 5;
+
+constexpr unsigned int DB_STATE_LENGTH = 20; // SHA1
 
 
 /* メタブロック */
@@ -45,8 +45,7 @@ constexpr unsigned int CONTROL_BLOCK_HEAD_OFFSET = sizeof(FORMAT_ID) - 1; // 15
 constexpr unsigned int ALLOCATED_BLOCK_HEAD_OFFSET = CONTROL_BLOCK_HEAD_OFFSET + 5; // 20
 constexpr unsigned int UNUSED_BLOCK_HEAD_OFFSET = ALLOCATED_BLOCK_HEAD_OFFSET + 5; // 25
 constexpr unsigned int CONTROL_BLOCK_TAIL_OFFSET = UNUSED_BLOCK_HEAD_OFFSET + 5; // 30
-
-
+constexpr unsigned int DB_STATE_OFFSET = CONTROL_BLOCK_TAIL_OFFSET + DB_STATE_LENGTH;
 
 
 
@@ -88,7 +87,7 @@ public:
 	void freeBlockHead( ControlBlock *targetControlBlock ); // 先頭にセットする機能も備える
 	std::unique_ptr<ControlBlock> freeBlockHead();
 
-	void allocatedBlockHead( ControlBlock *targetAllodatedBlock  ); // 先頭にセットする機能も兼ねる
+	void allocatedBlockHead( ControlBlock *targetAllodatedBlock ); // 先頭にセットする機能も兼ねる
 	std::unique_ptr<ControlBlock> allocatedBlockHead();
 
 	std::unique_ptr<ControlBlock> useUnUsedControlBlockHead();
@@ -97,6 +96,9 @@ public:
 
 	void controlBlockTail( ControlBlock* targetControlBlock );
 	std::unique_ptr<ControlBlock> controlBlockTail();
+
+	void dbState( std::shared_ptr<unsigned char> target );
+	size_t dbState( std::shared_ptr<unsigned char> *ret );
 
 	bool isFormatted();
 	bool isFileFormatted();
@@ -177,7 +179,6 @@ protected:
 	void init(); // 初めのコントロールブロックを配置する
 
 public:
-
 	OverlayMemoryAllocator( int dataFileFD  = -1 , int freeListFileFD = -1 );
 
 	std::shared_ptr<optr> allocate( unsigned long allocateSize );
@@ -213,7 +214,14 @@ public:
 	std::shared_ptr<CacheTable> dataCacheTable();
 	std::shared_ptr<CacheTable> freeListCacheTable();
 
+	MetaBlock* metaBlock(); // あまり使用しないようにする
 }; // close miya_db
+  
+
+
+
+   
+   
 
 #endif // B6103BCF_DE57_4E00_96CB_194A3C316C52
 

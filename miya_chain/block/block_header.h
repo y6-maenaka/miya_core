@@ -20,7 +20,7 @@
 #endif
 #ifdef __APPLE__
 	#include <machine/endian.h>
-#endif 
+#endif
 
 
 
@@ -46,7 +46,7 @@ namespace block
 
 /*
  nBit について
- 前2bytesが指数部 ( 00000000 00000000 ) 
+ 前2bytesが指数部 ( 00000000 00000000 )
  後ろ2bytseがマントリップ ( 00000000 00000000 ) // 0の個数
  */
 
@@ -57,7 +57,7 @@ namespace block
 struct BlockHeader
 {
 private:
-	int32_t _version; // 
+	int32_t _version; //
 	unsigned char _previousBlockHeaderHash[32];
 	unsigned char _merkleRoot[32];
 	uint32_t _time; // このブロックが生成された時のタイムスタンプ
@@ -91,7 +91,7 @@ public:
     bool cmpMerkleRoot( std::shared_ptr<unsigned char> target ); // ヘッダに格納されているマークルルートとの比較メソッド
 	bool cmpPrevBlockHash( std::shared_ptr<unsigned char> target );
 
-} __attribute__((packed)); 
+} __attribute__((packed));
 
 
 
@@ -110,4 +110,3 @@ public:
 
 
 #endif // F68D2B16_A2C5_4CF8_85CE_D3EE525C19EA
-

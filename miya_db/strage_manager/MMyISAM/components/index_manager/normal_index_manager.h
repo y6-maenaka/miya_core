@@ -22,7 +22,7 @@ class NormalIndexManager : public IndexManager
 
 private:
 	std::shared_ptr<OBtree> _masterBtree; // バックアップファイルから起動する場合は
-	std::shared_ptr<OverlayMemoryManager> _oMemoryManager;
+	// std::shared_ptr<OverlayMemoryManager> _oMemoryManager;
 
 public:
 	const std::shared_ptr<OBtree> masterBtree();

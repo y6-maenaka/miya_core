@@ -21,7 +21,7 @@ class NormalIndexManager;
 class SafeIndexManager;
 class SafeValueStoreManager;
 
-
+constexpr unsigned short ALLOWED_SAFE_REGISTRY_COUNT = 5;
 
 
 class MMyISAM //: public UnifiedStorageManager { // 継承したほうがいい? 継承したメソッドを呼び出すとエラーが発生する
@@ -33,22 +33,26 @@ private:
 	IndexManager* _indexManager; // インデックスが保存されているマネージャーを渡す
 	std::string _dbName;
 
-	struct 
+	struct
 	{
 		struct {
-			std::shared_ptr<ValueStoreManager> _valueStoreManager = nullptr;
-			std::shared_ptr<NormalIndexManager> _indexManager = nullptr;
+			std::shared_ptr<NormalIndexManager> _indexManager = {{nullptr}};
+			std::shared_ptr<ValueStoreManager> _valueStoreManager = {{nullptr}};
 		} _normal;
 
 		struct { // safe関係モジュールは毎回初期化されるので,持つ必要ないかも
 			// std::shared_ptr<ValueStoreManager> _valueStoreManager = nullptr;
 			//std::shared_ptr<SafeIndexManager> _indexManager = nullptr;
-			std::vector< std::shared_ptr<SafeIndexManager> > _activeSafeIndexManagerVector;
-			std::vector< std::shared_ptr<ValueStoreManager> > _activeValueStoreManagerVector;
+			std::array< std::shared_ptr<SafeIndexManager>,  ALLOWED_SAFE_REGISTRY_COUNT > _activeSafeIndexManagerArray;
+			std::array< std::shared_ptr<ValueStoreManager>, ALLOWED_SAFE_REGISTRY_COUNT > _activeValueStoreManagerArray;
+			// std::vector< std::shared_ptr<SafeIndexManager> > _activeSafeIndexManagerVector;
+			// std::vector< std::shared_ptr<ValueStoreManager> > _activeValueStoreManagerVector;
 		} _safe;
 	};
 
 	bool _isSafeMode = false;
+
+	void clearSafeMode();
 
 public:
 	MMyISAM( std::string dbName );
@@ -58,10 +62,9 @@ public:
 	bool remove( std::shared_ptr<QueryContext> qctx );
 	bool exists( std::shared_ptr<QueryContext> qctx );
 
-
-	bool switchToSafeMode( unsigned short safeModeIndex ); // セーフモードに移行する ※トランザクションのイメージ
-	bool safeCommitExit( unsigned short safeModeIndex ); // セーフモードを本ファイルに同期して終了する
-	bool safeAbortExit( unsigned short safeModeIndex );  // セーフモードを破棄して終了する
+	bool migrateToSafeMode( std::shared_ptr<QueryContext> qctx ); // セーフモードに移行する ※トランザクションのイメージ
+	bool safeCommitExit( std::shared_ptr<QueryContext> qctx ); // セーフモードを本ファイルに同期して終了する
+	bool safeAbortExit( std::shared_ptr<QueryContext> qctx );  // セーフモードを破棄して終了する
 
 	void hello();
 };

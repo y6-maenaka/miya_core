@@ -25,7 +25,7 @@ namespace miya_db
 MMyISAM::MMyISAM( std::string dbName )
 {
 	_dbName = dbName;
-	
+
    // データストアの初期化
    std::string filePath = "../miya_db/table_files/" + dbName + "/" + dbName;
 	_normal._valueStoreManager = std::make_shared<ValueStoreManager>( filePath );
@@ -37,6 +37,12 @@ MMyISAM::MMyISAM( std::string dbName )
 	// 初回起動時は通常モードで起動する
 	_valueStoreManager = _normal._valueStoreManager.get();
 	_indexManager = dynamic_cast<IndexManager*>(_normal._indexManager.get());
+}
+
+void MMyISAM::clearSafeMode()
+{
+  std::fill( _safe._activeSafeIndexManagerArray.begin(), _safe._activeSafeIndexManagerArray.end(), nullptr);
+  std::fill( _safe._activeValueStoreManagerArray.begin() , _safe._activeValueStoreManagerArray.end(), nullptr );
 }
 
 
@@ -91,7 +97,7 @@ bool MMyISAM::remove( std::shared_ptr<QueryContext> qctx )
 	}  std::cout << "\x1b[39m"  << "\n";
 
 	_indexManager->remove( qctx->key() );
- // 本来はvalueStoreからも削除する
+  // 本来はvalueStoreからも削除する
 
 	return true;
 }
@@ -107,16 +113,25 @@ bool MMyISAM::exists( std::shared_ptr<QueryContext> qctx )
 }
 
 
-bool MMyISAM::switchToSafeMode( unsigned short safeModeIndex )
+bool MMyISAM::migrateToSafeMode( std::shared_ptr<QueryContext> qctx )
 {
 	if( _isSafeMode ) return false;
 
-	std::string safeDirPath = "../miya_db/table_files/.system/safe/" + _dbName + "/";
+	short registryIndex = qctx->registryIndex();
+	std::cout << "SwitchToSafeMode IndexWith :: " << registryIndex << "\n";
+	std::string safeDirPath = "../miya_db/table_files/.system/safe/" + _dbName +  "/" + std::to_string(registryIndex) + "_";
 
-	//std::shared_ptr<SafeIndexManager> safeIndexManager = std::shared_ptr<SafeIndexManager>( new SafeIndexManager(_normal._indexManager->masterBtree()) );
+	// std::shared_ptr<SafeIndexManager> safeIndexManager = std::shared_ptr<SafeIndexManager>( new SafeIndexManager(_normal._indexManager->masterBtree()) );
 	// SafeIndexManager* safeIndexManager = new SafeIndexManager( _normal._indexManager->masterBtree() );
+	
+	// セーフモードに移行する前のデータベース状態の保持
+	std::shared_ptr<unsigned char> dbState;
+	_indexManager->oMemoryManager()->syncDBState();
+	dbState = _indexManager->oMemoryManager()->dbState();
+
+	
 	std::string safeIndexFilePath = safeDirPath + _dbName + "_index";
-	std::shared_ptr<SafeIndexManager> safeIndexManager = std::shared_ptr<SafeIndexManager>(  new SafeIndexManager( safeIndexFilePath ,_normal._indexManager->masterBtree() ) );
+	std::shared_ptr<SafeIndexManager> safeIndexManager = std::shared_ptr<SafeIndexManager>(  new SafeIndexManager( safeIndexFilePath , _normal._indexManager->masterBtree() , dbState ) );
 	/* SafeIndexManager は内部で関連ファイルを削除&フォーマットするので明示的にclearする必要はない */
 
 	// あとでファイル名はハードコードする
@@ -125,11 +140,27 @@ bool MMyISAM::switchToSafeMode( unsigned short safeModeIndex )
 	std::shared_ptr<ValueStoreManager> valueStoreManager = std::shared_ptr<ValueStoreManager>( new ValueStoreManager{ valueStoreFilePath });
 	valueStoreManager->clear();
 
+	_indexManager->oMemoryManager()->syncDBState();
+	std::shared_ptr<unsigned char> stateCode = _indexManager->oMemoryManager()->dbState();
+	safeIndexManager->migrationDBState( stateCode );
+	std::shared_ptr<unsigned char> _stateCode = safeIndexManager->migrationDBState();
+	std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << "\n";
+	for( int i=0; i<20; i++ ){
+	  printf("%02X", stateCode.get()[i] );
+	} std::cout << "\n";
+	std::cout << "--------------------------------" << "\n";
+	for( int i=0; i<20; i++ ){
+	  printf("%02x", _stateCode.get()[i] );
+	} std::cout << "\n";
+	std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << "\n";
+
+	
+
 	_indexManager = dynamic_cast<IndexManager*>( safeIndexManager.get() );
 	_valueStoreManager = valueStoreManager.get();
 
-	_safe._activeSafeIndexManagerVector.push_back( safeIndexManager );
-	_safe._activeValueStoreManagerVector.push_back( valueStoreManager );
+	_safe._activeSafeIndexManagerArray[registryIndex] = safeIndexManager;
+	_safe._activeValueStoreManagerArray[registryIndex] = valueStoreManager;
 
 	_isSafeMode = true;
 
@@ -138,13 +169,15 @@ bool MMyISAM::switchToSafeMode( unsigned short safeModeIndex )
 }
 
 
-bool MMyISAM::safeCommitExit( unsigned short safeModeIndex )
+bool MMyISAM::safeCommitExit( std::shared_ptr<QueryContext> qctx )
 {
 	if( !_isSafeMode ) return false;
 
+	short registryIndex = qctx->registryIndex();
+
 	/* Meta領域のコピ 雑すぎる　後で修正する */
 	unsigned char addrZero[5]; memset( addrZero , 0x00 , sizeof(addrZero) );
-	std::shared_ptr<ONodeConversionTable> conversionTable = _safe._activeSafeIndexManagerVector.at(safeModeIndex)->conversionTable();
+	std::shared_ptr<ONodeConversionTable> conversionTable = _safe._activeSafeIndexManagerArray.at(registryIndex)->conversionTable();
 	std::shared_ptr<optr> oNodeMeta = std::make_shared<optr>( addrZero , conversionTable->normalOMemoryManager()->dataCacheTable() );
 	std::shared_ptr<optr> safeONodeMeta = std::make_shared<optr>( addrZero , conversionTable->safeOMemoryManager()->dataCacheTable() );
 	omemcpy( oNodeMeta.get() , safeONodeMeta.get() , 100 );
@@ -168,10 +201,9 @@ bool MMyISAM::safeCommitExit( unsigned short safeModeIndex )
 }
 
 
-bool MMyISAM::safeAbortExit( unsigned short safeModeIndex )
+bool MMyISAM::safeAbortExit( std::shared_ptr<QueryContext> qctx )
 {
 	if( !_isSafeMode ) return false;
-
 
 	delete _indexManager;
 	delete _valueStoreManager;

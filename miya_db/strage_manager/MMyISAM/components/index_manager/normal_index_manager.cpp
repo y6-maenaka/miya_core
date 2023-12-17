@@ -9,22 +9,19 @@ namespace miya_db{
 
 
 
-NormalIndexManager::NormalIndexManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager )
+NormalIndexManager::NormalIndexManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager ) : IndexManager( oMemoryManager )
 {
-	_oMemoryManager = oMemoryManager;
-	_masterBtree = 	std::shared_ptr<OBtree>( new OBtree(oMemoryManager) );
+	// _oMemoryManager = oMemoryManager;
+	_masterBtree = 	std::shared_ptr<OBtree>( new OBtree(_oMemoryManager) );
 };
 
 
-NormalIndexManager::NormalIndexManager( std::string indexFilePath )
+NormalIndexManager::NormalIndexManager( std::string indexFilePath ) : IndexManager( indexFilePath )
 {
-	_oMemoryManager	 = std::make_shared<OverlayMemoryManager>( indexFilePath );
+	// _oMemoryManager	 = std::make_shared<OverlayMemoryManager>( indexFilePath );
 	_masterBtree = std::make_shared<OBtree>( _oMemoryManager );
-
 	printf("NormalIndexManager :: OverlayMemoryManager Initialized with %p\n", _oMemoryManager.get() );
 }
-
-
 
 
 const std::shared_ptr<OBtree> NormalIndexManager::masterBtree()
@@ -38,22 +35,16 @@ void NormalIndexManager::add( std::shared_ptr<unsigned char> key , std::shared_p
 };
 
 
-
 void NormalIndexManager::remove( std::shared_ptr<unsigned char> key )
 {
 	return _masterBtree->remove( key );
 }
 
 
-
-
 std::pair< std::shared_ptr<optr>, int > NormalIndexManager::find( std::shared_ptr<unsigned char> key )
 {
 	return std::make_pair( _masterBtree->find( key ) , DATA_OPTR_LOCATED_AT_NORMAL ); // あとで修正する 0: Normal
 };
-
-
-
 
 
 void NormalIndexManager::printIndexTree()

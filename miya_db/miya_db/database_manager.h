@@ -38,7 +38,7 @@ constexpr int QUERY_SELECT = 2;
 constexpr int QUERY_EXISTS = 3;
 constexpr int QUERY_REMOVE = 4;
 
-constexpr int QUERY_SWITCH_TO_SAFE_MODE = 10;
+constexpr int QUERY_MIGRATE_SAFE_MODE = 10;
 constexpr int QUERY_SAFE_MODE_COMMIT = 11;
 constexpr int QUERY_SAFE_MODE_ABORT = 12;
 
@@ -48,7 +48,7 @@ class DatabaseManager : public QueryParser
 	{
 
 private:
-	
+
 	std::shared_ptr<InformationSchema> _informationSchema; // plannerが参照することが多い
 																				 // ここにテーブルがロードされているか否かなども保存される
 
@@ -74,4 +74,3 @@ public:
 
 
 #endif // B024B40B_546B_4907_B464_A22438B617CD
-

@@ -46,7 +46,7 @@ int db_safe_p1( std::string dbName )
 
   //　ここからセーフモードに移行する
   std::cout << "セーフモードを発行します" << "\n";
-  flag =dbClient->safeMode();
+  flag =dbClient->safeMode(2);
   std::cout << "SafeModeStatus :: " << flag << "\n";
   std::cout << "セーフモードを発行しました" << "\n";
 
@@ -103,8 +103,7 @@ int db_safe_p1( std::string dbName )
   dbClient->get( storeTargetPair.first , &rawResponse );
   std::cout << "保存結果(10) : " << verifyDataConsistency( storeTargetPair.second  , rawResponse , 12  ) << "\n";
 
-  dbClient->commit();
-
+  dbClient->commit(2);
 
   // セーフモードコミット後追加検証
   storeTargetPair = generateDBKeyValuePair( "zzzzzzzzzzzzzzzzzzzz", "HelloWorld30", 12 );

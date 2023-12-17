@@ -59,9 +59,6 @@ void MetaBlock::freeBlockHead( ControlBlock *targetControlBlock )
 }
 
 
-
-
-
 std::unique_ptr<ControlBlock> MetaBlock::freeBlockHead() // 要修正
 {
 	if( _primaryOptr == nullptr ) return nullptr;
@@ -79,9 +76,6 @@ std::unique_ptr<ControlBlock> MetaBlock::freeBlockHead() // 要修正
 
 	return std::make_unique<ControlBlock>( retControlBlock );
 }
-
-
-
 
 
 void MetaBlock::allocatedBlockHead( ControlBlock *targetAllodatedBlock )
@@ -116,7 +110,6 @@ void MetaBlock::allocatedBlockHead( ControlBlock *targetAllodatedBlock )
 }
 
 
-
 std::unique_ptr<ControlBlock> MetaBlock::allocatedBlockHead()
 {
 	if( _primaryOptr == nullptr ) return nullptr;
@@ -133,8 +126,6 @@ std::unique_ptr<ControlBlock> MetaBlock::allocatedBlockHead()
 
 	return std::make_unique<ControlBlock>( retControlBlock );
 }
-
-
 
 
 void MetaBlock::unUsedControlBlockHead( ControlBlock* targetUnUsedControlBlock )
@@ -175,9 +166,6 @@ void MetaBlock::unUsedControlBlockHead( ControlBlock* targetUnUsedControlBlock )
 }
 
 
-
-
-
 std::unique_ptr<ControlBlock> MetaBlock::unUsedControlBlockHead()
 {
 	if( _primaryOptr == nullptr ) return nullptr;
@@ -197,12 +185,9 @@ std::unique_ptr<ControlBlock> MetaBlock::unUsedControlBlockHead()
 }
 
 
-
-
 // 使用と同時に使用済みになる
 std::unique_ptr<ControlBlock> MetaBlock::useUnUsedControlBlockHead()
 {
-
 	if( _primaryOptr == nullptr ) return nullptr;
 
 	unsigned char addrZero[5] = {0, 0, 0, 0, 0};
@@ -233,10 +218,6 @@ std::unique_ptr<ControlBlock> MetaBlock::useUnUsedControlBlockHead()
 }
 
 
-
-
-
-
 void MetaBlock::controlBlockTail( ControlBlock* targetControlBlock )
 {
 	if( _primaryOptr == nullptr ) return;
@@ -251,7 +232,6 @@ void MetaBlock::controlBlockTail( ControlBlock* targetControlBlock )
 		omemcpy( (*_primaryOptr + CONTROL_BLOCK_TAIL_OFFSET).get() , targetControlBlock->blockOptr()->addr() , CONTROL_BLOCK_LENGTH );
 	}
 }
-
 
 
 std::unique_ptr<ControlBlock> MetaBlock::controlBlockTail()
@@ -272,9 +252,21 @@ std::unique_ptr<ControlBlock> MetaBlock::controlBlockTail()
 }
 
 
+void MetaBlock::dbState( std::shared_ptr<unsigned char> target )
+{
+  if( target == nullptr ) return;
 
+  std::cout << "\x1b[36m" << "DB State SYNCESD" << "\x1b[39m" << "\n";
+  omemcpy( (*_primaryOptr + (DB_STATE_OFFSET)).get() , target.get() , DB_STATE_LENGTH );
+  return;
+}
 
-
+size_t MetaBlock::dbState( std::shared_ptr<unsigned char> *ret )
+{
+  *ret = std::shared_ptr<unsigned char>( new unsigned char[DB_STATE_LENGTH] );
+  omemcpy( (*ret).get(), (*_primaryOptr + DB_STATE_OFFSET) , DB_STATE_LENGTH );
+  return DB_STATE_LENGTH;
+}
 
 
 bool MetaBlock::isFileFormatted() // ファイル先頭のフォーマットIDが一致したら初期化されている
@@ -287,6 +279,9 @@ bool MetaBlock::isFileFormatted() // ファイル先頭のフォーマットID�
 	std::cout  << "[ ATTENTION ] is Not Formated" << "\n";
 	return false;
 }
+
+
+
 
 
 

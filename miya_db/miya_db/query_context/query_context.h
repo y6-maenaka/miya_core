@@ -28,7 +28,7 @@ private:
 	// 1. add( key , data , dataLength )
 	// 2. update( key , data , dataLength )
 	// 3. select( key )
-
+	// 4. safe( registryIndex )
 	
 	struct 
 	{
@@ -39,6 +39,11 @@ private:
 		size_t _valueLength;
 
 	} _data;
+
+	struct 
+	{
+		short _index; // registryIndex:これを用いてデータベースにおけるセーフモードの同時進行を管理する
+	} _safe;
 
 	uint64_t _timestamp;
 
@@ -60,6 +65,9 @@ public:
 
 	uint32_t id();
 	void id( uint32_t target );
+
+	void registryIndex( short target );
+	short registryIndex();
 
 	uint64_t timestamp();
 	void timestamp( uint64_t target );

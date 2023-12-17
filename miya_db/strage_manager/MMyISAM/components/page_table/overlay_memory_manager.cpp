@@ -3,6 +3,8 @@
 #include "./cache_manager/cache_table.h"
 #include "./overlay_memory_allocator.h"
 
+#include "../../../../../shared_components/hash/sha_hash.h"
+
 
 namespace miya_db{
 
@@ -110,6 +112,42 @@ std::shared_ptr<CacheTable> OverlayMemoryManager::freeListCacheTable()
 	return _memoryAllocator->freeListCacheTable();
 }
 
+
+void OverlayMemoryManager::dbState( std::shared_ptr<unsigned char> target )
+{
+  MetaBlock* metaBlock = _memoryAllocator->metaBlock();
+  return metaBlock->dbState( target );
+}
+
+std::shared_ptr<unsigned char> OverlayMemoryManager::dbState()
+{
+  MetaBlock* metaBlock = _memoryAllocator->metaBlock();
+  std::shared_ptr<unsigned char> ret;
+  metaBlock->dbState( &ret );
+  return ret;
+}
+
+size_t OverlayMemoryManager::dbState( std::shared_ptr<unsigned char> *ret )
+{
+  MetaBlock* metaBlock = _memoryAllocator->metaBlock();
+  return metaBlock->dbState( ret );
+}
+
+void OverlayMemoryManager::syncDBState()
+{
+  uint32_t timestamp = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+  unsigned char ctimestamp[sizeof(timestamp)];
+  ctimestamp[0] = static_cast<unsigned char>((timestamp>>24) & 0xFF);
+  ctimestamp[1] = static_cast<unsigned char>((timestamp>>16) & 0xFF);
+  ctimestamp[2] = static_cast<unsigned char>((timestamp>>8) & 0xFF);
+  ctimestamp[3] = static_cast<unsigned char>((timestamp) & 0xFF);
+  
+  std::shared_ptr<unsigned char> digest; size_t digestLength;
+  digestLength = hash::SHAHash( ctimestamp , sizeof(timestamp) , &digest , "sha1" );
+
+  MetaBlock* metaBlock = _memoryAllocator->metaBlock();
+  metaBlock->dbState( digest );
+}
 
 
 
