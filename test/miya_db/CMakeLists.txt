@@ -8,6 +8,8 @@ add_library( TEST_MIYA_DB STATIC
 			  db_remove_normal_p1.cpp
 
 			  db_safe_p1.cpp
+			  db_safe_p2.cpp
+			  db_safe_p3.cpp
 			
 )
 

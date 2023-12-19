@@ -40,4 +40,4 @@ int verifyDataConsistency( std::shared_ptr<unsigned char> origin, std::shared_pt
 }
 
 
-#endif // 
+#endif //

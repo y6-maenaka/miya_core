@@ -18,7 +18,7 @@ constexpr int MIYA_DB_QUERY_ABORT = 12;
 
 constexpr int MIYA_DB_KEY_LENGTH = 20;
 
-constexpr int MIYA_DB_STATUS_OK = 0;
+constexpr int MIYA_DB_STATUS_OK = 1;
 constexpr int MIYA_DB_STATUS_BAD = -1;
 
 

@@ -208,9 +208,15 @@ bool MiyaDBSBClient::abort( short registryIndex )
 
 	std::unique_ptr<SBSegment> querySB = generateQuerySB( queryJson );
 	_pushSBContainer->pushOne( std::move(querySB) );
-	
+
+	std::cout << "** 1" << "\n";
 	nlohmann::json responseJson;
+	std::cout << "** 2 " << "\n";
 	responseJson = filterResponseSB( queryJson );
+	std::cout << "** 3" << "\n";
+
+	std::cout << responseJson << "\n";
+	std::cout << "DB CLIENT STATUS :: " << responseJson["status"] << "\n";
 
 	if( !(responseJson.contains("status")) ) return false;
 	return (responseJson["status"] == miya_db::MIYA_DB_STATUS_OK );

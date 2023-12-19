@@ -29,8 +29,8 @@ class MMyISAM //: public UnifiedStorageManager { // 継承したほうがいい?
 private:
 //public:
 	// std::shared_ptr<OverlayMemoryManager> _dataOverlayMemoryManager; // データが保存されているファイルのマネージャー
-	ValueStoreManager*_valueStoreManager;
-	IndexManager* _indexManager; // インデックスが保存されているマネージャーを渡す
+	// ValueStoreManager*_valueStoreManager;
+	// IndexManager* _indexManager; // インデックスが保存されているマネージャーを渡す
 	std::string _dbName;
 
 	struct Normal
@@ -48,8 +48,6 @@ private:
 		void clear(); // 全てのSafeIndexManagerとValueStoreManagerをクエリする
 	} _safe;
 
-	bool _isSafeMode = false;
-
 	void clearSafeMode();
 
 public:
@@ -64,6 +62,7 @@ public:
 	bool safeCommitExit( std::shared_ptr<QueryContext> qctx ); // セーフモードを本ファイルに同期して終了する
 	bool safeAbortExit( std::shared_ptr<QueryContext> qctx );  // セーフモードを破棄して終了する
 
+	void showSafeModeState();
 	void hello();
 };
 

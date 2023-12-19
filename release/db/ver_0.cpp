@@ -24,6 +24,7 @@
 #include "../../test/miya_db/db_append_normal_p1.cpp"
 #include "../../test/miya_db/db_remove_normal_p1.cpp"
 #include "../../test/miya_db/db_safe_p1.cpp"
+#include "../../test/miya_db/db_safe_p3.cpp"
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -43,7 +44,9 @@ int main()
 	std::cout << "Hello World" << "\n";
 	// db_append_normal_p1("sample");
 	// db_remove_normal_p1("sample");
-	db_safe_p1( "sample" );
+	// db_safe_p1( "sample" );
+	//db_safe_p2( "sample" );
+	db_safe_p3( "sample" );
 
 
 	return 0;
