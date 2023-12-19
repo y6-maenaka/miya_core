@@ -237,6 +237,8 @@ void ValueStoreManager::mergeDataOptr( std::shared_ptr<ONodeConversionTable> con
 		}
 		conversionTable->update( std::make_shared<optr>(itr.first) , std::make_shared<MappingContext>(itr.second) );
 	}
+
+	_dataOverlayMemoryManager->syncDBState(); // データベース内部状態の書き込み/保存
 }
 
 

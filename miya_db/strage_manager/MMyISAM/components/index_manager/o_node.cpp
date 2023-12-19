@@ -29,7 +29,6 @@ void ViewItemSet::importItemSet( std::shared_ptr<OCItemSet> citemSet )
 }
 
 
-
 void ViewItemSet::moveInsertChildOptr( unsigned short index ,std::shared_ptr<optr> target )
 {
 	for( int i = _childOptr.size()-1; i > index; i-- )
@@ -60,7 +59,6 @@ ONodeItemSet::ONodeItemSet( std::shared_ptr<optr> __optr )
 	//_optr = nullptr;
 	_optr = __optr;
 }
-
 
 
 std::shared_ptr<optr> ONodeItemSet::Optr()
@@ -124,15 +122,12 @@ void ONodeItemSet::keyCount( unsigned short num ) // キー個数の挿入
 }
 
 
-
-
 void ONodeItemSet::sortKey()
 {
 	// loke buble sort
 	std::shared_ptr<optr> oKey_j0; std::shared_ptr<optr> oKey_j1;
 	std::shared_ptr<unsigned char> key_j0 = std::shared_ptr<unsigned char>( new unsigned char[20] );
 	std::shared_ptr<unsigned char> key_j1 = std::shared_ptr<unsigned char>( new unsigned char[20] );
-
 
 	for( int i=0; i < keyCount()-1; i++ )
 	{
@@ -207,8 +202,6 @@ std::shared_ptr<optr> ONodeItemSet::childOptr( unsigned short index )
 
 	//return childOptr;
 }
-
-
 
 
 void ONodeItemSet::childOptr( unsigned short index , std::shared_ptr<optr> targetOptr )
@@ -290,7 +283,6 @@ void ONodeItemSet::dataOptr( unsigned short index , std::shared_ptr<optr> target
 }
 
 
-
 void ONodeItemSet::moveInsertDataOptr( unsigned short index , std::shared_ptr<optr> targetDataOptr )
 {
 	for( int i = dataOptrCount(); i > index; i-- )
@@ -334,8 +326,6 @@ void ONodeItemSet::remove( unsigned short index )
 /* -------------------------------------------------------------- */
 
 
-
-
 std::array< std::shared_ptr<unsigned char> , DEFAULT_KEY_COUNT> *ONodeItemSet::exportKeyArray()
 {
 	std::array< std::shared_ptr<unsigned char> , DEFAULT_KEY_COUNT> *ret = new std::array< std::shared_ptr<unsigned char>  , DEFAULT_KEY_COUNT>;
@@ -347,7 +337,6 @@ std::array< std::shared_ptr<unsigned char> , DEFAULT_KEY_COUNT> *ONodeItemSet::e
 }
 
 
-
 std::array< std::shared_ptr<optr> , DEFAULT_CHILD_COUNT> *ONodeItemSet::exportChildOptrArray()
 {
 	std::array< std::shared_ptr<optr>, DEFAULT_CHILD_COUNT> *ret = new std::array< std::shared_ptr<optr> , DEFAULT_CHILD_COUNT>;
@@ -357,7 +346,6 @@ std::array< std::shared_ptr<optr> , DEFAULT_CHILD_COUNT> *ONodeItemSet::exportCh
 
 	return ret;
 }
-
 
 
 std::array< std::shared_ptr<optr>, DEFAULT_DATA_OPTR_COUNT > *ONodeItemSet::exportDataOptrArray()
@@ -507,7 +495,6 @@ void ONode::itemSet( std::shared_ptr<ONodeItemSet> target )
 
 
 
-
 ItemSet::ItemSet( std::shared_ptr<ONodeItemSet> target )
 {
 	_body = target;
@@ -526,6 +513,11 @@ std::shared_ptr<OCItemSet> ItemSet::citemSet()
 	return __citemSet;
 }
 
+std::shared_ptr<optr> ItemSet::baseOptr()
+{
+  return _body->Optr();
+}
+
 
 
 
@@ -537,20 +529,25 @@ ONode::ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared
 
 	if( baseOptr == nullptr ) // baseOptrが指定されていない場合は,itemSetを新規作成(割り当て)する
 	{
-		std::shared_ptr<optr> baseOptr = oMemoryManager->allocate( O_NODE_ITEMSET_SIZE ); // 新規作成の場合
-		itemSet( std::make_shared<ONodeItemSet>(baseOptr) );
-		itemSet()->clear();
-	} 
+		std::shared_ptr<optr> baseOptr = oMemoryManager->allocate( O_NODE_ITEMSET_SIZE ); // ItemSet領域の確保
+		this->itemSet( std::make_shared<ONodeItemSet>(baseOptr) ); // アイテムセットの新規作成と本メンバへセット
+		this->itemSet()->clear(); // アイテムセットのクリア
+	}
 	else // baseOptrが指定されいる場合は,baseOptrのitemSetを使用する
 	{
-		itemSet( std::make_shared<ONodeItemSet>(baseOptr) );
+		this->itemSet( std::make_shared<ONodeItemSet>(baseOptr) );  // baseOptrはitemSetの開始点と同じ
 	}
 	return;
 }
 
+ONode::ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared_ptr<ItemSet> itemSet )
+{
+  if( oMemoryManager == nullptr ) return;
+  _oMemoryManager = oMemoryManager;
 
-
-
+  if( itemSet == nullptr ) return;
+  _itemSet = itemSet;
+}
 
 
 std::shared_ptr<OItemSet> ONode::itemSet()
@@ -1260,9 +1257,10 @@ std::shared_ptr<optr> ONode::subtreeFind( std::shared_ptr<unsigned char> targetK
 }
 
 
-
-
-
+std::shared_ptr<optr> ONode::baseOptr()
+{
+  return _itemSet->baseOptr();
+}
 
 
 

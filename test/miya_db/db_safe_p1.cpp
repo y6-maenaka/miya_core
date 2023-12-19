@@ -27,6 +27,7 @@ int db_safe_p1( std::string dbName )
   bool flag;
   std::shared_ptr<unsigned char> rawResponse = nullptr;
   size_t rawResponseLength = 0;
+  short registryWith = 2;
 
   // 以降がデータ追加シーケンス
   // <データ1> 
@@ -46,7 +47,7 @@ int db_safe_p1( std::string dbName )
 
   //　ここからセーフモードに移行する
   std::cout << "セーフモードを発行します" << "\n";
-  flag =dbClient->safeMode(2);
+  flag =dbClient->safeMode(registryWith );
   std::cout << "SafeModeStatus :: " << flag << "\n";
   std::cout << "セーフモードを発行しました" << "\n";
 
@@ -54,56 +55,57 @@ int db_safe_p1( std::string dbName )
   std::cout << "\n\n\n\n\n\n\n\n";
 
 
+
   // <データ3> 
   storeTargetPair = generateDBKeyValuePair( "aaaaaaaaaaaaaaaaaaaa", "HelloWorld3", 11 );
   std::shared_ptr<unsigned char>  key_3 = storeTargetPair.first;
-  dbClient->add( storeTargetPair.first , storeTargetPair.second , 11 );
-  dbClient->get( storeTargetPair.first , &rawResponse );
+  dbClient->add( storeTargetPair.first , storeTargetPair.second , 11 , registryWith );
+  dbClient->get( storeTargetPair.first , &rawResponse , registryWith );
   std::cout << "保存結果(3) : " << verifyDataConsistency( storeTargetPair.second  , rawResponse , 11  ) << "\n";
   // <データ4> 
   storeTargetPair = generateDBKeyValuePair( "cccccccccccccccccccc", "HelloWorld4", 11 );
   std::shared_ptr<unsigned char> key_4 = storeTargetPair.first;
-  dbClient->add( storeTargetPair.first , storeTargetPair.second , 11 );
-  dbClient->get( storeTargetPair.first , &rawResponse );
+  dbClient->add( storeTargetPair.first , storeTargetPair.second , 11 , registryWith );
+  dbClient->get( storeTargetPair.first , &rawResponse , registryWith );
   std::cout << "保存結果(4) : " << verifyDataConsistency( storeTargetPair.second  , rawResponse , 11  ) << "\n";
   // <データ5> 
   storeTargetPair = generateDBKeyValuePair( "gggggggggggggggggggg", "HelloWorld5", 11 );
   std::shared_ptr<unsigned char> key_5 = storeTargetPair.first;
-  dbClient->add( storeTargetPair.first , storeTargetPair.second , 11 );
-  dbClient->get( storeTargetPair.first , &rawResponse );
+  dbClient->add( storeTargetPair.first , storeTargetPair.second , 11 , registryWith );
+  dbClient->get( storeTargetPair.first , &rawResponse , registryWith );
   std::cout << "保存結果(5) : " << verifyDataConsistency( storeTargetPair.second  , rawResponse , 11  ) << "\n";
   // <データ6> 
   storeTargetPair = generateDBKeyValuePair( "ffffffffffffffffffff", "HelloWorld6", 11 );
   std::shared_ptr<unsigned char> key_6 = storeTargetPair.first;
-  dbClient->add( storeTargetPair.first , storeTargetPair.second , 11 );
-  dbClient->get( storeTargetPair.first , &rawResponse );
+  dbClient->add( storeTargetPair.first , storeTargetPair.second , 11 , registryWith );
+  dbClient->get( storeTargetPair.first , &rawResponse , registryWith );
   std::cout << "保存結果(6) : " << verifyDataConsistency( storeTargetPair.second  , rawResponse , 11  ) << "\n";
   // <データ7> 
   storeTargetPair = generateDBKeyValuePair( "yyyyyyyyyyyyyyyyyyyy", "HelloWorld7", 11 );
   std::shared_ptr<unsigned char> key_7 = storeTargetPair.first;
-  dbClient->add( storeTargetPair.first , storeTargetPair.second , 11 );
-  dbClient->get( storeTargetPair.first , &rawResponse );
+  dbClient->add( storeTargetPair.first , storeTargetPair.second , 11 , registryWith );
+  dbClient->get( storeTargetPair.first , &rawResponse , registryWith );
   std::cout << "保存結果(7) : " << verifyDataConsistency( storeTargetPair.second  , rawResponse , 11  ) << "\n";
   // <データ8> 
   storeTargetPair = generateDBKeyValuePair( "qqqqqqqqqqqqqqqqqqqq", "HelloWorld8", 11 );
   std::shared_ptr<unsigned char> key_8 = storeTargetPair.first;
-  dbClient->add( storeTargetPair.first , storeTargetPair.second , 11 );
-  dbClient->get( storeTargetPair.first , &rawResponse );
+  dbClient->add( storeTargetPair.first , storeTargetPair.second , 11 , registryWith );
+  dbClient->get( storeTargetPair.first , &rawResponse , registryWith );
   std::cout << "保存結果(8) : " << verifyDataConsistency( storeTargetPair.second  , rawResponse , 11  ) << "\n";
   // <データ9> 
   storeTargetPair = generateDBKeyValuePair( "uuuuuuuuuuuuuuuuuuuu", "HelloWorld9", 11 );
   std::shared_ptr<unsigned char> key_9 = storeTargetPair.first;
-  dbClient->add( storeTargetPair.first , storeTargetPair.second , 11 );
-  dbClient->get( storeTargetPair.first , &rawResponse );
+  dbClient->add( storeTargetPair.first , storeTargetPair.second , 11 , registryWith );
+  dbClient->get( storeTargetPair.first , &rawResponse , registryWith );
   std::cout << "保存結果(9) : " << verifyDataConsistency( storeTargetPair.second  , rawResponse , 11  ) << "\n";
   // <データ10> 
   storeTargetPair = generateDBKeyValuePair( "vvvvvvvvvvvvvvvvvvvv", "HelloWorld10", 12 );
   std::shared_ptr<unsigned char> key_10 = storeTargetPair.first;
-  dbClient->add( storeTargetPair.first , storeTargetPair.second , 12 );
-  dbClient->get( storeTargetPair.first , &rawResponse );
+  dbClient->add( storeTargetPair.first , storeTargetPair.second , 12 , registryWith );
+  dbClient->get( storeTargetPair.first , &rawResponse , registryWith );
   std::cout << "保存結果(10) : " << verifyDataConsistency( storeTargetPair.second  , rawResponse , 12  ) << "\n";
 
-  dbClient->commit(2);
+  dbClient->commit(registryWith );
 
   // セーフモードコミット後追加検証
   storeTargetPair = generateDBKeyValuePair( "zzzzzzzzzzzzzzzzzzzz", "HelloWorld30", 12 );

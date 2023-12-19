@@ -28,21 +28,27 @@ SafeIndexManager::SafeIndexManager( std::string indexFilePath ,const std::shared
     _conversionTable->safeOMemoryManager(_oMemoryManager); // 変換テーブルにSafe用のOverlayMemoryManagerをセットする
 		_conversionTable->normalOMemoryManager( normalOBtree->overlayMemoryManager() );
 
+	std::cout << "## 1" << "\n";
     // ノーマルモードのOBtreeからSafeModeの基準となるOBtreeを作成する
-    _masterBtree = std::make_shared<SafeOBtree>(  _conversionTable ,normalOBtree->rootONode() ); // rootONodeが存在しない場合は
-    _conversionTable->init(); // entryMapを削除する
-
+    //_masterBtree = std::make_shared<SafeOBtree>(  _conversionTable ,normalOBtree->rootONode() ); // rootONodeが存在しない場合は
+	_masterBtree = std::shared_ptr<SafeOBtree>( new SafeOBtree( _conversionTable , normalOBtree->rootONode() ) );
+	std::cout << "## 1.1"  << "\n";
+	_conversionTable->init(); // entryMapを削除する
+  
+	std::cout << "## 2 " << "\n";
     _oMemoryManager->clear(); // セーフファイルはセーフモードが終了するまでの一時的なファイルなので都度削除する
-		_oMemoryManager->allocate( 100 );
+	_oMemoryManager->allocate( 100 );
 
-		/* 雑だがMeta領域をコピーしておく */
-		unsigned char addrZero[5]; memset( addrZero , 0x00 , sizeof(addrZero) );
-		std::shared_ptr<optr> normalMetaOptr = std::make_shared<optr>( addrZero, _conversionTable->normalOMemoryManager()->dataCacheTable() );
-		std::shared_ptr<optr> safeMetaOptr = std::make_shared<optr>( addrZero , _conversionTable->safeOMemoryManager()->dataCacheTable() );
-		omemcpy( safeMetaOptr.get() , normalMetaOptr.get() , 100 );
+	/* 雑だがMeta領域をコピーしておく */
+	unsigned char addrZero[5]; memset( addrZero , 0x00 , sizeof(addrZero) );
+	std::shared_ptr<optr> normalMetaOptr = std::make_shared<optr>( addrZero, _conversionTable->normalOMemoryManager()->dataCacheTable() );
+	std::shared_ptr<optr> safeMetaOptr = std::make_shared<optr>( addrZero , _conversionTable->safeOMemoryManager()->dataCacheTable() );
+	omemcpy( safeMetaOptr.get() , normalMetaOptr.get() , 100 );
+	std::cout << "## 3" << "\n";
 
+	_oMemoryManager->allocate( SAFE_MODE_COLLICION_OFFSET );
 
-		_oMemoryManager->allocate( SAFE_MODE_COLLICION_OFFSET );
+	std::cout << "Safe Index Constructor Done" << "\n";
 
     /* 重要な操作 ※この操作をしないと,ConversionTableでNormalIndexかSafeIndexのアドレスが重複した場合変換ループが発生してしまう */
 }
@@ -73,13 +79,16 @@ void SafeIndexManager::add( std::shared_ptr<unsigned char> key , std::shared_ptr
 {
   std::cout << "SafeInDexManager::add() called"  << "\n";
   _masterBtree->rootONode()->hello();
-  return _masterBtree->add( key, dataOptr );
+  _masterBtree->add( key, dataOptr );
+
+  _oMemoryManager->syncDBState(); // 更新後状態を保存する
 }
 
 
 void SafeIndexManager::remove( std::shared_ptr<unsigned char> key )
 {
-	return _masterBtree->remove( key );
+	_masterBtree->remove( key );
+	_oMemoryManager->syncDBState(); // 更新後状態を保存する
 }
 
 
@@ -92,7 +101,9 @@ std::pair< std::shared_ptr<optr> ,int> SafeIndexManager::find( std::shared_ptr<u
 
 std::shared_ptr<ONode> SafeIndexManager::mergeSafeBtree()
 {
-  return _masterBtree->mergeSafeBtree( _masterBtree->SafeOBtree::rootONode() );
+  std::shared_ptr<ONode> ret = _masterBtree->mergeSafeBtree( _masterBtree->SafeOBtree::rootONode() );
+  _oMemoryManager->syncDBState(); // DB内部上他の書き込み/保存
+  return ret;
 }
 
 

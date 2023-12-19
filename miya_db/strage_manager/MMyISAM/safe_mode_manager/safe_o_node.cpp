@@ -283,7 +283,7 @@ int SafeONode::findIndex( std::shared_ptr<unsigned char> targetKey )
 }
 
 
-SafeONode::SafeONode( std::shared_ptr<ONodeConversionTable> conversionTable, std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared_ptr<optr> baseOptr ) : ONode( oMemoryManager ,baseOptr)
+SafeONode::SafeONode( std::shared_ptr<ONodeConversionTable> conversionTable, std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared_ptr<optr> baseOptr ) : ONode( oMemoryManager ,baseOptr )
 {
 	if( !(conversionTable) ) return;
 	_conversionTable = conversionTable;
@@ -305,6 +305,7 @@ SafeONode::SafeONode( std::shared_ptr<ONodeConversionTable> conversionTable, std
 	}
 	return;
 }
+
 
 
 

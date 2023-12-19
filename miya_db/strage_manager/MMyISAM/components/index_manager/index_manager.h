@@ -31,13 +31,14 @@ public:
 	virtual ~IndexManager(){return;};
 
 	std::shared_ptr<OverlayMemoryManager> oMemoryManager();
+	void clear();
 
     virtual void add( std::shared_ptr<unsigned char> key , std::shared_ptr<optr> dataOptr ) = 0;
     virtual void remove( std::shared_ptr<unsigned char> key ) = 0;
     virtual std::pair< std::shared_ptr<optr>, int > find( std::shared_ptr<unsigned char> key ) = 0;
 	// dataOptrの本体の所在が,ノーマルファイルかセーフファイルかのフラグ
 
-
+	
     // debug
     virtual void printIndexTree() = 0;
 };

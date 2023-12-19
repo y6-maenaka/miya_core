@@ -13,6 +13,7 @@ NormalIndexManager::NormalIndexManager( std::shared_ptr<OverlayMemoryManager> oM
 {
 	// _oMemoryManager = oMemoryManager;
 	_masterBtree = 	std::shared_ptr<OBtree>( new OBtree(_oMemoryManager) );
+	_oMemoryManager->syncDBState();
 };
 
 
@@ -20,6 +21,7 @@ NormalIndexManager::NormalIndexManager( std::string indexFilePath ) : IndexManag
 {
 	// _oMemoryManager	 = std::make_shared<OverlayMemoryManager>( indexFilePath );
 	_masterBtree = std::make_shared<OBtree>( _oMemoryManager );
+	_oMemoryManager->syncDBState();
 	printf("NormalIndexManager :: OverlayMemoryManager Initialized with %p\n", _oMemoryManager.get() );
 }
 

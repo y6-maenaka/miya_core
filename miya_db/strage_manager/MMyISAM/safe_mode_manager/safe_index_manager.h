@@ -50,10 +50,27 @@ public:
 	// [(first): データ本体先頭ポインター], [(second): データ本体が格納されているデータファイルインデックス]
 
 	std::shared_ptr<ONode> mergeSafeBtree(); // セーフモードでの変更を通常OBtreeに反映する ≒ commit
-
+											 // 内部にもつConversionTableを利用してマージを行うため,NormalIndexManagerは不要
 	void printIndexTree();
 };
 
+
+
+
+/*
+ SafeModeの振る舞い
+
+ - SafeModeはレジストリIDを指定してモードチェンジ(SafeMode_(registryIndex))することができる
+ - SafeMode中に,NormalDBに何らかの変更が加えられた場合は,以降のSafeModeのクエリは失敗するように設計する( 毎回SafeModeのStatusとNormalModeのStatusを比較するのはナンセンス )
+	-> SafeModeが幾つか発行されていても,NormalDBへの変更は受け付けるようにする
+
+ - SafeMode中のクエリが成功する条件は,SafeMode起動時に取得しているNormalModeの内部状態とクエリ発行時のNormalModeの内部状態が同じ時
+
+ 全てのSafeModeがcloseされる条件 : NormalModeにAdd, Remove, merge の更新があった
+
+
+ (未セットアップのレジストリIDを指定してクエリが発行された場合)
+*/
 
 
 

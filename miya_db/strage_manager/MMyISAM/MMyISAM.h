@@ -33,22 +33,20 @@ private:
 	IndexManager* _indexManager; // インデックスが保存されているマネージャーを渡す
 	std::string _dbName;
 
-	struct
+	struct Normal
 	{
-		struct {
-			std::shared_ptr<NormalIndexManager> _indexManager = {{nullptr}};
-			std::shared_ptr<ValueStoreManager> _valueStoreManager = {{nullptr}};
-		} _normal;
+		std::shared_ptr<NormalIndexManager> _indexManager = nullptr;
+		std::shared_ptr<ValueStoreManager> _valueStoreManager = nullptr;
+  
+	} _normal;
 
-		struct { // safe関係モジュールは毎回初期化されるので,持つ必要ないかも
-			// std::shared_ptr<ValueStoreManager> _valueStoreManager = nullptr;
-			//std::shared_ptr<SafeIndexManager> _indexManager = nullptr;
-			std::array< std::shared_ptr<SafeIndexManager>,  ALLOWED_SAFE_REGISTRY_COUNT > _activeSafeIndexManagerArray;
-			std::array< std::shared_ptr<ValueStoreManager>, ALLOWED_SAFE_REGISTRY_COUNT > _activeValueStoreManagerArray;
-			// std::vector< std::shared_ptr<SafeIndexManager> > _activeSafeIndexManagerVector;
-			// std::vector< std::shared_ptr<ValueStoreManager> > _activeValueStoreManagerVector;
-		} _safe;
-	};
+	struct Safe // safe関係モジュールは毎回初期化されるので,持つ必要ないかも
+	{ 
+		std::array< std::shared_ptr<SafeIndexManager>,  ALLOWED_SAFE_REGISTRY_COUNT > _activeSafeIndexManagerArray = {{nullptr}};
+		std::array< std::shared_ptr<ValueStoreManager>, ALLOWED_SAFE_REGISTRY_COUNT > _activeValueStoreManagerArray = {{nullptr}};
+
+		void clear(); // 全てのSafeIndexManagerとValueStoreManagerをクエリする
+	} _safe;
 
 	bool _isSafeMode = false;
 

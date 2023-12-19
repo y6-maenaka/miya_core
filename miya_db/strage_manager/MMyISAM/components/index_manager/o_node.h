@@ -183,10 +183,10 @@ struct ItemSet{
 	public:
 		ItemSet( std::shared_ptr<ONodeItemSet> target );
 
-		//OItemSet *itemSet();
-		//OCItemSet *citemSet();
 		std::shared_ptr<OItemSet> itemSet();
 		std::shared_ptr<OCItemSet> citemSet();
+
+		std::shared_ptr<optr> baseOptr();
 };
 
 
@@ -202,11 +202,12 @@ protected:
 	virtual int findIndex( std::shared_ptr<unsigned char> targetKey );
 	std::shared_ptr<ONode> subtreeMax();
 
-public:
 	std::shared_ptr<ItemSet> _itemSet;
-
+public:
 	// ノードラップ(新規作成はしない)
 	ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared_ptr<optr> baseOptr = nullptr );
+	ONode( std::shared_ptr<OverlayMemoryManager> oMemoryManager , std::shared_ptr<ItemSet> itemSet );
+	virtual ~ONode() = default;
 
 	void overlayMemoryManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager );
 	std::shared_ptr<OverlayMemoryManager> overlayMemoryManager();
@@ -238,6 +239,8 @@ public:
 	std::shared_ptr<ONode> merge( std::shared_ptr<ONode> sourceONode ); // 補助
 	std::shared_ptr<ONode> recursiveMerge( unsigned short index );
 	std::shared_ptr<ONode> recursiveMerge( std::shared_ptr<ONode> sourceONode ); // 補助
+
+	std::shared_ptr<optr> baseOptr();
 };
 
 

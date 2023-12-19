@@ -12,6 +12,11 @@ IndexManager::IndexManager( std::string filePath )
   _oMemoryManager = std::make_shared<OverlayMemoryManager>( filePath );
 }
 
+void IndexManager::clear()
+{
+  _oMemoryManager->clear();
+}
+
 IndexManager::IndexManager( std::shared_ptr<OverlayMemoryManager> oMemoryManager )
 {
   _oMemoryManager = oMemoryManager;

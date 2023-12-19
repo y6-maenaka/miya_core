@@ -45,8 +45,6 @@ struct SafeOCItemSet : public OCItemSet // Safe ONode Const ItemSet
 {
 public:
   std::shared_ptr<ONodeConversionTable> _conversionTable;
-  const char* str = "Hellooooo";
-  int inte = 10;
 
 public:
 	SafeOCItemSet( std::shared_ptr<ONodeItemSet> base , std::shared_ptr<ONodeConversionTable> conversionTable );
@@ -62,11 +60,10 @@ public:
 
 
 
-struct SafeOItemSet : public OItemSet // Safe ONode ItemSet 
+struct SafeOItemSet : public OItemSet // Safe ONode ItemSet
 {
 public:
   std::shared_ptr<ONodeConversionTable> _conversionTable;
-
 public:
 	SafeOItemSet( std::shared_ptr<ONodeItemSet> base , std::shared_ptr<ONodeConversionTable> conversionTable );
 
@@ -91,7 +88,9 @@ protected:
 	int findIndex( std::shared_ptr<unsigned char> targetKey ) override;
 
 public:
-	// static ONodeConversionTable _conversionTable;
+	const char* str = "Hellooooo";
+	int inte = 10;
+
 	SafeONode( std::shared_ptr<ONodeConversionTable> conversionTable , std::shared_ptr<OverlayMemoryManager> oMemoryManager = nullptr ,std::shared_ptr<optr> baseOptr = nullptr );
 
 	std::shared_ptr<SafeONode> parent(); // 再定義

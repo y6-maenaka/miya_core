@@ -13,12 +13,25 @@ namespace miya_db
 // SafeOBtree初期化時のツリーはノーマルモードのコピーで良い
 SafeOBtree::SafeOBtree( std::shared_ptr<ONodeConversionTable> conversionTable ,std::shared_ptr<ONode> normalRootONode ) : OBtree( conversionTable->normalOMemoryManager() ,normalRootONode )
 {
+  std::cout << "this is safe obtree constructor" << "\n";
 	_conversionTable = conversionTable;
 
+	std::cout << "< 0 >" << "\n";
     // static_pointer_castを使用すると基底クラスポインタとなり，SafeNodeでオーバーロードしているメソッドが使えない
-    SafeONode *castedNormalONode = static_cast<SafeONode*>( normalRootONode.get() );
-    _rootONode = std::make_shared<SafeONode>( *castedNormalONode );
-	_rootONode->conversionTable( _conversionTable );
+	// SafeONode *castedNormalONode = static_cast<SafeONode*>( normalRootONode.get() );
+	std::shared_ptr<SafeONode> dcastedSafeONode = std::shared_ptr<SafeONode>( new SafeONode(_conversionTable, normalRootONode->overlayMemoryManager(), normalRootONode->baseOptr() ) ); // 無理やり疑似的にダウンキャストしている 良くない
+
+	std::cout << "< 0.0 >"	 << "\n";
+	std::cout << dcastedSafeONode->str << "\n";
+	std::cout << dcastedSafeONode->inte << "\n";
+	// std::cout << castedNormalONode->str << "\n";
+	// std::cout << castedNormalONode->inte << "\n";
+
+	std::cout << "< 1 >"  << "\n";
+	_rootONode = dcastedSafeONode;
+	// _rootONode = std::make_shared<SafeONode>( *castedNormalONode );
+	std::cout << "< 2 >" << "\n";
+	// _rootONode->conversionTable( _conversionTable );
 }
 
 std::shared_ptr<ONodeConversionTable> SafeOBtree::conversionTable()
@@ -37,17 +50,6 @@ void SafeOBtree::add( std::shared_ptr<unsigned char> targetKey , std::shared_ptr
 {
 	auto currentONode = _rootONode;
   	std::cout << "add with :: "; currentONode->hello();
-
-	std::cout << "########" << "\n";
-	printf("%p\n", currentONode.get() ); 
-	puts("$$$$$$$$");
-	printf("this conversionTable pointer :: %p\n", _conversionTable.get() );
-	printf("currentONode coinversionTable pointer :: %p\n", currentONode->conversionTable().get() );
-	printf("currentONode conversintaTable entry count :: %ld\n", currentONode->conversionTable()->_entryMap.size() );
-	std::cout << "************" << "\n";
-	currentONode->citemSet();
-	std::cout << "@@@@@@@@" << "\n";
-
 
 	while( (currentONode->citemSet()->childOptrCount() >= 1 ) )
 	{
