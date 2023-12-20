@@ -16,26 +16,18 @@ namespace miya_db
 
 
 SafeIndexManager::SafeIndexManager( std::string indexFilePath ,const std::shared_ptr<OBtree> normalOBtree , std::shared_ptr<unsigned char> migrationDBState ) : IndexManager( indexFilePath )
-{ 
+{
     std::cout << "THIS IS SAFE INDEX MANAGER CONSTRUCTOR" << "\n";
 	_migrationDBState = migrationDBState;
-
-    // std::string systemSafeDirectories = "../miya_db/table_files/.system/safe/safe_index"; // あとでグローバルに静的に定義する
-    // OverlayMemoryManagerの作成
-    // std::shared_ptr<OverlayMemoryManager> safeOverlayMemoryManager = std::make_shared<OverlayMemoryManager>( indexFilePath );
 
     _conversionTable = std::shared_ptr<ONodeConversionTable>( new ONodeConversionTable(_oMemoryManager) );
     _conversionTable->safeOMemoryManager(_oMemoryManager); // 変換テーブルにSafe用のOverlayMemoryManagerをセットする
 		_conversionTable->normalOMemoryManager( normalOBtree->overlayMemoryManager() );
 
-	std::cout << "## 1" << "\n";
     // ノーマルモードのOBtreeからSafeModeの基準となるOBtreeを作成する
-    //_masterBtree = std::make_shared<SafeOBtree>(  _conversionTable ,normalOBtree->rootONode() ); // rootONodeが存在しない場合は
 	_masterBtree = std::shared_ptr<SafeOBtree>( new SafeOBtree( _conversionTable , normalOBtree->rootONode() ) );
-	std::cout << "## 1.1"  << "\n";
 	_conversionTable->init(); // entryMapを削除する
-  
-	std::cout << "## 2 " << "\n";
+
     _oMemoryManager->clear(); // セーフファイルはセーフモードが終了するまでの一時的なファイルなので都度削除する
 	_oMemoryManager->allocate( 100 );
 
@@ -44,7 +36,6 @@ SafeIndexManager::SafeIndexManager( std::string indexFilePath ,const std::shared
 	std::shared_ptr<optr> normalMetaOptr = std::make_shared<optr>( addrZero, _conversionTable->normalOMemoryManager()->dataCacheTable() );
 	std::shared_ptr<optr> safeMetaOptr = std::make_shared<optr>( addrZero , _conversionTable->safeOMemoryManager()->dataCacheTable() );
 	omemcpy( safeMetaOptr.get() , normalMetaOptr.get() , 100 );
-	std::cout << "## 3" << "\n";
 
 	_oMemoryManager->allocate( SAFE_MODE_COLLICION_OFFSET );
 

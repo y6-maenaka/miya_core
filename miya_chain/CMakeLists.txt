@@ -23,8 +23,9 @@ add_library( MIYA_CHAIN STATIC
 							transaction/tx/tx.cpp
 
 							block/block.cpp
-							block/block_c_iterator.cpp
 							block/block_header.cpp
+
+							block_chain_iterator/block_chain_iterator.cpp
 
 							transaction_pool/transaction_pool.cpp
 							transaction_pool/txcb.cpp

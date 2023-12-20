@@ -88,9 +88,6 @@ protected:
 	int findIndex( std::shared_ptr<unsigned char> targetKey ) override;
 
 public:
-	const char* str = "Hellooooo";
-	int inte = 10;
-
 	SafeONode( std::shared_ptr<ONodeConversionTable> conversionTable , std::shared_ptr<OverlayMemoryManager> oMemoryManager = nullptr ,std::shared_ptr<optr> baseOptr = nullptr );
 
 	std::shared_ptr<SafeONode> parent(); // 再定義

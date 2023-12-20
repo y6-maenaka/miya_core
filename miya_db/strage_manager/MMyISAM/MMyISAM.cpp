@@ -36,7 +36,7 @@ MMyISAM::MMyISAM( std::string dbName )
 
 	// 初回起動時は通常モードで起動する
 	//_normal._valueStoreManager = _normal._valueStoreManager.get();
-	// _normal._indexManager = 
+	// _normal._indexManager =
 }
 
 void MMyISAM::clearSafeMode()
@@ -55,7 +55,7 @@ bool MMyISAM::add( std::shared_ptr<QueryContext> qctx )
 	  if( valueStoreManager == nullptr ) return false;
 
 	  std::shared_ptr<optr> storeTarget = valueStoreManager->add( qctx );
-		
+
 	  auto indexManager = _safe._activeSafeIndexManagerArray.at(registryIndex);
 	  if( indexManager == nullptr ) return false;
 	  indexManager->add( qctx->key(), storeTarget );
@@ -121,7 +121,7 @@ bool MMyISAM::remove( std::shared_ptr<QueryContext> qctx )
 {
 	std::cout << "\x1b[35m" << "(MiyaDB) remove with key :: ";
 
-	short registryIndex = qctx->registryIndex(); 
+	short registryIndex = qctx->registryIndex();
 	if( registryIndex >= 0 ) // SafeMode
 	{
 	  auto safeIndexManager = _safe._activeSafeIndexManagerArray.at(registryIndex);
@@ -177,11 +177,11 @@ bool MMyISAM::migrateToSafeMode( std::shared_ptr<QueryContext> qctx )
 
 	// std::shared_ptr<SafeIndexManager> safeIndexManager = std::shared_ptr<SafeIndexManager>( new SafeIndexManager(_normal._indexManager->masterBtree()) );
 	// SafeIndexManager* safeIndexManager = new SafeIndexManager( _normal._indexManager->masterBtree() );
-	
+
 	// セーフモードに移行する前のデータベース状態の保持
 	std::shared_ptr<unsigned char> dbState;
 	dbState = _normal._indexManager->oMemoryManager()->dbState();
-	
+
 	std::string safeIndexFilePath = safeDirPath + _dbName + "_index";
 	std::shared_ptr<SafeIndexManager> safeIndexManager = std::shared_ptr<SafeIndexManager>(  new SafeIndexManager( safeIndexFilePath , _normal._indexManager->masterBtree() , dbState ) );
 	safeIndexManager->clear();
@@ -191,13 +191,13 @@ bool MMyISAM::migrateToSafeMode( std::shared_ptr<QueryContext> qctx )
 	std::string valueStoreFilePath = safeDirPath + _dbName;
 	std::shared_ptr<ValueStoreManager> valueStoreManager = std::shared_ptr<ValueStoreManager>( new ValueStoreManager{ valueStoreFilePath });
 	valueStoreManager->clear();
-	
+
 
 	_safe._activeSafeIndexManagerArray[registryIndex] = safeIndexManager;
 	_safe._activeValueStoreManagerArray[registryIndex] = valueStoreManager;
 
 	std::cout << "\x1b[33m" << "SafeIndexManager Added to Array with :: " << registryIndex << "\x1b[39m" << "\n";
-	
+
 	/*
 	_indexManager = dynamic_cast<IndexManager*>( safeIndexManager.get() );
 	_valueStoreManager = valueStoreManager.get();
@@ -219,51 +219,36 @@ bool MMyISAM::safeCommitExit( std::shared_ptr<QueryContext> qctx )
 
 	// debug
 	this->showSafeModeState();
- 
+
 
 
 	if( registryIndex < 0 ) return false; // ノーマルモードが指定されている場合は特に何もしない
 	std::shared_ptr<SafeIndexManager> safeIndexManager = _safe._activeSafeIndexManagerArray.at(registryIndex);
 	if( safeIndexManager == nullptr ) return false; // 指定のsafeModeIndexManagerが存在しない
-													
+
 	auto valueStoreManager = _safe._activeValueStoreManagerArray.at(registryIndex);
 	if( valueStoreManager == nullptr ) return false;
 
 	/* Meta領域のコピ 雑すぎる　後で修正する */
 	unsigned char addrZero[5]; memset( addrZero , 0x00 , sizeof(addrZero) );
-	std::cout << "( 1.1 )" << "\n";
 	std::shared_ptr<ONodeConversionTable> conversionTable = safeIndexManager->conversionTable();
-	std::cout << "( 2 )" << "\n";
 	std::shared_ptr<optr> oNodeMeta = std::make_shared<optr>( addrZero , conversionTable->normalOMemoryManager()->dataCacheTable() );
-	std::cout << "( 3 )" << "\n";
 	std::shared_ptr<optr> safeONodeMeta = std::make_shared<optr>( addrZero , conversionTable->safeOMemoryManager()->dataCacheTable() );
-	std::cout << "( 4 )" << "\n";
 	omemcpy( oNodeMeta.get() , safeONodeMeta.get() , 100 );
 
-	std::cout << "( 5 )" << "\n";
 	conversionTable->printEntryMap();
-	std::cout << "( 6 )" << "\n";
 
 	/* Dataのコピー・移動 */
 	_normal._valueStoreManager->mergeDataOptr( conversionTable , valueStoreManager.get() );
-	std::cout << "( 7 )" << "\n";
 
 	/* ルートノード更新の反映 */
 	std::shared_ptr<ONode> newRootONode = dynamic_cast<SafeIndexManager*>(safeIndexManager.get())->mergeSafeBtree(); // インデックスのコミット
-	std::cout << "( 8 )" << "\n";
 	(_normal._indexManager)->masterBtree()->rootONode( newRootONode );
 	// dynamic_cast<NormalIndexManager*>(_normal._indexManager.get())->masterBtree()->rootONode( newRootONode ); // マージ後ルートノードに変更があった場合はNormalにも変更を加える
 
-	std::cout << "( 9 )" << "\n";
 	_normal._indexManager->oMemoryManager()->syncDBState();
 	clearSafeMode();
-	/*
-	delete _indexManager;
-	delete _valueStoreManager;
-	_indexManager = dynamic_cast<IndexManager*>( _normal._indexManager.get() );
-	_valueStoreManager = dynamic_cast<ValueStoreManager*>( _normal._valueStoreManager.get() );
-	_isSafeMode = false;
-	*/
+	
   return true;
 }
 

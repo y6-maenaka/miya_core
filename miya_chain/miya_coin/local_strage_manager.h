@@ -278,7 +278,6 @@ public:
 	// Rev操作
 	std::vector< std::shared_ptr<UTXO> > readUndo( std::shared_ptr<unsigned char> blockHash );
 
-
 	std::vector< std::shared_ptr<UTXO> > releaseBlock( std::shared_ptr<unsigned char> blockHash );  // ブロック・Revが共に管理外となる
 																																																	// undoはリターンする
 };

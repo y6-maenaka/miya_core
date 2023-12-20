@@ -77,7 +77,7 @@ public:
 	//size_t exportRaw( std::shared_ptr<unsigned char> *retRaw ); // ヘッダとトランザクション部まとめて書き出すようなことはしない
 
 	uint32_t time();
-
+	uint32_t height();
 	bool verify( std::shared_ptr<miya_chain::LightUTXOSet> utxoSet );
 
 };

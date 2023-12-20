@@ -155,6 +155,10 @@ uint32_t Block::time()
 	return _header->time();
 }
 
+uint32_t Block::height()
+{
+  _coinbase->height();
+}
 
 
 bool Block::verify( std::shared_ptr<miya_chain::LightUTXOSet> utxoSet )

@@ -115,7 +115,7 @@ std::shared_ptr<BlockLocalStrageManager> MiyaChainManager::localStrageManager()
 
 void MiyaChainManager::__unitTest( std::vector<std::shared_ptr<block::Block>> blocks )
 {
-	std::shared_ptr<unsigned char> localChainHead = _chainState->chainHead(); // これで見つからない場合は,自身のチェーンを遡って更新する
+	// std::shared_ptr<unsigned char> localChainHead = _chainState->chainHead(); // これで見つからない場合は,自身のチェーンを遡って更新する
 
 	// 仮想チェーンテスト
 	/*

@@ -15,7 +15,7 @@
 #include <unistd.h>
 
 #include "../miya_db/miya_db/database_manager.h"
-#include "./block/block_c_iterator.h"
+#include "./block_chain_iterator/block_chain_iterator.h"
 #include "./IBD.h"
 
 
@@ -50,6 +50,7 @@ class MiyaChainBrocker;
 class MiyaChainRequester;
 class BlockLocalStrageManager;
 class LightUTXOSet;
+class BlockChainIterator;
 
 
 
@@ -68,7 +69,8 @@ private:
 		uint32_t _heigth = 0;
 		uint32_t _timestamp;
 		unsigned char _version[4];  // ここではないかも
-		
+	
+		std::shared_ptr<unsigned char> blockHash();
 	} __attribute__((packed));
 
 	ChainMeta *_chainMeta; // ここにマッピングしたアドレスをキャストする
@@ -82,13 +84,11 @@ private:
 
 public:
 	MiyaChainState( std::shared_ptr<BlockLocalStrageManager> localStrageManager ); // 寄贈時にchain_stateファイルを読み込む
-	void update( std::shared_ptr<unsigned char> blockHash , unsigned short height ); // ファイルにも書き込む
-
-	block::BlockCIterator citerator(); // チェーン先頭のブロックイテレータを取得する
-
-	std::shared_ptr<unsigned char> chainHead();
-	unsigned int height();
 	~MiyaChainState();
+
+	void update( std::shared_ptr<unsigned char> blockHash , unsigned short height ); // ファイルにも書き込む
+	std::shared_ptr<BlockChainIterator> blockChainIterator();
+
 };
 
 

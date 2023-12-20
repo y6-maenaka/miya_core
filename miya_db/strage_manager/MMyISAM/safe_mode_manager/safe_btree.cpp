@@ -16,22 +16,8 @@ SafeOBtree::SafeOBtree( std::shared_ptr<ONodeConversionTable> conversionTable ,s
   std::cout << "this is safe obtree constructor" << "\n";
 	_conversionTable = conversionTable;
 
-	std::cout << "< 0 >" << "\n";
-    // static_pointer_castを使用すると基底クラスポインタとなり，SafeNodeでオーバーロードしているメソッドが使えない
-	// SafeONode *castedNormalONode = static_cast<SafeONode*>( normalRootONode.get() );
 	std::shared_ptr<SafeONode> dcastedSafeONode = std::shared_ptr<SafeONode>( new SafeONode(_conversionTable, normalRootONode->overlayMemoryManager(), normalRootONode->baseOptr() ) ); // 無理やり疑似的にダウンキャストしている 良くない
-
-	std::cout << "< 0.0 >"	 << "\n";
-	std::cout << dcastedSafeONode->str << "\n";
-	std::cout << dcastedSafeONode->inte << "\n";
-	// std::cout << castedNormalONode->str << "\n";
-	// std::cout << castedNormalONode->inte << "\n";
-
-	std::cout << "< 1 >"  << "\n";
 	_rootONode = dcastedSafeONode;
-	// _rootONode = std::make_shared<SafeONode>( *castedNormalONode );
-	std::cout << "< 2 >" << "\n";
-	// _rootONode->conversionTable( _conversionTable );
 }
 
 std::shared_ptr<ONodeConversionTable> SafeOBtree::conversionTable()

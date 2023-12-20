@@ -85,7 +85,7 @@ int ChainMaintainer::start()
 			ReceivedBlock receivedBlock{ std::get<MiyaChainMSG_BLOCK>(msg.payload()).block() };
 		
 			// この条件一致で処理が異なる
-			if( receivedBlock.height <= _chainState->height() ) // receivedBlockHeightがlocalHeadHeight以下であれば自身のチェーンを優先し，無視する
+			if( receivedBlock.height <= _chainState->blockChainIterator()->height() ) // receivedBlockHeightがlocalHeadHeight以下であれば自身のチェーンを優先し，無視する
 				continue;
 
 

@@ -14,8 +14,10 @@ namespace miya_chain
 
 
 
-
-
+std::shared_ptr<unsigned char> MiyaChainState::ChainMeta::blockHash()
+{
+  return std::shared_ptr<unsigned char>( _chainHead );
+}
 
 
 
@@ -54,10 +56,13 @@ MiyaChainState::MiyaChainState( std::shared_ptr<BlockLocalStrageManager> localSt
 	std::cout << "\n --- [ Chain State ] ---------------------------------- " << "\n";
 	printf( "| ChainState File Mapped with :: %p\n", _chainMeta );
 	std::cout << "| Chain Heade Block :: ";
+	/*
 	for( int i=0; i<32; i++ ){
 		printf("%02X", chainHead().get()[i] );
 	} std::cout << "\n";
+	
 	std::cout << "| Heigth :: " << height() << "\n";
+	*/ // イレテータから取得する
 	std::cout << "---------------------------------------------------------------------" << "\n";
 
 
@@ -76,9 +81,9 @@ void MiyaChainState::update( std::shared_ptr<unsigned char> blockHash , unsigned
 }
 
 
-block::BlockCIterator MiyaChainState::citerator()
+std::shared_ptr<BlockChainIterator> MiyaChainState::blockChainIterator()
 {
-	struct block::BlockCIterator ret( _localStrageManager , this->chainHead() );
+	std::shared_ptr<BlockChainIterator> ret = std::shared_ptr<BlockChainIterator>( new BlockChainIterator( _localStrageManager , _chainMeta->blockHash() ) );
 	return ret;
 }
 
@@ -90,19 +95,21 @@ MiyaChainState::~MiyaChainState()
 	close(_stateFileFD);
 }
 
-
+/*
 std::shared_ptr<unsigned char> MiyaChainState::chainHead()
 {
 	std::shared_ptr<unsigned char> ret = std::shared_ptr<unsigned char>(new unsigned char[sizeof(_chainMeta->_chainHead)] ); // コピー領域
 	memcpy( ret.get() , _chainMeta->_chainHead , sizeof(_chainMeta->_chainHead) );
 	return ret;
 }
+*/
 
-
+/*
 unsigned int MiyaChainState::height()
 {
 	return static_cast<unsigned int>(_chainMeta->_heigth);
 }
+*/
 
 
 
