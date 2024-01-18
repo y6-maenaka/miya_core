@@ -1,6 +1,7 @@
 #include "bd_filter.h"
 #include "./virtual_chain.h"
 
+#include "./BDBCB.h"
 #include "../block/block.h"
 #include "../block/block_header.h"
 
@@ -10,46 +11,66 @@ namespace miya_chain
 {
 
 
-
-
-
-
-
-/*
-  ------------------------------------------------------------------------------
-    - (Layer1) : Filter
-  ------------------------------------------------------------------------------
-*/
-
-
-/*
-bool BDFilter::add( struct BDBCB targetBCB ) // BDBCBは変更しない
+BDFilter::BDFilter()
 {
-	if( targetBCB.block == nullptr ) return false;
-	struct BlockHashAsKey key{ targetBCB }; // BDBCBからキーの作成
-
-  auto ret =  _filter._filterMap.insert( {key , std::make_pair(targetBCB, nullptr)} );
-  if( ret.second )  // 要素が存在せず,新たに追加した場合
-  {
-		std::cout << "(BDFilter) 新規追加" << "\n";
-		_validationHeaderQueue.push( std::make_pair( key , targetBCB ) ); // ヘッダ検証コンポーネントに移動する
-    	_validationHeaderQueue._cv.notify_all(); // leyer2を監視するスレッドが寝ている可能性があるので
-  }else
-	{
-		std::cout << "(BDFilter) 重複要素" << "\n";
-		return false;
-	}
-
-  return true;
+  _isClose = false;
 }
-*/
+
+
+
+
+std::shared_ptr<struct BDBCB> BDFilter::filter( std::shared_ptr<unsigned char> target, bool isReject )
+{
+  struct BlockHashAsKey key( target ); // targetよりキーの作成
+
+  auto findRet = _filter.find( key );
+  if( findRet == _filter.end() && isReject ) // 要素が存在せず, isRejectがfalseであれば要素を追加する
+  {
+	std::shared_ptr<struct BDBCB> newValue = std::shared_ptr<struct BDBCB>( new BDBCB(target) );
+	auto insertRet = _filter.insert( { key , newValue } );
+	if( insertRet.second ) // 挿入に成功した場合
+	  return newValue; 
+	else 
+	  return nullptr;
+  }
+  else if( findRet == _filter.end() && !isReject ) return nullptr; // isRejectがtrueの場合は追加しない
+
+  return findRet->second;
+}
+
+
+std::shared_ptr<struct BDBCB> BDFilter::filter( std::shared_ptr<block::BlockHeader> target , bool isReject )
+{
+  std::shared_ptr<unsigned char> targetHash;  targetHash = target->headerHash();
+  struct BlockHashAsKey key( targetHash );
+  
+  auto findRet = _filter.find( key ); // 追加
+  if( findRet == _filter.end() && isReject )
+  {
+	std::shared_ptr<struct BDBCB> newValue = std::shared_ptr<struct BDBCB>( new BDBCB(target) );
+	auto insertRet = _filter.insert( { key, newValue } );
+	if( insertRet.second )
+	  return newValue;
+	else
+	  return nullptr;
+  }
+  else if( findRet == _filter.end() && !isReject ) return nullptr;
+
+  return findRet->second;  // 要素が格納されている場合
+}
+
+
+/*
+  //------------------------------------------------------------------------------
+    //- (Layer1) : Filter
+  //------------------------------------------------------------------------------
 
 
 bool BDFilter::add( std::vector<struct BDBCB> cbVector  )
 {
 	std::cout << "BDFilter::add() called" << "\n";
 	bool insertFlag = false;
-	for( auto itr : cbVector )	
+	for( auto itr : cbVector )
 	{
 		struct BlockHashAsKey key(itr);
 		switch( itr.status )
@@ -77,13 +98,13 @@ bool BDFilter::add( std::vector<struct BDBCB> cbVector  )
 				{
 					std::cout << "直ポインタが存在しません" << "\n";
 					continue;
-				}			 
+				}
 				if( ret->second.second->status != static_cast<int>(BDState::BlockHeaderValidated) )
 				{
 					std::cout << ret->second.first.status << "\n";
 					std::cout << "ブロックヘッダの検証が済んでいません" << "\n";
 					continue;
-				} 
+				}
 
 				std::cout << "直ポインタを上書きします" << "\n";
 				ret->second.second->block = itr.block;
@@ -94,7 +115,7 @@ bool BDFilter::add( std::vector<struct BDBCB> cbVector  )
 
 			case static_cast<int>(BDState::BlockStored): // フィルターにキャッシュすすまでで留める
 			{
-				auto ret = _filter._filterMap.find( key );	
+				auto ret = _filter._filterMap.find( key );
 				if( ret == _filter._filterMap.end() ){
 					std::cout << "対象の要素が存在しません" << "\n";
 					if( !(isHeaderDownloadClosing()) && !(isBlockDownloadClosing()) )
@@ -145,7 +166,7 @@ void BDFilter::isHeaderDownloadClosing( bool target )
 	_filter._headerDownloadClosing = target;
 }
 
-bool BDFilter::isBlockDownloadClosing()
+bool BDFilter::isBlockDownloadClosing() const
 {
 	return _filter._blockDownloadClosing;
 }
@@ -158,6 +179,9 @@ void BDFilter::isBlockDownloadClosing( bool target )
 
 
 
+
+// debug
+
 void BDFilter::printFilter()
 {
 	int i = 0;
@@ -166,7 +190,7 @@ void BDFilter::printFilter()
 		std::cout << "\n";
 		std::cout << "(" << i << ") " << "\n";
 		std::cout << " [key] : ";
-		for( int i=0; i<32; i ++ ) 
+		for( int i=0; i<32; i ++ )
 			printf("%02X", itr.first._blockHash[i] );
 		std::cout << "\n";
 
@@ -187,14 +211,14 @@ void BDFilter::printHeaderValidationPendingQueue()
 {
 	std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << "\n";
 	std::cout << "[ Header Validation Pending Queue ]" << "\n";
-	std::cout << "Pending Count :: " << _validationHeaderQueue._pendingQueue.size() << "\n";
+	std::cout << "Pending Count :: " << _validationHeaderQueue._pendingVector.size() << "\n";
 	int i=0;
-	for( auto itr : _validationHeaderQueue._pendingQueue )
+	for( auto itr : _validationHeaderQueue._pendingVector )
 	{
 		std::cout << "\n";
 		std::cout << "(" << i << ") " << "\n";
 		std::cout << " [key] : ";
-		for( int i=0; i<32; i ++ ) 
+		for( int i=0; i<32; i ++ )
 			printf("%02X", itr.first._blockHash[i] );
 		std::cout << "\n";
 
@@ -223,7 +247,7 @@ void BDFilter::printMergePendingQueue()
 		std::cout << "\n";
 		std::cout << "(" << i << ") " << "\n";
 		std::cout << " [key] : ";
-		for( int i=0; i<32; i ++ ) 
+		for( int i=0; i<32; i ++ )
 			printf("%02X", itr.first._prevBlockHash[i] );
 		std::cout << "\n";
 
@@ -244,17 +268,17 @@ void BDFilter::printMergePendingQueue()
 
 
 
-/*
-  ------------------------------------------------------------------------------
-    - (Layer2) : ValidationHeaderQueue
-  ------------------------------------------------------------------------------
-*/
+
+  //------------------------------------------------------------------------------
+    //- (Layer2) : ValidationHeaderQueue
+  //------------------------------------------------------------------------------
+
 
 
 void BDFilter::ValidationHeaderQueue::push( std::pair< BlockHashAsKey, struct BDBCB > targetPair )
 {
 	std::unique_lock<std::mutex> lock(_mtx);
-	_pendingQueue.push_back( targetPair );
+	_pendingVector.push_back( targetPair );
 }
 
 
@@ -269,11 +293,10 @@ void BDFilter::ValidationHeaderQueue::push( std::pair< BlockHashAsKey, struct BD
 
 
 
-/*
-  ------------------------------------------------------------------------------
-    - (Layer3) : PendingMergeQueue
-  ------------------------------------------------------------------------------
-*/
+
+  //------------------------------------------------------------------------------
+    //- (Layer3) : PendingMergeQueue
+  //------------------------------------------------------------------------------
 
 
 
@@ -292,7 +315,7 @@ struct BDBCB BDFilter::PendingMergeQueue::findPop( std::shared_ptr<unsigned char
     	ret.status = static_cast<int>( BDState::Empty ); // 空(要素なし)を設定してリターン
 		return ret;
   	}
-	
+
 	ret = retItr->second;
   	_pendingMap.erase( retItr ); // ポップする
 	return ret;
@@ -319,11 +342,10 @@ bool BDFilter::PendingMergeQueue::empty()
 
 
 
-/*
-  ------------------------------------------------------------------------------
-    - BDFilter
-  ------------------------------------------------------------------------------
-*/
+
+  //------------------------------------------------------------------------------
+    //- BDFilter
+  //------------------------------------------------------------------------------
 
 
 
@@ -340,25 +362,25 @@ BDFilter::BDFilter( BDVirtualChain* virtualChain )
 		std::cout << "BDFilter::Constructor headerValidator started" << "\n";
 		std::unique_lock<std::mutex> lock(_validationHeaderQueue._mtx);
 		_validationHeaderQueue._cv.wait( lock , [&]{
-				bool ret =  !(_validationHeaderQueue._pendingQueue.empty());
+				bool ret =  !(_validationHeaderQueue._pendingVector.empty());
 				std::cout << "検証完了" << "\n";
 				return ret;
 		});
 		std::cout << "(BDFilter) Layer1検証プロセス起動" << "\n";
 
-	for( auto itr = _validationHeaderQueue._pendingQueue.begin() ; itr != _validationHeaderQueue._pendingQueue.end() ;)
+	for( auto itr = _validationHeaderQueue._pendingVector.begin() ; itr != _validationHeaderQueue._pendingVector.end() ;)
 	{
 		std::cout << "バックグラウンド検証プロセス起動" << "\n";
 		std::pair< BlockHashAsKey , struct BDBCB > frontCBSet;
-		frontCBSet = (_validationHeaderQueue._pendingQueue.front()); // キュー先頭から検証する
+		frontCBSet = (_validationHeaderQueue._pendingVector.front()); // キュー先頭から検証する
 		// itr++; // eraseする前に先に進めとく
-		itr = _validationHeaderQueue._pendingQueue.erase( itr ); // ここでeraseしたらauto itrバグらない？
-		
+		itr = _validationHeaderQueue._pendingVector.erase( itr ); // ここでeraseしたらauto itrバグらない？
+
 		// 既に保存済みの場合は検証もlayer2への追加もしない( ただフィルターに追加するだけに留める )
 		if( frontCBSet.second.status == static_cast<int>(BDState::BlockStored) ){
 			std::cout << "フィルタに追加します" << "\n";
 			continue;
-		} 
+		}
 
 		if( !(frontCBSet.second.block->header()->verify()) ){ // ブロックヘッダのみを簡易的に検証する
 			std::cout << "(BDFilter) ブロックヘッダ検証失敗" << "\n";
@@ -367,7 +389,7 @@ BDFilter::BDFilter( BDVirtualChain* virtualChain )
 
 		std::cout << "(BDFilter) ブロックヘッダ検証成功" << "\n";
 		_pendingMergeQueue.push( frontCBSet.second  ); // ブロックダウンロードとブロック検証を担当するlayer2に移動する
-		std::cout << "pendingQueue count :: "	 << _validationHeaderQueue._pendingQueue.size() << "\n";
+		std::cout << "pendingQueue count :: "	 << _validationHeaderQueue._pendingVector.size() << "\n";
 	}
 		// layer2要素が空でなければvirtualChainに通知する
 		if( _pendingMergeQueue.empty() ) continue;
@@ -386,7 +408,7 @@ BDFilter::BDFilter( BDVirtualChain* virtualChain )
   headerValidator.detach();
   std::cout << "BDFilter::Constructor headerValidator detached" << "\n";
 }
-
+*/
 
 
 

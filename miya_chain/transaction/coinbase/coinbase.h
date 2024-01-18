@@ -27,7 +27,7 @@ struct CoinbaseTxIn;
 struct Coinbase
 {
 private:
-    struct 
+    struct
 		{
       int32_t _version;
 			std::shared_ptr<CoinbaseTxIn> _txIn;
@@ -64,4 +64,4 @@ public:
 
 
 
-#endif 
+#endif

@@ -32,17 +32,22 @@ namespace miya_chain
 int MiyaChainManager::init( std::shared_ptr<StreamBufferContainer> toEKP2PBrokerSBC )
 {
 	// はじめに全てのデータベースを起動する
-
+	/*
+	std::filesystem::path currentPath = std::filesystem::current_path();
+	std::cout << currentPath << "\n";
+	*/
 
 	// BlockIndexDBの簡易起動
 	_blockIndexDB._toBlockIndexDBSBC = std::make_shared<StreamBufferContainer>();
 	_blockIndexDB._fromBlockIndexDBSBC = std::make_shared<StreamBufferContainer>();
-	_dbManager.startWithLightMode( _blockIndexDB._toBlockIndexDBSBC , _blockIndexDB._fromBlockIndexDBSBC  , "../miya_chain/miya_coin/blocks/index/block_index" );
+	// _dbManager.startWithLightMode( _blockIndexDB._toBlockIndexDBSBC , _blockIndexDB._fromBlockIndexDBSBC  , "../miya_chain/miya_coin/blocks/index/block_index" );
+	_dbManager.startWithLightMode( _blockIndexDB._toBlockIndexDBSBC , _blockIndexDB._fromBlockIndexDBSBC  , "block" );
 
 	// UTxOSetDBの簡易起動
 	_utxoSetDB._toUTXOSetDBSBC = std::make_shared<StreamBufferContainer>();
 	_utxoSetDB._fromUTXOSetDBSBC = std::make_shared<StreamBufferContainer>();
-	_dbManager.startWithLightMode( _utxoSetDB._toUTXOSetDBSBC, _utxoSetDB._fromUTXOSetDBSBC , "../miya_db/table_files/utxo/utxo" );
+	//_dbManager.startWithLightMode( _utxoSetDB._toUTXOSetDBSBC, _utxoSetDB._fromUTXOSetDBSBC , "../miya_db/table_files/utxo/utxo" );
+	_dbManager.startWithLightMode( _utxoSetDB._toUTXOSetDBSBC, _utxoSetDB._fromUTXOSetDBSBC , "utxo" );
 	_utxoSet = std::make_shared<LightUTXOSet>( _utxoSetDB._toUTXOSetDBSBC , _utxoSetDB._fromUTXOSetDBSBC );// utxoSet(クライアント) のセットアップ
 
 

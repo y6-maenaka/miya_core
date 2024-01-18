@@ -16,12 +16,10 @@ namespace miya_chain
 
 std::shared_ptr<unsigned char> MiyaChainState::ChainMeta::blockHash()
 {
-  return std::shared_ptr<unsigned char>( _chainHead );
+  std::shared_ptr<unsigned char> ret = std::shared_ptr<unsigned char>( new unsigned char[sizeof(_chainHead)] );
+  memcpy( ret.get(), _chainHead , sizeof(_chainHead) );
+  return ret;
 }
-
-
-
-
 
 
 MiyaChainState::MiyaChainState( std::shared_ptr<BlockLocalStrageManager> localStrageManager )
@@ -52,7 +50,7 @@ MiyaChainState::MiyaChainState( std::shared_ptr<BlockLocalStrageManager> localSt
 	_chainMeta = (struct MiyaChainState::ChainMeta *)( _mappedPtrHead );
 
 
-	
+
 	std::cout << "\n --- [ Chain State ] ---------------------------------- " << "\n";
 	printf( "| ChainState File Mapped with :: %p\n", _chainMeta );
 	std::cout << "| Chain Heade Block :: ";
@@ -60,7 +58,7 @@ MiyaChainState::MiyaChainState( std::shared_ptr<BlockLocalStrageManager> localSt
 	for( int i=0; i<32; i++ ){
 		printf("%02X", chainHead().get()[i] );
 	} std::cout << "\n";
-	
+
 	std::cout << "| Heigth :: " << height() << "\n";
 	*/ // イレテータから取得する
 	std::cout << "---------------------------------------------------------------------" << "\n";
@@ -77,14 +75,15 @@ void MiyaChainState::update( std::shared_ptr<unsigned char> blockHash , unsigned
 	memset( &(_chainMeta->_version) , 0x00 , sizeof(_chainMeta->_version) );
 	msync( _mappedPtrHead , sizeof(struct MiyaChainState::ChainMeta) , MS_SYNC ); // 同期を忘れない
 
-	std::cout << "updated" << "\n";
+	std::cout << "chain state updated" << "\n";
 }
 
 
-std::shared_ptr<BlockChainIterator> MiyaChainState::blockChainIterator()
+std::shared_ptr<BlockChainIterator> MiyaChainState::latestBlockIterator()
 {
-	std::shared_ptr<BlockChainIterator> ret = std::shared_ptr<BlockChainIterator>( new BlockChainIterator( _localStrageManager , _chainMeta->blockHash() ) );
-	return ret;
+  std::shared_ptr<BlockChainIterator> ret = std::shared_ptr<BlockChainIterator>( new BlockChainIterator( _localStrageManager , _chainMeta->blockHash() ) );
+  
+  return ret;
 }
 
 

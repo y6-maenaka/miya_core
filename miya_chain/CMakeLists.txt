@@ -73,6 +73,11 @@ add_library( MIYA_CHAIN STATIC
 							virtual_chain/bd_filter.cpp
 							virtual_chain/block_hash_as_key.cpp
 							virtual_chain/prev_block_hash_as_key.cpp
+							virtual_chain/BDBCB.cpp
+							virtual_chain/virtual_subchain.cpp
+							virtual_chain/virtual_subchain_manager.cpp
+							virtual_chain/block_hash_pool.cpp
+							virtual_chain/block_header_pool.cpp
 
 )
 

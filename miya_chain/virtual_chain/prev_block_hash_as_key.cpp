@@ -1,5 +1,8 @@
+#include "prev_block_hash_as_key.h"
+
 #include "./virtual_chain.h"
 #include "./bd_filter.h"
+#include "../block/block_header.h"
 
 
 namespace miya_chain
@@ -11,24 +14,26 @@ namespace miya_chain
 
 
 
-PrevBlockHashAsKey::PrevBlockHashAsKey( struct BDBCB fromCB )
+
+PrevBlockHashAsKey::PrevBlockHashAsKey( std::shared_ptr<unsigned char> fromHash )
 {
-	memcpy( _prevBlockHash, fromCB.prevBlockHash().get(), 32 );
+  if( fromHash == nullptr ) return;
+  memcpy( _prevBlockHash , fromHash.get() , sizeof(_prevBlockHash) );
 }
 
-
-PrevBlockHashAsKey::PrevBlockHashAsKey( std::shared_ptr<unsigned char> prevBlockHash )
+PrevBlockHashAsKey::PrevBlockHashAsKey( std::shared_ptr<block::BlockHeader> fromHeader )
 {
+  if( fromHeader == nullptr ) return;
+  std::shared_ptr<unsigned char> prevBlockHash = fromHeader->prevBlockHash();
+
   if( prevBlockHash == nullptr ) return;
-  memcpy( _prevBlockHash , prevBlockHash.get() , sizeof(_prevBlockHash) );
+  memcpy( _prevBlockHash , prevBlockHash.get(), sizeof(_prevBlockHash) );
 }
-
 
 
 bool PrevBlockHashAsKey::operator==(const PrevBlockHashAsKey& key) const {
 	return (memcmp( _prevBlockHash, key._prevBlockHash , sizeof(_prevBlockHash) ) == 0 );
 }
-
 
 
 bool PrevBlockHashAsKey::operator!=(const PrevBlockHashAsKey& key) const {

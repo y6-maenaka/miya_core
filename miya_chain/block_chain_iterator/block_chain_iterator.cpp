@@ -18,7 +18,17 @@ bool BlockChainIterator::setupFromBlockHash( std::shared_ptr<unsigned char> from
 {
 	std::shared_ptr<block::Block> thisBlock;
 	thisBlock = _localStrageManager->readBlock( from );
+	if( thisBlock == nullptr ) return false;
 
+	_body = thisBlock; // 格納
+	/*
+	std::shared_ptr<unsigned char> blockHash; size_t blockHashLength;
+	blockHashLength = thisBlock->blockHash( &blockHash );
+	for( int i=0; i<blockHashLength; i++ ){
+			printf("%02X", blockHash.get()[i]);
+	} std::cout << "\n";
+	printf("ThisBlock Pointer :: %p\n", thisBlock.get() );
+	*/
   return true;
 }
 
@@ -29,11 +39,20 @@ BlockChainIterator::BlockChainIterator( std::shared_ptr<miya_chain::BlockLocalSt
 
 	_localStrageManager = localStrageManager;
 	setupFromBlockHash( blockHash ); // 失敗する可能性もある
-
   if( _body ){ // キャッシュのセット
     _cache._blockHash = _body->blockHash();
     _cache._heigth = _body->height();
   }
+
+	/*
+	std::cout << "--------------" << "\n";
+	std::cout << "block Hash :: ";
+	for( int i=0; i<32; i++ ){
+			printf("%02X", _cache._blockHash.get()[i]);
+	} std::cout << "\n";
+	std::cout << "--------------" << "\n";
+	*/
+
   return;
 }
 
@@ -63,6 +82,21 @@ BlockChainIterator& BlockChainIterator::operator--()
 	return *this;
 }
 
+std::shared_ptr<BlockChainIterator> BlockChainIterator::prev()
+{
+	std::shared_ptr<unsigned char> prevBlockHash = _body->header()->prevBlockHash();
+	if( prevBlockHash == nullptr ) return nullptr;
+
+	std::shared_ptr<BlockChainIterator> ret = std::shared_ptr<BlockChainIterator>( new BlockChainIterator( _localStrageManager , prevBlockHash ) );
+	return ret;
+}
+
+std::shared_ptr<block::BlockHeader> BlockChainIterator::header()
+{
+	if( _body == nullptr ) return nullptr;
+	return _body->header();
+}
+
 std::shared_ptr<unsigned char> BlockChainIterator::blockHash() const
 {
 	return _cache._blockHash;
@@ -84,6 +118,16 @@ bool BlockChainIterator::operator==( const BlockChainIterator &si ) const
 bool BlockChainIterator::operator!=( const BlockChainIterator &si ) const
 {
 	return !(this->operator==(si));
+}
+
+
+void BlockChainIterator::__printHeader()
+{
+	if( _body == nullptr ){
+		std::cout << "(@) Block is Empty" << "\n";
+		return;
+	}
+	return _body->header()->print();
 }
 
 

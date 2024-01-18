@@ -67,7 +67,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 			return std::move(ret);
 		};
 
-		
+
 		auto dumpToSBBody = [&]( nlohmann::json from, std::shared_ptr<unsigned char> *retRaw ) -> size_t
 		{
 		  nlohmann::json dumpedJson = nlohmann::json::to_bson(from);
@@ -76,7 +76,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 		  std::copy( dumpedJson.begin(), dumpedJson.end(), (*retRaw).get() );
 		  return retLength;
 		};
-	
+
 
 		nlohmann::json responseJson;
 		for(;;)
@@ -127,7 +127,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 				case QUERY_SELECT: // 2 get
 				{
 					std::cout << "\x1b[34m" << "## (HANDLE) QUERY_SELECT"	<<"\x1b[39m" << "\n";
-					
+
 					flag = mmyisam->get( qctx );
 					if( !flag ){
 						sbSegment = failureSB( qctx );
@@ -177,7 +177,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 					flag = mmyisam->remove( qctx );
 					responseJson["QueryID"] = qctx->id();
 					responseJson["status"] = flag;
-					
+
 					std::shared_ptr<unsigned char>	 dumpedJsonRaw; size_t dumpedJsonRawLength;
 					dumpedJsonRawLength = dumpToSBBody( responseJson , &dumpedJsonRaw );
 					sbSegment->body( dumpedJsonRaw , dumpedJsonRawLength );
@@ -192,7 +192,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 					flag = mmyisam->migrateToSafeMode( qctx );
 					responseJson["QueryID"] = qctx->id();
 					responseJson["status"] = flag;
-					
+
 					// レスポンスSBのセットアップ
 					std::shared_ptr<unsigned char> dumpedJsonRaw; size_t dumpedJsonRawLength;
 					dumpedJsonRawLength = dumpToSBBody( responseJson , &dumpedJsonRaw );
@@ -207,7 +207,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 					flag = mmyisam->safeCommitExit(qctx);
 					responseJson["QueryID"] = qctx->id();
 					responseJson["status"] = flag;
-					
+
 					// レスポンスSBのセットアップ
 					std::shared_ptr<unsigned char> dumpedJsonRaw; size_t dumpedJsonRawLength;
 					dumpedJsonRawLength = dumpToSBBody( responseJson , &dumpedJsonRaw );
@@ -222,7 +222,7 @@ void DatabaseManager::startWithLightMode( std::shared_ptr<StreamBufferContainer>
 					flag = mmyisam->safeAbortExit(qctx);
 					responseJson["QueryID"] = qctx->id();
 					responseJson["status"] = flag;
-  
+
 					// レスポンスSBのセットアップ
 					std::shared_ptr<unsigned char> dumpedJsonRaw; size_t dumpedJsonRawLength;
 					dumpedJsonRawLength = dumpToSBBody( responseJson , &dumpedJsonRaw );

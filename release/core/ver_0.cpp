@@ -48,12 +48,20 @@
 #include "../../miya_core/miya_core.h"
 #include "../../miya_chain/virtual_chain/virtual_chain.h"
 
+#include "../../test/miya_chain/common.cpp"
+#include "../../test/miya_chain/virtual_chain_p1.cpp"
+#include "../../test/miya_chain/build_sample_chain_p1.cpp"
+
 
 int main()
 {
+	virtual_chain_p1();
+	return 0;
+
+
 	std::cout << " WELCOME TO MIYA COIN CLIENT [ MIYA_CORE ] " << "\n";
 
-	
+
 	/*
 	miya_core::MiyaCore	miyaCore;
 	cipher::ECDSAManager ecdsaManager;
@@ -132,7 +140,7 @@ int main()
 
 
 
-	
+
 	// -------- [ 必須セットアップ ] ------------------------------------------------------------------------------------------------------
 	miya_core::MiyaCore miyaCore;
 
@@ -183,7 +191,7 @@ int main()
 
 
 
-	
+
 	std::shared_ptr<tx::P2PKH> p2pkh_0001 = interface.createTxFromJsonFile("../control_interface/tx_origin/payment_genesis.json");
 	for( auto itr : p2pkh_0001->ins() ){
 		itr->pkey( ecdsaManager.myPkey() );
@@ -194,7 +202,7 @@ int main()
 	memcpy( coinbase_0001_text.get() , "HelloWorld" , 10 );
 	tx::Coinbase coinbase_0001( 0 , coinbase_0001_text , 10 , selfAddress , miyaCore.context() );
 
-	
+
 	block::Block block_0001;
 	block_0001.coinbase( std::make_shared<tx::Coinbase>(coinbase_0001) );
 	block_0001.add( p2pkh_0001 );
@@ -299,7 +307,7 @@ int main()
 	*/
 
 
-
+	/*
 	std::cout << "\n\n\n\n========================================================" << "\n";
 
 
@@ -347,7 +355,7 @@ int main()
 	std::condition_variable cv;
 	std::unique_lock<std::mutex> lock(mtx);
 	cv.wait( lock );
-
+	*/
 
 	return 0;
 
@@ -368,10 +376,10 @@ int main()
 	}
 	std::cout << "p2pkh_0001 sign :: " << p2pkh_0001->sign() << "\n";
 	std::cout << "p2pkh_0001 txout count :: " << p2pkh_0001->outCount() << "\n";
-	std::shared_ptr<unsigned char> p2pkh_0001_ID; 
+	std::shared_ptr<unsigned char> p2pkh_0001_ID;
 	p2pkh_0001->calcTxID( &p2pkh_0001_ID );
 
-	
+
 	std::shared_ptr<miya_chain::UTXO> dummyUTXO = std::make_shared<miya_chain::UTXO>( p2pkh_0001->outs().at(0) , p2pkh_0001_ID  ,0 );
 	std::cout << "dummy UTXO amout :: " << dummyUTXO->amount() << "\n";
 	std::cout << "dummy UTXO txID :: ";
@@ -389,7 +397,7 @@ int main()
 	std::shared_ptr<unsigned char> coinbase_0002Text = std::shared_ptr<unsigned char>( new unsigned char[10] );
 	memcpy( coinbase_0002Text.get() , "HelloWorld", 10 );
 	tx::Coinbase coinbase_0002( 2 , coinbase_0002Text , 10 , selfAddress , miyaCore.context() );
-	
+
 	block::Block block_0002;
 	block_0002.coinbase( std::make_shared<tx::Coinbase>(coinbase_0002) );
 	block_0002.add( p2pkh_0001 );
@@ -408,11 +416,11 @@ int main()
 	uint32_t nonce_0002 = miya_chain::simpleMining( nBits_0002 , block_0002.header(), false );
 	block_0002.header()->nonce( nonce_0002 );
 	block_0002.header()->print();
-	
+
 	std::shared_ptr<unsigned char> block_0002Hash;
 	block_0002.blockHash( &block_0002Hash );
 
-	
+
 	localStrageManager->writeBlock( std::make_shared<block::Block>(block_0002) );
 	auto readedBlock = localStrageManager->readBlock( block_0002Hash );
 	auto utxoVector = localStrageManager->readUndo( block_0002Hash );
@@ -420,14 +428,14 @@ int main()
 
 
 	std::cout << "------------------------------------------" << "\n";
-	
-	
+
+
 	std::shared_ptr<unsigned char> temp;
 	readedBlock->blockHash( &temp );
 	for( int i=0; i<32; i++) {
 		printf("%02X", temp.get()[i]);
 	} std::cout << "\n";
-	
+
 
 	for( auto itr : utxoVector )
 	{

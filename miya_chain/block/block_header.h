@@ -64,7 +64,6 @@ private:
 	uint32_t _nBits; // 採掘難易度 目標のnonce値
 	uint32_t _nonce; // ナンス値
 
-
 public:
 	BlockHeader();
 	void merkleRoot( std::shared_ptr<unsigned char> target );

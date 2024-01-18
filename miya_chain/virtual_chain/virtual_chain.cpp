@@ -11,6 +11,7 @@
 #include "../daemon/requester/requester.h"
 
 #include "../block/block.h"
+#include "../block/block_header.h"
 #include "../transaction/coinbase/coinbase.h"
 
 #include "../message/message.h"
@@ -21,54 +22,142 @@
 #include "../utxo_set/utxo_set.h"
 #include "../miya_coin/local_strage_manager.h"
 
+#include "./virtual_subchain_manager.h"
+#include "./virtual_subchain.h"
+
+
 
 namespace miya_chain
 {
 
 
 
-BDBCB::BDBCB()
+
+
+
+VirtualChain::VirtualChain( BlockChainIterator initialForkPoint ) : _forkPoint(initialForkPoint)
 {
-	block = std::make_shared<block::Block>();
-	status = static_cast<int>(BDState::Empty);
+	_forkPoint = initialForkPoint;
+	_filter = std::shared_ptr<BDFilter>( new BDFilter() );
+	_subChainManager = std::shared_ptr<VirtualSubChainManager>( new VirtualSubChainManager( initialForkPoint.header() ) );
 }
 
 
-void BDBCB::header( std::shared_ptr<block::BlockHeader> target ) // 使わなくても良い
+void VirtualChain::startBlockHashDownloader()
 {
-	block->header( target );
+  assert( _subChainManager != nullptr );
+
+  std::thread blockHashDownloader([&]()
+  {
+  });
 }
 
 
-std::shared_ptr<unsigned char> BDBCB::blockHash() const
+void VirtualChain::startBlockHeaderDownloader()
 {
-	std::shared_ptr<unsigned char> ret;
-	// block->blockHash( &ret );
-	block->header()->headerHash( &ret );
-	return ret;
-}
+  assert( _subChainManager != nullptr );
 
-std::shared_ptr<unsigned char> BDBCB::prevBlockHash() const
-{
-	return block->header()->prevBlockHash();
-}
-
-void BDBCB::print()
-{
-	std::cout << "blockHash :: ";
-	std::shared_ptr<unsigned char> blockHash;
-	block->blockHash( &blockHash );
-	for( int i=0; i<32; i++){
-		printf("%02X", blockHash.get()[i]);
-	} std::cout << "\n";
-
-	std::cout << "height :: " << static_cast<size_t>(height) << "\n";
-
-	std::cout << "status :: " << status << "\n";
-
+  std::thread blockHeaderDownloader([&]()
+  {
+	  std::mutex mtx;
+	  std::condition_variable cv;
+	  std::unique_lock<std::mutex> lock(mtx);
+	  cv.wait_for( lock , std::chrono::seconds(5) , [&]{ // trueで解除
+		return (_blockHashPool._pool.size() != 0 );
+	  });
+	return;
+  });
+  return;
 }
 
 
+void VirtualChain::send( MiyaChainCommand commandBody , auto command )
+{
+  std::unique_ptr<SBSegment> requestSB = std::make_unique<SBSegment>();
+  requestSB->options.option1 = commandBody;
+  requestSB->options.option2 = command;
+
+  requestSB->sendFlag( ekp2p::EKP2P_SEND_BROADCAST );
+  requestSB->forwardingSBCID(DEFAULT_DAEMON_FORWARDING_SBC_ID_REQUESTER);
+  _toRequesterSBC->pushOne( std::move(requestSB) );
+}
+
+
+void VirtualChain::add( std::vector<std::shared_ptr<block::BlockHeader>> targetVector )
+{
+  std::vector< std::shared_ptr<block::BlockHeader> > duplicateHeaders;
+  std::shared_ptr<struct BDBCB> filterCtx;
+  std::pair< bool , short > poolCtx;
+
+  // 1. 各headerの追加
+  // 2. subchainの延長通知
+  for( auto itr : targetVector )
+  {
+	filterCtx = _filter->filter( itr );
+	if( filterCtx == nullptr ) continue; // フィルターに引っかかった場合はcontinue
+	if( filterCtx->status() >= static_cast<int>(BDState::BlockHeaderReceived) ) continue; // 既に対象要素に対する処理が終わっている場合はcontinueする
+
+	poolCtx = this->_blockHeaderPool.push( itr );
+	if( poolCtx.first && poolCtx.second > 1 ) // 追加成功 && 追加後の要素数が2以上 => 重複追加
+	  duplicateHeaders.push_back( itr ); // 重複した要素は保存しておく
+
+	filterCtx->status( static_cast<int>(BDState::BlockHeaderReceived) ); // headerPoolに追加したらFilter要素の状態を更新する
+  }
+
+  // headerPoolからのheader取得用callback関数の生成
+  std::function<std::vector<std::shared_ptr<block::BlockHeader>>(std::shared_ptr<unsigned char>)> findCallback = std::bind(
+																												  &BlockHeaderPool::find,
+																												  std::ref(_blockHeaderPool),
+																												  std::placeholders::_1
+  );
+
+
+  for( auto itr : duplicateHeaders )
+	_subChainManager->build( findCallback ,itr ); // 重複ブロックが存在した場合は仮想チェーンを作成する
+
+  _subChainManager->extend( findCallback ); // headerPoolに更新があった旨をsubchainに通知し,subchainの延長を試みる
+
+  return;
+}
+
+
+
+
+
+/*
+void VirtualChain::add( std::shared_ptr<block::BlockHeader> target ) // 新規に追加したブロックヘッダーを追加
+{
+  std::shared_ptr<struct BDBCB> filterRet;
+  filterRet = _filter->filter( target );
+  if( filterRet == nullptr ) return; // フィルターされていなければ無視する
+
+  switch( filterRet->status() )
+  {
+	case static_cast<int>(BDState::BlockHashReceived) :
+	{
+	  std::pair<bool,short> pushCtx = _blockHeaderPool.push( target );
+	  filterRet->status( static_cast<int>(BDState::BlockHeaderReceived) ); // ステータスの更新
+
+	  if( pushCtx.first ) // 追加時に重複した場合はその要素までのチェーンを構築する
+	  {
+		std::function<std::vector<std::shared_ptr<block::BlockHeader>>(std::shared_ptr<unsigned char>)> findCallback = std::bind(
+				&BlockHeaderPool::find,
+				std::ref(_blockHeaderPool),
+				std::placeholders::_1
+			);
+		_subChainManager->build( findCallback , target );
+	  }
+	  break;
+	}
+	default:
+	{
+	  break;
+	}
+  }
+
+  return;
+}
+*/
 
 
 
@@ -76,6 +165,17 @@ void BDBCB::print()
 
 
 
+
+
+
+
+
+
+
+
+
+
+/*
 void BDVirtualChain::IncompleteBlockVector::push( VirtualMiyaChain::iterator target )
 {
 	std::unique_lock<std::shared_mutex> lock(_mtx);
@@ -115,7 +215,7 @@ size_t BDVirtualChain::IncompleteBlockVector::size()
 BDVirtualChain::BDVirtualChain( std::shared_ptr<LightUTXOSet> utxoSet , std::shared_ptr<BlockLocalStrageManager> localStrageManager ,std::shared_ptr<block::Block> startBlock, std::shared_ptr<unsigned char> stopHash )
 {
 	_bdFilter = std::make_shared<BDFilter>( this );
-	std::this_thread::sleep_for(std::chrono::milliseconds(300)); 
+	std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
 	// 仮想チェーンの初期化 : 基準となるブロックを追加する これ以降のブロックが収集&検証される
 	std::vector<struct BDBCB> initialBCBVector;
@@ -139,16 +239,16 @@ BDVirtualChain::BDVirtualChain( std::shared_ptr<LightUTXOSet> utxoSet , std::sha
 	assert( utxoSet != nullptr );
 	_utxoSet = utxoSet;
 	_utxoSet->toVirtual();
-	
+
 }
 
 
 
 BDVirtualChain::BDVirtualChain( std::shared_ptr<LightUTXOSet> utxoSet , std::shared_ptr<BlockLocalStrageManager> localStrageManager , std::shared_ptr<block::Block> startBlock , std::vector<std::shared_ptr<block::BlockHeader>> headerVector )
 {
-	
+
 	_bdFilter = std::make_shared<BDFilter>( this );
-	std::this_thread::sleep_for(std::chrono::milliseconds(300)); 
+	std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
 	std::vector< struct BDBCB > initialBCBVector;
 	struct BDBCB initialBCB;
@@ -175,7 +275,7 @@ BDVirtualChain::BDVirtualChain( std::shared_ptr<LightUTXOSet> utxoSet , std::sha
 
 	_currentStartHash = startHash;
 	_stopHash = stopHash;
-	
+
 	assert( localStrageManager != nullptr );
 	_localStrageManager = localStrageManager;
 
@@ -226,7 +326,7 @@ void BDVirtualChain::requestedExtendChain( std::function<struct BDBCB( std::shar
 	printf("%p\n", _stopHash.get() );
 	if( _stopHash != nullptr )
 		if( memcmp( chainHeadHash.get(), _stopHash.get() , 32 ) == 0  ) return; // 仮想チェーンがストップハッシュに達していたら何もしない
-	
+
 	std::cout << "--- 2 ---" << "\n";
 	popedCB = findPopCallback( chainHeadHash ); //prevがchainHeadHashを指すブロックを取得する
 	if( popedCB.status == static_cast<int>(BDState::Empty) ) return;
@@ -237,7 +337,7 @@ void BDVirtualChain::requestedExtendChain( std::function<struct BDBCB( std::shar
 	std::shared_ptr<unsigned char> blockHash;
 	blockHash = popedCB.blockHash();
 	std::shared_ptr<struct BDBCB> newChainHeadCB = std::make_shared<struct BDBCB>(popedCB);
-	_chainVector.push_back( std::make_pair( blockHash/* ブロックハッシュ */ , newChainHeadCB )); // 仮想チェーンを伸ばす
+	_chainVector.push_back( std::make_pair( blockHash , newChainHeadCB )); // 仮想チェーンを伸ばす
 	_incompleteBlockVector.push( _chainVector.end() - 1 ); // 未ダウンロードリストに追加する
 	_bdFilter->updateBlockPtr( newChainHeadCB ); // フィルタに直ポインタを設定する
 }
@@ -291,7 +391,7 @@ void BDVirtualChain::blockHeaderDownloader( std::shared_ptr<StreamBufferContaine
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(900));
 			_currentStartHash = this->chainHeadHash();
-			/* 本来はここでkademliaIteratorを操作して送信相手を変更する */
+			// 本来はここでkademliaIteratorを操作して送信相手を変更する
 			continue;
 		}
 	}
@@ -415,7 +515,7 @@ bool BDVirtualChain::startSequentialAssemble( std::shared_ptr<StreamBufferContai
 		if( !(itr->second->block->verify(_utxoSet)) ) return false; // 実際にはここでfalutだとブロック本体の再送を要求する
 		itr->second->status = static_cast<int>(BDState::BlockBodyValidated);
 	}
-	
+
 	std::cout << "ローカルへ保存します" << "\n";
 	return this->mergeToLocalChain(); // ローカルへ保存
 }
@@ -489,6 +589,12 @@ size_t BDVirtualChain::chainLength()
 	return _incompleteBlockVector.size();
 }
 
+
+
+
+
+
+
 void BDVirtualChain::printFilter()
 {
 	return _bdFilter->printFilter();
@@ -503,7 +609,7 @@ void BDVirtualChain::printMergePendingQueue()
 {
 	return _bdFilter->printMergePendingQueue();
 }
-
+*/
 
 
 

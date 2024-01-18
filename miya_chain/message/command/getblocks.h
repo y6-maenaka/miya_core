@@ -7,6 +7,12 @@
 #include <iostream>
 #include <string.h> // for use memset() on LinuxOS
 
+
+namespace block
+{
+	struct BlockHeader;
+}
+
 namespace miya_chain
 {
 
@@ -33,6 +39,7 @@ public:
     static constexpr char command[12] = "getblocks";
 
 		MiyaChainMSG_GETBLOCKS( size_t hashCount = 200 );
+		MiyaChainMSG_GETBLOCKS( std::shared_ptr<block::BlockHeader> startHashHeader /* このヘッダーをprevHashにとるblock(blockHash)をリクエストする*/ ,size_t hashCount = 200 ); //　コマンド作成時は基本的にこれを使う
 
 		/* Getter*/
 		size_t hashCount();

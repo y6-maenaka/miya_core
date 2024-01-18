@@ -93,7 +93,7 @@ unsigned int Block::calcMerkleRoot( std::shared_ptr<unsigned char> *ret )
 
 	std::function<std::vector<std::shared_ptr<unsigned char>>(std::vector<std::shared_ptr<unsigned char>>)> calcRoot = [&]( std::vector<std::shared_ptr<unsigned char>> txIDVector ){
 		if( txIDVector.size() <= 1 ) return txIDVector;
-		
+
 		std::vector< std::shared_ptr<unsigned char>> altTxVector; // 代替ベクター
 		std::shared_ptr<unsigned char> joinedTxID = std::shared_ptr<unsigned char>( new unsigned char[32*2] );
 		std::shared_ptr<unsigned char> hashedJoinedTxID; unsigned int hashedJoinedTxIDLength;
@@ -189,6 +189,19 @@ bool Block::verify( std::shared_ptr<miya_chain::LightUTXOSet> utxoSet )
 	// 5. コインベーストランザクションの宝珠確認
 	// 6. マージン(prev_out)との関係
 	// 7. スクリプトの実行
+}
+
+
+void Block::__printBlockHash()
+{
+	std::shared_ptr<unsigned char> blockHash; size_t blockHashLength;
+	blockHashLength = this->blockHash( &blockHash );
+	std::cout << "Block Hash :: ";
+	std::cout << "\x1b[33m";
+	for( int i=0; i<blockHashLength; i++ ){
+		printf("%02X", blockHash.get()[i]);
+	} std::cout << "\n";
+	std::cout << "\x1b[39m";
 }
 
 

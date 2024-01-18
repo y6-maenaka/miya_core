@@ -39,9 +39,6 @@ size_t MiyaCoreContext::pemPass( std::shared_ptr<unsigned char> *ret )
 
 
 
-
-
-
 MiyaCore::MiyaCore()
 {
     _context = std::make_shared<MiyaCoreContext>();

@@ -75,7 +75,8 @@ public:
 									 std::shared_ptr<BlockLocalStrageManager> localStrageManager // ブロック保存用
 									);
 	int start();
-
+  
+	void accidentFork(); // 偶発的に発生するフォーク
 };
 
 

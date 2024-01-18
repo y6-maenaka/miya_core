@@ -16,6 +16,7 @@ namespace miya_chain
 namespace block
 {
   struct Block;
+	struct BlockHeader;
 }
 
 
@@ -37,7 +38,7 @@ private:
 	std::shared_ptr<block::Block> _body = nullptr;
 	// std::shared_ptr<unsigned char> _blockHashCache;
 	std::shared_ptr<miya_chain::BlockLocalStrageManager> _localStrageManager = nullptr;
-	bool setupFromBlockHash( std::shared_ptr<unsigned char> from ); // 実質的なコンスト楽
+	bool setupFromBlockHash( std::shared_ptr<unsigned char> from ); // 実質的なコンストラクタ
 
   struct // 毎回bodyから取得するのは面倒だからキャッシュを設ける
   {
@@ -51,13 +52,16 @@ public:
 
 	std::shared_ptr<block::Block> operator*(); // デリファレンス
 	BlockChainIterator &operator--(); // ブロックチェーンの逆方向参照
+	std::shared_ptr<BlockChainIterator> prev();
 
+	std::shared_ptr<block::BlockHeader> header();
 	std::shared_ptr<unsigned char> blockHash() const;
 	long long height() const;
 
 	bool operator==( const BlockChainIterator &si ) const;
 	bool operator!=( const BlockChainIterator &si ) const;
 
+	void __printHeader();
 };
 
 

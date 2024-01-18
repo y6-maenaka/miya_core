@@ -6,8 +6,9 @@
 #include <iostream>
 #include <chrono>
 #include <vector>
-#include <unordered_map>  
+#include <unordered_map>
 #include <cassert>
+#include <filesystem>
 
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -69,7 +70,7 @@ private:
 		uint32_t _heigth = 0;
 		uint32_t _timestamp;
 		unsigned char _version[4];  // ここではないかも
-	
+
 		std::shared_ptr<unsigned char> blockHash();
 	} __attribute__((packed));
 
@@ -87,8 +88,7 @@ public:
 	~MiyaChainState();
 
 	void update( std::shared_ptr<unsigned char> blockHash , unsigned short height ); // ファイルにも書き込む
-	std::shared_ptr<BlockChainIterator> blockChainIterator();
-
+	std::shared_ptr<BlockChainIterator> latestBlockIterator();
 };
 
 
@@ -105,13 +105,13 @@ private:
 	miya_db::DatabaseManager _dbManager;
 
 	/* SBSegment ルーティング設定 */
-	struct 
+	struct
 	{
 		std::shared_ptr<StreamBufferContainer> _toBrokerSBC;
 		std::shared_ptr<MiyaChainBrocker> _broker;
 	} _brokerDaemon;
 
-	struct 
+	struct
 	{
 		std::shared_ptr<StreamBufferContainer> _toRequesterSBC;
 		std::shared_ptr<MiyaChainRequester> _requester;
@@ -119,20 +119,20 @@ private:
 
 
 	/* データベース関連 */
-	struct 
+	struct
 	{
 		std::shared_ptr<StreamBufferContainer> _toBlockIndexDBSBC;
 		std::shared_ptr<StreamBufferContainer> _fromBlockIndexDBSBC;
 	} _blockIndexDB;
 
-	struct 
+	struct
 	{
 		std::shared_ptr<StreamBufferContainer> _toUTXOSetDBSBC;
 		std::shared_ptr<StreamBufferContainer> _fromUTXOSetDBSBC;
-	} _utxoSetDB; 
+	} _utxoSetDB;
 
 	struct  // ローカルストレージマネージャーへの呼び出しは現在の実装では同期的に行われる
-	{ 
+	{
 		std::shared_ptr<BlockLocalStrageManager> _strageManager;
 	} _localStrageManager;
 
@@ -151,7 +151,7 @@ public:
 	// first : toBlockIndexDBSBC ,  second : fromBlockIndexDBSBC
 	std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferContainer>> blockIndexDBSBCPair();
 	// first : toUTxOSetDBSBC , second : fromUTxOSetDBSBC ※ UTxOデータベースとのやり取りは基本的にUTxOSet(クライアント)を使う事
-	std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferContainer>> utxoSetDBSBCPair(); 
+	std::pair<std::shared_ptr<StreamBufferContainer>, std::shared_ptr<StreamBufferContainer>> utxoSetDBSBCPair();
 	std::shared_ptr<MiyaChainState> chainState();
 	std::shared_ptr<LightUTXOSet> utxoSet();
 
@@ -171,6 +171,3 @@ public:
 
 
 #endif // F9D3E3DD_AAEF_4D7F_9063_874CB7AF3E55
-
-
-

@@ -120,7 +120,7 @@ std::shared_ptr<unsigned char> BlockHeader::prevBlockHash()
 	std::shared_ptr<unsigned char> ret = std::shared_ptr<unsigned char>( new unsigned char[sizeof(_previousBlockHeaderHash)] );
 
 	unsigned char addrZero[32]; memset( addrZero, 0x00 , sizeof(addrZero));
-	if( memcpy( _previousBlockHeaderHash , addrZero , 32 ) == 0 )  return nullptr;
+	if( memcmp( _previousBlockHeaderHash , addrZero , 32 ) == 0 ) return nullptr;
 
 	memcpy( ret.get() , _previousBlockHeaderHash, sizeof(_previousBlockHeaderHash) );
 	return ret;
