@@ -27,20 +27,28 @@ class VirtualSubChain;
 
 
 
+
+
 class VirtualSubChainManager
 {
 private:
   std::unordered_set< VirtualSubChain, VirtualSubChain::Hash > _subchainSet; // subchain unordered set
-  // const std::variant< std::shared_ptr<block::Block>, std::shared_ptr<block::BlockHeader> > _startBlock;
+  
   const std::shared_ptr<block::BlockHeader> _startBlockHeader;
   uint32_t _updatedAt; // 最終更新(最後にサブチェーンの延長が発生した)タイムスタンプ
 
+  const BHPoolFinder _bhPoolFinder;
+  const PBHPoolFinder _pbhPoolFinder;
+
   // 管理下の仮想チェーンを全て延長する
 public:
-  VirtualSubChainManager( std::shared_ptr<block::BlockHeader> startBlockHeader );
+  VirtualSubChainManager( std::shared_ptr<block::BlockHeader> startBlockHeader , BHPoolFinder bhPoolFinder , PBHPoolFinder pbhPoolFinder );
 
-  void extend( std::function<std::vector<std::shared_ptr<block::BlockHeader>>(std::shared_ptr<unsigned char>)> popCallback );
-  void build( std::function<std::vector<std::shared_ptr<block::BlockHeader>>(std::shared_ptr<unsigned char>)> popCallback , std::shared_ptr<block::BlockHeader> stopHeader ); // 新たに仮想チェーンを作成して,重複がなければ管理下に追加する
+  void extend( bool collisionAction = false );
+  void build( std::shared_ptr<block::BlockHeader> stopHeader ); // 新たに仮想チェーンを作成して,重複がなければ管理下に追加する
+
+  
+  void __printSubChainSet();
 };
 
 

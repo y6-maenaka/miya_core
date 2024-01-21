@@ -2,6 +2,7 @@
 
 #include "./virtual_chain.h"
 #include "./bd_filter.h"
+#include "../block/block_header.h"
 
 
 
@@ -11,15 +12,21 @@ namespace miya_chain
 
 
 
-BlockHashAsKey::BlockHashAsKey( unsigned char* target )
+BlockHashAsKey::BlockHashAsKey( unsigned char* from )
 {
-  if( target == nullptr ) return;
-  memcpy( _blockHash , target , sizeof(_blockHash) );
+  if( from == nullptr ) return;
+  memcpy( _blockHash , from , sizeof(_blockHash) );
 }
 
-BlockHashAsKey::BlockHashAsKey( std::shared_ptr<unsigned char> target ) : BlockHashAsKey(target.get())
+BlockHashAsKey::BlockHashAsKey( std::shared_ptr<unsigned char> from ) : BlockHashAsKey(from.get())
 {
   return;
+}
+
+BlockHashAsKey::BlockHashAsKey( std::shared_ptr<block::BlockHeader> fromHeader )
+{
+  std::shared_ptr<unsigned char> blockHash = fromHeader->headerHash();
+  memcpy( _blockHash, blockHash.get() , sizeof(_blockHash));
 }
 
 

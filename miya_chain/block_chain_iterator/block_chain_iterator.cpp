@@ -91,10 +91,15 @@ std::shared_ptr<BlockChainIterator> BlockChainIterator::prev()
 	return ret;
 }
 
+std::shared_ptr<block::Block> BlockChainIterator::block()
+{
+  return _body;
+}
+
 std::shared_ptr<block::BlockHeader> BlockChainIterator::header()
 {
-	if( _body == nullptr ) return nullptr;
-	return _body->header();
+  if( _body == nullptr ) return nullptr;
+  return _body->header();
 }
 
 std::shared_ptr<unsigned char> BlockChainIterator::blockHash() const

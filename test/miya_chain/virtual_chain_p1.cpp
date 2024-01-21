@@ -1,5 +1,6 @@
 #include <iostream>
 #include <memory>
+#include <vector>
 
 #include "./common.h"
 
@@ -46,7 +47,6 @@ int virtual_chain_p1()
   build_sample_chain_p1( miyaCore, controlInterface , ecdsaManager, miyaChainManager );
 
   std::shared_ptr<miya_chain::BlockChainIterator> latestBlockItr = miyaChainManager->chainState()->latestBlockIterator();
-  std::shared_ptr<miya_chain::VirtualChain> virtualChain = std::shared_ptr<miya_chain::VirtualChain>( new miya_chain::VirtualChain( *latestBlockItr ) );
 
 
   std::shared_ptr<unsigned char> prevBlockHash_0000 = latestBlockItr->blockHash();
@@ -130,7 +130,25 @@ int virtual_chain_p1()
 
 
 
+  std::cout << "\n\n\n\n\n\n\n";
+  std::cout << "-----------------------------" << "\n";
 
+
+  std::shared_ptr<miya_chain::VirtualChain> virtualChain = std::shared_ptr<miya_chain::VirtualChain>( new miya_chain::VirtualChain( *latestBlockItr ) );
+
+  std::cout << "これ -> "; block_0000->__printPrevBlockHash();
+
+  std::vector< std::shared_ptr<block::BlockHeader> > requestHeaderVector;
+  requestHeaderVector.push_back( block_0000->header() );
+  requestHeaderVector.push_back( block_0001->header() );
+
+
+  std::cout << "%%%% :: "; latestBlockItr->block()->__printPrevBlockHash();
+  virtualChain->add( requestHeaderVector );
+
+
+
+  virtualChain->__printState();
   std::cout << "Done" << "\n";
 
   return 0;

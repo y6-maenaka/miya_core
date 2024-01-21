@@ -58,6 +58,9 @@ constexpr unsigned int DEFAULT_BD_MAX_TIMEOUT_COUNT = 4;
 
 // first: blockHash , second: ブロック管理ブロック
 using VirtualMiyaChain = std::vector< std::pair< std::shared_ptr<unsigned char>, std::shared_ptr<struct BDBCB>> >;
+using BHPoolFinder = std::function< std::shared_ptr<block::BlockHeader>(std::shared_ptr<unsigned char>)>;
+using PBHPoolFinder = std::function< std::vector<std::shared_ptr<block::BlockHeader>>(std::shared_ptr<unsigned char>)>;
+
 
 
 
@@ -89,10 +92,19 @@ private:
 
   struct BlockHeaderPool
   {
-	  std::unordered_multimap< PrevBlockHashAsKey , std::shared_ptr<block::BlockHeader>, PrevBlockHashAsKey::Hash > _pool;
+	private: // リソース効率は良くない
+	  std::unordered_map< BlockHashAsKey , std::shared_ptr<block::BlockHeader>, BlockHashAsKey::Hash > _pool_blockHsah;
+	  std::unordered_multimap< PrevBlockHashAsKey , std::shared_ptr<block::BlockHeader>, PrevBlockHashAsKey::Hash > _pool_prevBlockHash;
 
+	public:
 	  std::pair<bool, short> push( std::shared_ptr<block::BlockHeader> target ); // (戻り値) : 重複 or 非重複
-	  std::vector< std::shared_ptr<block::BlockHeader> > find( std::shared_ptr<unsigned char> prevBlockHash );
+	  
+	  std::shared_ptr<block::BlockHeader> findByBlockHash( std::shared_ptr<unsigned char> blockHash );
+	  std::vector< std::shared_ptr<block::BlockHeader> > findByPrevBlockHash( std::shared_ptr<unsigned char> prevBlockHash ); 
+	  // 分岐によっては前ブロックを参照するブロックが複数あるケースも
+
+	  void __printPoolSortWithBlockHash();
+	  void __printPoolSortWithPrevBlockHash();
   } _blockHeaderPool;
 
 
@@ -108,6 +120,8 @@ public:
 
   // void add( std::shared_ptr<block::BlockHeader> target ); // 外部ノードから到着したブロックヘッダー
   void add( std::vector<std::shared_ptr<block::BlockHeader>> targetVector ); // headersレスポンスなどが帰ってくる場合
+
+  void __printState();
 };
 
 

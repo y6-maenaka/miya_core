@@ -17,47 +17,81 @@ BDFilter::BDFilter()
 }
 
 
-
-
 std::shared_ptr<struct BDBCB> BDFilter::filter( std::shared_ptr<unsigned char> target, bool isReject )
 {
+  if( _isClose ) return nullptr;
+
   struct BlockHashAsKey key( target ); // targetよりキーの作成
 
   auto findRet = _filter.find( key );
-  if( findRet == _filter.end() && isReject ) // 要素が存在せず, isRejectがfalseであれば要素を追加する
+  if( findRet == _filter.end() && !(isReject) ) // 要素が存在せず, isRejectがfalseであれば要素を追加する
   {
 	std::shared_ptr<struct BDBCB> newValue = std::shared_ptr<struct BDBCB>( new BDBCB(target) );
 	auto insertRet = _filter.insert( { key , newValue } );
-	if( insertRet.second ) // 挿入に成功した場合
-	  return newValue; 
-	else 
-	  return nullptr;
+	if( insertRet.second ) return newValue; 
+	else return nullptr;
   }
-  else if( findRet == _filter.end() && !isReject ) return nullptr; // isRejectがtrueの場合は追加しない
+  else if( findRet == _filter.end() && isReject ) return nullptr; // isRejectがtrueの場合は追加しない
 
   return findRet->second;
+}
+
+std::shared_ptr<struct BDBCB> BDFilter::filter( std::shared_ptr<block::Block> target , bool isReject )
+{
+  if( _isClose ) return nullptr;
+
+  std::shared_ptr<unsigned char> targetHash; targetHash = target->blockHash();
+  struct BlockHashAsKey key( targetHash );
+
+  auto findRet = _filter.find( key );
+  if( findRet == _filter.end() && !(isReject) ) // 要素が見つからない
+  {
+	std::shared_ptr<struct BDBCB> newValue = std::shared_ptr<struct BDBCB>( new BDBCB(target) );
+	auto insertRet = _filter.insert( {key, newValue});
+	if( insertRet.second ) return newValue; // 挿入に成功した場合
+	else return nullptr; 
+  }
+  else if( findRet == _filter.end() && isReject ) return nullptr;
+
+  return findRet->second; // 要素が見つかった場合はそれを返す
 }
 
 
 std::shared_ptr<struct BDBCB> BDFilter::filter( std::shared_ptr<block::BlockHeader> target , bool isReject )
 {
+  if( _isClose ) return nullptr;
+
   std::shared_ptr<unsigned char> targetHash;  targetHash = target->headerHash();
   struct BlockHashAsKey key( targetHash );
-  
+
   auto findRet = _filter.find( key ); // 追加
-  if( findRet == _filter.end() && isReject )
+  if( findRet == _filter.end() && !(isReject) )
   {
 	std::shared_ptr<struct BDBCB> newValue = std::shared_ptr<struct BDBCB>( new BDBCB(target) );
 	auto insertRet = _filter.insert( { key, newValue } );
-	if( insertRet.second )
-	  return newValue;
-	else
-	  return nullptr;
+	if( insertRet.second ) return newValue;
+	else return nullptr;
   }
-  else if( findRet == _filter.end() && !isReject ) return nullptr;
+  else if( findRet == _filter.end() && isReject ) return nullptr;
 
   return findRet->second;  // 要素が格納されている場合
 }
+
+
+void BDFilter::__printFilter()
+{
+  int i=0;
+  for( auto itr : _filter ){
+	std::cout << "=======================================" << "\n";
+	itr.first.printHash();
+	itr.second->print();
+
+	std::cout << "\n\n";
+	i++;
+  }
+}
+
+
 
 
 /*

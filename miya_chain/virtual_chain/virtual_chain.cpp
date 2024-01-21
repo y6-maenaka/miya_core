@@ -38,8 +38,26 @@ namespace miya_chain
 VirtualChain::VirtualChain( BlockChainIterator initialForkPoint ) : _forkPoint(initialForkPoint)
 {
 	_forkPoint = initialForkPoint;
+
+	// フィルターのセットアップと初期ヘッダーの登録
 	_filter = std::shared_ptr<BDFilter>( new BDFilter() );
-	_subChainManager = std::shared_ptr<VirtualSubChainManager>( new VirtualSubChainManager( initialForkPoint.header() ) );
+	std::shared_ptr<block::Block> forkPointBlock = _forkPoint.block();
+	if( forkPointBlock == nullptr ) return;
+	_filter->filter( forkPointBlock );
+
+	BHPoolFinder bhPoolFinder = std::bind(
+										  &BlockHeaderPool::findByBlockHash,
+										  std::ref(_blockHeaderPool),
+										  std::placeholders::_1 );
+
+	PBHPoolFinder pbhPoolFinder = std::bind(
+											&BlockHeaderPool::findByPrevBlockHash,
+											std::ref(_blockHeaderPool),
+											std::placeholders::_1 );
+
+	_subChainManager = std::shared_ptr<VirtualSubChainManager>( new VirtualSubChainManager( initialForkPoint.header() , bhPoolFinder, pbhPoolFinder ) );
+  
+	return;
 }
 
 
@@ -95,7 +113,8 @@ void VirtualChain::add( std::vector<std::shared_ptr<block::BlockHeader>> targetV
   {
 	filterCtx = _filter->filter( itr );
 	if( filterCtx == nullptr ) continue; // フィルターに引っかかった場合はcontinue
-	if( filterCtx->status() >= static_cast<int>(BDState::BlockHeaderReceived) ) continue; // 既に対象要素に対する処理が終わっている場合はcontinueする
+	if( filterCtx->status() > static_cast<int>(BDState::BlockHeaderReceived) ) continue; // 既に対象要素に対する処理が終わっている場合はcontinueする
+
 
 	poolCtx = this->_blockHeaderPool.push( itr );
 	if( poolCtx.first && poolCtx.second > 1 ) // 追加成功 && 追加後の要素数が2以上 => 重複追加
@@ -104,22 +123,28 @@ void VirtualChain::add( std::vector<std::shared_ptr<block::BlockHeader>> targetV
 	filterCtx->status( static_cast<int>(BDState::BlockHeaderReceived) ); // headerPoolに追加したらFilter要素の状態を更新する
   }
 
-  // headerPoolからのheader取得用callback関数の生成
-  std::function<std::vector<std::shared_ptr<block::BlockHeader>>(std::shared_ptr<unsigned char>)> findCallback = std::bind(
-																												  &BlockHeaderPool::find,
-																												  std::ref(_blockHeaderPool),
-																												  std::placeholders::_1
-  );
+  _blockHeaderPool.__printPoolSortWithPrevBlockHash();
 
 
-  for( auto itr : duplicateHeaders )
-	_subChainManager->build( findCallback ,itr ); // 重複ブロックが存在した場合は仮想チェーンを作成する
+  for( auto itr : duplicateHeaders ){
+	std::cout << "新たにサブチェーンがビルドされます" << "\n";
+	_subChainManager->build( itr ); // 重複ブロックが存在した場合は仮想チェーンを作成する
+  }
 
-  _subChainManager->extend( findCallback ); // headerPoolに更新があった旨をsubchainに通知し,subchainの延長を試みる
+  _subChainManager->extend(); // headerPoolに更新があった旨をsubchainに通知し,subchainの延長を試みる
 
   return;
 }
 
+
+void VirtualChain::__printState()
+{
+  std::cout << "====== < 仮想チェーン内部状態 > ====== " << "\n";
+
+  _subChainManager->__printSubChainSet();
+  
+  std::cout << "-----------------------------------------" << "\n";
+} 
 
 
 

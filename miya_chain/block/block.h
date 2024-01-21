@@ -80,7 +80,7 @@ public:
 	uint32_t height();
 	bool verify( std::shared_ptr<miya_chain::LightUTXOSet> utxoSet );
 
-
+	void __printPrevBlockHash();
 	void __printBlockHash();
 };
 

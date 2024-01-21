@@ -16,8 +16,9 @@ struct BlockHashAsKey // filterのunordered_mapのキーとして使う
   unsigned char _blockHash[32];
   struct Hash;
  
-  BlockHashAsKey( unsigned char* target );
-  BlockHashAsKey( std::shared_ptr<unsigned char> target );
+  BlockHashAsKey( unsigned char* fromHash );
+  BlockHashAsKey( std::shared_ptr<unsigned char> fromHash );
+  BlockHashAsKey( std::shared_ptr<block::BlockHeader> fromHeader );
 
   bool operator==(const BlockHashAsKey& bh ) const;
   bool operator!=(const BlockHashAsKey& bh ) const;

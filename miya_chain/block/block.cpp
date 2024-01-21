@@ -205,5 +205,16 @@ void Block::__printBlockHash()
 }
 
 
+void Block::__printPrevBlockHash()
+{
+	std::shared_ptr<unsigned char> prevHash; size_t prevHashLength;
+	prevHash = _header->prevBlockHash();
+
+	for( int i=0; i<32; i++ )
+	{
+		printf("%02X", prevHash.get()[i] );
+	} std::cout << "\n";
+}
+
 
 };

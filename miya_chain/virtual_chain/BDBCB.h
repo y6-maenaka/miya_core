@@ -43,7 +43,6 @@ enum class BDState : int
 struct BDBCB // ( Block Donwload Block Control Block)
 {
 private:
-	std::shared_ptr<block::Block> _block = nullptr; // ブロック本体
 	std::variant< std::shared_ptr<block::Block> , std::shared_ptr<block::BlockHeader> > _body;
 	int _status;
 
@@ -51,24 +50,22 @@ private:
   {
       std::shared_ptr<unsigned char> _blockHash;
       uint32_t _height;
-
-      // void set( std::shared_ptr<block::Block> from );
-      // void set( std::shared_ptr<block::BlockHeader> from );
   } _blockCache;
 
 public:
   BDBCB( std::shared_ptr<unsigned char> fromBlockHash ); // ブロックハッシュから作成(StateはBlockHashReceived)
   BDBCB( std::shared_ptr<block::BlockHeader> fromBlockHeader );
+  BDBCB( std::shared_ptr<block::Block> fromBlock );
 
   int status();
   void status( int target );
   // 間接Getterメソッド
-	std::shared_ptr<unsigned char> blockHash() const; // キャッシュから呼び出す
-	unsigned int height();
-	std::shared_ptr<unsigned char> prevBlockHash() const;
+  std::shared_ptr<unsigned char> blockHash() const; // キャッシュから呼び出す
+  unsigned int height();
+  std::shared_ptr<unsigned char> prevBlockHash() const;
 
-	// debug
-	void print();
+  // debug
+  void print();
 };
 
 

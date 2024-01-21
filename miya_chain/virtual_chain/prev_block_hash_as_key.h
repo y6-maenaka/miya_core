@@ -29,6 +29,8 @@ struct PrevBlockHashAsKey
   bool operator!=(const PrevBlockHashAsKey& bh ) const;
 
   std::shared_ptr<unsigned char> prevBlockHash() const;
+
+  void __printHash() const;
 };
 
 struct PrevBlockHashAsKey::Hash {

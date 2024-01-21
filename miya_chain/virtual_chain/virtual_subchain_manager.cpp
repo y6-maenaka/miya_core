@@ -11,40 +11,72 @@ namespace miya_chain
 
 
 
-VirtualSubChainManager::VirtualSubChainManager( std::shared_ptr<block::BlockHeader> startBlockHeader ) : _startBlockHeader(startBlockHeader)
+VirtualSubChainManager::VirtualSubChainManager( std::shared_ptr<block::BlockHeader> startBlockHeader ,
+												BHPoolFinder bhPoolFinder,
+												PBHPoolFinder pbhPoolFinder
+) : _startBlockHeader(startBlockHeader) , _bhPoolFinder(bhPoolFinder), _pbhPoolFinder(pbhPoolFinder)
 {
-  return;
+  VirtualSubChain initialSubChain( _startBlockHeader, _bhPoolFinder, _pbhPoolFinder );
+
+
+  _subchainSet.insert( initialSubChain );
 }
 
-void VirtualSubChainManager::extend( std::function<std::vector<std::shared_ptr<block::BlockHeader>>(std::shared_ptr<unsigned char>)> popCallback )
+void VirtualSubChainManager::extend( bool collisionAction )
 {
   std::vector< VirtualSubChain > extendedVector;
-  for( auto itr : _subchainSet )
+  for( auto && itr : _subchainSet ){
 	extendedVector.push_back( itr );
-
-  for( auto itr : extendedVector )
+  }
+  
+  for( auto && itr : extendedVector )
   {
-	itr.extend( popCallback );  // 仮想チェーンを延長する
+	itr.extend( nullptr , collisionAction );
+  }
+  
+  _subchainSet.clear();
+
+  for( auto && itr : extendedVector )
+  {
+	_subchainSet.insert( itr );
   }
 
-  // 延長したsubChainで入れ替える 延長した結果仮想チェーンが重複した場合は削除する
-  _subchainSet.clear();
-  for( auto itr : extendedVector )
-	_subchainSet.insert( itr ); // 延長して同じ仮想チェーンになった場合は削除する
+  std::cout << "## サブチェーンマネージャーの延長処理が終了しました" << "\n";
 }
 
 
-void VirtualSubChainManager::build( std::function<std::vector<std::shared_ptr<block::BlockHeader>>(std::shared_ptr<unsigned char>)> popCallback , std::shared_ptr<block::BlockHeader> stopHeader )
+void VirtualSubChainManager::build( std::shared_ptr<block::BlockHeader> stopHeader )
 {
   // 新たに仮想チェーンを作成
-  VirtualSubChain newSubchain( _startBlockHeader );
-  newSubchain.extend( popCallback ); // 作成した仮想チェーンを伸ばせるだけ伸ばす
+  VirtualSubChain newSubchain( _startBlockHeader , _bhPoolFinder, _pbhPoolFinder );
+  newSubchain.extend(); // 作成した仮想チェーンを伸ばせるだけ伸ばす
 
   _subchainSet.insert( newSubchain ); // 既に存在するsubchainだった場合は管理下にせず破棄する
 }
 
 
+void VirtualSubChainManager::__printSubChainSet()
+{
+  std::cout << "SubChainCount :: " << _subchainSet.size() << "\n";
+  
+  for( auto __ : _subchainSet )
+  {
+	VirtualSubChain subChain = __;
+	auto _header = subChain.latestBlockHeader();
+	subChain.__printChainDigest();
 
+	auto exportedHeaderVector = subChain.exportChainVector();
+
+	std::cout << "仮想サブチェーンサイズ :: " << exportedHeaderVector.size() << "\n";
+	for( auto itr : exportedHeaderVector ){
+	  itr->print();
+	  std::cout << "---------------------------" << "\n";
+	}
+  }
+
+
+
+}
 
 
 

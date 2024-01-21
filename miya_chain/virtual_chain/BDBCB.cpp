@@ -10,9 +10,10 @@ namespace miya_chain
 
 
 
-BDBCB::BDBCB( std::shared_ptr<unsigned char> fromBlockHash ) : _block{nullptr}
+BDBCB::BDBCB( std::shared_ptr<unsigned char> fromBlockHash )
 {
   _blockCache._blockHash = fromBlockHash; 
+
   _status = static_cast<int>(BDState::BlockHashReceived);
 }
 
@@ -26,6 +27,19 @@ BDBCB::BDBCB( std::shared_ptr<block::BlockHeader> fromBlockHeader )
   _blockCache._blockHash = fromBlockHash;
 
   _status = static_cast<int>(BDState::BlockHeaderReceived); // ステータスの変更
+}
+
+BDBCB::BDBCB( std::shared_ptr<block::Block> fromBlock )
+{
+  _body = fromBlock;
+
+  // ブロックハッシュキャッシュをセット
+  std::shared_ptr<unsigned char> fromBlockHash;
+  fromBlockHash = fromBlock->blockHash();
+  _blockCache._blockHash = fromBlockHash;
+  _blockCache._height = fromBlock->height();
+
+  _status = static_cast<int>(BDState::BlockBodyReceived);
 }
 
 int BDBCB::status()
@@ -50,7 +64,8 @@ unsigned int BDBCB::height()
 
 std::shared_ptr<unsigned char> BDBCB::prevBlockHash() const
 {
-	return _block->header()->prevBlockHash();
+  return _blockCache._blockHash;
+  // return _body->header()->prevBlockHash();
 }
 
 
@@ -65,8 +80,7 @@ std::shared_ptr<unsigned char> BDBCB::prevBlockHash() const
 void BDBCB::print()
 {
 	std::cout << "blockHash :: ";
-	std::shared_ptr<unsigned char> blockHash;
-	_block->blockHash( &blockHash );
+	std::shared_ptr<unsigned char> blockHash = _blockCache._blockHash;
 	for( int i=0; i<32; i++){
 		printf("%02X", blockHash.get()[i]);
 	} std::cout << "\n";

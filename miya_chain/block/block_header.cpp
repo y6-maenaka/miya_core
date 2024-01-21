@@ -153,6 +153,12 @@ void BlockHeader::print()
 	std::cout << "[ Block Header Information ]" << "\n";
 	std::cout << "Version :: " << _version << "\n";
 
+	std::cout << "Header(Block) Hash :: ";
+	std::shared_ptr<unsigned char> headerHash = this->headerHash();
+	for( int i=0; i<32; i++ ){
+		printf("%02X", headerHash.get()[i] );
+	} std::cout << "\n";
+
 	std::cout << "PrevBlockID :: ";
 	for( int i=0; i<sizeof(_previousBlockHeaderHash); i++ ){
 		printf("%02X", _previousBlockHeaderHash[i] );

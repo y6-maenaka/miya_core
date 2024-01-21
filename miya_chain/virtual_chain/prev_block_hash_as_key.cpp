@@ -54,7 +54,13 @@ std::size_t PrevBlockHashAsKey::Hash::operator()(const PrevBlockHashAsKey& key) 
 	//ダブルハッシュになって非効率的だが,unsigned char[32]をsize_tに変換する術を知らない
 }
 
-
+void PrevBlockHashAsKey::__printHash() const
+{
+  for( int i=0; i< sizeof(_prevBlockHash); i++ )
+  {
+	printf("%02X", _prevBlockHash[i] );
+  } std::cout << "\n";
+}
 
 
 

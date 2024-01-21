@@ -14,6 +14,7 @@
 #include <chrono>
 
 #include "../message/message.h"
+#include "./virtual_chain.h"
 
 namespace block
 {
@@ -52,22 +53,29 @@ private:
 
   uint32_t _updatedAt; // チェーン最後尾が更新された時の時間
   void update();
-
+ 
+  const BHPoolFinder _bhPoolFinder;
+  const PBHPoolFinder _pbhPoolFinder;
 
 public: 
-  VirtualSubChain( std::shared_ptr<block::BlockHeader> startBlockHeader );
+  VirtualSubChain( std::shared_ptr<block::BlockHeader> startBlockHeader , BHPoolFinder bhPoolFinder , PBHPoolFinder pbhPoolFinder );
+
   size_t chainDigest( std::shared_ptr<unsigned char> *ret ) const;
   std::shared_ptr<unsigned char> chainDigest() const;
+  std::shared_ptr<block::BlockHeader> latestBlockHeader(); // あまり使用しない
 
   bool operator==( const VirtualSubChain &sc ) const;
   bool operator!=( const VirtualSubChain &sc ) const;
   struct Hash;
 
   uint32_t updatedAt() const;
-  void extend( std::function<std::vector<std::shared_ptr<block::BlockHeader>>(std::shared_ptr<unsigned char>)> popCallback , std::shared_ptr<unsigned char> stopHash = nullptr , int collisionAction = 0 ); // stopHashのチェーンに達したら延長を打ち切る
+  void extend( std::shared_ptr<unsigned char> stopHash = nullptr , int collisionAction = 0 ); // stopHashのチェーンに達したら延長を打ち切る
   MiyaChainCommand extendCommand(); // 本サブチェーンにつながるようなブロックリクエストコマンドを発行する
   
   std::vector< std::shared_ptr<block::BlockHeader> > exportChainVector(); // latestBlockHeaderから遡ってチェーンを生成する
+
+
+  void __printChainDigest();
 };
 
 

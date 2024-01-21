@@ -48,20 +48,21 @@ private:
 
 public:
   BlockChainIterator( std::shared_ptr<BlockLocalStrageManager> localStrageManager , std::shared_ptr<unsigned char> blockHash ); // ブロックボディの取得はコンストラクタ内で行う
-	BlockChainIterator( std::shared_ptr<miya_chain::BlockLocalStrageManager> localStrageManager , std::shared_ptr<block::Block> body ); // ブロック本体からイテレータを作成する
+  BlockChainIterator( std::shared_ptr<miya_chain::BlockLocalStrageManager> localStrageManager , std::shared_ptr<block::Block> body ); // ブロック本体からイテレータを作成する
 
-	std::shared_ptr<block::Block> operator*(); // デリファレンス
-	BlockChainIterator &operator--(); // ブロックチェーンの逆方向参照
-	std::shared_ptr<BlockChainIterator> prev();
+  std::shared_ptr<block::Block> operator*(); // デリファレンス
+  BlockChainIterator &operator--(); // ブロックチェーンの逆方向参照
+  std::shared_ptr<BlockChainIterator> prev();
 
-	std::shared_ptr<block::BlockHeader> header();
-	std::shared_ptr<unsigned char> blockHash() const;
-	long long height() const;
+  std::shared_ptr<block::Block> block();
+  std::shared_ptr<block::BlockHeader> header();
+  std::shared_ptr<unsigned char> blockHash() const;
+  long long height() const;
 
-	bool operator==( const BlockChainIterator &si ) const;
-	bool operator!=( const BlockChainIterator &si ) const;
+  bool operator==( const BlockChainIterator &si ) const;
+  bool operator!=( const BlockChainIterator &si ) const;
 
-	void __printHeader();
+  void __printHeader();
 };
 
 
