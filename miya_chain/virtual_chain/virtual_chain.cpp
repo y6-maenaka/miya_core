@@ -126,9 +126,12 @@ void VirtualChain::add( std::vector<std::shared_ptr<block::BlockHeader>> targetV
   _blockHeaderPool.__printPoolSortWithPrevBlockHash();
 
 
-  for( auto itr : duplicateHeaders ){
+  for( auto itr : duplicateHeaders )
+  {
 	std::cout << "新たにサブチェーンがビルドされます" << "\n";
 	_subChainManager->build( itr ); // 重複ブロックが存在した場合は仮想チェーンを作成する
+  
+	std::cout << "ビルド後延長処理 :: " << _subChainManager->subchainCount() << "\n";
   }
 
   _subChainManager->extend(); // headerPoolに更新があった旨をsubchainに通知し,subchainの延長を試みる

@@ -25,7 +25,8 @@ VirtualSubChainManager::VirtualSubChainManager( std::shared_ptr<block::BlockHead
 void VirtualSubChainManager::extend( bool collisionAction )
 {
   std::vector< VirtualSubChain > extendedVector;
-  for( auto && itr : _subchainSet ){
+  for( auto && itr : _subchainSet )
+  {
 	extendedVector.push_back( itr );
   }
   
@@ -47,13 +48,27 @@ void VirtualSubChainManager::extend( bool collisionAction )
 
 void VirtualSubChainManager::build( std::shared_ptr<block::BlockHeader> stopHeader )
 {
+  std::cout << "=== 1 ===" << "\n";
   // 新たに仮想チェーンを作成
   VirtualSubChain newSubchain( _startBlockHeader , _bhPoolFinder, _pbhPoolFinder );
+  newSubchain.build( stopHeader );
+  std::cout << "=== 2 ==="  << "\n";
   newSubchain.extend(); // 作成した仮想チェーンを伸ばせるだけ伸ばす
 
-  _subchainSet.insert( newSubchain ); // 既に存在するsubchainだった場合は管理下にせず破棄する
+  std::cout << "=== 3 ===" << "\n";
+  (*(_subchainSet.begin())).__printChainDigest();
+  newSubchain.__printChainDigest();
+  auto ret = _subchainSet.insert( newSubchain ); // 既に存在するsubchainだった場合は管理下にせず破棄する
+  std::cout << "可否 : " << ret.second << "\n";
+
+  std::cout << "=== 4 ===" << "\n";
 }
 
+
+unsigned short VirtualSubChainManager::subchainCount()
+{
+  return _subchainSet.size();
+}
 
 void VirtualSubChainManager::__printSubChainSet()
 {

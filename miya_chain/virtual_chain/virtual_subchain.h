@@ -69,13 +69,14 @@ public:
   struct Hash;
 
   uint32_t updatedAt() const;
+  void build( std::shared_ptr<block::BlockHeader> latestBlockHeader );
   void extend( std::shared_ptr<unsigned char> stopHash = nullptr , int collisionAction = 0 ); // stopHashのチェーンに達したら延長を打ち切る
   MiyaChainCommand extendCommand(); // 本サブチェーンにつながるようなブロックリクエストコマンドを発行する
   
   std::vector< std::shared_ptr<block::BlockHeader> > exportChainVector(); // latestBlockHeaderから遡ってチェーンを生成する
 
 
-  void __printChainDigest();
+  void __printChainDigest() const;
 };
 
 

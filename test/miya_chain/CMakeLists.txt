@@ -7,6 +7,7 @@ add_library( TEST_MIYA_CHAIN STATIC
 
 			  common.cpp
 			  virtual_chain_p1.cpp
+			  virtual_chain_p2.cpp
 				build_sample_chain_p1.cpp
 )
 

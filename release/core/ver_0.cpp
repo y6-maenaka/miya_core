@@ -50,12 +50,13 @@
 
 #include "../../test/miya_chain/common.cpp"
 #include "../../test/miya_chain/virtual_chain_p1.cpp"
+#include "../../test/miya_chain/virtual_chain_p2.cpp"
 #include "../../test/miya_chain/build_sample_chain_p1.cpp"
 
 
 int main()
 {
-	virtual_chain_p1();
+	virtual_chain_p2();
 	return 0;
 
 

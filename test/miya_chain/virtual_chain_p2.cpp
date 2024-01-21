@@ -31,10 +31,10 @@
 
 
 
-/* ˙仮想チェーン構築と2ヘッダー追加(衝突なし) STOPHashなし */
+/* ˙仮想チェーン構築と2ヘッダー追加(衝突あり) STOPHashなし */
 
 
-int virtual_chain_p1()
+int virtual_chain_p2()
 {
   std::shared_ptr<miya_core::MiyaCore> miyaCore;
   std::shared_ptr<ControlInterface> controlInterface;
@@ -98,7 +98,7 @@ int virtual_chain_p1()
 
   uint32_t nBits_0001 = 532390001;
   block_0001->header()->nBits( nBits_0001 );
-  block_0001->header()->prevBlockHash( blockHash_0000 );
+  block_0001->header()->prevBlockHash( prevBlockHash_0000 );
   uint32_t nonce_0001 = miya_chain::simpleMining( nBits_0001, block_0001->header(), false );
   block_0001->header()->nonce( nonce_0001 );
 
@@ -130,7 +130,6 @@ int virtual_chain_p1()
 
   std::shared_ptr<unsigned char>  blockHash_0002;
   block_0002->blockHash( &blockHash_0002 );
-
 
 
 

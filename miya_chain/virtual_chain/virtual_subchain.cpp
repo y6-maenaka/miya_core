@@ -92,6 +92,11 @@ uint32_t VirtualSubChain::updatedAt() const
   return _updatedAt;
 }
 
+void VirtualSubChain::build( std::shared_ptr<block::BlockHeader> latestBlockHeader )
+{
+  _context._latestBlockHeader = latestBlockHeader;
+}
+
 
 void VirtualSubChain::extend( std::shared_ptr<unsigned char> stopHash, int collisionAction )
 {
@@ -210,32 +215,27 @@ std::size_t VirtualSubChain::Hash::operator()( const VirtualSubChain &sc ) const
 std::vector< std::shared_ptr<block::BlockHeader> > VirtualSubChain::exportChainVector()
 {
   std::vector< std::shared_ptr<block::BlockHeader> > ret;
-  std::cout << "< 1 >" << "\n";
 
   std::shared_ptr<unsigned char> blockHash; 
   std::shared_ptr<block::BlockHeader> blockHeader;
 
   blockHeader = _context._latestBlockHeader;
-  std::cout << "< 2 >" << "\n";
 
   while( blockHeader != nullptr ) 
   {
-	std::cout << "< 3 >" << "\n";
 	ret.push_back( blockHeader );
 	blockHash = ret.back()->prevBlockHash();
 
 	blockHeader = _bhPoolFinder( blockHash );
-	std::cout << "< 4 >" << "\n";
   }
   
-  std::cout << "< 5 >" << "\n";
   return ret;
 }
 
 
 
 
-void VirtualSubChain::__printChainDigest()
+void VirtualSubChain::__printChainDigest() const
 {
   std::shared_ptr<unsigned char> chainDigest; size_t chainDigestLength;
   chainDigestLength = this->chainDigest( &chainDigest );

@@ -48,6 +48,7 @@ public:
   void build( std::shared_ptr<block::BlockHeader> stopHeader ); // 新たに仮想チェーンを作成して,重複がなければ管理下に追加する
 
   
+  unsigned short subchainCount();
   void __printSubChainSet();
 };
 
