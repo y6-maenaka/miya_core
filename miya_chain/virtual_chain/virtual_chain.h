@@ -120,6 +120,10 @@ public:
 
   // void add( std::shared_ptr<block::BlockHeader> target ); // 外部ノードから到着したブロックヘッダー
   void add( std::vector<std::shared_ptr<block::BlockHeader>> targetVector ); // headersレスポンスなどが帰ってくる場合
+  void add( std::vector<std::shared_ptr<block::Block>> targetVector );
+
+  void startSyncHeaderChain();
+  void startSyncBlockChain();
 
   void __printState();
 };

@@ -55,7 +55,7 @@ VirtualChain::VirtualChain( BlockChainIterator initialForkPoint ) : _forkPoint(i
 											std::ref(_blockHeaderPool),
 											std::placeholders::_1 );
 
-	_subChainManager = std::shared_ptr<VirtualSubChainManager>( new VirtualSubChainManager( initialForkPoint.header() , bhPoolFinder, pbhPoolFinder ) );
+	_subChainManager = std::shared_ptr<VirtualSubChainManager>( new VirtualSubChainManager( initialForkPoint.header(), nullptr , bhPoolFinder, pbhPoolFinder ) );
   
 	return;
 }
@@ -123,19 +123,29 @@ void VirtualChain::add( std::vector<std::shared_ptr<block::BlockHeader>> targetV
 	filterCtx->status( static_cast<int>(BDState::BlockHeaderReceived) ); // headerPoolに追加したらFilter要素の状態を更新する
   }
 
-  _blockHeaderPool.__printPoolSortWithPrevBlockHash();
-
 
   for( auto itr : duplicateHeaders )
   {
 	std::cout << "新たにサブチェーンがビルドされます" << "\n";
 	_subChainManager->build( itr ); // 重複ブロックが存在した場合は仮想チェーンを作成する
-  
-	std::cout << "ビルド後延長処理 :: " << _subChainManager->subchainCount() << "\n";
   }
 
   _subChainManager->extend(); // headerPoolに更新があった旨をsubchainに通知し,subchainの延長を試みる
 
+  return;
+}
+
+void VirtualChain::add( std::vector<std::shared_ptr<block::Block>> targetVector )
+{
+  std::shared_ptr<struct BDBCB> filterCtx;
+  for( auto itr : targetVector )
+  {
+	filterCtx = _filter->filter( itr );
+	if( filterCtx == nullptr ) continue;
+	if( filterCtx->status() > static_cast<int>(BDState::BlockBodyReceived) ) continue;
+
+
+  }
   return;
 }
 

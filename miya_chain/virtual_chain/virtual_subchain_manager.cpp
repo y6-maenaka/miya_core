@@ -12,11 +12,12 @@ namespace miya_chain
 
 
 VirtualSubChainManager::VirtualSubChainManager( std::shared_ptr<block::BlockHeader> startBlockHeader ,
+												std::shared_ptr<unsigned char> stopHash,
 												BHPoolFinder bhPoolFinder,
 												PBHPoolFinder pbhPoolFinder
-) : _startBlockHeader(startBlockHeader) , _bhPoolFinder(bhPoolFinder), _pbhPoolFinder(pbhPoolFinder)
+) : _startBlockHeader(startBlockHeader) , _bhPoolFinder(bhPoolFinder), _pbhPoolFinder(pbhPoolFinder) , _stopHash(stopHash)
 {
-  VirtualSubChain initialSubChain( _startBlockHeader, _bhPoolFinder, _pbhPoolFinder );
+  VirtualSubChain initialSubChain( _startBlockHeader, stopHash ,_bhPoolFinder, _pbhPoolFinder );
 
 
   _subchainSet.insert( initialSubChain );
@@ -32,7 +33,7 @@ void VirtualSubChainManager::extend( bool collisionAction )
   
   for( auto && itr : extendedVector )
   {
-	itr.extend( nullptr , collisionAction );
+	itr.extend( collisionAction );
   }
   
   _subchainSet.clear();
@@ -48,20 +49,13 @@ void VirtualSubChainManager::extend( bool collisionAction )
 
 void VirtualSubChainManager::build( std::shared_ptr<block::BlockHeader> stopHeader )
 {
-  std::cout << "=== 1 ===" << "\n";
+  std::shared_ptr<unsigned char> stopHash = stopHeader->headerHash();
   // 新たに仮想チェーンを作成
-  VirtualSubChain newSubchain( _startBlockHeader , _bhPoolFinder, _pbhPoolFinder );
+  VirtualSubChain newSubchain( _startBlockHeader , stopHash ,_bhPoolFinder, _pbhPoolFinder );
   newSubchain.build( stopHeader );
-  std::cout << "=== 2 ==="  << "\n";
   newSubchain.extend(); // 作成した仮想チェーンを伸ばせるだけ伸ばす
 
-  std::cout << "=== 3 ===" << "\n";
-  (*(_subchainSet.begin())).__printChainDigest();
-  newSubchain.__printChainDigest();
-  auto ret = _subchainSet.insert( newSubchain ); // 既に存在するsubchainだった場合は管理下にせず破棄する
-  std::cout << "可否 : " << ret.second << "\n";
-
-  std::cout << "=== 4 ===" << "\n";
+  auto insertRet = _subchainSet.insert( newSubchain ); // 既に存在するsubchainだった場合は管理下にせず破棄する
 }
 
 

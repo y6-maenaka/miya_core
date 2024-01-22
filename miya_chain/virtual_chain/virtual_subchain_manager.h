@@ -36,13 +36,14 @@ private:
   
   const std::shared_ptr<block::BlockHeader> _startBlockHeader;
   uint32_t _updatedAt; // 最終更新(最後にサブチェーンの延長が発生した)タイムスタンプ
+  const std::shared_ptr<unsigned char> _stopHash = nullptr;
 
   const BHPoolFinder _bhPoolFinder;
   const PBHPoolFinder _pbhPoolFinder;
 
   // 管理下の仮想チェーンを全て延長する
 public:
-  VirtualSubChainManager( std::shared_ptr<block::BlockHeader> startBlockHeader , BHPoolFinder bhPoolFinder , PBHPoolFinder pbhPoolFinder );
+  VirtualSubChainManager( std::shared_ptr<block::BlockHeader> startBlockHeader, std::shared_ptr<unsigned char> stopHash ,BHPoolFinder bhPoolFinder , PBHPoolFinder pbhPoolFinder );
 
   void extend( bool collisionAction = false );
   void build( std::shared_ptr<block::BlockHeader> stopHeader ); // 新たに仮想チェーンを作成して,重複がなければ管理下に追加する

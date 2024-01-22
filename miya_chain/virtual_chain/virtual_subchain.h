@@ -53,12 +53,13 @@ private:
 
   uint32_t _updatedAt; // チェーン最後尾が更新された時の時間
   void update();
+  const std::shared_ptr<unsigned char> _stopHash = nullptr;
  
   const BHPoolFinder _bhPoolFinder;
   const PBHPoolFinder _pbhPoolFinder;
 
 public: 
-  VirtualSubChain( std::shared_ptr<block::BlockHeader> startBlockHeader , BHPoolFinder bhPoolFinder , PBHPoolFinder pbhPoolFinder );
+  VirtualSubChain( std::shared_ptr<block::BlockHeader> startBlockHeader, std::shared_ptr<unsigned char> stopHash , BHPoolFinder bhPoolFinder , PBHPoolFinder pbhPoolFinder );
 
   size_t chainDigest( std::shared_ptr<unsigned char> *ret ) const;
   std::shared_ptr<unsigned char> chainDigest() const;
@@ -70,7 +71,7 @@ public:
 
   uint32_t updatedAt() const;
   void build( std::shared_ptr<block::BlockHeader> latestBlockHeader );
-  void extend( std::shared_ptr<unsigned char> stopHash = nullptr , int collisionAction = 0 ); // stopHashのチェーンに達したら延長を打ち切る
+  void extend( int collisionAction = 0 ); // stopHashのチェーンに達したら延長を打ち切る
   MiyaChainCommand extendCommand(); // 本サブチェーンにつながるようなブロックリクエストコマンドを発行する
   
   std::vector< std::shared_ptr<block::BlockHeader> > exportChainVector(); // latestBlockHeaderから遡ってチェーンを生成する

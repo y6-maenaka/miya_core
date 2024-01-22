@@ -37,9 +37,10 @@ std::shared_ptr<unsigned char> VirtualSubChain::Context::latestBlockHash()
 
 
 VirtualSubChain::VirtualSubChain( std::shared_ptr<block::BlockHeader> startBlockHeader,
+								  std::shared_ptr<unsigned char> stopHash,
 								  BHPoolFinder bhPoolFinder , 
 								  PBHPoolFinder pbhPoolFinder )
-  : _context(startBlockHeader) , _bhPoolFinder(bhPoolFinder), _pbhPoolFinder(pbhPoolFinder)
+  : _context(startBlockHeader) , _bhPoolFinder(bhPoolFinder), _pbhPoolFinder(pbhPoolFinder) , _stopHash(stopHash)
 { 
   _context._latestBlockHeader = startBlockHeader; // 初期化時の最後尾ブロックヘッダーはstartBlockHeaderにしておく
   return;
@@ -98,12 +99,12 @@ void VirtualSubChain::build( std::shared_ptr<block::BlockHeader> latestBlockHead
 }
 
 
-void VirtualSubChain::extend( std::shared_ptr<unsigned char> stopHash, int collisionAction )
+void VirtualSubChain::extend( int collisionAction )
 {
   std::cout << "VirtualSubChain::extend() called" << "\n";
 
   // std::unique_lock<std::shared_mutex> lock(_mtx);
-  if( stopHash != nullptr && memcmp( _context.latestBlockHash().get(), stopHash.get() , 32 ) == 0 ) return; // ブロックの最後尾がstopHashに達していたら即座に戻る
+  if( _stopHash != nullptr && memcmp( _context.latestBlockHash().get(), _stopHash.get() , 32 ) == 0 ) return; // ブロックの最後尾がstopHashに達していたら即座に戻る
 
   auto popRet = _pbhPoolFinder( _context.latestBlockHash() ); // 検索結果が複数個だった場合はどれを選択する
   if( popRet.empty() )
@@ -133,7 +134,6 @@ void VirtualSubChain::extend( std::shared_ptr<unsigned char> stopHash, int colli
   }
   else // 検索結果が1つの場合
   {
-	this->__printChainDigest();
 	std::cout << "(@) 仮想チェンサブチェーンの最先端ヘッダーを更新します" << "\n";
 	// std::cout << "PrevBlockHashFinder の検索結果は1つです" << "\n";
 	// std::shared_ptr<block::BlockHeader>	 __latestBlockHeader = popRet.at(0);
@@ -141,7 +141,7 @@ void VirtualSubChain::extend( std::shared_ptr<unsigned char> stopHash, int colli
 	this->update(); // 最後尾を更新した場合はupdateする
   }
   
-  return extend( stopHash , collisionAction );
+  return extend( collisionAction );
 }
 
 
