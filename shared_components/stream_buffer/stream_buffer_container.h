@@ -32,10 +32,7 @@ public:
 
 	std::function<void()> _scaleOutRequest; // スケールアップフラグが立ったデータセグメントを受信したらスケールアウトする (StreamBufferの個数を増やす)
 	std::function<void()> _scaleDownRequest; 
-
-
 //public:
-
 
 	void pushOne( std::unique_ptr<SBSegment> target, size_t timeout = 0 );
 	std::unique_ptr<SBSegment> popOne( size_t timeout = 0 );

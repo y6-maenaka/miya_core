@@ -13,9 +13,6 @@ EKP2PMessage::EKP2PMessage()
 	_header = std::shared_ptr<EKP2PMessageHeader>( new EKP2PMessageHeader() );
 }
 
-
-
-
 void EKP2PMessage::payload( std::shared_ptr<unsigned char> payload , size_t payloadLength )
 {
 	if( payload == nullptr || payloadLength == 0)
@@ -28,9 +25,6 @@ void EKP2PMessage::payload( std::shared_ptr<unsigned char> payload , size_t payl
 	_header->payloadLength( payloadLength );
 	_payload = payload;
 }
-
-
-
 
 size_t EKP2PMessage::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 {
@@ -46,28 +40,20 @@ size_t EKP2PMessage::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 	return formatPtr;
 }
 
-
-
 void EKP2PMessage::protocol( int type )
 {
 	_header->protocol( type );
 }
-
-
-
 
 std::shared_ptr<EKP2PMessageHeader> EKP2PMessage::header()
 {
 	return _header;
 }
 
-
-
 void EKP2PMessage::payload( std::shared_ptr<unsigned char> target )
 {
 	_payload = target;
 }
-
 
 std::shared_ptr<unsigned char> EKP2PMessage::payload()
 {

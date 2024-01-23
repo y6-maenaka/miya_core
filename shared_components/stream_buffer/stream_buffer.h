@@ -74,10 +74,8 @@ public:
 		std::any option2;
 	} options;
 
-
 	SBSegment(){};
 	SBSegment( void* body , unsigned short bodyLength );
-
 
 	/* Getter群 */
 	std::shared_ptr<ekp2p::KNodeAddr> sourceKNodeAddr();

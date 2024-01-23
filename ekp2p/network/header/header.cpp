@@ -142,10 +142,6 @@ bool EKP2PMessageHeader::importRawSequentially( std::shared_ptr<unsigned char> f
 }
 
 
-
-
-
-
 void EKP2PMessageHeader::sourceKNodeAddr( std::shared_ptr<KNodeAddr> nodeAddr )
 {
 	if( nodeAddr == nullptr )
@@ -164,7 +160,6 @@ void EKP2PMessageHeader::relayKNodeAddrVector( std::vector<std::shared_ptr<KNode
 }
 
 
-
 bool EKP2PMessageHeader::validate()
 {
 	std::cout << "--------------" << "\n";
@@ -179,8 +174,6 @@ bool EKP2PMessageHeader::validate()
 	
 	return false;
 }
-
-
 
 
 /* Getter */
@@ -210,15 +203,10 @@ unsigned short EKP2PMessageHeader::rpcType()
 }
 
 
-
-
 std::shared_ptr<KNodeAddr> EKP2PMessageHeader::sourceKNodeAddr()
 {
 	return _sourceKNodeAddr;
 }
-
-
-
 
 
 std::vector< std::shared_ptr<KNodeAddr> > EKP2PMessageHeader::relayKNodeAddrVector()
@@ -227,14 +215,10 @@ std::vector< std::shared_ptr<KNodeAddr> > EKP2PMessageHeader::relayKNodeAddrVect
 }
 
 
-
-
 unsigned char* EKP2PMessageHeader::token()
 {
 	return _meta._token;
 }
-
-
 
 
 void EKP2PMessageHeader::printRaw()
@@ -282,9 +266,6 @@ void EKP2PMessageHeader::printRaw()
 	for( int i=0; i<sizeof(_meta._relayKNodeAddrCount); i++){
 		printf("%02X", cRelayKNodeAddrCount[i]);
 	} std::cout << "\x1b[39m" << "\n";
-	
-
-
 
 
 	/* 送信元KNodeAddr*/

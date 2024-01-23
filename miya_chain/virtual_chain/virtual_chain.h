@@ -27,6 +27,7 @@
 
 #include "../message/message.h"
 
+
 namespace block
 {
 struct Block;
@@ -48,6 +49,7 @@ class BDVirtualChain;
 class LightUTXOSet;
 class BlockLocalStrageManager;
 class VirtualSubChainManager;
+class VirtualHeaderSyncManager;
 
 
 
@@ -75,8 +77,9 @@ private:
   short _updateCount = 0;
 
   std::shared_ptr< BDFilter > _filter; // フィルター本体
-  std::shared_ptr< VirtualSubChainManager > _subChainManager;
+  std::shared_ptr< VirtualHeaderSyncManager > _headerSyncManager;
   std::shared_ptr< StreamBufferContainer >  _toRequesterSBC;
+  std::shared_ptr< LightUTXOSet > _utxoSet;
 
   struct BlockHashPool // 一旦使用しない
   {

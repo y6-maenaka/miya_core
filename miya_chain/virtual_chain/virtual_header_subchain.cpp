@@ -1,4 +1,4 @@
-#include "virtual_subchain.h"
+#include "virtual_header_subchain.h"
 
 #include "../../shared_components/hash/sha_hash.h"
 
@@ -16,18 +16,13 @@ namespace miya_chain
 
 
 
-VirtualSubChain::Context::Context( std::shared_ptr<block::BlockHeader> startBlockHeader )
+VirtualHeaderSubChain::Context::Context( std::shared_ptr<block::BlockHeader> startBlockHeader )
   : _startBlockHeader( startBlockHeader )
 {
   return;
 }
 
-
-
-
-
-
-std::shared_ptr<unsigned char> VirtualSubChain::Context::latestBlockHash()
+std::shared_ptr<unsigned char> VirtualHeaderSubChain::Context::latestBlockHash()
 {
   return _latestBlockHeader->headerHash();
 }
@@ -36,7 +31,7 @@ std::shared_ptr<unsigned char> VirtualSubChain::Context::latestBlockHash()
 
 
 
-VirtualSubChain::VirtualSubChain( std::shared_ptr<block::BlockHeader> startBlockHeader,
+VirtualHeaderSubChain::VirtualHeaderSubChain( std::shared_ptr<block::BlockHeader> startBlockHeader,
 								  std::shared_ptr<unsigned char> stopHash,
 								  BHPoolFinder bhPoolFinder , 
 								  PBHPoolFinder pbhPoolFinder )
@@ -47,7 +42,7 @@ VirtualSubChain::VirtualSubChain( std::shared_ptr<block::BlockHeader> startBlock
 }
 
 
-size_t VirtualSubChain::chainDigest( std::shared_ptr<unsigned char> *ret ) const
+size_t VirtualHeaderSubChain::chainDigest( std::shared_ptr<unsigned char> *ret ) const
 {
   std::shared_ptr<unsigned char> joinedHash = std::shared_ptr<unsigned char>( new unsigned char[32*2] );
   std::shared_ptr<unsigned char> startBlockHash = _context._startBlockHeader->headerHash(); // スタートブロックのハッシュ
@@ -68,7 +63,7 @@ size_t VirtualSubChain::chainDigest( std::shared_ptr<unsigned char> *ret ) const
   return hash::SHAHash( joinedHash , 32*2 , ret , "sha1" ); 
 }
 
-std::shared_ptr<unsigned char> VirtualSubChain::chainDigest() const
+std::shared_ptr<unsigned char> VirtualHeaderSubChain::chainDigest() const
 {
   std::shared_ptr<unsigned char> ret;
   this->chainDigest( &ret );
@@ -77,40 +72,47 @@ std::shared_ptr<unsigned char> VirtualSubChain::chainDigest() const
 }
 
 
-std::shared_ptr<block::BlockHeader> VirtualSubChain::latestBlockHeader()
+std::shared_ptr<block::BlockHeader> VirtualHeaderSubChain::latestBlockHeader()
 {
   return _context._latestBlockHeader;
 }
 
 
-void VirtualSubChain::update()
+void VirtualHeaderSubChain::update()
 {
   _updatedAt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 }
 
-uint32_t VirtualSubChain::updatedAt() const
+uint32_t VirtualHeaderSubChain::updatedAt() const
 {
   return _updatedAt;
 }
 
-void VirtualSubChain::build( std::shared_ptr<block::BlockHeader> latestBlockHeader )
+bool VirtualHeaderSubChain::isChainStoped() const
+{
+  return _isChainStoped;
+}
+
+void VirtualHeaderSubChain::build( std::shared_ptr<block::BlockHeader> latestBlockHeader )
 {
   _context._latestBlockHeader = latestBlockHeader;
 }
 
-
-void VirtualSubChain::extend( int collisionAction )
+bool VirtualHeaderSubChain::extend( int collisionAction )
 {
   std::cout << "VirtualSubChain::extend() called" << "\n";
 
   // std::unique_lock<std::shared_mutex> lock(_mtx);
-  if( _stopHash != nullptr && memcmp( _context.latestBlockHash().get(), _stopHash.get() , 32 ) == 0 ) return; // ブロックの最後尾がstopHashに達していたら即座に戻る
+  if( _stopHash != nullptr && memcmp( _context.latestBlockHash().get(), _stopHash.get() , 32 ) == 0 ){
+	_isChainStoped = true;
+	return true; // ブロックの最後尾がstopHashに達していたら即座に戻る
+  } 
 
   auto popRet = _pbhPoolFinder( _context.latestBlockHash() ); // 検索結果が複数個だった場合はどれを選択する
   if( popRet.empty() )
   {  // pool内に対象のheaderが存在しない場合は戻る
 	std::cout << "(@) 延長ヘッダーは存在しません" << "\n";
-	return;
+	return false;
   }
   
   if( popRet.size() > 1 )
@@ -120,7 +122,7 @@ void VirtualSubChain::extend( int collisionAction )
 	  case ( 0 ):  // 停止 : 延長を停止して戻す
 		{
 		  std::cout << "(@) 延長ヘッダー重複 : 延長停止" << "\n";
-		  return;
+		  return false;
 		}
 	  case ( 1 ): // ランダム : どれかをランダムに選択して延長を続ける
 		{
@@ -145,7 +147,7 @@ void VirtualSubChain::extend( int collisionAction )
 }
 
 
-MiyaChainCommand VirtualSubChain::extendCommand()
+MiyaChainCommand VirtualHeaderSubChain::extendCommand()
 {
   MiyaChainMSG_GETBLOCKS command;
   MiyaChainCommand wrapedCommand;
@@ -158,7 +160,7 @@ MiyaChainCommand VirtualSubChain::extendCommand()
 }
 
 
-bool VirtualSubChain::operator==( const VirtualSubChain &sc ) const
+bool VirtualHeaderSubChain::operator==( const VirtualHeaderSubChain &sc ) const
 {
   std::shared_ptr<unsigned char> chainDigest; size_t chainDigestLength;
   chainDigestLength = sc.chainDigest( &chainDigest );
@@ -166,12 +168,12 @@ bool VirtualSubChain::operator==( const VirtualSubChain &sc ) const
   return ( memcmp( this->chainDigest().get() , chainDigest.get() , chainDigestLength ) == 0 );
 }
 
-bool VirtualSubChain::operator!=( const VirtualSubChain &sc ) const
+bool VirtualHeaderSubChain::operator!=( const VirtualHeaderSubChain &sc ) const
 {
   return !(this->operator==(sc));
 }
 
-std::size_t VirtualSubChain::Hash::operator()( const VirtualSubChain &sc ) const  // 動作が不安定な関数 string格納辺り
+std::size_t VirtualHeaderSubChain::Hash::operator()( const VirtualHeaderSubChain &sc ) const  // 動作が不安定な関数 string格納辺り
 {
   std::shared_ptr<unsigned char> chainDigest; size_t chainDigestLength;
   chainDigestLength = sc.chainDigest( &chainDigest );
@@ -212,7 +214,7 @@ std::size_t VirtualSubChain::Hash::operator()( const VirtualSubChain &sc ) const
 }
 
 
-std::vector< std::shared_ptr<block::BlockHeader> > VirtualSubChain::exportChainVector()
+std::vector< std::shared_ptr<block::BlockHeader> > VirtualHeaderSubChain::exportChainVector()
 {
   std::vector< std::shared_ptr<block::BlockHeader> > ret;
 
@@ -235,7 +237,7 @@ std::vector< std::shared_ptr<block::BlockHeader> > VirtualSubChain::exportChainV
 
 
 
-void VirtualSubChain::__printChainDigest() const
+void VirtualHeaderSubChain::__printChainDigest() const
 {
   std::shared_ptr<unsigned char> chainDigest; size_t chainDigestLength;
   chainDigestLength = this->chainDigest( &chainDigest );

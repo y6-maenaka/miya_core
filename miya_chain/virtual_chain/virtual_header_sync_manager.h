@@ -8,7 +8,7 @@
 #include <variant>
 #include <functional>
 
-#include "./virtual_subchain.h"
+#include "./virtual_header_subchain.h"
 
 
 namespace block
@@ -18,21 +18,23 @@ namespace block
 };
 
 
+class StreamBufferContainer;
+struct SBSegment;
 
 
 namespace miya_chain
 {
 
-class VirtualSubChain;
+class VirtualHeaderSubChain;
 
 
 
 
 
-class VirtualSubChainManager
+class VirtualHeaderSyncManager
 {
 private:
-  std::unordered_set< VirtualSubChain, VirtualSubChain::Hash > _subchainSet; // subchain unordered set
+  std::unordered_set< VirtualHeaderSubChain, VirtualHeaderSubChain::Hash > _headerSubchainSet; // subchain unordered set
   
   const std::shared_ptr<block::BlockHeader> _startBlockHeader;
   uint32_t _updatedAt; // 最終更新(最後にサブチェーンの延長が発生した)タイムスタンプ
@@ -41,13 +43,16 @@ private:
   const BHPoolFinder _bhPoolFinder;
   const PBHPoolFinder _pbhPoolFinder;
 
+  std::shared_ptr<StreamBufferContainer> _toRequesterSBC;
+
   // 管理下の仮想チェーンを全て延長する
 public:
-  VirtualSubChainManager( std::shared_ptr<block::BlockHeader> startBlockHeader, std::shared_ptr<unsigned char> stopHash ,BHPoolFinder bhPoolFinder , PBHPoolFinder pbhPoolFinder );
+  VirtualHeaderSyncManager( std::shared_ptr<block::BlockHeader> startBlockHeader, std::shared_ptr<unsigned char> stopHash ,BHPoolFinder bhPoolFinder , PBHPoolFinder pbhPoolFinder , std::shared_ptr<StreamBufferContainer> toRequesterSBC );
 
-  void extend( bool collisionAction = false );
+  bool extend( bool collisionAction = false );
   void build( std::shared_ptr<block::BlockHeader> stopHeader ); // 新たに仮想チェーンを作成して,重複がなければ管理下に追加する
 
+  std::shared_ptr<VirtualHeaderSubChain> stopedHeaderSubchain();
   
   unsigned short subchainCount();
   void __printSubChainSet();

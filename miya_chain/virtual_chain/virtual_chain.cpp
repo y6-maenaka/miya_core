@@ -22,8 +22,8 @@
 #include "../utxo_set/utxo_set.h"
 #include "../miya_coin/local_strage_manager.h"
 
-#include "./virtual_subchain_manager.h"
-#include "./virtual_subchain.h"
+#include "./virtual_header_sync_manager.h"
+#include "./virtual_header_subchain.h"
 
 
 
@@ -55,7 +55,7 @@ VirtualChain::VirtualChain( BlockChainIterator initialForkPoint ) : _forkPoint(i
 											std::ref(_blockHeaderPool),
 											std::placeholders::_1 );
 
-	_subChainManager = std::shared_ptr<VirtualSubChainManager>( new VirtualSubChainManager( initialForkPoint.header(), nullptr , bhPoolFinder, pbhPoolFinder ) );
+	_headerSyncManager = std::shared_ptr<VirtualHeaderSyncManager>( new VirtualHeaderSyncManager( initialForkPoint.header(), nullptr , bhPoolFinder, pbhPoolFinder , _toRequesterSBC ) );
   
 	return;
 }
@@ -63,7 +63,7 @@ VirtualChain::VirtualChain( BlockChainIterator initialForkPoint ) : _forkPoint(i
 
 void VirtualChain::startBlockHashDownloader()
 {
-  assert( _subChainManager != nullptr );
+  assert( _headerSyncManager != nullptr );
 
   std::thread blockHashDownloader([&]()
   {
@@ -73,7 +73,7 @@ void VirtualChain::startBlockHashDownloader()
 
 void VirtualChain::startBlockHeaderDownloader()
 {
-  assert( _subChainManager != nullptr );
+  assert( _headerSyncManager != nullptr );
 
   std::thread blockHeaderDownloader([&]()
   {
@@ -127,10 +127,10 @@ void VirtualChain::add( std::vector<std::shared_ptr<block::BlockHeader>> targetV
   for( auto itr : duplicateHeaders )
   {
 	std::cout << "新たにサブチェーンがビルドされます" << "\n";
-	_subChainManager->build( itr ); // 重複ブロックが存在した場合は仮想チェーンを作成する
+	_headerSyncManager->build( itr ); // 重複ブロックが存在した場合は仮想チェーンを作成する
   }
 
-  _subChainManager->extend(); // headerPoolに更新があった旨をsubchainに通知し,subchainの延長を試みる
+  _headerSyncManager->extend(); // headerPoolに更新があった旨をsubchainに通知し,subchainの延長を試みる
 
   return;
 }
@@ -154,7 +154,7 @@ void VirtualChain::__printState()
 {
   std::cout << "====== < 仮想チェーン内部状態 > ====== " << "\n";
 
-  _subChainManager->__printSubChainSet();
+  _headerSyncManager->__printSubChainSet();
   
   std::cout << "-----------------------------------------" << "\n";
 } 

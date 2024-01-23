@@ -19,6 +19,20 @@ unsigned char* inv::hash()
     return _hash;
 }
 
+inv::inv( unsigned short typeID , std::shared_ptr<unsigned char> fromHash )
+{
+    _typeID = typeID;
+    this->hash( fromHash );
+}
+
+inv::inv( std::string type , std::shared_ptr<unsigned char> fromHash )
+{
+    if( type == "TX" ) _typeID = static_cast<unsigned short>(TypeID::MSG_TX);
+    else if( type == "BLOCK" ) _typeID = static_cast<unsigned short>(TypeID::MSG_BLOCK);
+
+    this->hash( fromHash );
+}
+
 
 
 
@@ -40,15 +54,11 @@ size_t MiyaChainMSG_INV::exportRaw( std::shared_ptr<unsigned char> *retRaw )
     return formatPtr;
 }
 
-
-
 void MiyaChainMSG_INV::add( struct inv target )
 {
     _body._invVector.push_back( target );
     this->count( this->count() + 1 );
 }
-
-
 
 size_t MiyaChainMSG_INV::count()
 {
@@ -67,20 +77,18 @@ void MiyaChainMSG_INV::count( size_t count )
 
 void MiyaChainMSG_INV::addTx( std::shared_ptr<unsigned char> hash )
 {
-    struct inv target;
-    target._typeID = static_cast<unsigned short>(TypeID::MSG_TX);
-    target.hash( hash );
-
+    struct inv target = inv( static_cast<unsigned short>(TypeID::MSG_TX), hash );
+    // target._typeID = static_cast<unsigned short>(TypeID::MSG_TX);
+    // target.hash( hash );
     this->add( target );
 }
 
 
 void MiyaChainMSG_INV::addBlock( std::shared_ptr<unsigned char> hash )
 {
-    struct inv target;
-    target._typeID = static_cast<unsigned short>(TypeID::MSG_BLOCK);
-    target.hash( hash );
-
+    struct inv target = inv( static_cast<unsigned short>(TypeID::MSG_BLOCK) , hash );
+    // target._typeID = static_cast<unsigned short>(TypeID::MSG_BLOCK);
+    // target.hash( hash );
     this->add( target );
 }
 

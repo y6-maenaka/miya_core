@@ -64,6 +64,8 @@ public:
   unsigned int height();
   std::shared_ptr<unsigned char> prevBlockHash() const;
 
+  bool _isClosed = false;
+
   // debug
   void print();
 };

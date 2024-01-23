@@ -3,6 +3,7 @@
 
 #include <map>
 #include <unordered_map>
+#include <vector>
 #include <iostream>
 #include <memory>
 #include <mutex>
@@ -16,8 +17,8 @@
 
 namespace block
 {
-		struct Block;
-		struct BlockHeader;
+	struct Block;
+	struct BlockHeader;
 };
 
 
@@ -43,6 +44,8 @@ public:
 	std::shared_ptr<struct BDBCB> filter( std::shared_ptr<unsigned char> target, bool isReject = false );
 	std::shared_ptr<struct BDBCB> filter( std::shared_ptr<block::Block> target, bool isReject = false );
 	std::shared_ptr<struct BDBCB> filter( std::shared_ptr<block::BlockHeader> target, bool isReject = false );
+
+	void mask( std::vector< std::shared_ptr<block::BlockHeader>> targetVector ); // かなり重い処理
 
 	void __printFilter();
 };

@@ -77,6 +77,23 @@ std::shared_ptr<struct BDBCB> BDFilter::filter( std::shared_ptr<block::BlockHead
   return findRet->second;  // 要素が格納されている場合
 }
 
+void BDFilter::mask( std::vector< std::shared_ptr<block::BlockHeader>> targetVector )
+{
+  for( auto itr : _filter ) // 一旦全てのBDBCBをcloseする
+	itr.second->_isClosed = true;
+
+  for( auto itr : targetVector ) // 指定したBDBCBのclose状態を解除する
+  {
+	struct BlockHashAsKey key( itr );
+	auto findRet = _filter.find( key );
+  	if( findRet != _filter.end() ){
+	  findRet->second->_isClosed = false;
+	}
+  }
+
+  return;
+}
+
 
 void BDFilter::__printFilter()
 {
