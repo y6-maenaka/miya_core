@@ -212,6 +212,11 @@ bool BlockHeader::verify()
 	return miya_chain::mbitcmp( rawNBitMask.get() , ret.get() );
 }
 
+bool BlockHeader::compare( std::shared_ptr<unsigned char> targetBlockHash  )
+{
+	return memcmp( this->headerHash().get(), targetBlockHash.get(), 32 ) == 0;
+}
+
 
 bool BlockHeader::cmpMerkleRoot( std::shared_ptr<unsigned char> target )
 {

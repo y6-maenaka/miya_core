@@ -82,6 +82,7 @@ public:
 	std::shared_ptr<unsigned char> prevBlockHash();
 
 	bool verify();
+	bool compare( std::shared_ptr<unsigned char> targetBlockHash );
 
 	size_t headerHash( std::shared_ptr<unsigned char> *ret );
 	std::shared_ptr<unsigned char> headerHash();

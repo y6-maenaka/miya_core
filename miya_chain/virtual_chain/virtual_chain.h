@@ -50,6 +50,7 @@ class LightUTXOSet;
 class BlockLocalStrageManager;
 class VirtualSubChainManager;
 class VirtualHeaderSyncManager;
+class VirtualBlockSyncManager;
 
 
 
@@ -78,6 +79,7 @@ private:
 
   std::shared_ptr< BDFilter > _filter; // フィルター本体
   std::shared_ptr< VirtualHeaderSyncManager > _headerSyncManager;
+  std::shared_ptr< VirtualBlockSyncManager > _blockSyncManager;
   std::shared_ptr< StreamBufferContainer >  _toRequesterSBC;
   std::shared_ptr< LightUTXOSet > _utxoSet;
 

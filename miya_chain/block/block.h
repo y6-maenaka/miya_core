@@ -79,6 +79,7 @@ public:
 	uint32_t time();
 	uint32_t height();
 	bool verify( std::shared_ptr<miya_chain::LightUTXOSet> utxoSet );
+	bool compare( std::shared_ptr<unsigned char> targetBlockHash );
 
 	void __printPrevBlockHash();
 	void __printBlockHash();

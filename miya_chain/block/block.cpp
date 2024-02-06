@@ -191,6 +191,10 @@ bool Block::verify( std::shared_ptr<miya_chain::LightUTXOSet> utxoSet )
 	// 7. スクリプトの実行
 }
 
+bool Block::compare( std::shared_ptr<unsigned char> targetBlockHash )
+{
+	return memcmp( this->blockHash().get(), targetBlockHash.get(), 32 ) == 0;
+}
 
 void Block::__printBlockHash()
 {
