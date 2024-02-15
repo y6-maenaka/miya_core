@@ -28,6 +28,7 @@
 #include "../../miya_chain/mining/simple_mining.h"
 
 #include "../../miya_chain/virtual_chain/virtual_chain.h"
+#include "../../miya_chain/virtual_chain/virtual_block_sync_manager.h"
 
 
 
@@ -142,28 +143,44 @@ int virtual_chain_p4()
 
   std::shared_ptr<miya_chain::VirtualChain> virtualChain = std::shared_ptr<miya_chain::VirtualChain>( new miya_chain::VirtualChain( *latestBlockItr ) );
 
-  std::cout << "これ -> "; block_0000->__printPrevBlockHash();
-
   std::vector< std::shared_ptr<block::BlockHeader> > requestHeaderVector;
   requestHeaderVector.push_back( block_0000->header() );
   requestHeaderVector.push_back( block_0001->header() );
 
 
   std::cout << "%%%% :: "; latestBlockItr->block()->__printPrevBlockHash();
-  virtualChain->add( requestHeaderVector );
+  // virtualChain->add( requestHeaderVector );
 
-  std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << "\n";
+  std::cout << "\n\n\n" << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << "\n\n\n";
+
+
+  std::shared_ptr<StreamBufferContainer> toRequesterSBC = std::make_shared<StreamBufferContainer>();
+  std::shared_ptr<miya_chain::VirtualBlockSyncManager> blockSyncManager = std::shared_ptr<miya_chain::VirtualBlockSyncManager>( 
+		  new miya_chain::VirtualBlockSyncManager(
+				requestHeaderVector,
+				( miyaChainManager->localStrageManager().get() ),
+				toRequesterSBC
+		));
+  blockSyncManager->start(); 
 
 
   std::vector< std::shared_ptr<block::Block> > requestBlockVector;
   requestBlockVector.push_back( block_0000 );
   requestBlockVector.push_back( block_0001 );
 
-  virtualChain->add( requestBlockVector );
+  sleep(1);
+  blockSyncManager->add( block_0000 );
+  blockSyncManager->add( block_0001 );
+  std::cout << "\x1b[36m" << "追加しました" << "\x1b[39m";
+  // blockSyncManager->add();
+
+  
+  std::mutex mtx;
+  std::condition_variable cv;
+  std::unique_lock<std::mutex> lock(mtx);
+  cv.wait( lock );
 
 
-
-  virtualChain->__printState();
   std::cout << "Done" << "\n";
 
   return 0;

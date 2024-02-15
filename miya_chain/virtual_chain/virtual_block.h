@@ -52,7 +52,8 @@ public:
   bool compare( std::shared_ptr<unsigned char> targetBlockHash );
   
   struct inv downloadInv();
-
+  
+  void __print();
 };
 
 

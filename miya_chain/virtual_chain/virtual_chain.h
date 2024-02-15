@@ -94,7 +94,6 @@ private:
 
   } _blockHashPool;
 
-
   struct BlockHeaderPool
   {
 	private: // リソース効率は良くない
@@ -112,7 +111,6 @@ private:
 	  void __printPoolSortWithPrevBlockHash();
   } _blockHeaderPool;
 
-
 public:
   VirtualChain( BlockChainIterator initialForkPoint );
   void startBlockHashDownloader();
@@ -126,6 +124,7 @@ public:
   // void add( std::shared_ptr<block::BlockHeader> target ); // 外部ノードから到着したブロックヘッダー
   void add( std::vector<std::shared_ptr<block::BlockHeader>> targetVector ); // headersレスポンスなどが帰ってくる場合
   void add( std::vector<std::shared_ptr<block::Block>> targetVector );
+  void add( std::shared_ptr<block::Block> targetBlock );
 
   void startSyncHeaderChain();
   void startSyncBlockChain();
@@ -135,86 +134,6 @@ public:
 
 
 
-/*
-// このメソッドに対してaddするのは,MiyaChainMSGから取り出された生のヘッダまたはブロックのみ
-class BDVirtualChain : public std::enable_shared_from_this<BDVirtualChain>
-{
-private:
-  std::shared_ptr<BDFilter> _bdFilter; // ブロックヘッダのフィルタ 外部からブロック収集プロセスが締め切られるとここにセットされているヘッダー以外は無視される
-  std::shared_ptr<LightUTXOSet> _utxoSet; // トランザクション/ブロック検証用(SafeModeに対応する必要がある)
-	std::shared_ptr<BlockLocalStrageManager> _localStrageManager; // ブロック保存用
-
-  VirtualMiyaChain _chainVector;// 仮想チェーン本体
-	unsigned char _index; // VirtualChainのインデックス // SafeModeはこのインデックスを元に生成される
-
-	struct IncompleteBlockVector // まだチェーンに連結されていないブロック集合
-   {
-		std::shared_mutex _mtx; // 保護用
-		std::condition_variable _cv;
-
-		std::vector< VirtualMiyaChain::iterator > _undownloadBlockVector; // チェーンに繋がれたがブロック本体のダウンロードが完了していない要素イテレータのベクター
-		VirtualMiyaChain::iterator _validateBlockHead;
-
-		void push( VirtualMiyaChain::iterator target );
-		std::vector< VirtualMiyaChain::iterator > pop( size_t size = DEFAULT_DOWNLOAD_BLOCK_WINDOW_SIZE );
-		size_t size();
-		VirtualMiyaChain::iterator popUnvalidateBlockHead();
-  } _incompleteBlockVector;
-
-	std::shared_ptr<unsigned char> _currentStartHash; // 仮想チェーンのスタートブロックハッシュ
-	std::shared_ptr<unsigned char> _stopHash; // 仮想チェーンのストップブロックハッシュ
-
-	std::shared_mutex _mtx;
-	std::condition_variable_any _cv; // 多少のオーバーヘッドを伴うらしい
-
-protected:
-	std::shared_ptr<unsigned char> chainHeadHash();
-	const std::pair< std::shared_ptr<unsigned char> , std::shared_ptr<struct BDBCB> > chainHead(); // virtualChain最後尾を取得
-  VirtualMiyaChain chainVector();
-
-	// 仮想チェーン構築系メソッド
-	// メソッド変数の_currentStartHash(startBlockHash)から_stopHashまでのブロックヘッダを収集する あくまで集めるだけのメソッド, 検証はしない(Filterで自動的に行う)
-	void blockHeaderDownloader( std::shared_ptr<StreamBufferContainer> toRequesterSBC );
-	void blockDownloader( std::shared_ptr<StreamBufferContainer> toRequesterSBC ); // ブロックヘッダよりブロック本体をダウンロードする処理
-
-	bool mergeToLocalChain(); // 仮想チェーンの全てをローカルの本番チェーンにマージする // 並列保存しない場合
-
-public:
-  BDVirtualChain(   // 自身チェーンとの分岐点,目標ハッシュ(nullは最先端)をセットする
-									std::shared_ptr<LightUTXOSet> utxoSet ,
-									std::shared_ptr<BlockLocalStrageManager> localStrageManager ,
-									std::shared_ptr<block::Block> startBlock ,
-									std::shared_ptr<unsigned char> stopHash = nullptr
-									);
-
-	BDVirtualChain( // 自身チェーンとの分岐点,最終譚までのブロックヘッダをセットする
-									std::shared_ptr<LightUTXOSet> utxoSet,
-									std::shared_ptr<BlockLocalStrageManager> localStrageManager,
-									std::shared_ptr<block::Block> startBlock,
-									std::vector< std::shared_ptr<block::BlockHeader>> _headerVector // チェーンの順に並んでいること
-									);
-
-	~BDVirtualChain();
-
-  void requestedExtendChain( std::function<struct BDBCB( std::shared_ptr<unsigned char> )> findPopCallback ); // 仮想チェーンの最先端ブロックハッシュを元にポップする
-
-	// 何のケースでもブロックヘッダを前回種しない限りはブロックダウンロード、検証、ストアは行われない
-	bool startSequentialAssemble( std::shared_ptr<StreamBufferContainer> toRequesterSBC ); // 主にIBD　ローカルファイルに書き込みながらチェーンを組み立てる
-	bool startParallelAssemble( std::shared_ptr<StreamBufferContainer> toRequesterSBC ); // 主にマージ ローカルファイルには保存せずブロックをすべてダウンロードする
-
-	// bool add( std::shared_ptr<block::BlockHeader> header , int defaultStatus = static_cast<int>(BDState::None) );
-	bool add( std::vector< std::shared_ptr<block::BlockHeader> > headerVector , int defaultStatus = static_cast<int>(BDState::None) );
-	bool add( std::vector<std::shared_ptr<block::Block>> blockVector, int defaultStatus = static_cast<int>(BDState::None) );
-
-	size_t chainLength();
-
-	// debug
-	void printVirtualChain();
-	void printFilter();
-	void printHeaderValidationPendingQueue();
-	void printMergePendingQueue();
-};
-*/
 
 
 

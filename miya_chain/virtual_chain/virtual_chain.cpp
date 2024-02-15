@@ -24,6 +24,7 @@
 
 #include "./virtual_header_sync_manager.h"
 #include "./virtual_header_subchain.h"
+#include "./virtual_block_sync_manager.h"
 
 
 
@@ -101,6 +102,12 @@ void VirtualChain::send( MiyaChainCommand commandBody , auto command )
 }
 
 
+void VirtualChain::backward()
+{
+  
+}
+
+
 void VirtualChain::add( std::vector<std::shared_ptr<block::BlockHeader>> targetVector )
 {
   std::vector< std::shared_ptr<block::BlockHeader> > duplicateHeaders;
@@ -143,10 +150,19 @@ void VirtualChain::add( std::vector<std::shared_ptr<block::Block>> targetVector 
 	filterCtx = _filter->filter( itr );
 	if( filterCtx == nullptr ) continue;
 	if( filterCtx->status() > static_cast<int>(BDState::BlockBodyReceived) ) continue;
-
-
   }
+
   return;
+}
+
+void VirtualChain::add( std::shared_ptr<block::Block> targetBlock )
+{
+  std::shared_ptr<struct BDBCB> filterCtx;
+  filterCtx = _filter->filter( targetBlock );
+  if( filterCtx == nullptr ) return;
+  if( filterCtx->status() > static_cast<int>(BDState::BlockBodyReceived) ) return;
+
+  return _blockSyncManager->add( targetBlock );
 }
 
 

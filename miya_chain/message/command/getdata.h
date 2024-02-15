@@ -29,7 +29,7 @@ public:
 		bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength ){};
 
     void inv( struct MiyaChainMSG_INV target );
-
+    void __print();
 };
 
 }

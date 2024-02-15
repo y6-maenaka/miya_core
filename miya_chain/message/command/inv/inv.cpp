@@ -65,7 +65,20 @@ size_t MiyaChainMSG_INV::count()
     return static_cast<size_t>(_body._count);
 }
 
+void MiyaChainMSG_INV::__print()
+{
+    printf(" .... %s .... \n" , MiyaChainMSG_INV::command );
 
+    int i=0;
+    for( int i=0; i<_body._invVector.size(); i++ ){
+        std::cout << "(" << i << ") ";
+        std::cout << "type :: " << _body._invVector.at(i)._typeID << "\n";
+        auto _ = _body._invVector.at(i);
+        for( int j=0; j<32; j++ ){
+            printf("%02X", _.hash()[j] );
+        } std::cout << "\n\n";
+    }
+}
 
 
 

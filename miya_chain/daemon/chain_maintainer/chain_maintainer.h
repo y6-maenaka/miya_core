@@ -41,21 +41,6 @@ class BlockLocalStrageManager;
 
 
 
-class CandidateVirtualChain
-{
-private:
-	std::shared_ptr<block::Block> _branchPointBlock; // 分岐点ブロック
-
-
-
-public:
-
-};
-
-
-
-
-
 
 
 class ChainMaintainer

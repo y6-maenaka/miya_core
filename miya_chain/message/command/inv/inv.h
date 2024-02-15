@@ -43,8 +43,6 @@ struct inv
 
 
 
-
-
 struct MiyaChainMSG_INV
 {
 	struct
@@ -70,6 +68,7 @@ public:
 	void addBlock( std::shared_ptr<unsigned char> hash );
 
 	std::vector<struct inv> invVector();
+	void __print();
 };
 
 

@@ -35,9 +35,6 @@ if( yn == 'y' ){ saveNewPkey( _pemPass , _pemPassSize ); _myPkey = readPriKey( _
 	return true;
 }
 
-
-
-
 void ECDSAManager::error( const char* errorMSG , bool isExit )
 {
 	fprintf( stderr , "[ ECDSA ERROR ] %s ", errorMSG );
@@ -45,13 +42,10 @@ void ECDSAManager::error( const char* errorMSG , bool isExit )
 	if( isExit == true ) exit(1);
 }
 
-
 EVP_PKEY* ECDSAManager::myPkey()
 {
 	return _myPkey;
 }
-
-
 
 
 void ECDSAManager::setPemPass( unsigned char* pemPass , unsigned int passSize )
@@ -59,11 +53,6 @@ void ECDSAManager::setPemPass( unsigned char* pemPass , unsigned int passSize )
 	_pemPass = pemPass;
 	_pemPassSize = passSize;
 }
-																														
-
-
-
-
 
 
 EVP_PKEY* ECDSAManager::generatePkey()
@@ -112,9 +101,6 @@ EVP_PKEY* ECDSAManager::generatePkey()
 }
 
 
-
-
-
 EVP_PKEY *ECDSAManager::readPubKey( const char *path )
 {
 
@@ -136,7 +122,6 @@ EVP_PKEY *ECDSAManager::readPubKey( const char *path )
 	
 	return pkey;
 }
-
 
 
 EVP_PKEY *ECDSAManager::readPriKey( unsigned char *pemPass ,const char *path )
@@ -168,17 +153,6 @@ EVP_PKEY *ECDSAManager::readPriKey( unsigned char *pemPass ,const char *path )
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
 // pubkeyは鍵しで保存
 bool ECDSAManager::writePubKey( EVP_PKEY *pkey , const char* path ){
 
@@ -195,10 +169,6 @@ bool ECDSAManager::writePubKey( EVP_PKEY *pkey , const char* path ){
 
 	return true;
 }
-
-
-
-
 
 
 bool ECDSAManager::writePriKey( EVP_PKEY* pkey , const char* path , unsigned char* pemPass, unsigned int passSize )
@@ -233,8 +203,6 @@ bool ECDSAManager::writePriKey( EVP_PKEY* pkey , const char* path , unsigned cha
 	return true;
 }
 
-
-
 /*
 bool ECDSAManager::saveNewKeyPair( unsigned char* pemPass , unsigned int passSize , const char *pubPath , const char *priPath )
 {
@@ -266,11 +234,8 @@ bool ECDSAManager::saveNewPkey( unsigned char* pemPass , unsigned int passSize )
 }
 
 
-
-
 void ECDSAManager::printPkey( EVP_PKEY *pkey )
 {
-	
 	if( pkey == nullptr ) return;
 
 	BIO *output_bio = BIO_new_fp( stdout, 0 );
@@ -282,9 +247,6 @@ void ECDSAManager::printPkey( EVP_PKEY *pkey )
 	BIO_vfree( output_bio );
 	
 }
-
-
-
 
 
 int ECDSAManager::toRawPubKey( unsigned char **ret , EVP_PKEY* pkey )
@@ -320,8 +282,6 @@ int ECDSAManager::toRawPubKey( unsigned char **ret , EVP_PKEY* pkey )
 	return rawPubKeyBuffSize;
 }
 
-
-
 unsigned int ECDSAManager::toRawPubKey( EVP_PKEY *pkey , std::shared_ptr<unsigned char> *ret )
 {
 	unsigned char *output = nullptr; unsigned int outputLength;
@@ -335,10 +295,6 @@ unsigned int ECDSAManager::toRawPubKey( EVP_PKEY *pkey , std::shared_ptr<unsigne
 	return outputLength;
 }
 
-
-
-
-
 EVP_PKEY* ECDSAManager::toPkey( unsigned char* rawPubKey , unsigned int rawPubKeySize )
 {
 	EVP_PKEY* pkey = NULL; 
@@ -351,8 +307,6 @@ EVP_PKEY* ECDSAManager::toPkey( unsigned char* rawPubKey , unsigned int rawPubKe
 	return pkey;
 }
 
-
-
 /*
 EVP_PKEY* ECDSAManager::toPKEY( std::shared_ptr<unsigned char> from , unsigned int fromLength )
 {
@@ -364,8 +318,6 @@ EVP_PKEY* ECDSAManager::toPKEY( std::shared_ptr<unsigned char> from , unsigned i
 	return pkey;
 }
 */
-
-
 
 int ECDSAManager::Sign( unsigned char *target, size_t targetLen , unsigned char** sig, EVP_PKEY* pri_key )
 {
@@ -402,9 +354,6 @@ int ECDSAManager::Sign( unsigned char *target, size_t targetLen , unsigned char*
 }
 
 
-
-
-
 unsigned int ECDSAManager::sign( std::shared_ptr<unsigned char> target , unsigned int targetLength, EVP_PKEY *pkey , std::shared_ptr<unsigned char> *retSign )
 {
 	size_t sigLen;
@@ -435,12 +384,6 @@ unsigned int ECDSAManager::sign( std::shared_ptr<unsigned char> target , unsigne
 
 	return sigLen;
 }
-
-
-
-
-
-
 
 bool ECDSAManager::Verify( unsigned char *sig, size_t sigLen , unsigned char *target, size_t targetLen, EVP_PKEY* pub_key )
 {
@@ -473,8 +416,6 @@ bool ECDSAManager::Verify( unsigned char *sig, size_t sigLen , unsigned char *ta
 		return false;
 }
 
-
-
 bool ECDSAManager::verify( std::shared_ptr<unsigned char> sig , size_t sigLength , std::shared_ptr<unsigned char> msg , size_t msgLength , EVP_PKEY *pubKey , char *hashType )
 {
 	std::shared_ptr<unsigned char> md; unsigned int mdLength;
@@ -483,7 +424,6 @@ bool ECDSAManager::verify( std::shared_ptr<unsigned char> sig , size_t sigLength
 
 	return verify( sig , sigLength , md, mdLength ,pubKey );
 }
-
 
 bool ECDSAManager::verify( std::shared_ptr<unsigned char> sig , size_t sigLength , std::shared_ptr<unsigned char> msgDigest , size_t msgDigestLength , EVP_PKEY *pubKey )
 {
@@ -500,7 +440,6 @@ bool ECDSAManager::verify( std::shared_ptr<unsigned char> sig , size_t sigLength
 
 	return (ret == 1);
 }
-
 
 void ECDSAManager::showRawPubKey()
 {

@@ -93,7 +93,6 @@ struct MiyaChainMessage
 		unsigned char _token[4];
 		char _command[12]; // プロトコルタイプ  with ASCII
 		uint32_t _payloadLength;
-
 	} _header; // 20 [bytse]
 
 	MiyaChainCommand _payload;
@@ -111,7 +110,6 @@ public:
 	/* Setter */
 	void payload( MiyaChainCommand targetPayload , const char *command );
 	void payloadLength( size_t target );
-
 
 	bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );
 	size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );

@@ -62,6 +62,16 @@ struct inv VirtualBlock::downloadInv()
  return inv( std::string("BLOCK") , this->blockHash() );
 }
 
+void VirtualBlock::__print()
+{
+  std::cout << " ==== [ VirtualBlock ] ==== "  << "\n";
+  std::shared_ptr<unsigned char> blockHash = this->blockHash();
+  for( int i=0; i<32; i++ ){
+	printf("%02X", blockHash.get()[i]);
+  } std::cout << "\n";
+  std::cout << "==============================" << "\n";
+}
+
 
 
 
