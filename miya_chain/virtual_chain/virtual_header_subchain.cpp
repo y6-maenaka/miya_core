@@ -88,9 +88,15 @@ uint32_t VirtualHeaderSubChain::updatedAt() const
   return _updatedAt;
 }
 
-bool VirtualHeaderSubChain::isChainStoped() const
+bool VirtualHeaderSubChain::isActive()
 {
-  return _isChainStoped;
+  uint32_t currentTimestamp = static_cast<uint32_t>( std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count() );
+  return ( static_cast<unsigned int>(currentTimestamp - _updatedAt) < SUBCHAIN_LIFETIME );
+}
+
+bool VirtualHeaderSubChain::isStoped() const
+{
+  return _isStoped;
 }
 
 void VirtualHeaderSubChain::build( std::shared_ptr<block::BlockHeader> latestBlockHeader )
@@ -104,7 +110,7 @@ bool VirtualHeaderSubChain::extend( int collisionAction )
 
   // std::unique_lock<std::shared_mutex> lock(_mtx);
   if( _stopHash != nullptr && memcmp( _context.latestBlockHash().get(), _stopHash.get() , 32 ) == 0 ){
-	_isChainStoped = true;
+	_isStoped = true;
 	return true; // ブロックの最後尾がstopHashに達していたら即座に戻る
   } 
 

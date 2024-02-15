@@ -94,6 +94,11 @@ void BDFilter::mask( std::vector< std::shared_ptr<block::BlockHeader>> targetVec
   return;
 }
 
+void BDFilter::update( std::shared_ptr<unsigned char> blockHash , int state )
+{
+  return;
+}
+
 
 void BDFilter::__printFilter()
 {

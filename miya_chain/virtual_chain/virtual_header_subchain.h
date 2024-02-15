@@ -32,6 +32,7 @@ namespace miya_chain
 
 
 constexpr unsigned short STATE_HASH_LENGTH = (160 / 8);
+constexpr unsigned short SUBCHAIN_LIFETIME = 5;
 
 
 class VirtualHeaderSubChain
@@ -53,7 +54,7 @@ private:
 
   uint32_t _updatedAt; // チェーン最後尾が更新された時の時間
   void update();
-  bool _isChainStoped = false;
+  bool _isStoped = false;
   const std::shared_ptr<unsigned char> _stopHash = nullptr;
  
   const BHPoolFinder _bhPoolFinder;
@@ -70,7 +71,8 @@ public:
   bool operator!=( const VirtualHeaderSubChain &sc ) const;
   struct Hash;
 
-  bool isChainStoped() const; 
+  bool isStoped() const;  // チェーンがStopHashに到達しているか否か
+  bool isActive();
 
   uint32_t updatedAt() const;
   void build( std::shared_ptr<block::BlockHeader> latestBlockHeader );
@@ -78,7 +80,6 @@ public:
   MiyaChainCommand extendCommand(); // 本サブチェーンにつながるようなブロックリクエストコマンドを発行する
   
   std::vector< std::shared_ptr<block::BlockHeader> > exportChainVector(); // latestBlockHeaderから遡ってチェーンを生成する
-
 
   void __printChainDigest() const;
 };

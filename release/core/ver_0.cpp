@@ -53,12 +53,13 @@
 #include "../../test/miya_chain/virtual_chain_p2.cpp"
 #include "../../test/miya_chain/virtual_chain_p3.cpp"
 #include "../../test/miya_chain/virtual_chain_p4.cpp"
+#include "../../test/miya_chain/virtual_chain_p5.cpp"
 #include "../../test/miya_chain/build_sample_chain_p1.cpp"
 
 
 int main()
 {
-	virtual_chain_p4();
+	virtual_chain_p5();
 	return 0;
 
 

@@ -1,4 +1,4 @@
-#include "virtual_chain.h"
+#include "virtual_header_sync_manager.h"
 
 #include "../block/block.h"
 #include "../block/block_header.h"
@@ -20,7 +20,7 @@ namespace miya_chain
 // VirtualChain || BlockHeaderPool
 
 
-std::pair< bool, short > VirtualChain::BlockHeaderPool::push( std::shared_ptr<block::BlockHeader> target )
+std::pair< bool, short > VirtualHeaderSyncManager::BlockHeaderPool::push( std::shared_ptr<block::BlockHeader> target )
 {
   // targetBlockHeaderからprevBlockHashの取り出し
   std::shared_ptr<unsigned char> prevBlockHash = target->prevBlockHash(); 
@@ -40,7 +40,7 @@ std::pair< bool, short > VirtualChain::BlockHeaderPool::push( std::shared_ptr<bl
 }
 
 
-std::shared_ptr<block::BlockHeader> VirtualChain::BlockHeaderPool::findByBlockHash( std::shared_ptr<unsigned char> blockHash )
+std::shared_ptr<block::BlockHeader> VirtualHeaderSyncManager::BlockHeaderPool::findByBlockHash( std::shared_ptr<unsigned char> blockHash )
 {
   BlockHashAsKey key( blockHash );
 
@@ -50,7 +50,7 @@ std::shared_ptr<block::BlockHeader> VirtualChain::BlockHeaderPool::findByBlockHa
   return ret->second;
 }
 
-std::vector< std::shared_ptr<block::BlockHeader> > VirtualChain::BlockHeaderPool::findByPrevBlockHash( std::shared_ptr<unsigned char> prevBlockHash )
+std::vector< std::shared_ptr<block::BlockHeader> > VirtualHeaderSyncManager::BlockHeaderPool::findByPrevBlockHash( std::shared_ptr<unsigned char> prevBlockHash )
 {
   std::vector< std::shared_ptr<block::BlockHeader> >  retVector;
   PrevBlockHashAsKey key( prevBlockHash );
@@ -64,7 +64,7 @@ std::vector< std::shared_ptr<block::BlockHeader> > VirtualChain::BlockHeaderPool
 }
 
 
-void VirtualChain::BlockHeaderPool::__printPoolSortWithPrevBlockHash()
+void VirtualHeaderSyncManager::BlockHeaderPool::__printPoolSortWithPrevBlockHash()
 {
   std::cout << "===== <Virtual Chain Lists> =====" << "\n";
 

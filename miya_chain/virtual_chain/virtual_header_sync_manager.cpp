@@ -6,6 +6,9 @@
 #include "../../shared_components/stream_buffer/stream_buffer.h"
 #include "../../shared_components/stream_buffer/stream_buffer_container.h"
 
+#include "../message/message.h"
+#include "../message/command/command_set.h"
+
 
 
 
@@ -16,18 +19,70 @@ namespace miya_chain
 
 VirtualHeaderSyncManager::VirtualHeaderSyncManager( std::shared_ptr<block::BlockHeader> startBlockHeader ,
 												std::shared_ptr<unsigned char> stopHash,
-												BHPoolFinder bhPoolFinder,
-												PBHPoolFinder pbhPoolFinder,
+												FilterStateUpdator filterStateUpdator,
 												std::shared_ptr<StreamBufferContainer> toRequesterSBC
-) : _startBlockHeader(startBlockHeader) , _bhPoolFinder(bhPoolFinder), _pbhPoolFinder(pbhPoolFinder) , _stopHash(stopHash) , _toRequesterSBC(toRequesterSBC)
+) : _startBlockHeader(startBlockHeader) , _stopHash(stopHash) , _filterStateUpdator(filterStateUpdator) ,_toRequesterSBC(toRequesterSBC)
 {
-  VirtualHeaderSubChain initialSubChain( _startBlockHeader, stopHash ,_bhPoolFinder, _pbhPoolFinder );
 
+ // Block Sync Managerのセットアップ
+  _bhPoolFinder = std::bind(
+							&BlockHeaderPool::findByBlockHash,
+							std::ref(_blockHeaderPool),
+							std::placeholders::_1 );
+
+  _pbhPoolFinder = std::bind(
+							&BlockHeaderPool::findByPrevBlockHash,
+							std::ref(_blockHeaderPool),
+							std::placeholders::_1 );
+
+
+  VirtualHeaderSubChain initialSubChain( _startBlockHeader, stopHash ,_bhPoolFinder, _pbhPoolFinder );
 
   _headerSubchainSet.insert( initialSubChain );
 }
 
-bool VirtualHeaderSyncManager::extend( bool collisionAction )
+void VirtualHeaderSyncManager::sendRequestSyncedCommand()
+{
+  std::vector< MiyaChainCommand > extendCommands;
+  for( auto itr : _headerSubchainSet )
+  {
+	extendCommands.push_back( itr.extendCommand() );
+  }
+
+  return;
+}
+
+size_t VirtualHeaderSyncManager::activeSubchainCount()
+{
+  int count=0;
+  for( auto itr : _headerSubchainSet )
+	count += ( itr.isActive() ) ? 1 : 0;
+
+  return count;
+}
+
+void VirtualHeaderSyncManager::add( std::vector< std::shared_ptr<block::BlockHeader> > targetVector )
+{
+  std::pair< bool , short > poolCtx; // 要素追加可否とその際のpool内部状態を取得
+  std::vector< std::shared_ptr<block::BlockHeader> > duplicateHeaders; // 重複要素
+  for( auto itr : targetVector )
+  {
+	poolCtx = this->_blockHeaderPool.push( itr );
+	if( poolCtx.first && poolCtx.second > 1 ) // 追加成功 && 追加後の要素数が2以上 => 重複追加
+	  duplicateHeaders.push_back( itr ); // 重複した要素は保存しておく
+  }
+
+ for( auto itr : duplicateHeaders )
+  {
+	std::cout << "新たにサブチェーンがビルドされます" << "\n";
+	this->build( itr ); // 重複ブロックが存在した場合は仮想チェーンを作成する
+  }
+  
+  this->extend(); // headerPoolに更新があった旨をsubchainに通知し,subchainの延長を試みる
+}
+
+
+bool VirtualHeaderSyncManager::extend( bool collisionAction ) // あまり良い方法ではない
 {
   bool chainStopFlag = false;
   std::vector< VirtualHeaderSubChain > extendedVector;
@@ -59,7 +114,7 @@ void VirtualHeaderSyncManager::build( std::shared_ptr<block::BlockHeader> stopHe
   // 新たに仮想チェーンを作成
   VirtualHeaderSubChain newSubchain( _startBlockHeader , stopHash ,_bhPoolFinder, _pbhPoolFinder );
   newSubchain.build( stopHeader );
-  newSubchain.extend(); // 作成した仮想チェーンを伸ばせるだけ伸ばす
+  newSubchain.extend(); // 作成した仮想チェーンを伸ばせるだけ伸ばす 必ずextendしなければならない
 
   auto insertRet = _headerSubchainSet.insert( newSubchain ); // 既に存在するsubchainだった場合は管理下にせず破棄する
 }
@@ -67,10 +122,33 @@ void VirtualHeaderSyncManager::build( std::shared_ptr<block::BlockHeader> stopHe
 std::shared_ptr<VirtualHeaderSubChain> VirtualHeaderSyncManager::stopedHeaderSubchain()
 {
   for( auto && itr : _headerSubchainSet ){
-	if( itr.isChainStoped() ) return std::make_shared<VirtualHeaderSubChain>( itr );
+	if( itr.isStoped() ) return std::make_shared<VirtualHeaderSubChain>( itr );
   }
   return nullptr;
 }
+
+
+void VirtualHeaderSyncManager::start()
+{
+   
+  std::thread requestSender([&]()
+  {
+	std::cout << "VirtualHeaderSyncManager::start thread started()" << "\n";
+ 
+	while(true)
+	{
+	  std::this_thread::sleep_for( std::chrono::seconds(HEADER_REQUEST_TIMEOUT_SECOND) ); // 受信待ち時間
+	  // retransmissionCount++;
+	}
+	return;
+
+  
+  });
+
+  requestSender.detach();
+  return;
+}
+
 
 unsigned short VirtualHeaderSyncManager::subchainCount()
 {
