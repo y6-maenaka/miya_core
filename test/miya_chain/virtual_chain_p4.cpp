@@ -142,7 +142,8 @@ int virtual_chain_p4()
 
   
   std::shared_ptr<StreamBufferContainer> toRequesterSBC = std::make_shared<StreamBufferContainer>();
-  std::shared_ptr<miya_chain::VirtualChain> virtualChain = std::shared_ptr<miya_chain::VirtualChain>( new miya_chain::VirtualChain( *latestBlockItr , toRequesterSBC ) );
+  std::shared_ptr<miya_chain::BlockLocalStrageManager> localStrageManager = miyaChainManager->localStrageManager();
+  std::shared_ptr<miya_chain::VirtualChain> virtualChain = std::shared_ptr<miya_chain::VirtualChain>( new miya_chain::VirtualChain( *latestBlockItr , localStrageManager ,toRequesterSBC ) );
 
   std::vector< std::shared_ptr<block::BlockHeader> > requestHeaderVector;
   requestHeaderVector.push_back( block_0000->header() );
@@ -158,7 +159,7 @@ int virtual_chain_p4()
   std::shared_ptr<miya_chain::VirtualBlockSyncManager> blockSyncManager = std::shared_ptr<miya_chain::VirtualBlockSyncManager>( 
 		  new miya_chain::VirtualBlockSyncManager(
 				requestHeaderVector,
-				( miyaChainManager->localStrageManager().get() ),
+				miyaChainManager->localStrageManager() ,
 				toRequesterSBC
 		));
   blockSyncManager->start(); 

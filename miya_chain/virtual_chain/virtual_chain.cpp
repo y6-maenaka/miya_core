@@ -36,10 +36,11 @@ namespace miya_chain
 
 
 
-VirtualChain::VirtualChain( BlockChainIterator initialForkPoint , std::shared_ptr<StreamBufferContainer> toRequesterSBC ) : _forkPoint(initialForkPoint)
+VirtualChain::VirtualChain( BlockChainIterator& initialForkPoint , std::shared_ptr<BlockLocalStrageManager> localStrageManager ,std::shared_ptr<StreamBufferContainer> toRequesterSBC ) : _forkPoint(initialForkPoint)
 {
   _forkPoint = initialForkPoint;
   _toRequesterSBC = toRequesterSBC;
+  _localStrageManager = localStrageManager;
 
   // フィルターのセットアップと初期ヘッダーの登録
   _filter = std::shared_ptr<BDFilter>( new BDFilter() );
@@ -50,13 +51,73 @@ VirtualChain::VirtualChain( BlockChainIterator initialForkPoint , std::shared_pt
   _status = static_cast<int>(VirtualChainState::PENDING);
 }
 
+
+void VirtualChain::forward()
+{
+  std::thread vchainBuilder([&]()
+  {
+	std::cout << "< forward > Started VirtualChain Builder Thread" << "\n";
+
+
+	FilterStateUpdator filterStateUpdator = std::bind( 
+							  &BDFilter::update,
+							  std::ref(_filter),
+							  std::placeholders::_1 ,
+							  std::placeholders::_2
+						  );
+  
+	std::vector< std::shared_ptr<block::BlockHeader> > longestHeaderChain;
+	int forkPointDecrimentsCount = 0;
+	do
+	{
+	  _syncManager._headerSyncManager = std::shared_ptr<VirtualHeaderSyncManager>( new VirtualHeaderSyncManager( _forkPoint.header() , nullptr, filterStateUpdator, _toRequesterSBC) );
+	  _syncManager._headerSyncManager->start();
+	  _status = static_cast<int>(VirtualChainState::HEADER_SYNC_MANAGER_WORKING);
+
+	  std::vector< std::shared_ptr<VirtualHeaderSubChain> > headerSubchainVector;
+	  headerSubchainVector = _syncManager._headerSyncManager->subchainVector(); 
+
+	  for( auto itr : headerSubchainVector ) // 構築された仮想ヘッダーチェーンで最も長いものを採用する
+	  { 
+		auto headerChain = itr->exportChainVector();
+		if( headerChain.size() > longestHeaderChain.size() ) longestHeaderChain = headerChain;
+	  }
+	
+	  if( longestHeaderChain.size() > 1 ) break; // (初期ヘッダー + ダウンロードしたヘッダー) が構築されていれば処理を進める
+	  
+	  _forkPoint.operator--();
+	  forkPointDecrimentsCount++;
+	  longestHeaderChain.clear(); headerSubchainVector.clear(); // 必ず
+
+	} while( forkPointDecrimentsCount < ALLOWED_FORKPOINT_DECREMENTS );
+
+	if( longestHeaderChain.size() <= 1 ){
+	  _status = static_cast<int>(VirtualChainState::HEADER_SYNC_MANAGER_FAILED);
+	  std::cout << "ヘッダーの同期に失敗しました" << "\n";
+	}
+
+	_status = static_cast<int>(VirtualChainState::HEADER_SYNC_MANAGER_DONE);
+	_syncManager._blockSyncManager = std::make_shared<VirtualBlockSyncManager>( longestHeaderChain, _localStrageManager , _toRequesterSBC );
+	bool blockSyncCompleteFlag = _syncManager._blockSyncManager->start();
+
+	if( blockSyncCompleteFlag )
+	  _status = static_cast<int>(VirtualChainState::BLOCK_SYNC_MANAGER_DONE);
+	else
+	  _status = static_cast<int>(VirtualChainState::BLOCK_SYNC_MANAGER_FAILED);
+
+	std::cout << "< forward > 仮想チェーン同期マネージャー(header&block)終了" << "\n";
+  });
+  vchainBuilder.detach();
+  return;
+}
+
 void VirtualChain::backward( std::shared_ptr<block::BlockHeader> objectiveHeader )
 {
   std::thread vchainBuilder([&]()
   {
-	std::cout << "Started VirtualChain Builder Thread" << "\n";
+	std::cout << "< backward > Started VirtualChain Builder Thread" << "\n";
 	  
-	int headerSyncFlag = 0;
+	bool headerSyncCompleteFlag = false;
 	std::shared_ptr<unsigned char> stopHash = objectiveHeader->headerHash();
 
 	FilterStateUpdator filterStateUpdator = std::bind( // フィルターの更新関数
@@ -65,42 +126,48 @@ void VirtualChain::backward( std::shared_ptr<block::BlockHeader> objectiveHeader
 							  std::placeholders::_1 ,
 							  std::placeholders::_2
 						  );
-
-	 while( !(headerSyncFlag) )  // 成功するまでフォークポイントを下げて検証する
-	 {
+  
+	int forkPointDecrimentsCount = 0;
+	do  // 成功するまでフォークポイントを下げて検証する
+	{
 		std::cout << "ヘッダー同期マネージャー In ループ" << "\n";
 		_syncManager._headerSyncManager = std::shared_ptr<VirtualHeaderSyncManager>( new VirtualHeaderSyncManager( _forkPoint.header(), stopHash , filterStateUpdator , _toRequesterSBC ) );
 
 		_status = static_cast<int>(VirtualChainState::HEADER_SYNC_MANAGER_WORKING); // 内部状態の更新
-		headerSyncFlag = _syncManager._headerSyncManager->start();
-		std::cout << "HeaderSyncManagerのブロッキングが終了しました" << "\n";
+		headerSyncCompleteFlag = _syncManager._headerSyncManager->start();
 
-		break;
+		_forkPoint.operator--(); // ヘッダ収集の始点を下げる(内部状態が更新さない演算子オーバーロードの場合は,明示的にoperatorまで書かなければならないらしい)
+  		forkPointDecrimentsCount++;
+	} while( !(headerSyncCompleteFlag) || forkPointDecrimentsCount < ALLOWED_FORKPOINT_DECREMENTS );
+ 
+	if( !(headerSyncCompleteFlag) ){ // ヘッダーの同期に失敗した場合
+	  _status = static_cast<int>(VirtualChainState::HEADER_SYNC_MANAGER_FAILED);
+	  std::cout << "ヘッダーの同期に失敗しました" << "\n";
+	  return;
 	}
-	 _status = static_cast<int>(VirtualChainState::HEADER_SYNC_MANAGER_DONE); // 内部状態の更新
+   
+	std::cout << "ヘッダー同期シーケンスが終了しました" << "\n";
+	_status = static_cast<int>(VirtualChainState::HEADER_SYNC_MANAGER_DONE); // 内部状態の更新
 
-	 std::cout << "仮想チェーン同期マネージャー終了" << "\n";
+	std::shared_ptr<VirtualHeaderSubChain> syncedHeaderSubchain = _syncManager._headerSyncManager->stopedHeaderSubchain();
+	std::vector< std::shared_ptr<block::BlockHeader> > syncedHeaderVector;
+	syncedHeaderVector = syncedHeaderSubchain->exportChainVector();
+
+    _syncManager._blockSyncManager = std::make_shared<VirtualBlockSyncManager>( syncedHeaderVector , _localStrageManager , _toRequesterSBC );
+    bool blockSyncCompleteFlag = _syncManager._blockSyncManager->start();
+	
+	if( blockSyncCompleteFlag )
+	  _status = static_cast<int>(VirtualChainState::BLOCK_SYNC_MANAGER_DONE);
+	else
+	  _status = static_cast<int>(VirtualChainState::BLOCK_SYNC_MANAGER_FAILED);
+
+	std::cout << "< backward > 仮想チェーン同期マネージャー(header&block)終了" << "\n";
   });
 
-  vchainBuilder.detach(); // デタッチする
-  int headerSyncFlag = 0;
-  std::shared_ptr<unsigned char> stopHash = objectiveHeader->headerHash();
-
-
-  FilterStateUpdator filterStateUpdator = std::bind(
-							&BDFilter::update,
-							std::ref(_filter),
-							std::placeholders::_1 ,
-							std::placeholders::_2
-						);
-
-   while( headerSyncFlag )
-   {
-	  // 成功するまでフォークポイントを下げて検証する
-	  _syncManager._headerSyncManager = std::shared_ptr<VirtualHeaderSyncManager>( new VirtualHeaderSyncManager( _forkPoint.header(), stopHash , filterStateUpdator , _toRequesterSBC ) );
-	  // headerSyncFlag = _syncManager._headerSyncManager.start();
-  }
+  vchainBuilder.detach();
+  return;
 }
+
 
 void VirtualChain::add( std::vector<std::shared_ptr<block::BlockHeader>> targetVector )
 {
@@ -134,20 +201,6 @@ void VirtualChain::add( std::shared_ptr<block::Block> targetBlock )
   if( filterCtx->status() > static_cast<int>(BDState::BlockBodyReceived) ) return;
 
   return _syncManager._blockSyncManager->add( targetBlock );
-}
-
-
-void VirtualChain::start()
-{
-  std::thread vchainBuilder([&]()
-  {
-	std::cout << "Started VirtualChain Builder Thread" << "\n";
-	
-	_syncManager._headerSyncManager->start(); // ブロッキング処理
-	return;
-  });
-  vchainBuilder.detach();
-
 }
 
 

@@ -97,7 +97,7 @@ int virtual_chain_p5()
   std::shared_ptr<block::Block> block_0001 = std::shared_ptr<block::Block>( new block::Block{} );
   block_0001->coinbase( coinbase_0001 );
   block_0001->add( p2pkh_0001 );
-
+  
   std::shared_ptr<unsigned char> merkleRoot_0001; size_t merkleRootLength_0001;
   merkleRootLength_0001 = block_0001->calcMerkleRoot( &merkleRoot_0001 );
   block_0001->header()->merkleRoot( merkleRoot_0001 );
@@ -143,7 +143,8 @@ int virtual_chain_p5()
   std::cout << "-----------------------------" << "\n";
 
   std::shared_ptr<StreamBufferContainer> toRequesterSBC = std::make_shared<StreamBufferContainer>();
-  std::shared_ptr<miya_chain::VirtualChain> virtualChain = std::shared_ptr<miya_chain::VirtualChain>( new miya_chain::VirtualChain( *latestBlockItr , toRequesterSBC ) );
+  std::shared_ptr<miya_chain::BlockLocalStrageManager> localStrageManager = miyaChainManager->localStrageManager();
+  std::shared_ptr<miya_chain::VirtualChain> virtualChain = std::shared_ptr<miya_chain::VirtualChain>( new miya_chain::VirtualChain( *latestBlockItr , localStrageManager ,toRequesterSBC ) );
 
   std::vector< std::shared_ptr<block::BlockHeader> > requestHeaderVector;
   requestHeaderVector.push_back( block_0000->header() );

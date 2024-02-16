@@ -55,7 +55,7 @@ private:
   // std::map< unsigned int , std::shared_ptr<block::BlockHeader> > _chain;
 
   // miyaChain更新系モジュール
-  BlockLocalStrageManager *_localStrageManager;
+  std::shared_ptr<BlockLocalStrageManager> _localStrageManager;
   std::shared_ptr< LightUTXOSet > _utxoSet;
 
   struct UnChaindedWindow  // 親に操作される(のみ)
@@ -104,10 +104,10 @@ protected:
   void setupWindow( std::vector<std::shared_ptr<VirtualBlock>> fromVBVector );
 
 public:
-  VirtualBlockSyncManager( std::vector<std::shared_ptr<block::BlockHeader>> virtualHeaderChainVector/* これを元にvirtual_block_chainを作成する */ , BlockLocalStrageManager *localStrageManager , std::shared_ptr<StreamBufferContainer> toRequesterSBC );
+  VirtualBlockSyncManager( std::vector<std::shared_ptr<block::BlockHeader>> virtualHeaderChainVector/* これを元にvirtual_block_chainを作成する */ , std::shared_ptr<BlockLocalStrageManager> localStrageManager , std::shared_ptr<StreamBufferContainer> toRequesterSBC );
 
   void add( std::shared_ptr<block::Block> target ); // 外部からブロックが到着
-  void start();
+  bool start();
 };
 
 

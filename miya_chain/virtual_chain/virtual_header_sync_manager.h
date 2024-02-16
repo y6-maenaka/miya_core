@@ -111,6 +111,7 @@ public:
   bool extend( bool collisionAction = false );
   void build( std::shared_ptr<block::BlockHeader> stopHeader ); // 新たに仮想チェーンを作成して,重複がなければ管理下に追加する
 
+  std::vector< std::shared_ptr<VirtualHeaderSubChain> > subchainVector() const; // 全ての構築したサブチェーンを取り出す
   std::shared_ptr<VirtualHeaderSubChain> stopedHeaderSubchain(); // 延長停止した(収取目的が達成した)仮想サブチェーンを取得
   bool start();
   int status() const;
@@ -120,6 +121,9 @@ public:
 };
 
 
+/*
+  最も長いor有効的なサブチェーンを選出するには
+*/
 
 
 

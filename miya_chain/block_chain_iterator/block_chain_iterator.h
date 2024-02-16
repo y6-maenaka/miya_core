@@ -47,6 +47,7 @@ private:
   } _cache;
 
 public:
+  BlockChainIterator( const BlockChainIterator& bcitr );
   BlockChainIterator( std::shared_ptr<BlockLocalStrageManager> localStrageManager , std::shared_ptr<unsigned char> blockHash ); // ブロックボディの取得はコンストラクタ内で行う
   BlockChainIterator( std::shared_ptr<miya_chain::BlockLocalStrageManager> localStrageManager , std::shared_ptr<block::Block> body ); // ブロック本体からイテレータを作成する
 

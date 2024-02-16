@@ -58,6 +58,8 @@ constexpr unsigned int DEFAULT_BLOCK_HEADER_DOWNLOAD_AGENT_COUNT = 1; // メイ�
 constexpr unsigned int DEFAULT_BLOCK_DOWNLOAD_AGENT_COUNT = 3; // ブロックダウンロードエージェントの起動数
 constexpr unsigned int DEFAULT_DOWNLOAD_BLOCK_WINDOW_SIZE = 10; // 一つのブロックダウンロードエージェントが一回で担当するブロック数
 constexpr unsigned int DEFAULT_BD_MAX_TIMEOUT_COUNT = 4;
+constexpr unsigned int ALLOWED_FORKPOINT_DECREMENTS = 4;
+// constexpr unsigned int ALLOWED_FORWARD_SYNC_TRIES = 3; // forwardで有効なチェーンが見つからなかった場合に再試行する回数
 
 // first: blockHash , second: ブロック管理ブロック
 using VirtualMiyaChain = std::vector< std::pair< std::shared_ptr<unsigned char>, std::shared_ptr<struct BDBCB>> >;
@@ -72,7 +74,9 @@ enum class VirtualChainState : int
   FINISHED,
   HEADER_SYNC_MANAGER_WORKING,
   HEADER_SYNC_MANAGER_DONE,
+  HEADER_SYNC_MANAGER_FAILED,
   BLOCK_SYNC_MANAGER_WORKING,
+  BLOCK_SYNC_MANAGER_FAILED,
   BLOCK_SYNC_MANAGER_DONE,
   TIMEOUT = -1 ,
   ERROR = -2
@@ -91,17 +95,18 @@ private:
   BlockChainIterator &_forkPoint; // フォーク分岐点 下がることもある
   std::shared_ptr< LightUTXOSet > _utxoSet;
   std::shared_ptr<StreamBufferContainer> _toRequesterSBC;
+  std::shared_ptr<BlockLocalStrageManager> _localStrageManager = nullptr;
   int _status;
 
   std::shared_ptr< BDFilter > _filter; // フィルター本体
   struct
   {
-	   std::shared_ptr< VirtualHeaderSyncManager > _headerSyncManager;
-	    std::shared_ptr< VirtualBlockSyncManager > _blockSyncManager;
+	 std::shared_ptr< VirtualHeaderSyncManager > _headerSyncManager;
+	 std::shared_ptr< VirtualBlockSyncManager > _blockSyncManager;
   } _syncManager;
 
 public:
-  VirtualChain( BlockChainIterator initialForkPoint , std::shared_ptr<StreamBufferContainer> toRequesterSBC );
+  VirtualChain( BlockChainIterator& initialForkPoint , std::shared_ptr<BlockLocalStrageManager> localStrageManager ,std::shared_ptr<StreamBufferContainer> toRequesterSBC );
 
   void forward(); // 目的(最終)を指定せず(自動的に最終を取得)して,それに達するように仮想チェーンを構築する ※ IBDなど
   void backward( std::shared_ptr<block::BlockHeader> objectiveHeader ); // 目的(最終)を指定して,それに達するように仮想チェーンを構築する ※ 他ノードが新たにブロックを発掘した時など
@@ -111,8 +116,7 @@ public:
   void add( std::vector<std::shared_ptr<block::Block>> targetVector );
   void add( std::shared_ptr<block::Block> targetBlock );
 
-  void start();
-   void __printState();
+  void __printState();
 };
 
 

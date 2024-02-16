@@ -94,7 +94,7 @@ void VirtualBlockSyncManager::UnChaindedWindow::__print()
 
 
 
-VirtualBlockSyncManager::VirtualBlockSyncManager( std::vector< std::shared_ptr<block::BlockHeader> > virtualHeaderChainVector, BlockLocalStrageManager *localStrageManager , std::shared_ptr<StreamBufferContainer> toRequesterSBC )
+VirtualBlockSyncManager::VirtualBlockSyncManager( std::vector< std::shared_ptr<block::BlockHeader> > virtualHeaderChainVector, std::shared_ptr<BlockLocalStrageManager> localStrageManager , std::shared_ptr<StreamBufferContainer> toRequesterSBC )
 {
   _localStrageManager = localStrageManager;
   _toRequesterSBC = toRequesterSBC;
@@ -139,10 +139,10 @@ std::pair< MiyaChainCommand , const char* > VirtualBlockSyncManager::downloadCom
   MiyaChainCommand wrapCommand = getdataCommand;
 
 
-  std::cout << "作成済みコマンド" << "\n";
-  std::cout << "========================================" << "\n";
-  getdataCommand.__print();
-  std::cout << "========================================" << "\n";
+  std::cout << "++++++++++++++++++++++" << "\n";
+  std::cout << "作成済みブロック同期コマンド" << "\n";
+  inv.__print();
+  std::cout << "++++++++++++++++++++++" << "\n";
 
   return std::make_pair( wrapCommand , MiyaChainMSG_INV::command );
 }
@@ -219,72 +219,60 @@ void VirtualBlockSyncManager::add( std::shared_ptr<block::Block> target ) // 検
 
 
 
-void VirtualBlockSyncManager::start() 
+bool VirtualBlockSyncManager::start() 
 {
-  std::thread requestSender([&]() 
-  { // 基本的に検証プロセス
-	std::vector< std::shared_ptr<VirtualBlock> > windowTargetVBVector; // _chainから取り出したwindow作成用のVirtualBlockリスト
+  std::vector< std::shared_ptr<VirtualBlock> > windowTargetVBVector; // _chainから取り出したwindow作成用のVirtualBlockリスト
 
-	bool failureFlag = false;
-	unsigned int vbIndex = 0;
-	bool blockIsInLocal;
+  bool failureFlag = false;
+  unsigned int vbIndex = 0;
+  bool blockIsInLocal;
 
-	while( vbIndex < _chain.size() ) // チェーンの最後尾まで検証が済むまで
+  while( vbIndex < _chain.size() ) // チェーンの最後尾まで検証が済むまで
+  {
+	windowTargetVBVector.clear();
+	vbIndex = _verifiedIndex;
+	while( vbIndex < _chain.size() ) // windowサイズに到着 or _chain最後尾までのVirtualBlockをベクタ化する
+	{ 
+	  _chain.at(vbIndex)->__print();
+	  windowTargetVBVector.push_back( _chain.at(vbIndex) );
+	  vbIndex += 1;
+	}
+   
+	std::cout << "## windowTargetVBVectorのサイズ :: " << windowTargetVBVector.size() << "\n";
+
+	if( windowTargetVBVector.empty() ) break; // _chain内の全てのブロックの検証が完了している場合は終了
+   
+	// Window分のブロックダウンロード処理
+	this->setupWindow( windowTargetVBVector ); // UnChaindedWindowのセットアップ
+	_unChaindedWindow.__print();
+
+	if( !(this->downloadWindow()) ) // windowダウンロードに失敗した場合 // downloadWindowは成功/失敗までブロッキングする
 	{
-	  windowTargetVBVector.clear();
-	  vbIndex = _verifiedIndex;
-	  while( vbIndex < _chain.size() ) // windowサイズに到着 or _chain最後尾までのVirtualBlockをベクタ化する
-	  { 
-		_chain.at(vbIndex)->__print();
-		windowTargetVBVector.push_back( _chain.at(vbIndex) );
-		vbIndex += 1;
+	  failureFlag = true;
+	  break;
+	}
+	std::cout << "ウィンドウブロックのダウンロードが完了しました" << "\n";
+
+	for( int i=0; i<_unChaindedWindow.size(); i++ )
+	{
+	  std::shared_ptr<block::Block> targetBlock;
+	  auto segment = _unChaindedWindow.at(i);
+	  blockIsInLocal = segment.first;
+	  targetBlock = segment.second;
+	  // ここでブロックの検証を行う
+	  
+	  
+	  // 検証をパスしたブロックであれば	
+	  if( !(blockIsInLocal) ){ // ローカルにあるブロックの場合は特に保存操作はしない
+		_localStrageManager->writeBlock( targetBlock );
+		std::cout << "\x1b[31m" << "ブロックがローカルに書き込まれました" << "\x1b[39m" << "\n";
 	  }
-	 
-	  std::cout << "## windowTargetVBVectorのサイズ :: " << windowTargetVBVector.size() << "\n";
-
-	  if( windowTargetVBVector.empty() ) break; // _chain内の全てのブロックの検証が完了している場合は終了
-	 
-	  // Window分のブロックダウンロード処理
-	  this->setupWindow( windowTargetVBVector ); // UnChaindedWindowのセットアップ
-	  _unChaindedWindow.__print();
-
-	  if( !(this->downloadWindow()) ) // windowダウンロードに失敗した場合 // downloadWindowは成功/失敗までブロッキングする
-	  {
-		failureFlag = true;
-		break;
-	  }
-	  std::cout << "ウィンドウブロックのダウンロードが完了しました" << "\n";
-
-	  for( int i=0; i<_unChaindedWindow.size(); i++ )
-	  {
-		std::shared_ptr<block::Block> targetBlock;
-		auto segment = _unChaindedWindow.at(i);
-		blockIsInLocal = segment.first;
-		targetBlock = segment.second;
-		// ここでブロックの検証を行う
-		
-		
-		// 検証をパスしたブロックであれば	
-		if( !(blockIsInLocal) ){ // ローカルにあるブロックの場合は特に保存操作はしない
-		  _localStrageManager->writeBlock( targetBlock );
-		  std::cout << "\x1b[31m" << "ブロックがローカルに書き込まれました" << "\x1b[39m" << "\n";
-		}
-	  }
-
 	}
 
-	std::cout << "BlockSyncスレッドが終了しました" << "\n";
-  });
+  }
 
-  requestSender.detach(); // スレッド終了は自身で制御する
-  
-  /*
-  リクエストコマンド(メッセージ)を送信するタイミングは
-  <イベント>
-  timeout -> 
-  window内のブロックが途中まで到着 -> 感知方法:
-  */
-
+  std::cout << "BlockSyncスレッドが終了しました" << "\n";
+  return true;
 }
 
 

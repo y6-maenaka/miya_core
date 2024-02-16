@@ -112,7 +112,7 @@ void VirtualHeaderSyncManager::add( std::vector< std::shared_ptr<block::BlockHea
   }
 
   if( this->extend() ) // headerPoolに更新があった旨をsubchainに通知し,subchainの延長を試みる
-	_status = static_cast<int>(VirtualHeaderSyncManagerState::FINISHED);
+	_status = static_cast<int>(VirtualHeaderSyncManagerState::FINISHED); // 延長操作によりstopに達したらフラグを立てて終了する
 }
 
 
@@ -156,7 +156,16 @@ void VirtualHeaderSyncManager::build( std::shared_ptr<block::BlockHeader> stopHe
   auto insertRet = _headerSubchainSet.insert( newSubchain ); // 既に存在するsubchainだった場合は管理下にせず破棄する
 }
 
-std::shared_ptr<VirtualHeaderSubChain> VirtualHeaderSyncManager::stopedHeaderSubchain()
+std::vector< std::shared_ptr<VirtualHeaderSubChain> > VirtualHeaderSyncManager::subchainVector() const
+{
+  std::vector< std::shared_ptr<VirtualHeaderSubChain> > ret;
+  for( auto itr : _headerSubchainSet )
+	ret.push_back( std::make_shared<VirtualHeaderSubChain>(itr) );
+  
+  return ret;
+}
+
+std::shared_ptr<VirtualHeaderSubChain> VirtualHeaderSyncManager::stopedHeaderSubchain() 
 {
   for( auto && itr : _headerSubchainSet ){
 	if( itr.isStoped() ) return std::make_shared<VirtualHeaderSubChain>( itr );
@@ -179,11 +188,11 @@ bool VirtualHeaderSyncManager::start()
     this->sendRequestSyncedCommand();
 
     std::this_thread::sleep_for( std::chrono::seconds(HEADER_REQUEST_TIMEOUT_SECOND) ); // 受信待ち時間
-    sendCount++;
+    sendCount++; // 操作には影響しない アクティブなサブチェーンがなくなあると失敗と判定する
   }
 
   std::cout << "VirtualHeaderSyncManagerダウンロードシーケンスが終了しました" << "\n";
-  return false;
+  return _status == static_cast<int>(VirtualHeaderSyncManagerState::FINISHED);
 }
 
 int VirtualHeaderSyncManager::status() const

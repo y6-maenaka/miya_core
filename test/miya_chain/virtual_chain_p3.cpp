@@ -138,7 +138,7 @@ int virtual_chain_p3()
   std::cout << "-----------------------------" << "\n";
 
   std::shared_ptr<StreamBufferContainer> toRequesterSBC = std::make_shared<StreamBufferContainer>();
-  std::shared_ptr<miya_chain::VirtualChain> virtualChain = std::shared_ptr<miya_chain::VirtualChain>( new miya_chain::VirtualChain( *latestBlockItr, toRequesterSBC ) );
+  std::shared_ptr<miya_chain::VirtualChain> virtualChain = std::shared_ptr<miya_chain::VirtualChain>( new miya_chain::VirtualChain( *latestBlockItr, nullptr ,toRequesterSBC ) );
 
   std::cout << "これ -> "; block_0000->__printPrevBlockHash();
 

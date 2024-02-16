@@ -32,6 +32,12 @@ bool BlockChainIterator::setupFromBlockHash( std::shared_ptr<unsigned char> from
   return true;
 }
 
+BlockChainIterator::BlockChainIterator( const BlockChainIterator& bcitr )
+{
+	this->_body = bcitr._body;
+	this->_localStrageManager = bcitr._localStrageManager;
+	this->_cache = bcitr._cache;
+}
 
 BlockChainIterator::BlockChainIterator( std::shared_ptr<miya_chain::BlockLocalStrageManager> localStrageManager , std::shared_ptr<unsigned char> blockHash )
 {
