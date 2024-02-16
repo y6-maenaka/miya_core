@@ -29,12 +29,27 @@ namespace miya_chain
 {
 
 
+
+
+enum class VirtualHeaderSyncManagerState : int
+{
+  WORKING = 0,
+  PENDING,
+  FINISHED,
+  TIMEOUT = -1 ,
+  ERROR = -2
+};
+
+
+
+
 class VirtualHeaderSubChain;
 
 using BHPoolFinder = std::function< std::shared_ptr<block::BlockHeader>(std::shared_ptr<unsigned char>)>;
 using PBHPoolFinder = std::function< std::vector<std::shared_ptr<block::BlockHeader>>(std::shared_ptr<unsigned char>)>;
 
 constexpr unsigned short HEADER_REQUEST_TIMEOUT_SECOND = 3;
+constexpr unsigned short REQUEST_COMMAND_SEND_INTERVAL = 3;
 
 
 
@@ -81,6 +96,7 @@ private:
   PBHPoolFinder _pbhPoolFinder;
 
   std::shared_ptr<StreamBufferContainer> _toRequesterSBC;
+  int _status;
 
 protected:
   std::pair< MiyaChainCommand , const char* > downloadCommand();
@@ -95,8 +111,10 @@ public:
   bool extend( bool collisionAction = false );
   void build( std::shared_ptr<block::BlockHeader> stopHeader ); // 新たに仮想チェーンを作成して,重複がなければ管理下に追加する
 
-  std::shared_ptr<VirtualHeaderSubChain> stopedHeaderSubchain();
+  std::shared_ptr<VirtualHeaderSubChain> stopedHeaderSubchain(); // 延長停止した(収取目的が達成した)仮想サブチェーンを取得
   void start();
+
+  int status() const;
 
   unsigned short subchainCount();
   void __printSubChainSet();

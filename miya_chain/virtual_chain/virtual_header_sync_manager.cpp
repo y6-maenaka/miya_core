@@ -9,6 +9,9 @@
 #include "../message/message.h"
 #include "../message/command/command_set.h"
 
+#include "../miya_chain_manager.h"
+#include "../../ekp2p/daemon/sender/sender.h"
+
 
 
 
@@ -37,16 +40,39 @@ VirtualHeaderSyncManager::VirtualHeaderSyncManager( std::shared_ptr<block::Block
 
 
   VirtualHeaderSubChain initialSubChain( _startBlockHeader, stopHash ,_bhPoolFinder, _pbhPoolFinder );
-
   _headerSubchainSet.insert( initialSubChain );
+
+  std::cout << "+++++++++++++++++++++++++++++++++++++++" << "\n";
+  std::cout << "Subchain Count :: " << _headerSubchainSet.size() << "\n";
+  std::cout << "isActive? -> " << initialSubChain.isActive() << "\n";
+  std::cout << "ActiveSubChainCount :: " << this->activeSubchainCount() << "\n";
+  std::cout << "+++++++++++++++++++++++++++++++++++++++" << "\n";
+
+  _status = static_cast<int>( VirtualHeaderSyncManagerState::PENDING );
 }
 
 void VirtualHeaderSyncManager::sendRequestSyncedCommand()
 {
-  std::vector< MiyaChainCommand > extendCommands;
+  std::vector< MiyaChainMSG_GETBLOCKS > extendCommandVector;
   for( auto itr : _headerSubchainSet )
   {
-	extendCommands.push_back( itr.extendCommand() );
+	if( itr.isActive() )
+	  extendCommandVector.push_back( itr.extendCommand() );
+  }
+
+  for( auto itr : extendCommandVector )
+  {
+	MiyaChainCommand command;
+	command = itr;
+
+	std::unique_ptr< SBSegment > requestSB = std::make_unique<SBSegment>();
+	requestSB->options.option1 = itr;
+	requestSB->options.option2 = MiyaChainMSG_GETBLOCKS::command;
+
+	requestSB->sendFlag( ekp2p::EKP2P_SEND_BROADCAST );
+	requestSB->forwardingSBCID(DEFAULT_DAEMON_FORWARDING_SBC_ID_REQUESTER);
+
+	_toRequesterSBC->pushOne( std::move(requestSB) ); // 送信モジュールに流す
   }
 
   return;
@@ -77,8 +103,9 @@ void VirtualHeaderSyncManager::add( std::vector< std::shared_ptr<block::BlockHea
 	std::cout << "新たにサブチェーンがビルドされます" << "\n";
 	this->build( itr ); // 重複ブロックが存在した場合は仮想チェーンを作成する
   }
-  
-  this->extend(); // headerPoolに更新があった旨をsubchainに通知し,subchainの延長を試みる
+
+  if( this->extend() ) // headerPoolに更新があった旨をsubchainに通知し,subchainの延長を試みる
+	_status = static_cast<int>(VirtualHeaderSyncManagerState::FINISHED);
 }
 
 
@@ -102,6 +129,9 @@ bool VirtualHeaderSyncManager::extend( bool collisionAction ) // あまり良い
   {
 	_headerSubchainSet.insert( itr );
   }
+
+  if( chainStopFlag )
+	_status = static_cast<int>(VirtualHeaderSyncManagerState::FINISHED);
 
   std::cout << "## サブチェーンマネージャーの延長処理が終了しました" << "\n";
   return chainStopFlag;
@@ -130,23 +160,28 @@ std::shared_ptr<VirtualHeaderSubChain> VirtualHeaderSyncManager::stopedHeaderSub
 
 void VirtualHeaderSyncManager::start()
 {
-   
-  std::thread requestSender([&]()
-  {
-	std::cout << "VirtualHeaderSyncManager::start thread started()" << "\n";
- 
-	while(true)
-	{
-	  std::this_thread::sleep_for( std::chrono::seconds(HEADER_REQUEST_TIMEOUT_SECOND) ); // 受信待ち時間
-	  // retransmissionCount++;
-	}
-	return;
-
+  std::cout << "VirtualHeaderSyncManager::start thread started()" << "\n";
   
-  });
+  std::cout << "(initial) ActiveSubChainCount :: " << this->activeSubchainCount() << "\n";
+  std::cout << "(initial) HeaderSyncManager State :: " << this->status() << "\n";
 
-  requestSender.detach();
+  int sendCount = 0;
+  while( this->activeSubchainCount() > 0 || _status == static_cast<int>(VirtualHeaderSyncManagerState::FINISHED) )
+  {
+	std::cout << "(" << sendCount << ")" << " : 送信カウント" << "\n";
+	this->sendRequestSyncedCommand();
+
+	std::this_thread::sleep_for( std::chrono::seconds(HEADER_REQUEST_TIMEOUT_SECOND) ); // 受信待ち時間
+	sendCount++;
+  }
+
+  std::cout << "VirtualHeaderSyncManagerダウンロードシーケンスが終了しました" << "\n";
   return;
+}
+
+int VirtualHeaderSyncManager::status() const
+{
+  return _status;
 }
 
 

@@ -106,6 +106,8 @@ void VirtualChain::start()
   std::thread vchainBuilder([&]()
   {
 	std::cout << "Started VirtualChain Builder Thread" << "\n";
+	
+	_syncManager._headerSyncManager->start(); // ブロッキング処理
 	return;
   });
   vchainBuilder.detach();
