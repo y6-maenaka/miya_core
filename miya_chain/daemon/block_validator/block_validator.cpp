@@ -29,9 +29,6 @@ BlockValidationControlBlock::BlockValidationControlBlock( std::shared_ptr<Stream
 	_validator = validator;
 }
 
-
-
-
 void BlockValidationControlBlock::importStrucretHeader( std::shared_ptr<BlockHeaderMessage> target )
 {
 	/*
@@ -46,8 +43,6 @@ void BlockValidationControlBlock::blockHash( unsigned char* target )
 {
 	_blockHash = std::make_shared<unsigned char>( *target );
 }
-
-
 
 void BlockValidationControlBlock::networks( std::shared_ptr<ekp2p::KNodeAddr> sourceKNodeAddr , std::vector< std::shared_ptr<ekp2p::KNodeAddr> > relayNodeAddr )
 {

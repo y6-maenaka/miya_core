@@ -58,7 +58,6 @@ class BlockValidator;
 
 struct BlockValidationControlBlock
 {
-
 	std::shared_ptr<unsigned char> _blockHash;
 
 	struct 
@@ -70,14 +69,12 @@ struct BlockValidationControlBlock
 		std::shared_ptr<unsigned char> _data;
 	} _rawBlock;
 
-
 	struct
 	{
 		std::shared_ptr<block::Block> _block;
 		unsigned int _txCount = 0;
 		bool _updateFlag = false;
 	} _structedBlock;
-
 
 	struct
 	{
@@ -154,7 +151,6 @@ private:
 
 protected:
 	
-
 public:
 	void start();
 

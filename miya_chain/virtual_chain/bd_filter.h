@@ -9,6 +9,7 @@
 #include <mutex>
 #include <shared_mutex>
 #include <condition_variable>
+#include <functional>
 
 #include "./BDBCB.h"
 #include "./block_hash_as_key.h"
@@ -29,6 +30,10 @@ namespace miya_chain
 class BDVirtualChain;
 
 
+using FilterStateUpdator = std::function< void(std::shared_ptr<unsigned char>, int) >;
+
+
+
 
 class BDFilter
 {
@@ -46,6 +51,7 @@ public:
 	std::shared_ptr<struct BDBCB> filter( std::shared_ptr<block::BlockHeader> target, bool isReject = false );
 
 	void mask( std::vector< std::shared_ptr<block::BlockHeader>> targetVector ); // かなり重い処理
+	void update( std::shared_ptr<unsigned char> blockHash , int state ); //filterに登録しているBDBCBの内部状態を更新する
 
 	void __printFilter();
 };

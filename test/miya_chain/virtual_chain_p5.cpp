@@ -1,6 +1,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <functional>
 
 #include "./common.h"
 
@@ -28,13 +29,18 @@
 #include "../../miya_chain/mining/simple_mining.h"
 
 #include "../../miya_chain/virtual_chain/virtual_chain.h"
+#include "../../miya_chain/virtual_chain/bd_filter.h"
+#include "../../miya_chain/virtual_chain/virtual_block_sync_manager.h"
+#include "../../miya_chain/virtual_chain/virtual_header_sync_manager.h"
 
 
 
-/* ˙仮想チェーン構築と2ヘッダー追加(衝突あり) STOPHashなし */
+/* ˙仮想チェーン構築と2ヘッダー追加(衝突なし) 
+ * 本体追加
+ * STOPHashなし */
 
 
-int virtual_chain_p2()
+int virtual_chain_p5()
 {
   std::shared_ptr<miya_core::MiyaCore> miyaCore;
   std::shared_ptr<ControlInterface> controlInterface;
@@ -98,7 +104,7 @@ int virtual_chain_p2()
 
   uint32_t nBits_0001 = 532390001;
   block_0001->header()->nBits( nBits_0001 );
-  block_0001->header()->prevBlockHash( prevBlockHash_0000 );
+  block_0001->header()->prevBlockHash( blockHash_0000 );
   uint32_t nonce_0001 = miya_chain::simpleMining( nBits_0001, block_0001->header(), false );
   block_0001->header()->nonce( nonce_0001 );
 
@@ -135,11 +141,10 @@ int virtual_chain_p2()
 
   std::cout << "\n\n\n\n\n\n\n";
   std::cout << "-----------------------------" << "\n";
+  
 
   std::shared_ptr<StreamBufferContainer> toRequesterSBC = std::make_shared<StreamBufferContainer>();
   std::shared_ptr<miya_chain::VirtualChain> virtualChain = std::shared_ptr<miya_chain::VirtualChain>( new miya_chain::VirtualChain( *latestBlockItr , toRequesterSBC ) );
-
-  std::cout << "これ -> "; block_0000->__printPrevBlockHash();
 
   std::vector< std::shared_ptr<block::BlockHeader> > requestHeaderVector;
   requestHeaderVector.push_back( block_0000->header() );
@@ -147,11 +152,20 @@ int virtual_chain_p2()
 
 
   std::cout << "%%%% :: "; latestBlockItr->block()->__printPrevBlockHash();
+
+  std::cout << "\n\n\n" << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << "\n\n\n";
+
+  virtualChain->backward( block_0002->header() );
+
+  sleep(1);
   virtualChain->add( requestHeaderVector );
 
+  
+  std::mutex mtx;
+  std::condition_variable cv;
+  std::unique_lock<std::mutex> lock(mtx);
+  cv.wait( lock );
 
-
-  virtualChain->__printState();
   std::cout << "Done" << "\n";
 
   return 0;

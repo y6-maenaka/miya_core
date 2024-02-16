@@ -7,9 +7,6 @@
 
 #include "../block_chain_iterator/block_chain_iterator.h"
 
-#include "../message/command/getblocks.h"
-
-
 namespace miya_chain
 {
 
@@ -38,6 +35,7 @@ VirtualHeaderSubChain::VirtualHeaderSubChain( std::shared_ptr<block::BlockHeader
   : _context(startBlockHeader) , _bhPoolFinder(bhPoolFinder), _pbhPoolFinder(pbhPoolFinder) , _stopHash(stopHash)
 { 
   _context._latestBlockHeader = startBlockHeader; // 初期化時の最後尾ブロックヘッダーはstartBlockHeaderにしておく
+  this->syncUpdatedAt();
   return;
 }
 
@@ -77,8 +75,7 @@ std::shared_ptr<block::BlockHeader> VirtualHeaderSubChain::latestBlockHeader()
   return _context._latestBlockHeader;
 }
 
-
-void VirtualHeaderSubChain::update()
+void VirtualHeaderSubChain::syncUpdatedAt()
 {
   _updatedAt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 }
@@ -88,9 +85,15 @@ uint32_t VirtualHeaderSubChain::updatedAt() const
   return _updatedAt;
 }
 
-bool VirtualHeaderSubChain::isChainStoped() const
+bool VirtualHeaderSubChain::isActive()
 {
-  return _isChainStoped;
+  uint32_t currentTimestamp = static_cast<uint32_t>( std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count() );
+  return ( static_cast<unsigned int>(currentTimestamp - _updatedAt) < SUBCHAIN_LIFETIME );
+}
+
+bool VirtualHeaderSubChain::isStoped() const
+{
+  return _isStoped;
 }
 
 void VirtualHeaderSubChain::build( std::shared_ptr<block::BlockHeader> latestBlockHeader )
@@ -101,10 +104,11 @@ void VirtualHeaderSubChain::build( std::shared_ptr<block::BlockHeader> latestBlo
 bool VirtualHeaderSubChain::extend( int collisionAction )
 {
   std::cout << "VirtualSubChain::extend() called" << "\n";
+  if( !(this->isActive()) ) return false; // 死んでいるチェーンはどうするか
 
   // std::unique_lock<std::shared_mutex> lock(_mtx);
   if( _stopHash != nullptr && memcmp( _context.latestBlockHash().get(), _stopHash.get() , 32 ) == 0 ){
-	_isChainStoped = true;
+	_isStoped = true;
 	return true; // ブロックの最後尾がstopHashに達していたら即座に戻る
   } 
 
@@ -129,7 +133,7 @@ bool VirtualHeaderSubChain::extend( int collisionAction )
 		  std::cout << "(@) 延長ヘッダー重複 : ランダム延長" << "\n";
 		  std::srand(static_cast<unsigned int>(std::time(nullptr))); // 乱数シードの設定
 		  _context._latestBlockHeader = popRet.at( std::rand() % popRet.size() );
-		  this->update(); // 最後尾を更新した場合はupdateする
+		  this->syncUpdatedAt(); // 最後尾を更新した場合はupdateする
 		  break;
 		}
 	};
@@ -140,23 +144,21 @@ bool VirtualHeaderSubChain::extend( int collisionAction )
 	// std::cout << "PrevBlockHashFinder の検索結果は1つです" << "\n";
 	// std::shared_ptr<block::BlockHeader>	 __latestBlockHeader = popRet.at(0);
 	_context._latestBlockHeader = popRet.at(0); // 最後尾ブロックを更新
-	this->update(); // 最後尾を更新した場合はupdateする
+	this->syncUpdatedAt(); // 最後尾を更新した場合はupdateする
   }
   
   return extend( collisionAction );
 }
 
 
-MiyaChainCommand VirtualHeaderSubChain::extendCommand()
+MiyaChainMSG_GETBLOCKS VirtualHeaderSubChain::extendCommand()
 {
-  MiyaChainMSG_GETBLOCKS command;
-  MiyaChainCommand wrapedCommand;
+  MiyaChainMSG_GETBLOCKS ret;
 
   std::shared_ptr<unsigned char> latestBlockHash = this->_context.latestBlockHash();
-  command.startHash( latestBlockHash );
+  ret.startHash( latestBlockHash );
 
-  wrapedCommand = command;
-  return wrapedCommand;
+  return ret;
 }
 
 

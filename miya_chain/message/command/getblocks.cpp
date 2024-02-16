@@ -82,7 +82,7 @@ bool MiyaChainMSG_GETBLOCKS::importRaw( std::shared_ptr<unsigned char> fromRaw ,
 }
 
 
-void MiyaChainMSG_GETBLOCKS::print()
+void MiyaChainMSG_GETBLOCKS::__print()
 {
 	std::cout << "version :: ";
 	for(int i=0; i<sizeof(_body._version); i++)

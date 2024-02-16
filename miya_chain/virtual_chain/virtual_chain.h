@@ -65,6 +65,20 @@ using BHPoolFinder = std::function< std::shared_ptr<block::BlockHeader>(std::sha
 using PBHPoolFinder = std::function< std::vector<std::shared_ptr<block::BlockHeader>>(std::shared_ptr<unsigned char>)>;
 
 
+enum class VirtualChainState : int
+{
+  WORKING = 0,
+  PENDING,
+  FINISHED,
+  HEADER_SYNC_MANAGER_WORKING,
+  HEADER_SYNC_MANAGER_DONE,
+  BLOCK_SYNC_MANAGER_WORKING,
+  BLOCK_SYNC_MANAGER_DONE,
+  TIMEOUT = -1 ,
+  ERROR = -2
+};
+
+
 
 
 
@@ -75,59 +89,29 @@ class VirtualChain
 private:
   std::variant< std::shared_ptr<block::Block>, std::shared_ptr<block::BlockHeader> > _objectiveBlock; // 目的ブロック(このブロックまで仮想チェーンを構築する)
   BlockChainIterator &_forkPoint; // フォーク分岐点 下がることもある
-  short _updateCount = 0;
+  std::shared_ptr< LightUTXOSet > _utxoSet;
+  std::shared_ptr<StreamBufferContainer> _toRequesterSBC;
+  int _status;
 
   std::shared_ptr< BDFilter > _filter; // フィルター本体
-  std::shared_ptr< VirtualHeaderSyncManager > _headerSyncManager;
-  std::shared_ptr< VirtualBlockSyncManager > _blockSyncManager;
-  std::shared_ptr< StreamBufferContainer >  _toRequesterSBC;
-  std::shared_ptr< LightUTXOSet > _utxoSet;
 
-  struct BlockHashPool // 一旦使用しない
+  struct
   {
-	  std::shared_mutex _mtx;
-	  std::condition_variable _cv;
-	  std::unordered_set< BlockHashAsKey , BlockHashAsKey::Hash> _pool;
+	   std::shared_ptr< VirtualHeaderSyncManager > _headerSyncManager;
+	    std::shared_ptr< VirtualBlockSyncManager > _blockSyncManager;
+  } _syncManager;
 
-	  void push( std::shared_ptr<unsigned char> target );
-	  std::shared_ptr<unsigned char> find( std::shared_ptr<unsigned char> blockHash );
-
-  } _blockHashPool;
-
-  struct BlockHeaderPool
-  {
-	private: // リソース効率は良くない
-	  std::unordered_map< BlockHashAsKey , std::shared_ptr<block::BlockHeader>, BlockHashAsKey::Hash > _pool_blockHsah;
-	  std::unordered_multimap< PrevBlockHashAsKey , std::shared_ptr<block::BlockHeader>, PrevBlockHashAsKey::Hash > _pool_prevBlockHash;
-
-	public:
-	  std::pair<bool, short> push( std::shared_ptr<block::BlockHeader> target ); // (戻り値) : 重複 or 非重複
-	  
-	  std::shared_ptr<block::BlockHeader> findByBlockHash( std::shared_ptr<unsigned char> blockHash );
-	  std::vector< std::shared_ptr<block::BlockHeader> > findByPrevBlockHash( std::shared_ptr<unsigned char> prevBlockHash ); 
-	  // 分岐によっては前ブロックを参照するブロックが複数あるケースも
-
-	  void __printPoolSortWithBlockHash();
-	  void __printPoolSortWithPrevBlockHash();
-  } _blockHeaderPool;
 
 public:
-  VirtualChain( BlockChainIterator initialForkPoint );
-  void startBlockHashDownloader();
-  void startBlockHeaderDownloader();
-
-  void send( MiyaChainCommand commandBody, auto command );
+  VirtualChain( BlockChainIterator initialForkPoint , std::shared_ptr<StreamBufferContainer> toRequesterSBC );
 
   void forward(); // 目的(最終)を指定せず(自動的に最終を取得)して,それに達するように仮想チェーンを構築する ※ IBDなど
-  void backward(); // 目的(最終)を指定して,それに達するように仮想チェーンを構築する ※ 他ノードが新たにブロックを発掘した時など
+  void backward( std::shared_ptr<block::BlockHeader> objectiveHeader ); // 目的(最終)を指定して,それに達するように仮想チェーンを構築する ※ 他ノードが新たにブロックを発掘した時など
 
   // void add( std::shared_ptr<block::BlockHeader> target ); // 外部ノードから到着したブロックヘッダー
   void add( std::vector<std::shared_ptr<block::BlockHeader>> targetVector ); // headersレスポンスなどが帰ってくる場合
   void add( std::vector<std::shared_ptr<block::Block>> targetVector );
   void add( std::shared_ptr<block::Block> targetBlock );
-
-  void startSyncHeaderChain();
-  void startSyncBlockChain();
 
   void __printState();
 };

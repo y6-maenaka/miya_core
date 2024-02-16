@@ -127,7 +127,6 @@ unsigned int VirtualBlockSyncManager::sendElapsedTime() const
 
 std::pair< MiyaChainCommand , const char* > VirtualBlockSyncManager::downloadCommand()
 {
-
   MiyaChainMSG_INV inv;
   MiyaChainMSG_GETDATA getdataCommand;
   for( auto itr : _unChaindedWindow._segmentVector )
