@@ -141,7 +141,6 @@ int virtual_chain_p5()
 
   std::cout << "\n\n\n\n\n\n\n";
   std::cout << "-----------------------------" << "\n";
-  
 
   std::shared_ptr<StreamBufferContainer> toRequesterSBC = std::make_shared<StreamBufferContainer>();
   std::shared_ptr<miya_chain::VirtualChain> virtualChain = std::shared_ptr<miya_chain::VirtualChain>( new miya_chain::VirtualChain( *latestBlockItr , toRequesterSBC ) );
@@ -152,14 +151,12 @@ int virtual_chain_p5()
 
 
   std::cout << "%%%% :: "; latestBlockItr->block()->__printPrevBlockHash();
-
   std::cout << "\n\n\n" << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << "\n\n\n";
 
   virtualChain->backward( block_0002->header() );
 
   sleep(1);
   virtualChain->add( requestHeaderVector );
-
   
   std::mutex mtx;
   std::condition_variable cv;

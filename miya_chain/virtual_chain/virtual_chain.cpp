@@ -83,8 +83,24 @@ void VirtualChain::backward( std::shared_ptr<block::BlockHeader> objectiveHeader
   });
 
   vchainBuilder.detach(); // デタッチする
-}
+  int headerSyncFlag = 0;
+  std::shared_ptr<unsigned char> stopHash = objectiveHeader->headerHash();
 
+
+  FilterStateUpdator filterStateUpdator = std::bind(
+							&BDFilter::update,
+							std::ref(_filter),
+							std::placeholders::_1 ,
+							std::placeholders::_2
+						);
+
+   while( headerSyncFlag )
+   {
+	  // 成功するまでフォークポイントを下げて検証する
+	  _syncManager._headerSyncManager = std::shared_ptr<VirtualHeaderSyncManager>( new VirtualHeaderSyncManager( _forkPoint.header(), stopHash , filterStateUpdator , _toRequesterSBC ) );
+	  // headerSyncFlag = _syncManager._headerSyncManager.start();
+  }
+}
 
 void VirtualChain::add( std::vector<std::shared_ptr<block::BlockHeader>> targetVector )
 {
@@ -118,6 +134,20 @@ void VirtualChain::add( std::shared_ptr<block::Block> targetBlock )
   if( filterCtx->status() > static_cast<int>(BDState::BlockBodyReceived) ) return;
 
   return _syncManager._blockSyncManager->add( targetBlock );
+}
+
+
+void VirtualChain::start()
+{
+  std::thread vchainBuilder([&]()
+  {
+	std::cout << "Started VirtualChain Builder Thread" << "\n";
+	
+	_syncManager._headerSyncManager->start(); // ブロッキング処理
+	return;
+  });
+  vchainBuilder.detach();
+
 }
 
 

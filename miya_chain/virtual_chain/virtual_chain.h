@@ -94,13 +94,11 @@ private:
   int _status;
 
   std::shared_ptr< BDFilter > _filter; // フィルター本体
-
   struct
   {
 	   std::shared_ptr< VirtualHeaderSyncManager > _headerSyncManager;
 	    std::shared_ptr< VirtualBlockSyncManager > _blockSyncManager;
   } _syncManager;
-
 
 public:
   VirtualChain( BlockChainIterator initialForkPoint , std::shared_ptr<StreamBufferContainer> toRequesterSBC );
@@ -113,7 +111,8 @@ public:
   void add( std::vector<std::shared_ptr<block::Block>> targetVector );
   void add( std::shared_ptr<block::Block> targetBlock );
 
-  void __printState();
+  void start();
+   void __printState();
 };
 
 

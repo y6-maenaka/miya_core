@@ -72,6 +72,11 @@ void VirtualHeaderSyncManager::sendRequestSyncedCommand()
 	requestSB->sendFlag( ekp2p::EKP2P_SEND_BROADCAST );
 	requestSB->forwardingSBCID(DEFAULT_DAEMON_FORWARDING_SBC_ID_REQUESTER);
 
+	std::cout << "......................." << "\n";
+	std::cout << "ヘッダー同期コマンド" << "\n";
+	itr.__print();
+	std::cout << "......................." << "\n";
+
 	_toRequesterSBC->pushOne( std::move(requestSB) ); // 送信モジュールに流す
   }
 
@@ -170,11 +175,11 @@ bool VirtualHeaderSyncManager::start()
   int sendCount = 0;
   while( this->activeSubchainCount() > 0 || _status == static_cast<int>(VirtualHeaderSyncManagerState::FINISHED) )
   {
-	std::cout << "(" << sendCount << ")" << " : 送信カウント" << "\n";
-	this->sendRequestSyncedCommand();
-  
-	std::this_thread::sleep_for( std::chrono::seconds(HEADER_REQUEST_TIMEOUT_SECOND) ); // 受信待ち時間
-	sendCount++;
+    std::cout << "(" << sendCount << ")" << " : 送信カウント" << "\n";
+    this->sendRequestSyncedCommand();
+
+    std::this_thread::sleep_for( std::chrono::seconds(HEADER_REQUEST_TIMEOUT_SECOND) ); // 受信待ち時間
+    sendCount++;
   }
 
   std::cout << "VirtualHeaderSyncManagerダウンロードシーケンスが終了しました" << "\n";

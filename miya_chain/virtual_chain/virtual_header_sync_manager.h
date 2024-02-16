@@ -113,7 +113,6 @@ public:
 
   std::shared_ptr<VirtualHeaderSubChain> stopedHeaderSubchain(); // 延長停止した(収取目的が達成した)仮想サブチェーンを取得
   bool start();
-
   int status() const;
 
   unsigned short subchainCount();
