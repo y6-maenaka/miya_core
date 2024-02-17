@@ -1,6 +1,6 @@
 #include "prev_block_hash_as_key.h"
 
-#include "./virtual_chain.h"
+#include "./chain_sync_manager.h"
 #include "./bd_filter.h"
 #include "../block/block_header.h"
 

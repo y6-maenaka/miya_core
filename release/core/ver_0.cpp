@@ -46,7 +46,7 @@
 #include "../../miya_db/miya_db/database_manager.h"
 
 #include "../../miya_core/miya_core.h"
-#include "../../miya_chain/virtual_chain/virtual_chain.h"
+#include "../../miya_chain/chain_sync_manager/chain_sync_manager.h"
 
 #include "../../test/miya_chain/common.cpp"
 #include "../../test/miya_chain/virtual_chain_p5.cpp"

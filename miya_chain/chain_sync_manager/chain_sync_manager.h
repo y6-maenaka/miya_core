@@ -62,12 +62,12 @@ constexpr unsigned int ALLOWED_FORKPOINT_DECREMENTS = 4;
 // constexpr unsigned int ALLOWED_FORWARD_SYNC_TRIES = 3; // forwardで有効なチェーンが見つからなかった場合に再試行する回数
 
 // first: blockHash , second: ブロック管理ブロック
-using VirtualMiyaChain = std::vector< std::pair< std::shared_ptr<unsigned char>, std::shared_ptr<struct BDBCB>> >;
+using VirtualChain = std::vector< std::pair< std::shared_ptr<unsigned char>, std::shared_ptr<struct BDBCB>> >;
 using BHPoolFinder = std::function< std::shared_ptr<block::BlockHeader>(std::shared_ptr<unsigned char>)>;
 using PBHPoolFinder = std::function< std::vector<std::shared_ptr<block::BlockHeader>>(std::shared_ptr<unsigned char>)>;
 
 
-enum class VirtualChainState : int
+enum class ChainSyncManagerState : int
 {
   WORKING = 0,
   PENDING,
@@ -88,7 +88,7 @@ enum class VirtualChainState : int
 
 
 
-class VirtualChain
+class ChainSyncManager
 {
 private:
   std::variant< std::shared_ptr<block::Block>, std::shared_ptr<block::BlockHeader> > _objectiveBlock; // 目的ブロック(このブロックまで仮想チェーンを構築する)
@@ -106,7 +106,7 @@ private:
   } _syncManager;
 
 public:
-  VirtualChain( BlockChainIterator& initialForkPoint , std::shared_ptr<BlockLocalStrageManager> localStrageManager ,std::shared_ptr<StreamBufferContainer> toRequesterSBC );
+  ChainSyncManager( BlockChainIterator& initialForkPoint , std::shared_ptr<BlockLocalStrageManager> localStrageManager ,std::shared_ptr<StreamBufferContainer> toRequesterSBC );
 
   void forward(); // 目的(最終)を指定せず(自動的に最終を取得)して,それに達するように仮想チェーンを構築する ※ IBDなど
   void backward( std::shared_ptr<block::BlockHeader> objectiveHeader ); // 目的(最終)を指定して,それに達するように仮想チェーンを構築する ※ 他ノードが新たにブロックを発掘した時など

@@ -60,6 +60,8 @@ public:
   std::shared_ptr<unsigned char> blockHash() const;
   long long height() const;
 
+  bool isHead();
+
   bool operator==( const BlockChainIterator &si ) const;
   bool operator!=( const BlockChainIterator &si ) const;
 

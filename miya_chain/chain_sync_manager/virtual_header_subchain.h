@@ -15,7 +15,7 @@
 
 #include "../message/message.h"
 #include "../message/command/getblocks.h"
-#include "./virtual_chain.h"
+#include "./chain_sync_manager.h"
 
 namespace block
 {

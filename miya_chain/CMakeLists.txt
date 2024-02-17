@@ -69,17 +69,17 @@ add_library( MIYA_CHAIN STATIC
 							miya_coin/block_container.cpp
 							miya_coin/undo_container.cpp
 
-							virtual_chain/virtual_chain.cpp
-							virtual_chain/bd_filter.cpp
-							virtual_chain/block_hash_as_key.cpp
-							virtual_chain/prev_block_hash_as_key.cpp
-							virtual_chain/BDBCB.cpp
-							virtual_chain/virtual_header_subchain.cpp
-							virtual_chain/virtual_header_sync_manager.cpp
-							virtual_chain/virtual_block_sync_manager.cpp
-							virtual_chain/virtual_block.cpp
-							virtual_chain/block_hash_pool.cpp
-							virtual_chain/block_header_pool.cpp
+							chain_sync_manager/chain_sync_manager.cpp
+							chain_sync_manager/bd_filter.cpp
+							chain_sync_manager/block_hash_as_key.cpp
+							chain_sync_manager/prev_block_hash_as_key.cpp
+							chain_sync_manager/BDBCB.cpp
+							chain_sync_manager/virtual_header_subchain.cpp
+							chain_sync_manager/virtual_header_sync_manager.cpp
+							chain_sync_manager/virtual_block_sync_manager.cpp
+							chain_sync_manager/virtual_block.cpp
+							chain_sync_manager/block_hash_pool.cpp
+							chain_sync_manager/block_header_pool.cpp
 
 )
 

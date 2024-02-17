@@ -12,7 +12,7 @@
 
 #include "../../miya_chain_manager.h"
 
-#include "../../virtual_chain/virtual_chain.h"
+#include "../../chain_sync_manager/chain_sync_manager.h"
 #include "../../block_chain_iterator/block_chain_iterator.h"
 
 

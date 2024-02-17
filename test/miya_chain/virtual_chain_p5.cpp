@@ -28,10 +28,9 @@
 
 #include "../../miya_chain/mining/simple_mining.h"
 
-#include "../../miya_chain/virtual_chain/virtual_chain.h"
-#include "../../miya_chain/virtual_chain/bd_filter.h"
-#include "../../miya_chain/virtual_chain/virtual_block_sync_manager.h"
-#include "../../miya_chain/virtual_chain/virtual_header_sync_manager.h"
+#include "../../miya_chain/chain_sync_manager/chain_sync_manager.h"
+#include "../../miya_chain/chain_sync_manager/bd_filter.h"
+#include "../../miya_chain/chain_sync_manager/chain_sync_manager.h"
 
 
 
@@ -144,7 +143,7 @@ int virtual_chain_p5()
 
   std::shared_ptr<StreamBufferContainer> toRequesterSBC = std::make_shared<StreamBufferContainer>();
   std::shared_ptr<miya_chain::BlockLocalStrageManager> localStrageManager = miyaChainManager->localStrageManager();
-  std::shared_ptr<miya_chain::VirtualChain> virtualChain = std::shared_ptr<miya_chain::VirtualChain>( new miya_chain::VirtualChain( *latestBlockItr , localStrageManager ,toRequesterSBC ) );
+  std::shared_ptr<miya_chain::ChainSyncManager> virtualChain = std::shared_ptr<miya_chain::ChainSyncManager>( new miya_chain::ChainSyncManager( *latestBlockItr , localStrageManager ,toRequesterSBC ) );
 
   std::vector< std::shared_ptr<block::BlockHeader> > requestHeaderVector;
   requestHeaderVector.push_back( block_0000->header() );

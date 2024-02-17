@@ -118,6 +118,11 @@ long long BlockChainIterator::height() const
 	return _cache._heigth;
 }
 
+bool BlockChainIterator::isHead()
+{
+	unsigned char addrZero[32]; memset( addrZero, 0x00 , sizeof(addrZero) );
+	return ( memcmp( _cache._blockHash.get() , addrZero, sizeof(addrZero) ) == 0 );
+}
 
 bool BlockChainIterator::operator==( const BlockChainIterator &si ) const
 {
@@ -125,12 +130,10 @@ bool BlockChainIterator::operator==( const BlockChainIterator &si ) const
 	return false;
 }
 
-
 bool BlockChainIterator::operator!=( const BlockChainIterator &si ) const
 {
 	return !(this->operator==(si));
 }
-
 
 void BlockChainIterator::__printHeader()
 {

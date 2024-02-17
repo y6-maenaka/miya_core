@@ -1,5 +1,5 @@
 #include "bd_filter.h"
-#include "./virtual_chain.h"
+#include "./chain_sync_manager.h"
 
 #include "./BDBCB.h"
 #include "../block/block.h"
