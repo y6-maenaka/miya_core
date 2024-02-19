@@ -136,13 +136,11 @@ public:
 		std::vector< std::condition_variable > _contributers;
 	} _pushContributer;
 
-
 	struct
 	{
 		unsigned int _capacity;
 		std::vector< std::unique_ptr<SBSegment> > _queue;
 	} _sb;
-
 
 public:
 	StreamBuffer();

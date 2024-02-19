@@ -197,9 +197,11 @@ void StreamBuffer::enqueue( std::unique_ptr<SBSegment> target , size_t timeout )
 	// ロックの獲得
 	std::unique_lock<std::mutex> lock(_mtx);  // 他が使用中だとブロッキングする. 他プロセスが解放するとそこからスタート
 
-	if( timeout > 0 ) // タイムアウト付き呼び出しだった場合
+	if( _sb._queue.size() >= _sb._capacity && timeout > 0 ) // タイムアウト付き呼び出しだった場合
 	{
-		_pushContributer._pushCV.wait_for( lock , std::chrono::seconds(timeout) );
+		_pushContributer._pushCV.wait_for( lock , std::chrono::seconds(timeout) , [&]{
+		  return (_sb._queue.size() < _sb._capacity);
+		});
 		if( _sb._queue.size() < _sb._capacity ) return;
 	}
 
@@ -219,17 +221,15 @@ void StreamBuffer::enqueue( std::unique_ptr<SBSegment> target , size_t timeout )
 }
 
 
-
-
-
-
 std::unique_ptr<SBSegment> StreamBuffer::dequeue( size_t timeout )
 {
 	std::unique_lock<std::mutex> lock(_mtx);
 
-	if( timeout > 0 )
+	if( (_sb._queue.empty()) && timeout > 0 )
 	{
-		_popContributer._popCV.wait_for( lock , std::chrono::seconds(timeout) );
+		_popContributer._popCV.wait_for( lock , std::chrono::seconds(timeout) , [&]{
+			return !(_sb._queue.empty());
+		  });
 		if( _sb._queue.empty() ) return nullptr;
 	}
 

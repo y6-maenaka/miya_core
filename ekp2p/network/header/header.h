@@ -83,7 +83,6 @@ public:
 	void sourceKNodeAddr( std::shared_ptr<KNodeAddr> nodeAddr );
 	void relayKNodeAddrVector( std::vector<std::shared_ptr<KNodeAddr>> targetVector );
 		
-
 	/* Getter */
 	size_t headerLength();
 	unsigned short payloadLength();

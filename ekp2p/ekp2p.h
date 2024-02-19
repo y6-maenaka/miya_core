@@ -112,7 +112,6 @@ public:
 	int send( KClientNode *targetNode , void* payload , unsigned short payloadLength , unsigned short protocol );
 	//bool startMonitor( unsigned short port );
 
-
 	std::shared_ptr<StreamBufferContainer> toBrokerSBC();
 	std::shared_ptr<StreamBufferContainer> toReseiverSBC();
 	std::shared_ptr<StreamBufferContainer> toSenderSBC();
