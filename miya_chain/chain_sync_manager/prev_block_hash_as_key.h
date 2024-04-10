@@ -4,7 +4,7 @@
 #include <memory>
 
 
-namespace block 
+namespace block
 {
   struct Block;
   struct BlockHeader;

@@ -24,9 +24,6 @@ namespace ekp2p
 class SocketManager;
 
 
-
-
-
 struct KNodeAddr
 {
 // private:
@@ -56,9 +53,6 @@ public:
 
 
 
-
-
-
 class KNode
 {
 
@@ -74,10 +68,6 @@ public:
 	void kNodeAddr( std::shared_ptr<KNodeAddr> nodeAddr );
 
 };
-
-
-
-
 
 
 

@@ -1,9 +1,5 @@
 cmake_minimum_required( VERSION 3.12 )
 
-include_directories( ${OPENSSL_INCLUDE_DIRS} )
-
-
-
 add_library( MIYA_CHAIN STATIC
 
 							miya_chain_manager.cpp
@@ -80,7 +76,10 @@ add_library( MIYA_CHAIN STATIC
 							chain_sync_manager/virtual_block.cpp
 							chain_sync_manager/block_hash_pool.cpp
 							chain_sync_manager/block_header_pool.cpp
+)
 
+target_include_directories( MIYA_CHAIN PUBLIC 
+  ${OPENSSL_INCLUDE_DIR}
 )
 
 

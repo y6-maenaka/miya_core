@@ -1,22 +1,5 @@
 #include "common.h"
 
-#include "../../shared_components/stream_buffer/stream_buffer.h"
-#include "../../shared_components/stream_buffer/stream_buffer_container.h"
-#include "../../shared_components/cipher/ecdsa_manager.h"
-
-#include "../../miya_chain/utxo_set/utxo.h"
-#include "../../miya_chain/utxo_set/utxo_set.h"
-
-#include "../../miya_chain/miya_chain_manager.h"
-
-#include "../../miya_core/miya_core.h"
-#include "../../control_interface/control_interface.h"
-
-#include "../../miya_chain/transaction/p2pkh/p2pkh.h"
-#include "../../miya_chain/transaction/tx/tx_in.h"
-#include "../../miya_chain/transaction/tx/tx_out.h"
-#include "../../miya_chain/transaction/coinbase/coinbase.h"
-
 /*
  本テストプログラム実行前に必ず,関連データベースファイルは削除しておくこと
 */

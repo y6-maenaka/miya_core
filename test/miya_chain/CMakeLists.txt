@@ -1,7 +1,6 @@
 cmake_minimum_required( VERSION 3.12 )
 
-include_directories( ${OPENSSL_INCLUDE_DIRS} )
-
+include_directories(${OPENSSL_INCLUDE_DIR})
 
 add_library( TEST_MIYA_CHAIN STATIC
 

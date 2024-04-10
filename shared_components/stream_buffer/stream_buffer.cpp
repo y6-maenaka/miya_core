@@ -215,6 +215,7 @@ void StreamBuffer::enqueue( std::unique_ptr<SBSegment> target , size_t timeout )
 	_sb._queue.push_back( std::move(target) );
 
 	_popContributer._popCV.notify_all();
+	_pushContributer._pushCV.notify_all();
 
 	return;
 
@@ -246,6 +247,7 @@ std::unique_ptr<SBSegment> StreamBuffer::dequeue( size_t timeout )
 	_sb._queue.erase( _sb._queue.cbegin() );
 
 	_pushContributer._pushCV.notify_all();
+	_popContributer._popCV.notify_all();
 
 	return std::move( ret );
 }

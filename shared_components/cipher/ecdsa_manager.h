@@ -19,10 +19,8 @@
 namespace cipher{
 
 
-
-
-class ECDSAManager{
-
+class ECDSAManager
+{
 private:
 	EVP_PKEY *_pkey;
 

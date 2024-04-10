@@ -83,11 +83,6 @@ enum class ChainSyncManagerState : int
 };
 
 
-
-
-
-
-
 class ChainSyncManager
 {
 private:

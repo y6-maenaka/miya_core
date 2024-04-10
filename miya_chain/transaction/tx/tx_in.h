@@ -7,11 +7,11 @@
 #include <variant>
 #include <string>
 #include <string.h>
-#include "openssl/evp.h"
 #include <algorithm>
 #include <cstdint>
 #include <arpa/inet.h>
 
+#include "openssl/evp.h"
 
 #include "../../../shared_components/json.hpp"
 using json = nlohmann::json;
@@ -22,18 +22,6 @@ struct PrevOut;
 
 
 constexpr unsigned short PREV_OUT_SIZE = /*TX_ID_SIZE*/20 + (32 / 8);
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

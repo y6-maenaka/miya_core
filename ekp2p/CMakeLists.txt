@@ -1,28 +1,26 @@
 cmake_minimum_required( VERSION 3.12 )
 
 
-include_directories( ${OPENSSL_INCLUDE_DIRS} )
-
 #add_subdirectory( kademlia )
 #add_subdirectory( network )
 
 
-add_library( EKP2P STATIC 
+add_library( EKP2P STATIC
 
 						 ekp2p.cpp
 
 						 kademlia/k_node.cpp
-						 
+
 						 kademlia/k_routing_table/k_routing_table.cpp
 						 kademlia/k_routing_table/k_bucket.cpp
-						 
+
 						 network/header/header.cpp
 						 network/message/message.cpp
 
 						 network/nat/request_handler.cpp
 						 network/nat/stun_message.cpp
 						 network/nat/client_nat_manager.cpp
-						 
+
 
 						 network/socket_manager/socket_manager.cpp
 
@@ -36,4 +34,3 @@ add_library( EKP2P STATIC
 
 
 add_definitions( -std=c++20 )
-

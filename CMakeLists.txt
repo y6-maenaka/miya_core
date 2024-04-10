@@ -12,8 +12,7 @@ add_subdirectory( test/miya_db )
 add_subdirectory( test/ekp2p )
 add_subdirectory( test/miya_chain )
 
-
-include_directories( ${OPENSSL_INCLUDE_DIRS} )
+include_directories( ${OPENSSL_INCLUDE_DIR} )
 #include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
 
 
@@ -47,8 +46,9 @@ target_link_libraries( core_ver_0 PRIVATE
 												CONTROL_INTERFACE
 
 												TEST_MIYA_CHAIN
+												${OPENSSL_LIBRARIES}
 )
-#target_include_directories( core_ver_0 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include )
+target_include_directories( core_ver_0 PUBLIC ${OpenSSL_INCLUDE_DIR} )
 target_compile_options( core_ver_0 PUBLIC -Wall )
 endif()
 
