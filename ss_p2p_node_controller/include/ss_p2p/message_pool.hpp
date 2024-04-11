@@ -108,7 +108,7 @@ public:
 	std::shared_ptr<message> msg;
 	std::time_t time;
 
-	_message_( class message_peer_entry::_message_entry_ &from, ip::udp::endpoint src_ep );
+	_message_( struct message_peer_entry::_message_entry_ &from, ip::udp::endpoint src_ep );
   };
 
   struct message_hub

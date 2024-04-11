@@ -1,7 +1,5 @@
 #include "sha_hash.h"
 
-#include "openssl/evp.h"
-
 namespace hash{
 
 // templateを使った方がいい？

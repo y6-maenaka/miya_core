@@ -9,11 +9,15 @@
 #include <algorithm>
 
 #include <unistd.h>
+#include <ss_p2p/message_pool.hpp>
+#include <crypto_utils/w_sha/sha.h>
+#include "../shared_components/json.hpp"
 
+
+using json = nlohmann::json;
 
 namespace miya_core
 {
-
 
 
 struct MiyaCoreContext
@@ -42,8 +46,6 @@ public:
 };
 
 
-
-
 // MiyaCore全体統合モジュール
 class MiyaCore
 {
@@ -54,6 +56,7 @@ public:
     MiyaCore();
 
     const std::shared_ptr<MiyaCoreContext> context();
+    void on_income_message( ss::message_pool::_message_ msg ); // 外部からメッセージが到着した時のハンドラ
 };
 
 

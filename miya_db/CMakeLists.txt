@@ -1,9 +1,9 @@
 cmake_minimum_required( VERSION 3.12 )
 
 
-add_library( MIYA_DB STATIC 
-				
-				
+add_library( MIYA_DB STATIC
+
+
 				strage_manager/MMyISAM/components/value_store_manager/value_store_manager.cpp
 
 				strage_manager/MMyISAM/MMyISAM.cpp
@@ -38,9 +38,10 @@ add_library( MIYA_DB STATIC
 				# miya_db_client/miya_db_client.cpp
 				miya_db/query_parser/query_parser.cpp
 				miya_db/query_context/query_context.cpp
-
 )
 
+target_include_directories( MIYA_DB PRIVATE
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
 
 add_definitions( -std=c++20 -w )
-

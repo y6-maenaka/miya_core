@@ -53,8 +53,8 @@ struct SBSegment
 		unsigned int _rpcType;
 		bool _isProcessed = false;
 		int _sendFlag = 0; // 0 : sendBack(sourceKNodeAddrに送信)
-		std::shared_ptr<ekp2p::KNodeAddr> _sourceKNodeAddr;
-		std::vector< std::shared_ptr<ekp2p::KNodeAddr> > _relayKNodeAddrVector;
+		// std::shared_ptr<ekp2p::KNodeAddr> _sourceKNodeAddr;
+		// std::vector< std::shared_ptr<ekp2p::KNodeAddr> > _relayKNodeAddrVector;
 
 		struct sockaddr_in _rawSenderAddr; // フラグがSENDBACKの時に優先される
 		struct sockaddr_in _destinationAddr; // フラグがUNICASTの時に優先される

@@ -1,61 +1,29 @@
 #include "ver_0.h"
 
-#include "../../shared_components/cipher/ecdsa_manager.h"
-#include "../../shared_components/stream_buffer/test/unit_test.h"
-#include "../../shared_components/json.hpp"
-#include "../../shared_components/stream_buffer/stream_buffer.h"
-#include "../../shared_components/stream_buffer/stream_buffer_container.h"
-#include "../../shared_components/hash/sha_hash.h"
-
-#include "../../miya_chain/block/block.h"
-#include "../../miya_chain/message/__test.h"
-
-#include "../../miya_chain/mining/simple_mining.h"
-
-#include "../../miya_chain/transaction/tx/tx_in.h"
-#include "../../miya_chain/transaction/tx/tx_out.h"
-#include "../../miya_chain/transaction//tx/prev_out.h"
-#include "../../miya_chain/transaction/p2pkh/p2pkh.h"
-#include "../../miya_chain/transaction/coinbase/coinbase.h"
-#include "../../miya_chain/transaction/coinbase/coinbase_tx_in.h"
-#include "../../miya_chain/transaction/script/signature_script.h"
-#include "../../miya_chain/utxo_set/utxo_set.h"
-#include "../../miya_chain/utxo_set/utxo.h"
-
-#include "../../miya_chain/transaction/txcb_table_manager/txcb_table_manager.h"
-#include "../../miya_chain/transaction/txcb_table_manager/txcb_table/txcb_table.h"
-
-#include "../../miya_chain/transaction_pool/unit_test.h"
-#include "../../miya_chain/transaction_pool/transaction_pool.h"
-#include "../../miya_chain/transaction_pool/txcb.h"
-#include "../../miya_chain/transaction_pool/txcb_bucket.h"
-#include "../../miya_chain/transaction_pool/txcb_table.h"
-
-#include "../../miya_chain/miya_chain_manager.h"
-#include "../../miya_chain/miya_coin/local_strage_manager.h"
-
-
-#include "openssl/evp.h"
-
-#include "../../ekp2p/ekp2p.h"
-// #include "../../ekp2p/kademlia/k_routing_table.h"
-
-#include "../../control_interface/control_interface.h"
-
-
-#include "../../miya_db/miya_db/database_manager.h"
-
-#include "../../miya_core/miya_core.h"
-#include "../../miya_chain/chain_sync_manager/chain_sync_manager.h"
-
-#include "../../test/miya_chain/common.cpp"
-#include "../../test/miya_chain/virtual_chain_p5.cpp"
-#include "../../test/miya_chain/build_sample_chain_p1.cpp"
+#include "../../miya_core/miya_core.hpp"
+#include "../../ss_p2p_node_controller/include/ss_p2p/node_controller.hpp"
 
 
 int main()
 {
-	virtual_chain_p5();
+	miya_core::MiyaCore core = miya_core::MiyaCore();
+
+	std::shared_ptr<boost::asio::io_context> io_ctx = std::make_shared<boost::asio::io_context>();
+	boost::asio::ip::udp::endpoint self_ep( boost::asio::ip::udp::v4(), 8080 );
+
+	ss::node_controller n_controller( self_ep, io_ctx );
+	auto &message_hub = n_controller.get_message_hub();
+
+	n_controller.start();
+
+	message_hub.start( std::bind( &miya_core::MiyaCore::on_income_message, core, std::placeholders::_1 ) ); // メッセージ受信時のコールバックを設定
+
+
+	std::mutex mtx;
+	std::condition_variable cv;
+	std::unique_lock<std::mutex> lock(mtx);
+	cv.wait( lock );
+	// virtual_chain_p5();
 	return 0;
 
 
@@ -137,10 +105,7 @@ int main()
 
 
 
-
-
-
-
+  /*
 	// -------- [ 必須セットアップ ] ------------------------------------------------------------------------------------------------------
 	miya_core::MiyaCore miyaCore;
 
@@ -280,7 +245,7 @@ int main()
 
 	std::shared_ptr<unsigned char> blockHash_0003;
 	block_0003.blockHash( &blockHash_0003 );
-
+  */
 
 
 

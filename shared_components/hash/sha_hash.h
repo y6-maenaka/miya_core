@@ -5,9 +5,13 @@
 #include <stdlib.h>
 #include <memory>
 
+#include "openssl/evp.h"
+
 #define DIGEST_NAME_SHA512 "sha512"
 #define DIGEST_NAME_SHA256 "sha256"
 #define DIGEST_NAME_SHA1 "sha1"
+
+
 
 namespace hash{
 

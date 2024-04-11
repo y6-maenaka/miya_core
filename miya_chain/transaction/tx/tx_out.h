@@ -16,7 +16,7 @@
 #endif
 #ifdef __APPLE__
 	#include <machine/endian.h>
-#endif 
+#endif
 
 
 #include "../script/signature_script.h"
@@ -45,8 +45,8 @@ public:
 
 	struct  Body
 	{
-		int64_t _value = 0; // 8 bytes
-		uint64_t _pkScriptBytes; // lockingScriptのバイト長
+		std::int64_t _value = 0; // 8 bytes
+		std::uint64_t _pkScriptBytes; // lockingScriptのバイト長
 		std::shared_ptr<PkScript> _pkScript;  // lockingScript
 	} _body;
 

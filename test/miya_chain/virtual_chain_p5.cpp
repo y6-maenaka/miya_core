@@ -15,7 +15,7 @@
 
 #include "../../miya_chain/miya_chain_manager.h"
 
-#include "../../miya_core/miya_core.h"
+#include "../../miya_core/miya_core.hpp"
 #include "../../control_interface/control_interface.h"
 
 #include "../../miya_chain/transaction/p2pkh/p2pkh.h"
@@ -34,7 +34,7 @@
 
 
 
-/* ˙仮想チェーン構築と2ヘッダー追加(衝突なし) 
+/* ˙仮想チェーン構築と2ヘッダー追加(衝突なし)
  * 本体追加
  * STOPHashなし */
 
@@ -60,7 +60,7 @@ int virtual_chain_p5()
 
   std::shared_ptr<unsigned char> prevBlockHash_0000 = latestBlockItr->blockHash();
 
-  
+
   std::shared_ptr<tx::P2PKH> p2pkh_0000 = nullptr;
   auto created_p2pkh = CreateTxFromJsonFile( "../control_interface/tx_origin/payment_tx_info_0003.json" , controlInterface , ecdsaManager );
   if( created_p2pkh.first ) p2pkh_0000 = created_p2pkh.second;
@@ -96,7 +96,7 @@ int virtual_chain_p5()
   std::shared_ptr<block::Block> block_0001 = std::shared_ptr<block::Block>( new block::Block{} );
   block_0001->coinbase( coinbase_0001 );
   block_0001->add( p2pkh_0001 );
-  
+
   std::shared_ptr<unsigned char> merkleRoot_0001; size_t merkleRootLength_0001;
   merkleRootLength_0001 = block_0001->calcMerkleRoot( &merkleRoot_0001 );
   block_0001->header()->merkleRoot( merkleRoot_0001 );
@@ -157,7 +157,7 @@ int virtual_chain_p5()
 
   sleep(1);
   virtualChain->add( requestHeaderVector );
-  
+
   std::mutex mtx;
   std::condition_variable cv;
   std::unique_lock<std::mutex> lock(mtx);

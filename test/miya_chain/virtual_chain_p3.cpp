@@ -14,7 +14,7 @@
 
 #include "../../miya_chain/miya_chain_manager.h"
 
-#include "../../miya_core/miya_core.h"
+#include "../../miya_core/miya_core.hpp"
 #include "../../control_interface/control_interface.h"
 
 #include "../../miya_chain/transaction/p2pkh/p2pkh.h"
@@ -55,7 +55,7 @@ int virtual_chain_p3()
 
   std::shared_ptr<unsigned char> prevBlockHash_0000 = latestBlockItr->blockHash();
 
-  
+
   std::shared_ptr<tx::P2PKH> p2pkh_0000 = nullptr;
   auto created_p2pkh = CreateTxFromJsonFile( "../control_interface/tx_origin/payment_tx_info_0003.json" , controlInterface , ecdsaManager );
   if( created_p2pkh.first ) p2pkh_0000 = created_p2pkh.second;

@@ -14,7 +14,7 @@
 
 #include "../../miya_chain/miya_chain_manager.h"
 
-#include "../../miya_core/miya_core.h"
+#include "../../miya_core/miya_core.hpp"
 #include "../../control_interface/control_interface.h"
 
 #include "../../miya_chain/transaction/p2pkh/p2pkh.h"
@@ -32,7 +32,7 @@
 
 
 
-/* ˙仮想チェーン構築と2ヘッダー追加(衝突なし) 
+/* ˙仮想チェーン構築と2ヘッダー追加(衝突なし)
  * 本体追加
  * STOPHashなし */
 
@@ -58,7 +58,7 @@ int virtual_chain_p4()
 
   std::shared_ptr<unsigned char> prevBlockHash_0000 = latestBlockItr->blockHash();
 
-  
+
   std::shared_ptr<tx::P2PKH> p2pkh_0000 = nullptr;
   auto created_p2pkh = CreateTxFromJsonFile( "../control_interface/tx_origin/payment_tx_info_0003.json" , controlInterface , ecdsaManager );
   if( created_p2pkh.first ) p2pkh_0000 = created_p2pkh.second;
@@ -140,7 +140,7 @@ int virtual_chain_p4()
   std::cout << "\n\n\n\n\n\n\n";
   std::cout << "-----------------------------" << "\n";
 
-  
+
   std::shared_ptr<StreamBufferContainer> toRequesterSBC = std::make_shared<StreamBufferContainer>();
   std::shared_ptr<miya_chain::BlockLocalStrageManager> localStrageManager = miyaChainManager->localStrageManager();
   std::shared_ptr<miya_chain::ChainSyncManager> virtualChain = std::shared_ptr<miya_chain::ChainSyncManager>( new miya_chain::ChainSyncManager( *latestBlockItr , localStrageManager ,toRequesterSBC ) );
@@ -156,13 +156,13 @@ int virtual_chain_p4()
   std::cout << "\n\n\n" << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << "\n\n\n";
 
 
-  std::shared_ptr<miya_chain::VirtualBlockSyncManager> blockSyncManager = std::shared_ptr<miya_chain::VirtualBlockSyncManager>( 
+  std::shared_ptr<miya_chain::VirtualBlockSyncManager> blockSyncManager = std::shared_ptr<miya_chain::VirtualBlockSyncManager>(
 		  new miya_chain::VirtualBlockSyncManager(
 				requestHeaderVector,
 				miyaChainManager->localStrageManager() ,
 				toRequesterSBC
 		));
-  blockSyncManager->start(); 
+  blockSyncManager->start();
 
 
   std::vector< std::shared_ptr<block::Block> > requestBlockVector;
@@ -175,7 +175,7 @@ int virtual_chain_p4()
   std::cout << "\x1b[36m" << "追加しました" << "\x1b[39m";
   // blockSyncManager->add();
 
-  
+
   std::mutex mtx;
   std::condition_variable cv;
   std::unique_lock<std::mutex> lock(mtx);

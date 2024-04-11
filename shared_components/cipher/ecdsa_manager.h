@@ -11,6 +11,7 @@
 #include "openssl/ec.h"
 
 #include "../hash/sha_hash.h"
+// #include <hash/sha_hash.h>
 
 #define DEFAULT_PUBLIC_KEY_PEM_PATH  "../.config/ecdsa_public_key.pem"
 #define DEFAULT_PRIVATE_KEY_PEM_PATH  "../.config/ecdsa_private_key.pem"
@@ -64,7 +65,7 @@ public:
 	static bool Verify( unsigned char *sig, size_t sigLen , unsigned char *target, size_t targetLen, EVP_PKEY* pub_key = ECDSAManager::_myPkey );
 
 	static unsigned int sign( std::shared_ptr<unsigned char> target , unsigned int targetLength, EVP_PKEY *pkey , std::shared_ptr<unsigned char> *retSign );
-	static bool verify( std::shared_ptr<unsigned char> sig , size_t sigLength , std::shared_ptr<unsigned char> msg , size_t msgLength , EVP_PKEY *pubKey , char *hashType ); 
+	static bool verify( std::shared_ptr<unsigned char> sig , size_t sigLength , std::shared_ptr<unsigned char> msg , size_t msgLength , EVP_PKEY *pubKey , char *hashType );
 	static bool verify( std::shared_ptr<unsigned char> sig , size_t sigLength , std::shared_ptr<unsigned char> msgDigest , size_t msgDigestLength , EVP_PKEY *pubKey );
 
 	bool writePkey( const char *path , EVP_PKEY *pkey );
@@ -78,4 +79,3 @@ public:
 }; // close cipher namespace
 
 #endif // BF4F4979_7F92_4792_BAFB_EED69FEFA96C
-

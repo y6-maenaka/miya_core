@@ -90,21 +90,24 @@ list(TRANSFORM ss_p2p_kademlia_source_files PREPEND "src/ss_p2p/kademlia/")
 list(TRANSFORM ss_p2p_ice_agent_include_files PREPEND "include/ss_p2p/ice_agent/")
 list(TRANSFORM ss_p2p_ice_agent_source_files PREPEND "src/ss_p2p/ice_agent/")
 
-add_library( SS_P2P # ss_p2pをライブラリとしてまとめる
+add_library( SS_P2P STATIC # ss_p2pをライブラリとしてまとめる
 			${basic_include_files}
 			${basic_source_files}
             ${ss_p2p_include_files}
             ${ss_p2p_source_files}
-
 )
 # 共通のインストールディレクトリとソールディレクトリの指定
-target_include_directories( SS_P2P PUBLIC
+target_include_directories( SS_P2P PUBLIC # 一応依存先には公開しない
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 
-			${OPENSSL_INCLUDE_DIRS}
+			${OPENSSL_INCLUDE_DIR}
 			${Boost_INCLUDE_DIRS}
-			# include/json.hpp # use nlohmann_json
+)
+
+target_link_libraries( SS_P2P PRIVATE
+			${OPENSSL_LIBRARIES}
+			${Boost_LIBRARIES}
 )
 
 # if KADEMLIA FLAG
@@ -113,7 +116,7 @@ target_sources( SS_P2P PRIVATE
               ${ss_p2p_kademlia_include_files}
 
 )
-target_sources( SS_P2P PRIVATE 
+target_sources( SS_P2P PRIVATE
 			  ${ss_p2p_ice_agent_source_files}
 			  ${ss_p2p_ice_agent_include_files}
 )

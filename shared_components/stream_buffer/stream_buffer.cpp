@@ -21,7 +21,7 @@ SBSegment::SBSegment( void* body , unsigned short bodyLength )
 
 std::shared_ptr<ekp2p::KNodeAddr> SBSegment::sourceKNodeAddr()
 {
-	return _ekp2pBlock._sourceKNodeAddr;
+	// return _ekp2pBlock._sourceKNodeAddr;
 }
 
 
@@ -57,18 +57,18 @@ void SBSegment::body( std::shared_ptr<unsigned char> body , unsigned short bodyL
 
 std::vector< std::shared_ptr<ekp2p::KNodeAddr> > SBSegment::relayKNodeAddrVector()
 {
-	return _ekp2pBlock._relayKNodeAddrVector;
+	// return _ekp2pBlock._relayKNodeAddrVector;
 }
 
 
 unsigned short SBSegment::rpcType()
 {
-	return _ekp2pBlock._rpcType;
+	// return _ekp2pBlock._rpcType;
 }
 
 unsigned short SBSegment::protocol()
 {
-	return _controlBlock._protocol;
+	// return _controlBlock._protocol;
 }
 
 bool SBSegment::ekp2pIsProcessed()
@@ -106,30 +106,30 @@ struct sockaddr_in SBSegment::destinationAddr()
 
 void SBSegment::sourceKNodeAddr( std::shared_ptr<ekp2p::KNodeAddr> target )
 {
-	_ekp2pBlock._sourceKNodeAddr = target;
+	// _ekp2pBlock._sourceKNodeAddr = target;
 }
 
 
 void SBSegment::relayKNodeAddrVector( std::vector< std::shared_ptr<ekp2p::KNodeAddr> > target )
 {
-	_ekp2pBlock._relayKNodeAddrVector = target;
+	// _ekp2pBlock._relayKNodeAddrVector = target;
 }
 
 
 void SBSegment::relayKNodeAddrVector( std::shared_ptr<ekp2p::KNodeAddr> target )
 {
-	_ekp2pBlock._relayKNodeAddrVector.push_back( target );
+	// _ekp2pBlock._relayKNodeAddrVector.push_back( target );
 }
 
 
 void SBSegment::rpcType( unsigned short target )
 {
-	_ekp2pBlock._rpcType = target;
+	// _ekp2pBlock._rpcType = target;
 }
 
 void SBSegment::protocol( unsigned short target )
 {
-	_controlBlock._protocol = target;
+	//_controlBlock._protocol = target;
 }
 
 void SBSegment::ekp2pIsProcessed( bool target )
@@ -168,10 +168,10 @@ void SBSegment::destinationAddr( struct sockaddr_in target )
 
 void SBSegment::importFromEKP2PHeader( std::shared_ptr<ekp2p::EKP2PMessageHeader> fromHeader )
 {
-	this->sourceKNodeAddr(fromHeader->sourceKNodeAddr() );
-	this->relayKNodeAddrVector( fromHeader->relayKNodeAddrVector() );
-	this->protocol( fromHeader->protocol() );
-	this->rpcType( fromHeader->rpcType() );
+	// this->sourceKNodeAddr(fromHeader->sourceKNodeAddr() );
+	// this->relayKNodeAddrVector( fromHeader->relayKNodeAddrVector() );
+	// this->protocol( fromHeader->protocol() );
+	// this->rpcType( fromHeader->rpcType() );
 }
 
 

@@ -150,7 +150,6 @@ k_bucket_iterator k_routing_table::get_begin_bucket_iterator()
   return ret;
 }
 
-#if SS_DEBUG
 void k_routing_table::print( int start_branch )
 {
   for( int i=start_branch; i<=_table.size(); i++ )
@@ -164,7 +163,6 @@ void k_routing_table::print( int start_branch )
 	std::cout << "\n";
   }
 }
-#endif
 
 
 std::vector<k_node> eps_to_k_nodds( std::vector<ip::udp::endpoint> eps )

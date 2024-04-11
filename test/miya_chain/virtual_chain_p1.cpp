@@ -14,7 +14,7 @@
 
 #include "../../miya_chain/miya_chain_manager.h"
 
-#include "../../miya_core/miya_core.h"
+#include "../../miya_core/miya_core.hpp"
 #include "../../control_interface/control_interface.h"
 
 #include "../../miya_chain/transaction/p2pkh/p2pkh.h"

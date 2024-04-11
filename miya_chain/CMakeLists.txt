@@ -1,5 +1,7 @@
 cmake_minimum_required( VERSION 3.12 )
 
+
+
 add_library( MIYA_CHAIN STATIC
 
 							miya_chain_manager.cpp
@@ -78,10 +80,14 @@ add_library( MIYA_CHAIN STATIC
 							chain_sync_manager/block_header_pool.cpp
 )
 
-target_include_directories( MIYA_CHAIN PUBLIC 
-  ${OPENSSL_INCLUDE_DIR}
+target_include_directories( MIYA_CHAIN PUBLIC
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
 
-
+get_property(include_dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+message("miya chain Included Directories:")
+foreach(dir ${include_dirs})
+      message("  ${dir}")
+endforeach()
 
 add_definitions( -std=c++20 -w )
