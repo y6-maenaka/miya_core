@@ -11,9 +11,9 @@
 #include "../../network/header/header.h"
 #include "../../network/message/message.h"
 
-#include "../../../shared_components/json.hpp"
-#include "../../../shared_components/stream_buffer/stream_buffer.h"
-#include "../../../shared_components/stream_buffer/stream_buffer_container.h"
+#include "../../../share/json.hpp"
+#include "../../../share/stream_buffer/stream_buffer.h"
+#include "../../../share/stream_buffer/stream_buffer_container.h"
 
 #include "../../ekp2p.h"
 #include "../../daemon/sender/sender.h"

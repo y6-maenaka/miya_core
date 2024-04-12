@@ -1,8 +1,8 @@
 #include "miya_db_sb_client.h"
 
 
-#include "../../shared_components/stream_buffer/stream_buffer.h"
-#include "../../shared_components/stream_buffer/stream_buffer_container.h"
+#include "../../share/stream_buffer/stream_buffer.h"
+#include "../../share/stream_buffer/stream_buffer_container.h"
 
 
 #include "./common.h"

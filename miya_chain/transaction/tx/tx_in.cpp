@@ -4,7 +4,7 @@
 #include "./prev_out.h"
 #include "../script/signature_script.h"
 #include "../script/script.h"
-#include "../../../shared_components/cipher/ecdsa_manager.h"
+#include "../../../share/cipher/ecdsa_manager.h"
 
 
 namespace tx{

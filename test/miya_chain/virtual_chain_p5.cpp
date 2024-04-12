@@ -5,10 +5,10 @@
 
 #include "./common.h"
 
-#include "../../shared_components/stream_buffer/stream_buffer.h"
-#include "../../shared_components/stream_buffer/stream_buffer_container.h"
-#include "../../shared_components/cipher/ecdsa_manager.h"
-#include "../../shared_components/hash/sha_hash.h"
+#include "../../share/stream_buffer/stream_buffer.h"
+#include "../../share/stream_buffer/stream_buffer_container.h"
+#include "../../share/cipher/ecdsa_manager.h"
+#include "../../share/hash/sha_hash.h"
 
 #include "../../miya_chain/utxo_set/utxo.h"
 #include "../../miya_chain/utxo_set/utxo_set.h"

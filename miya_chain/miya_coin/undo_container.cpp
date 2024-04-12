@@ -5,7 +5,7 @@
 #include "../transaction/coinbase/coinbase.h"
 #include "../transaction/p2pkh/p2pkh.h"
 #include "../utxo_set/utxo.h"
-#include "../../shared_components/json.hpp"
+#include "../../share/json.hpp"
 
 
 

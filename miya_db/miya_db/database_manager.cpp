@@ -1,8 +1,8 @@
 #include "database_manager.h"
 
-#include "../../shared_components/json.hpp"
-#include "../../shared_components/stream_buffer/stream_buffer.h"
-#include "../../shared_components/stream_buffer/stream_buffer_container.h"
+#include "../../share/json.hpp"
+#include "../../share/stream_buffer/stream_buffer.h"
+#include "../../share/stream_buffer/stream_buffer_container.h"
 
 #include "./query_context/query_context.h"
 

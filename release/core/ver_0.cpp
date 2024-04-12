@@ -4,9 +4,12 @@
 #include "../../ss_p2p_node_controller/include/ss_p2p/node_controller.hpp"
 
 
-int main()
+int main( int argc, const char* argv[] )
 {
-	miya_core::MiyaCore core = miya_core::MiyaCore();
+
+	miya_core::miya_core core = miya_core::miya_core();
+	std::string pem_pass = core.get_context().get_ecdsa_pem_pass();
+	std::cout << pem_pass << "\n";
 
 	std::shared_ptr<boost::asio::io_context> io_ctx = std::make_shared<boost::asio::io_context>();
 	boost::asio::ip::udp::endpoint self_ep( boost::asio::ip::udp::v4(), 8080 );
@@ -16,7 +19,7 @@ int main()
 
 	n_controller.start();
 
-	message_hub.start( std::bind( &miya_core::MiyaCore::on_income_message, core, std::placeholders::_1 ) ); // メッセージ受信時のコールバックを設定
+	message_hub.start( std::bind( &miya_core::miya_core::on_income_message, core, std::placeholders::_1 ) ); // メッセージ受信時のコールバックを設定
 
 
 	std::mutex mtx;

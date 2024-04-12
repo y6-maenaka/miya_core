@@ -6,8 +6,8 @@
 #include "../script/script_validator.h"
 #include "../script/signature_script.h"
 #include "../script/pk_script.h"
-#include "../../../shared_components/cipher/ecdsa_manager.h"
-#include "../../../shared_components/hash/sha_hash.h"
+#include "../../../share/cipher/ecdsa_manager.h"
+#include "../../../share/hash/sha_hash.h"
 
 
 #include "../../utxo_set/utxo.h"

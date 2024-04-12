@@ -6,9 +6,9 @@
 
 #include "../../miya_db/miya_db/database_manager.h"
 
-#include "../../shared_components/stream_buffer/stream_buffer.h"
-#include "../../shared_components/stream_buffer/stream_buffer_container.h"
-#include "../../shared_components/miya_db_client/miya_db_sb_client.h"
+#include "../../share/stream_buffer/stream_buffer.h"
+#include "../../share/stream_buffer/stream_buffer_container.h"
+#include "../../share/miya_db_client/miya_db_sb_client.h"
 
 
 int db_safe_p3( std::string dbName )

@@ -5,13 +5,13 @@
 #include "../transaction/p2pkh/p2pkh.h"
 
 
-#include "../../shared_components/json.hpp"
-#include "../../shared_components/stream_buffer/stream_buffer.h"
-#include "../../shared_components/stream_buffer/stream_buffer_container.h"
+#include "../../share/json.hpp"
+#include "../../share/stream_buffer/stream_buffer.h"
+#include "../../share/stream_buffer/stream_buffer_container.h"
 
-#include "../../shared_components/miya_db_client/common.h"
+#include "../../share/miya_db_client/common.h"
 
-#include "../../shared_components/miya_db_client/miya_db_sb_client.h"
+#include "../../share/miya_db_client/miya_db_sb_client.h"
 
 
 namespace miya_chain

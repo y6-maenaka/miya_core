@@ -23,7 +23,7 @@
 #include "../script/pk_script.h"
 #include "../script/script.h"
 
-#include "../../../shared_components/json.hpp"
+#include "../../../share/json.hpp"
 using json = nlohmann::json;
 
 

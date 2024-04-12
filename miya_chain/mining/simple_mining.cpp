@@ -3,7 +3,7 @@
 
 
 #include "../block/block.h"
-#include "../../shared_components/hash/sha_hash.h"
+#include "../../share/hash/sha_hash.h"
 
 
 namespace miya_chain

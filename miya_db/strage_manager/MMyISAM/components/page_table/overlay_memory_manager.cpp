@@ -3,7 +3,7 @@
 #include "./cache_manager/cache_table.h"
 #include "./overlay_memory_allocator.h"
 
-#include "../../../../../shared_components/hash/sha_hash.h"
+#include "../../../../../share/hash/sha_hash.h"
 
 
 namespace miya_db{

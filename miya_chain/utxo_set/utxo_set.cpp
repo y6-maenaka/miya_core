@@ -1,12 +1,12 @@
 #include "utxo_set.h"
 
 
-#include "../../shared_components/stream_buffer/stream_buffer.h"
-#include "../../shared_components/stream_buffer/stream_buffer_container.h"
-#include "../../shared_components/json.hpp"
-#include "../../shared_components/hash/sha_hash.h"
-#include "../../shared_components/miya_db_client/common.h"
-#include "../../shared_components/miya_db_client/miya_db_sb_client.h"
+#include "../../share/stream_buffer/stream_buffer.h"
+#include "../../share/stream_buffer/stream_buffer_container.h"
+#include "../../share/json.hpp"
+#include "../../share/hash/sha_hash.h"
+#include "../../share/miya_db_client/common.h"
+#include "../../share/miya_db_client/miya_db_sb_client.h"
 
 #include "../transaction/p2pkh/p2pkh.h"
 #include "../transaction/tx/tx_out.h"

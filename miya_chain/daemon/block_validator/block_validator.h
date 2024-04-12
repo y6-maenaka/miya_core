@@ -12,7 +12,7 @@
 #include <condition_variable>
 #include <chrono>
 
-#include "../../../shared_components/stream_buffer/stream_buffer.h"
+#include "../../../share/stream_buffer/stream_buffer.h"
 
 
 

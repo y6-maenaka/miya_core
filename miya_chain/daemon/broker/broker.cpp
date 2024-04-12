@@ -1,7 +1,7 @@
 #include "broker.h"
 
-#include "../../../shared_components/stream_buffer/stream_buffer.h"
-#include "../../../shared_components/stream_buffer/stream_buffer_container.h"
+#include "../../../share/stream_buffer/stream_buffer.h"
+#include "../../../share/stream_buffer/stream_buffer_container.h"
 
 #include "../../message/message.h"
 

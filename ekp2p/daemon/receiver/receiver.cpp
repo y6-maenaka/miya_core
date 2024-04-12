@@ -5,8 +5,8 @@
 #include "../../network/header/header.h"
 
 #include "../../network/socket_manager/socket_manager.h"
-#include "../../../shared_components/stream_buffer/stream_buffer.h"
-#include "../../../shared_components/stream_buffer/stream_buffer_container.h"
+#include "../../../share/stream_buffer/stream_buffer.h"
+#include "../../../share/stream_buffer/stream_buffer_container.h"
 
 #include "../../ekp2p.h"
 #include "../../protocol.h"

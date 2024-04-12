@@ -2,8 +2,8 @@
 
 
 #include "script_validator.h"
-#include "../../../shared_components/hash/sha_hash.h"
-#include "../../../shared_components/cipher/ecdsa_manager.h"
+#include "../../../share/hash/sha_hash.h"
+#include "../../../share/cipher/ecdsa_manager.h"
 
 namespace tx{
 

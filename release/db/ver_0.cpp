@@ -12,9 +12,9 @@
 
 #include "../../miya_db/strage_manager/MMyISAM/components/page_table/unit_test.h"
 
-#include "../../shared_components/stream_buffer/stream_buffer.h"
-#include "../../shared_components/stream_buffer/stream_buffer_container.h"
-#include "../../shared_components/miya_db_client/miya_db_sb_client.h"
+#include "../../share/stream_buffer/stream_buffer.h"
+#include "../../share/stream_buffer/stream_buffer_container.h"
+#include "../../share/miya_db_client/miya_db_sb_client.h"
 
 #include "../../miya_chain/utxo_set/utxo_set.h"
 #include "../../miya_chain/utxo_set/utxo.h"

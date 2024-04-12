@@ -1,6 +1,6 @@
 #include "virtual_header_subchain.h"
 
-#include "../../shared_components/hash/sha_hash.h"
+#include "../../share/hash/sha_hash.h"
 
 #include "../block/block.h"
 #include "../block/block_header.h"

@@ -7,9 +7,9 @@
 #include <string>
 #include <vector>
 
-#include "../../shared_components/stream_buffer/stream_buffer.h"
-#include "../../shared_components/stream_buffer/stream_buffer_container.h"
-#include "../../shared_components/cipher/ecdsa_manager.h"
+#include "../../share/stream_buffer/stream_buffer.h"
+#include "../../share/stream_buffer/stream_buffer_container.h"
+#include "../../share/cipher/ecdsa_manager.h"
 
 #include "../../miya_chain/utxo_set/utxo.h"
 #include "../../miya_chain/utxo_set/utxo_set.h"

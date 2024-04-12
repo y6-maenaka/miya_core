@@ -4,7 +4,7 @@
 
 #include "../transaction/coinbase/coinbase.h"
 #include "../transaction/p2pkh/p2pkh.h"
-#include "../../shared_components/hash/sha_hash.h"
+#include "../../share/hash/sha_hash.h"
 
 #include "../utxo_set/utxo_set.h"
 

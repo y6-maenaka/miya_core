@@ -7,7 +7,7 @@
 #include "../transaction/script/script.h"
 #include "../transaction/script/pk_script.h"
 
-#include "../../shared_components/cipher/ecdsa_manager.h"
+#include "../../share/cipher/ecdsa_manager.h"
 
 
 namespace miya_chain

@@ -2,7 +2,7 @@
 
 #include "./script.h"
 
-#include "../../../shared_components/cipher/ecdsa_manager.h"
+#include "../../../share/cipher/ecdsa_manager.h"
 
 
 namespace tx{

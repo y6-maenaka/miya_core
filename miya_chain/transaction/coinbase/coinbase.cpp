@@ -4,7 +4,7 @@
 #include "../tx/tx_out.h"
 
 #include "../../../miya_core/miya_core.hpp"
-#include "../../../shared_components/hash/sha_hash.h"
+#include "../../../share/hash/sha_hash.h"
 
 
 namespace tx

@@ -1,7 +1,7 @@
 cmake_minimum_required( VERSION 3.12 )
 
 
-add_library( SHARED_COMPONENTS SHARED
+add_library( SHARE SHARED
 
 				  cipher/ecdsa_manager.cpp
 
@@ -22,7 +22,7 @@ add_library( SHARED_COMPONENTS SHARED
 					crypto_utils/w_aes/aes_manager.cpp
 )
 
-target_link_libraries( SHARED_COMPONENTS PUBLIC
+target_link_libraries( SHARE PUBLIC
 						${OPENSSL_LIBRARIES}
 						# EKP2P #SBSegmentをekp2p::headerから作成するために必要
 )

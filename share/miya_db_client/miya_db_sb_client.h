@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 
-#include "../../shared_components/json.hpp"
+#include "../../share/json.hpp"
 
 
 struct SBSegment;

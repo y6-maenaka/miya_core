@@ -4,13 +4,13 @@ project(MIYA_CORE CXX)
 
 find_package( PkgConfig REQUIRED ) # 外部パッケージを検出する準備(opensslは外部パッケージ(?))
 find_package( OpenSSL REQUIRED )
-find_package( Boost REQUIRED )
+find_package( Boost REQUIRED COMPONENTS program_options )
 
 include_directories(
 	${Boost_INCLUDE_DIRS}
 	${OPENSSL_INCLUDE_DIR}
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ss_p2p_node_controller/include>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/shared_components>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/share>
 )
 
 # add_subdirectory( ekp2p )
@@ -18,7 +18,7 @@ add_subdirectory( ss_p2p_node_controller )
 add_subdirectory( miya_chain )
 add_subdirectory( miya_db )
 add_subdirectory( control_interface )
-add_subdirectory( shared_components )
+add_subdirectory( share )
 add_subdirectory( miya_core )
 
 # add_subdirectory( test/miya_db )
@@ -34,10 +34,11 @@ target_link_libraries( core_ver_0 PRIVATE
 	MIYA_DB
 	MIYA_CHAIN
 	CONTROL_INTERFACE
-	SHARED_COMPONENTS
+	SHARE
 	SS_P2P
 
 	# TEST_MIYA_CHAIN
+	Boost::program_options
 )
 
 target_compile_options( core_ver_0 PUBLIC -Wall )

@@ -15,7 +15,7 @@
 #include <unistd.h>
 
 
-#include "../shared_components/json.hpp"
+#include "../share/json.hpp"
 
 #include "../miya_chain/transaction/p2pkh/p2pkh.h"
 #include "../miya_chain/transaction/tx/tx_in.h"
@@ -26,8 +26,8 @@
 #include "../miya_chain/transaction/script/script.h"
 
 
-#include "../shared_components/stream_buffer/stream_buffer.h"
-#include "../shared_components/stream_buffer/stream_buffer_container.h"
+#include "../share/stream_buffer/stream_buffer.h"
+#include "../share/stream_buffer/stream_buffer_container.h"
 
 
 

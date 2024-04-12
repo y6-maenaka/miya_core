@@ -1,6 +1,6 @@
 #include "./k_node.h"
 
-#include "../../shared_components/hash/sha_hash.h"
+#include "../../share/hash/sha_hash.h"
 
 #include "../network/header/header.h"
 #include "../network/socket_manager/socket_manager.h"

@@ -13,7 +13,7 @@
 
 #include "openssl/evp.h"
 
-#include "../../../shared_components/json.hpp"
+#include "../../../share/json.hpp"
 using json = nlohmann::json;
 
 namespace tx{

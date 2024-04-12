@@ -1,6 +1,6 @@
 #include "miya_core.hpp"
 
-#include "../shared_components/json.hpp"
+#include "../share/json.hpp"
 #include "../ss_p2p_node_controller/include/ss_p2p/message_pool.hpp"
 
 
@@ -8,45 +8,42 @@ namespace miya_core
 {
 
 
-bool MiyaCoreContext::loadECDSAKey( std::string pathToECDSAPem )
+miya_core_context::miya_core_context( std::string path_to_ecdsa_pem )
 {
-    nlohmann::json pemPassJson;
-    std::ifstream input(pathToECDSAPem);
-    input >> pemPassJson;
+  if( !(this->load_ecdsa_key( path_to_ecdsa_pem )) ) return;
+}
 
-    std::vector<uint8_t> pemPassVector;
-    if( !(pemPassJson.contains("ecdsa_pem_pass")) ) return false;
+std::string miya_core_context::get_ecdsa_pem_pass()
+{
+  return _ecdsa_pem_pass;
+}
 
-    std::string pemPassString = pemPassJson["ecdsa_pem_pass"];
-    _pemPass._passSize = pemPassString.size();
-    _pemPass._pass = std::shared_ptr<unsigned char>( new unsigned char[_pemPass._passSize] );
-    memcpy( _pemPass._pass.get(), pemPassString.c_str(), _pemPass._passSize );
+bool miya_core_context::load_ecdsa_key( std::string path_to_ecdsa_pem )
+{
+  nlohmann::json pem_pass_j;
+  std::ifstream input( path_to_ecdsa_pem );
+  input >> pem_pass_j;
 
-    return true;
+  std::vector<std::uint8_t> pem_pass_v;
+  if( !(pem_pass_j.contains("ecdsa_pem_pass")) ) return false;
+
+  _ecdsa_pem_pass = pem_pass_j["ecdsa_pem_pass"];
+  return true;
 }
 
 
-size_t MiyaCoreContext::pemPass( std::shared_ptr<unsigned char> *ret )
+miya_core::miya_core() :
+  _context( "../.config/wallet.json" )
 {
-    *ret = _pemPass._pass;
-    return _pemPass._passSize;
+  return;
 }
 
-
-MiyaCore::MiyaCore()
-{
-    _context = std::make_shared<MiyaCoreContext>();
-    _context->loadECDSAKey( std::string("../.config/wallet.json") );
-    return ;
-}
-
-
-const std::shared_ptr<MiyaCoreContext> MiyaCore::context()
+miya_core_context &miya_core::get_context()
 {
     return _context;
 }
 
-void MiyaCore::on_income_message( ss::message_pool::_message_ msg )
+void miya_core::on_income_message( ss::message_pool::_message_ msg )
 {
   unsigned char temp[10]; memcpy( temp, "HelloWorld", 10 );
   std::shared_ptr<unsigned char> ret;
