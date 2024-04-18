@@ -65,7 +65,7 @@
 - SenderDaemonを終了させることができない
 
 
-- namespace miya_chain::block / miya_chain::tx に変更する
+- namespace chain::block / chain::tx に変更する
 
 - 特にimportRawSequentially系はエラーハンドリングするようにする
 
@@ -74,7 +74,7 @@
 
 - utxo_setのdbやりとりをmiya_db_clientに換装する
 
-- miya_chain_MSGのコマンド書き出し系が冗長
+- chain_MSGのコマンド書き出し系が冗長
 
 - ibdエラー発生時の回復メソッド
 
@@ -108,7 +108,7 @@
 
 
 // ジェネシスブロック作成
-	miya_core::MiyaCore	miyaCore;
+	core::MiyaCore	miyaCore;
 
 	cipher::ECDSAManager ecdsaManager;
 	std::shared_ptr<unsigned char> pemPass; size_t pemPassLength;
@@ -138,7 +138,7 @@
 	uint32_t nBits = 532390001; // 簡易的にマイニングの実行
 	block.header()->nBits( nBits );
 
-	uint32_t nonce = miya_chain::simpleMining( nBits , block.header() );
+	uint32_t nonce = chain::simpleMining( nBits , block.header() );
 	block.header()->nonce( nonce );
 	block.header()->print();
 
@@ -146,12 +146,12 @@
 	blockHashLength = block.blockHash( &blockHash );
 
 
-	miya_chain::MiyaChainManager miyaChainManager;
+	chain::MiyaChainManager miyaChainManager;
 	std::shared_ptr<StreamBufferContainer> toEKP2PBrokerDummySBC = std::make_shared<StreamBufferContainer>();
 	miyaChainManager.init( toEKP2PBrokerDummySBC );
 
 
-	std::shared_ptr<miya_chain::LightUTXOSet> utxoSet;
+	std::shared_ptr<chain::LightUTXOSet> utxoSet;
 	utxoSet = miyaChainManager.utxoSet();
 	std::shared_ptr<unsigned char> txID; size_t txIDLength;
 	txIDLength = coinbase.calcTxID( &txID );

@@ -8,34 +8,34 @@
 #include "../../share/cipher/ecdsa_manager.h"
 #include "../../share/hash/sha_hash.h"
 
-#include "../../miya_chain/utxo_set/utxo.h"
-#include "../../miya_chain/utxo_set/utxo_set.h"
+#include "../../chain/utxo_set/utxo.h"
+#include "../../chain/utxo_set/utxo_set.h"
 
-#include "../../miya_chain/miya_chain_manager.h"
+#include "../../chain/chain_manager.h"
 
-#include "../../miya_core/miya_core.hpp"
+#include "../../core/core.hpp"
 #include "../../control_interface/control_interface.h"
 
-#include "../../miya_chain/transaction/p2pkh/p2pkh.h"
-#include "../../miya_chain/transaction/tx/tx_in.h"
-#include "../../miya_chain/transaction/tx/tx_out.h"
-#include "../../miya_chain/transaction/coinbase/coinbase.h"
+#include "../../chain/transaction/p2pkh/p2pkh.h"
+#include "../../chain/transaction/tx/tx_in.h"
+#include "../../chain/transaction/tx/tx_out.h"
+#include "../../chain/transaction/coinbase/coinbase.hpp"
 
-#include "../../miya_chain/block/block.h"
-#include "../../miya_chain/block/block_header.h"
+#include "../../chain/block/block.h"
+#include "../../chain/block/block_header.h"
 
-#include "../../miya_chain/mining/simple_mining.h"
-#include "../../miya_chain/miya_chain_manager.h"
-#include "../../miya_chain/miya_coin/local_strage_manager.h"
-#include "../../miya_chain/block_chain_iterator/block_chain_iterator.h"
+#include "../../chain/mining/simple_mining.h"
+#include "../../chain/chain_manager.h"
+#include "../../chain/miya_coin/local_strage_manager.h"
+#include "../../chain/block_chain_iterator/block_chain_iterator.h"
 
 
 int build_sample_chain_p1
 (
-  std::shared_ptr<miya_core::MiyaCore> miyaCore,
+  std::shared_ptr<core::MiyaCore> miyaCore,
   std::shared_ptr<ControlInterface> controlInterface,
   std::shared_ptr<cipher::ECDSAManager> ecdsaManager,
-  std::shared_ptr<miya_chain::MiyaChainManager> miyaChainManager
+  std::shared_ptr<chain::MiyaChainManager> miyaChainManager
 )
 {
   std::shared_ptr<unsigned char> selfAddress; size_t selfAddressLength;
@@ -64,7 +64,7 @@ int build_sample_chain_p1
   uint32_t nBits_0000 = 532390001;
   block_0000->header()->nBits( nBits_0000 );
   block_0000->header()->prevBlockHash( nullptr );
-  uint32_t nonce_0000 = miya_chain::simpleMining( nBits_0000 , block_0000->header(), false );
+  uint32_t nonce_0000 = chain::simpleMining( nBits_0000 , block_0000->header(), false );
   block_0000->header()->nonce( nonce_0000 );
 
   std::shared_ptr<unsigned char> blockHash_0000;
@@ -91,7 +91,7 @@ int build_sample_chain_p1
   uint32_t nBits_0001 = 532390001;
   block_0001->header()->nBits( nBits_0001 );
   block_0001->header()->prevBlockHash( blockHash_0000 );
-  uint32_t nonce_0001 = miya_chain::simpleMining( nBits_0001 , block_0001->header(), false );
+  uint32_t nonce_0001 = chain::simpleMining( nBits_0001 , block_0001->header(), false );
   block_0001->header()->nonce( nonce_0001 );
 
   std::shared_ptr<unsigned char> blockHash_0001;
@@ -118,7 +118,7 @@ int build_sample_chain_p1
   uint32_t nBits_0002 = 532390001;
   block_0002->header()->nBits( nBits_0002 );
   block_0002->header()->prevBlockHash( blockHash_0001 );
-  uint32_t nonce_0002 = miya_chain::simpleMining( nBits_0002 , block_0002->header(), false );
+  uint32_t nonce_0002 = chain::simpleMining( nBits_0002 , block_0002->header(), false );
   block_0002->header()->nonce( nonce_0002 );
 
   std::shared_ptr<unsigned char> blockHash_0002;
@@ -129,10 +129,10 @@ int build_sample_chain_p1
 
 
 
-std::shared_ptr<miya_chain::BlockLocalStrageManager> localStrageManager;
+std::shared_ptr<chain::BlockLocalStrageManager> localStrageManager;
   localStrageManager = miyaChainManager->localStrageManager();
 
-  std::shared_ptr<miya_chain::MiyaChainState> chainState = miyaChainManager->chainState();
+  std::shared_ptr<chain::MiyaChainState> chainState = miyaChainManager->chainState();
 
 
 

@@ -16,10 +16,10 @@
 #include "../../share/stream_buffer/stream_buffer_container.h"
 #include "../../share/miya_db_client/miya_db_sb_client.h"
 
-#include "../../miya_chain/utxo_set/utxo_set.h"
-#include "../../miya_chain/utxo_set/utxo.h"
-#include "../../miya_chain/transaction/p2pkh/p2pkh.h"
-#include "../../miya_chain/transaction/tx/tx_out.h"
+#include "../../chain/utxo_set/utxo_set.h"
+#include "../../chain/utxo_set/utxo.h"
+#include "../../chain/transaction/p2pkh/p2pkh.h"
+#include "../../chain/transaction/tx/tx_out.h"
 
 #include "../../test/miya_db/db_append_normal_p1.cpp"
 #include "../../test/miya_db/db_remove_normal_p1.cpp"

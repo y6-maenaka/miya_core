@@ -9,25 +9,25 @@
 #include "../../share/cipher/ecdsa_manager.h"
 #include "../../share/hash/sha_hash.h"
 
-#include "../../miya_chain/utxo_set/utxo.h"
-#include "../../miya_chain/utxo_set/utxo_set.h"
+#include "../../chain/utxo_set/utxo.h"
+#include "../../chain/utxo_set/utxo_set.h"
 
-#include "../../miya_chain/miya_chain_manager.h"
+#include "../../chain/chain_manager.h"
 
-#include "../../miya_core/miya_core.hpp"
+#include "../../core/core.hpp"
 #include "../../control_interface/control_interface.h"
 
-#include "../../miya_chain/transaction/p2pkh/p2pkh.h"
-#include "../../miya_chain/transaction/tx/tx_in.h"
-#include "../../miya_chain/transaction/tx/tx_out.h"
-#include "../../miya_chain/transaction/coinbase/coinbase.h"
+#include "../../chain/transaction/p2pkh/p2pkh.h"
+#include "../../chain/transaction/tx/tx_in.h"
+#include "../../chain/transaction/tx/tx_out.h"
+#include "../../chain/transaction/coinbase/coinbase.hpp"
 
-#include "../../miya_chain/block/block.h"
-#include "../../miya_chain/block/block_header.h"
+#include "../../chain/block/block.h"
+#include "../../chain/block/block_header.h"
 
-#include "../../miya_chain/mining/simple_mining.h"
+#include "../../chain/mining/simple_mining.h"
 
-#include "../../miya_chain/chain_sync_manager/chain_sync_manager.h"
+#include "../../chain/chain_sync_manager/chain_sync_manager.h"
 
 
 
@@ -36,10 +36,10 @@
 
 int virtual_chain_p3()
 {
-  std::shared_ptr<miya_core::MiyaCore> miyaCore;
+  std::shared_ptr<core::MiyaCore> miyaCore;
   std::shared_ptr<ControlInterface> controlInterface;
   std::shared_ptr<cipher::ECDSAManager> ecdsaManager;
-  std::shared_ptr<miya_chain::MiyaChainManager> miyaChainManager;
+  std::shared_ptr<chain::MiyaChainManager> miyaChainManager;
 
   std::shared_ptr<unsigned char> selfAddress; size_t selfAddressLength;
   std::shared_ptr<unsigned char> pubKeyHash; size_t pubKeyHashLength;
@@ -50,7 +50,7 @@ int virtual_chain_p3()
   LaunchMiyaChain( &miyaCore, &controlInterface, &ecdsaManager, &miyaChainManager );
   build_sample_chain_p1( miyaCore, controlInterface , ecdsaManager, miyaChainManager );
 
-  std::shared_ptr<miya_chain::BlockChainIterator> latestBlockItr = miyaChainManager->chainState()->latestBlockIterator();
+  std::shared_ptr<chain::BlockChainIterator> latestBlockItr = miyaChainManager->chainState()->latestBlockIterator();
 
 
   std::shared_ptr<unsigned char> prevBlockHash_0000 = latestBlockItr->blockHash();
@@ -72,7 +72,7 @@ int virtual_chain_p3()
   uint32_t nBits_0000 = 532390001;
   block_0000->header()->nBits( nBits_0000 );
   block_0000->header()->prevBlockHash( prevBlockHash_0000 );
-  uint32_t nonce_0000 = miya_chain::simpleMining( nBits_0000, block_0000->header(), false );
+  uint32_t nonce_0000 = chain::simpleMining( nBits_0000, block_0000->header(), false );
   block_0000->header()->nonce( nonce_0000 );
 
   std::shared_ptr<unsigned char>  blockHash_0000;
@@ -99,7 +99,7 @@ int virtual_chain_p3()
   uint32_t nBits_0001 = 532390001;
   block_0001->header()->nBits( nBits_0001 );
   block_0001->header()->prevBlockHash( prevBlockHash_0000 );
-  uint32_t nonce_0001 = miya_chain::simpleMining( nBits_0001, block_0001->header(), false );
+  uint32_t nonce_0001 = chain::simpleMining( nBits_0001, block_0001->header(), false );
   block_0001->header()->nonce( nonce_0001 );
 
   std::shared_ptr<unsigned char>  blockHash_0001;
@@ -125,7 +125,7 @@ int virtual_chain_p3()
   uint32_t nBits_0002 = 532390001;
   block_0002->header()->nBits( nBits_0002 );
   block_0002->header()->prevBlockHash( blockHash_0001 );
-  uint32_t nonce_0002 = miya_chain::simpleMining( nBits_0002, block_0002->header(), false );
+  uint32_t nonce_0002 = chain::simpleMining( nBits_0002, block_0002->header(), false );
   block_0002->header()->nonce( nonce_0002 );
 
   std::shared_ptr<unsigned char>  blockHash_0002;
@@ -138,7 +138,7 @@ int virtual_chain_p3()
   std::cout << "-----------------------------" << "\n";
 
   std::shared_ptr<StreamBufferContainer> toRequesterSBC = std::make_shared<StreamBufferContainer>();
-  std::shared_ptr<miya_chain::ChainSyncManager> virtualChain = std::shared_ptr<miya_chain::ChainSyncManager>( new miya_chain::ChainSyncManager( *latestBlockItr, nullptr ,toRequesterSBC ) );
+  std::shared_ptr<chain::ChainSyncManager> virtualChain = std::shared_ptr<chain::ChainSyncManager>( new chain::ChainSyncManager( *latestBlockItr, nullptr ,toRequesterSBC ) );
 
   std::cout << "これ -> "; block_0000->__printPrevBlockHash();
 

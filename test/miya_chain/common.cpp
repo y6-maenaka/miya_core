@@ -6,15 +6,15 @@
 
 
 void LaunchMiyaChain(
-                      std::shared_ptr<miya_core::MiyaCore> *miyaCore ,
+                      std::shared_ptr<core::MiyaCore> *miyaCore ,
                       std::shared_ptr<ControlInterface> *controlInterface,
                       std::shared_ptr<cipher::ECDSAManager> *ecdsaManager ,
-                      std::shared_ptr<miya_chain::MiyaChainManager> *miyaChainManager
+                      std::shared_ptr<chain::MiyaChainManager> *miyaChainManager
 )
 {
   std::cout << "LAUNCH MIYA CHAIN" << "\n";
 
-  *miyaCore = std::shared_ptr<miya_core::MiyaCore>( new miya_core::MiyaCore{} );
+  *miyaCore = std::shared_ptr<core::MiyaCore>( new core::MiyaCore{} );
   *controlInterface = std::shared_ptr<ControlInterface>( new ControlInterface{} );
 
   *ecdsaManager = std::shared_ptr<cipher::ECDSAManager>( new cipher::ECDSAManager{} );
@@ -22,14 +22,14 @@ void LaunchMiyaChain(
   pemPassLength = (*miyaCore)->context()->pemPass( &pemPass );
   (*ecdsaManager)->init( pemPass.get() , pemPassLength );
 
-  *miyaChainManager = std::shared_ptr<miya_chain::MiyaChainManager>( new miya_chain::MiyaChainManager{} );
+  *miyaChainManager = std::shared_ptr<chain::MiyaChainManager>( new chain::MiyaChainManager{} );
   std::shared_ptr<StreamBufferContainer> toEKP2PBrokerDummySBC = std::make_shared<StreamBufferContainer>();
   (*miyaChainManager)->init( toEKP2PBrokerDummySBC );
 
-  std::shared_ptr<miya_chain::BlockLocalStrageManager> localStrageManager; // ブロック保存用のファイルマネージャー
+  std::shared_ptr<chain::BlockLocalStrageManager> localStrageManager; // ブロック保存用のファイルマネージャー
   localStrageManager = (*miyaChainManager)->localStrageManager();
 
-  std::shared_ptr<miya_chain::LightUTXOSet> utxoSet; // UTXOのセットアップ
+  std::shared_ptr<chain::LightUTXOSet> utxoSet; // UTXOのセットアップ
   utxoSet = (*miyaChainManager)->utxoSet();
 
   std::shared_ptr<unsigned char> selfAddress; size_t selfAddressLength;
@@ -56,7 +56,7 @@ std::pair< bool , std::shared_ptr<tx::P2PKH> > CreateTxFromJsonFile( std::string
 }
 
 
-std::shared_ptr<tx::Coinbase> CreateCoinbase( unsigned int height ,std::string coinbaseText ,std::shared_ptr<unsigned char> pubKeyHash , const std::shared_ptr<miya_core::MiyaCoreContext> mcContext )
+std::shared_ptr<tx::Coinbase> CreateCoinbase( unsigned int height ,std::string coinbaseText ,std::shared_ptr<unsigned char> pubKeyHash , const std::shared_ptr<core::MiyaCoreContext> mcContext )
 {
   std::shared_ptr<unsigned char> text = std::shared_ptr<unsigned char>( new unsigned char[coinbaseText.size()] ); size_t textLength = coinbaseText.size();
   memcpy( text.get(), coinbaseText.c_str(), coinbaseText.size() );

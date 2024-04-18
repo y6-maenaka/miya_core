@@ -16,7 +16,7 @@ int main()
 
 	sleep(1);
 
-	std::shared_ptr<miya_chain::MiyaChainManager> chainManager = std::make_shared<miya_chain::MiyaChainManager>();
+	std::shared_ptr<chain::MiyaChainManager> chainManager = std::make_shared<chain::MiyaChainManager>();
 	chainManager->init( ekp2p->toBrokerSBC() );
 	ekp2p->assignBrokerDestination( chainManager->toBrokerSBC() , 2 ); // ekp2pのプロトコル転送先にmiyaChainモジュールを設定
 

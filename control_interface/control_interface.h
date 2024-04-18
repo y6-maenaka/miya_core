@@ -17,13 +17,13 @@
 
 #include "../share/json.hpp"
 
-#include "../miya_chain/transaction/p2pkh/p2pkh.h"
-#include "../miya_chain/transaction/tx/tx_in.h"
-#include "../miya_chain/transaction/tx/tx_out.h"
+#include "../chain/transaction/p2pkh/p2pkh.h"
+#include "../chain/transaction/tx/tx_in.h"
+#include "../chain/transaction/tx/tx_out.h"
 
-#include "../miya_chain/transaction/script/signature_script.h"
-#include "../miya_chain/transaction/script/pk_script.h"
-#include "../miya_chain/transaction/script/script.h"
+#include "../chain/transaction/script/signature_script.h"
+#include "../chain/transaction/script/pk_script.h"
+#include "../chain/transaction/script/script.h"
 
 
 #include "../share/stream_buffer/stream_buffer.h"

@@ -1,13 +1,12 @@
 #include "ver_0.h"
 
-#include "../../miya_core/miya_core.hpp"
+#include "../../core/core.hpp"
 #include "../../ss_p2p_node_controller/include/ss_p2p/node_controller.hpp"
 
 
 int main( int argc, const char* argv[] )
 {
-
-	miya_core::miya_core core = miya_core::miya_core();
+	core::core core = core::core();
 	std::string pem_pass = core.get_context().get_ecdsa_pem_pass();
 	std::cout << pem_pass << "\n";
 
@@ -19,7 +18,7 @@ int main( int argc, const char* argv[] )
 
 	n_controller.start();
 
-	message_hub.start( std::bind( &miya_core::miya_core::on_income_message, core, std::placeholders::_1 ) ); // メッセージ受信時のコールバックを設定
+	message_hub.start( std::bind( &core::core::on_income_message, core, std::placeholders::_1 ) ); // メッセージ受信時のコールバックを設定
 
 
 	std::mutex mtx;
@@ -30,11 +29,11 @@ int main( int argc, const char* argv[] )
 	return 0;
 
 
-	std::cout << " WELCOME TO MIYA COIN CLIENT [ MIYA_CORE ] " << "\n";
+	std::cout << " WELCOME TO MIYA COIN CLIENT [ core ] " << "\n";
 
 
 	/*
-	miya_core::MiyaCore	miyaCore;
+	core::MiyaCore	miyaCore;
 	cipher::ECDSAManager ecdsaManager;
 	std::shared_ptr<unsigned char> pemPass; size_t pemPassLength;
 	pemPassLength = miyaCore.context()->pemPass( &pemPass );
@@ -66,7 +65,7 @@ int main( int argc, const char* argv[] )
 	uint32_t nBits = 532390001; // 簡易的にマイニングの実行
 	block.header()->nBits( nBits );
 
-	uint32_t nonce = miya_chain::simpleMining( nBits , block.header() ,false );
+	uint32_t nonce = chain::simpleMining( nBits , block.header() ,false );
 	block.header()->nonce( nonce );
 	block.header()->print();
 
@@ -74,12 +73,12 @@ int main( int argc, const char* argv[] )
 	blockHashLength = block.blockHash( &blockHash );
 
 
-	miya_chain::MiyaChainManager miyaChainManager;
+	chain::MiyaChainManager miyaChainManager;
 	std::shared_ptr<StreamBufferContainer> toEKP2PBrokerDummySBC = std::make_shared<StreamBufferContainer>();
 	miyaChainManager.init( toEKP2PBrokerDummySBC );
 
 
-	std::shared_ptr<miya_chain::LightUTXOSet> utxoSet;
+	std::shared_ptr<chain::LightUTXOSet> utxoSet;
 	utxoSet = miyaChainManager.utxoSet();
 	std::shared_ptr<unsigned char> txID; size_t txIDLength;
 	txIDLength = coinbase.calcTxID( &txID );
@@ -110,7 +109,7 @@ int main( int argc, const char* argv[] )
 
   /*
 	// -------- [ 必須セットアップ ] ------------------------------------------------------------------------------------------------------
-	miya_core::MiyaCore miyaCore;
+	core::MiyaCore miyaCore;
 
 	ControlInterface interface;
 
@@ -123,14 +122,14 @@ int main( int argc, const char* argv[] )
 	selfAddressLength = cipher::ECDSAManager::toRawPubKey( pkey , &selfAddress );
 
 
-	miya_chain::MiyaChainManager miyaChainManager;
+	chain::MiyaChainManager miyaChainManager;
 	std::shared_ptr<StreamBufferContainer> toEKP2PBrokerDummySBC = std::make_shared<StreamBufferContainer>();
 	miyaChainManager.init( toEKP2PBrokerDummySBC );
 
-	std::shared_ptr<miya_chain::BlockLocalStrageManager> localStrageManager;
+	std::shared_ptr<chain::BlockLocalStrageManager> localStrageManager;
 	localStrageManager = miyaChainManager.localStrageManager();
 
-	std::shared_ptr<miya_chain::LightUTXOSet> utxoSet;
+	std::shared_ptr<chain::LightUTXOSet> utxoSet;
 	utxoSet = miyaChainManager.utxoSet();
 	// ------------------------------------------------------------------------------------------------------------------
 
@@ -190,7 +189,7 @@ int main( int argc, const char* argv[] )
 	block_0001.header()->nBits( nBits_0001 );
 	block_0001.header()->prevBlockHash( nullptr );
 	std::cout << "マイングbefore" << "\n";
-	uint32_t nonce_0001 = miya_chain::simpleMining( nBits_0001 , block_0001.header(), false );
+	uint32_t nonce_0001 = chain::simpleMining( nBits_0001 , block_0001.header(), false );
 	std::cout << "マイニングafter" << "\n";
 	block_0001.header()->nonce( nonce_0001 );
 
@@ -219,7 +218,7 @@ int main( int argc, const char* argv[] )
 	uint32_t nBits_0002 = 532390001;
 	block_0002.header()->nBits( nBits_0002 );
 	block_0002.header()->prevBlockHash( blockHash_0001 );
-	uint32_t nonce_0002 = miya_chain::simpleMining( nBits_0002 , block_0002.header(), false );
+	uint32_t nonce_0002 = chain::simpleMining( nBits_0002 , block_0002.header(), false );
 	block_0002.header()->nonce( nonce_0002 );
 
 	std::shared_ptr<unsigned char> blockHash_0002;
@@ -243,7 +242,7 @@ int main( int argc, const char* argv[] )
 	uint32_t nBits_0003 = 532390001;
 	block_0003.header()->nBits( nBits_0003 );
 	block_0003.header()->prevBlockHash( blockHash_0002 );
-	uint32_t nonce_0003 = miya_chain::simpleMining( nBits_0003 , block_0003.header(), false );
+	uint32_t nonce_0003 = chain::simpleMining( nBits_0003 , block_0003.header(), false );
 	block_0003.header()->nonce( nonce_0003 );
 
 	std::shared_ptr<unsigned char> blockHash_0003;
@@ -279,7 +278,7 @@ int main( int argc, const char* argv[] )
 	std::cout << "\n\n\n\n========================================================" << "\n";
 
 
-	miya_chain::BDVirtualChain virtuahChain( miyaChainManager.utxoSet() , localStrageManager ,std::make_shared<block::Block>(block_0001)  );
+	chain::BDVirtualChain virtuahChain( miyaChainManager.utxoSet() , localStrageManager ,std::make_shared<block::Block>(block_0001)  );
 
 
 	virtuahChain.printFilter();
@@ -334,7 +333,7 @@ int main( int argc, const char* argv[] )
 
 
 	/*
-	std::shared_ptr<miya_chain::BlockLocalStrageManager> localStrageManager;
+	std::shared_ptr<chain::BlockLocalStrageManager> localStrageManager;
 	localStrageManager = miyaChainManager.localStrageManager();
 
 
@@ -348,7 +347,7 @@ int main( int argc, const char* argv[] )
 	p2pkh_0001->calcTxID( &p2pkh_0001_ID );
 
 
-	std::shared_ptr<miya_chain::UTXO> dummyUTXO = std::make_shared<miya_chain::UTXO>( p2pkh_0001->outs().at(0) , p2pkh_0001_ID  ,0 );
+	std::shared_ptr<chain::UTXO> dummyUTXO = std::make_shared<chain::UTXO>( p2pkh_0001->outs().at(0) , p2pkh_0001_ID  ,0 );
 	std::cout << "dummy UTXO amout :: " << dummyUTXO->amount() << "\n";
 	std::cout << "dummy UTXO txID :: ";
 	for( int i=0; i<32; i++){
@@ -381,7 +380,7 @@ int main( int argc, const char* argv[] )
 	uint32_t nBits_0002 = 532390001;
 	block_0002.header()->nBits( nBits_0002 );
 	block_0002.header()->previousBlockHeaderHash( dummyPrevBlockHash );
-	uint32_t nonce_0002 = miya_chain::simpleMining( nBits_0002 , block_0002.header(), false );
+	uint32_t nonce_0002 = chain::simpleMining( nBits_0002 , block_0002.header(), false );
 	block_0002.header()->nonce( nonce_0002 );
 	block_0002.header()->print();
 
@@ -483,7 +482,7 @@ int main( int argc, const char* argv[] )
 	uint32_t nBits = 532390001; // 簡易的にマイニングの実行
 	block_0001.header()->nBits( nBits );
 	block_0001.header()->previousBlockHeaderHash( blockHash_0000 );
-	uint32_t nonce = miya_chain::simpleMining( nBits , block_0001.header() , false );
+	uint32_t nonce = chain::simpleMining( nBits , block_0001.header() , false );
 	block_0001.header()->nonce( nonce );
 	block_0001.header()->print();
 
@@ -571,7 +570,7 @@ int main( int argc, const char* argv[] )
 	dbManager.startWithLightMode( toDBSBContainer , fromDBSBContainer , localFile );
 
 
-	miya_chain::LightUTXOSet utxoSet( toDBSBContainer , fromDBSBContainer );
+	chain::LightUTXOSet utxoSet( toDBSBContainer , fromDBSBContainer );
 	// utxoSet.store( loadedP2PKH );
 
 	std::cout << "P2PKH stored" << "\n";
@@ -582,7 +581,7 @@ int main( int argc, const char* argv[] )
 
 
 
-	std::shared_ptr<miya_chain::UTXO> utxo = utxoSet.get( searchTxID , 0 );
+	std::shared_ptr<chain::UTXO> utxo = utxoSet.get( searchTxID , 0 );
 	if( utxo == nullptr )
 	{
 		std::cout << "utxo is nullptr" << "\n";
@@ -595,7 +594,7 @@ int main( int argc, const char* argv[] )
 	}
 
 
-	bool flag = loadedP2PKH->verify( std::make_shared<miya_chain::LightUTXOSet>(utxoSet) );
+	bool flag = loadedP2PKH->verify( std::make_shared<chain::LightUTXOSet>(utxoSet) );
 	if( flag ) std::cout << "verify successfully done" << "\n";
 	else std::cout << "verify failure" << "\n";
 
@@ -627,7 +626,7 @@ int main( int argc, const char* argv[] )
 	dbManager.startWithLightMode( toDBSBContainer , fromDBSBContainer , localFile );
 
 
-	miya_chain::LightUTXOSet utxoSet( toDBSBContainer , fromDBSBContainer );
+	chain::LightUTXOSet utxoSet( toDBSBContainer , fromDBSBContainer );
 	//utxoSet.store( loadedP2PKH );
 
 
@@ -674,7 +673,7 @@ int main( int argc, const char* argv[] )
 	std::shared_ptr<tx::P2PKH> importP2PKH = std::make_shared<tx::P2PKH>();
 	importP2PKH->importRawSequentially( rawTx );
 
-	importP2PKH->verify( std::make_shared<miya_chain::LightUTXOSet>(utxoSet) );
+	importP2PKH->verify( std::make_shared<chain::LightUTXOSet>(utxoSet) );
 
 
 
@@ -693,13 +692,13 @@ int main( int argc, const char* argv[] )
 	uint32_t nBits = 522300001;
 	block.header()->nBits( nBits );
 
-	uint32_t nonce = miya_chain::simpleMining( nBits , block.header() );
+	uint32_t nonce = chain::simpleMining( nBits , block.header() );
 	block.header()->nonce( nonce );
 	std::cout << block.header()->nonce() << "\n";
 	std::cout << nonce << "\n";
 	block.header()->print();
 
-	int headerFlag = miya_chain::verifyBlockHeader(  block.header() );
+	int headerFlag = chain::verifyBlockHeader(  block.header() );
 	std::cout << "header verify flag -> " << headerFlag << "\n";
 
 
@@ -709,8 +708,8 @@ int main( int argc, const char* argv[] )
 
 
 
-	miya_chain::transaction_pool_whole_unit_test();
-	//miya_chain::TransactionPool txPool;
+	chain::transaction_pool_whole_unit_test();
+	//chain::TransactionPool txPool;
 
 	return 0;
 	*/
@@ -732,8 +731,8 @@ int main( int argc, const char* argv[] )
 
 
 
-	MiyaCore miya_core;
-	miya_core.num  = 10;
+	MiyaCore core;
+	core.num  = 10;
 
 	tx::PkScript pkScript;
 	pkScript.createP2PKHScript();
