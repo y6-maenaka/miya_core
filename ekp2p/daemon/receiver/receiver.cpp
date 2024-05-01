@@ -1,7 +1,7 @@
 #include "receiver.h"
 
 
-#include "../../network/message/message.h"
+#include "../../network/message/message.hpp"
 #include "../../network/header/header.h"
 
 #include "../../network/socket_manager/socket_manager.h"

@@ -11,12 +11,10 @@
 
 #include <chain/block/block_header.h>
 #include <chain/transaction/coinbase/coinbase.hpp>
-
-#include <chain/transaction/coinbase/coinbase.hpp>
 #include <chain/transaction/p2pkh/p2pkh.h>
-#include <hash/sha_hash.h>
-
 #include <chain/utxo_set/utxo_set.h>
+
+#include <hash/sha_hash.h>
 
 
 #include <string.h>

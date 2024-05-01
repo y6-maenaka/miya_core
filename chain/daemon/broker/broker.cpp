@@ -3,7 +3,7 @@
 #include "../../../share/stream_buffer/stream_buffer.h"
 #include "../../../share/stream_buffer/stream_buffer_container.h"
 
-#include <message/message.h>
+#include <message/message.hpp>
 
 #include "../../../ekp2p/ekp2p.h"
 #include "../../../ekp2p/daemon/sender/sender.h"
@@ -88,9 +88,8 @@ void MiyaChainBrocker::setDestinationStreamBuffer( std::shared_ptr<StreamBufferC
 
 
 
-std::shared_ptr<MiyaChainMessage> MiyaChainBrocker::parseRawMiyaChainMessage( std::shared_ptr<SBSegment> fromSB )
+/* std::shared_ptr<MiyaChainMessage> MiyaChainBrocker::parseRawMiyaChainMessage( std::shared_ptr<SBSegment> fromSB )
 {
-	/*
 	std::shared_ptr<unsigned char> rawMSG; size_t rawMSGLength;
 	rawMSG = fromSB->body();
 	rawMSGLength = fromSB->bodyLength();
@@ -102,8 +101,7 @@ std::shared_ptr<MiyaChainMessage> MiyaChainBrocker::parseRawMiyaChainMessage( st
 	ret->payload( payloadHead );
 
 	return ret;
-	*/
-}
+} */
 
 
 

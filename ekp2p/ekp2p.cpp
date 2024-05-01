@@ -5,7 +5,7 @@
 //#include "./network/inband/inband_manager.h"
 #include "./network/socket_manager/socket_manager.h"
 
-#include "./network/message/message.h"
+#include "./network/message/message.hpp"
 #include "./network/header/header.h"
 
 //#include "./kademlia/kademlia_RPC/FIND_NODE.cpp"

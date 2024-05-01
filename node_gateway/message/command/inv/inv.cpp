@@ -1,9 +1,8 @@
-#include "inv.h"
+#include "inv.hpp"
 
 
 namespace chain
 {
-
 
 
 void inv::hash( std::shared_ptr<unsigned char> target )
@@ -36,7 +35,7 @@ inv::inv( std::string type , std::shared_ptr<unsigned char> fromHash )
 
 
 
-size_t MiyaChainMSG_INV::exportRaw( std::shared_ptr<unsigned char> *retRaw )
+size_t MiyaCoreMSG_INV::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 {
     size_t retRawLength = sizeof(_body._count) + (sizeof(struct inv) * _body._invVector.size() );
     *retRaw = std::shared_ptr<unsigned char>( new unsigned char[retRawLength] );
@@ -54,20 +53,20 @@ size_t MiyaChainMSG_INV::exportRaw( std::shared_ptr<unsigned char> *retRaw )
     return formatPtr;
 }
 
-void MiyaChainMSG_INV::add( struct inv target )
+void MiyaCoreMSG_INV::add( struct inv target )
 {
     _body._invVector.push_back( target );
     this->count( this->count() + 1 );
 }
 
-size_t MiyaChainMSG_INV::count()
+size_t MiyaCoreMSG_INV::count()
 {
     return static_cast<size_t>(_body._count);
 }
 
-void MiyaChainMSG_INV::__print()
+void MiyaCoreMSG_INV::__print()
 {
-    printf(" .... %s .... \n" , MiyaChainMSG_INV::command );
+    printf(" .... %s .... \n" , MiyaCoreMSG_INV::command );
 
     int i=0;
     for( int i=0; i<_body._invVector.size(); i++ ){
@@ -80,15 +79,12 @@ void MiyaChainMSG_INV::__print()
     }
 }
 
-
-
-
-void MiyaChainMSG_INV::count( size_t count )
+void MiyaCoreMSG_INV::count( size_t count )
 {
     _body._count = static_cast<uint32_t>( count );
 }
 
-void MiyaChainMSG_INV::addTx( std::shared_ptr<unsigned char> hash )
+void MiyaCoreMSG_INV::addTx( std::shared_ptr<unsigned char> hash )
 {
     struct inv target = inv( static_cast<unsigned short>(TypeID::MSG_TX), hash );
     // target._typeID = static_cast<unsigned short>(TypeID::MSG_TX);
@@ -97,7 +93,7 @@ void MiyaChainMSG_INV::addTx( std::shared_ptr<unsigned char> hash )
 }
 
 
-void MiyaChainMSG_INV::addBlock( std::shared_ptr<unsigned char> hash )
+void MiyaCoreMSG_INV::addBlock( std::shared_ptr<unsigned char> hash )
 {
     struct inv target = inv( static_cast<unsigned short>(TypeID::MSG_BLOCK) , hash );
     // target._typeID = static_cast<unsigned short>(TypeID::MSG_BLOCK);
@@ -106,7 +102,7 @@ void MiyaChainMSG_INV::addBlock( std::shared_ptr<unsigned char> hash )
 }
 
 
-std::vector<struct inv> MiyaChainMSG_INV::invVector()
+std::vector<struct inv> MiyaCoreMSG_INV::invVector()
 {
     return _body._invVector;
 }

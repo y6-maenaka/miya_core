@@ -18,15 +18,33 @@
 #include <unistd.h>
 #include <map>
 
-#include "./BDBCB.h"
-#include "../block_chain_iterator/block_chain_iterator.h"
-#include "./bd_filter.h"
+#include <chain/chain_manager.h>
 
-#include "./block_hash_as_key.h"
-#include "./prev_block_hash_as_key.h"
+#include <chain/block_chain_iterator/block_chain_iterator.h>
+#include <chain/chain_sync_manager/BDBCB.h>
+#include <chain/chain_sync_manager/bd_filter.h>
+#include <chain/chain_sync_manager/block_hash_as_key.h>
+#include <chain/chain_sync_manager/prev_block_hash_as_key.h>
+#include <chain/chain_sync_manager/virtual_header_sync_manager.h>
+#include <chain/chain_sync_manager/virtual_header_subchain.h>
+#include <chain/chain_sync_manager/virtual_block_sync_manager.h>
 
-#include <node_gateway/message/message.h>
-#include <node_gateway/message/command/command_set.h>
+
+#include <node_gateway/message/message.hpp>
+#include <node_gateway/message/command/command_set.hpp>
+
+#include <stream_buffer/stream_buffer.h>
+#include <stream_buffer/stream_buffer_container.h>
+
+#include <chain/daemon/broker/broker.h>
+#include <chain/daemon/requester/requester.h>
+
+#include <chain/block/block.h>
+#include <chain/block/block_header.h>
+#include <chain/transaction/coinbase/coinbase.hpp>
+
+#include <chain/utxo_set/utxo_set.h>
+#include <chain/miya_coin/local_strage_manager.h>
 
 
 namespace block
@@ -64,9 +82,6 @@ constexpr unsigned int ALLOWED_FORKPOINT_DECREMENTS = 4;
 
 // first: blockHash , second: ブロック管理ブロック
 using VirtualChain = std::vector< std::pair< std::shared_ptr<unsigned char>, std::shared_ptr<struct BDBCB>> >;
-using BHPoolFinder = std::function< std::shared_ptr<BlockHeader>(std::shared_ptr<unsigned char>)>;
-using PBHPoolFinder = std::function< std::vector<std::shared_ptr<BlockHeader>>(std::shared_ptr<unsigned char>)>;
-
 
 enum class ChainSyncManagerState : int
 {

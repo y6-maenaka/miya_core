@@ -1,7 +1,7 @@
 #include "socket_manager.h"
 
 #include "../../kademlia/k_node.h"
-#include "../../network/message/message.h"
+#include "../../network/message/message.hpp"
 #include "../../network/header/header.h"
 
 

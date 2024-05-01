@@ -14,7 +14,7 @@
 
 #include "../../../share/stream_buffer/stream_buffer.h"
 
-#include <node_gateway/message/message.h>
+#include <node_gateway/message/message.hpp>
 
 
 struct SBSegment;

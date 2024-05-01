@@ -11,7 +11,7 @@ set( basic_include_files
 	  include/hash.hpp
 	  include/utils.hpp
 )
-set( basic_source_files 
+set( basic_source_files
 	  src/utils.cpp
 )
 set( ss_p2p_include_files
@@ -63,7 +63,7 @@ set( ss_p2p_kademlia_source_files
 	direct_routing_table_controller.cpp
 	connection_maintainer.cpp
 )
-set( ss_p2p_ice_agent_include_files 
+set( ss_p2p_ice_agent_include_files
 	ice_agent.hpp
 	ice_observer.hpp
 	ice_observer_strage.hpp
@@ -72,7 +72,7 @@ set( ss_p2p_ice_agent_include_files
 	ice_message.hpp
 	ice_sender.hpp
 )
-set( ss_p2p_ice_agent_source_files 
+set( ss_p2p_ice_agent_source_files
 	ice_agent.cpp
 	ice_observer.cpp
 	ice_observer_strage.cpp

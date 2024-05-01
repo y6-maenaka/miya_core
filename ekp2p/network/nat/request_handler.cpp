@@ -3,7 +3,7 @@
 #include "../../../share/stream_buffer/stream_buffer.h"
 #include "../../../share/stream_buffer/stream_buffer_container.h"
 
-#include "./stun_message.h"
+#include "./stun_message.hpp"
 #include "../../ekp2p.h"
 #include "../../daemon/sender/sender.h"
 

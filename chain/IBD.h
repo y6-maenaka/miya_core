@@ -12,15 +12,12 @@
 #include <cassert>
 #include <chrono>
 
-#include <node_gateway/message/message.h>
-#include <node_gateway/message/command/command_set.h>
+#include <node_gateway/message/message.hpp>
+#include <node_gateway/message/command/command_set.hpp>
 
 
 namespace chain
 {
-
-
-
 
 
 };

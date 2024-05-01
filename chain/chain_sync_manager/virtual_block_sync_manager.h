@@ -12,8 +12,8 @@
 #include <mutex>
 #include <array>
 
-#include <node_gateway/message/message.h>
-#include <node_gateway/message/command/inv/inv.h>
+#include <node_gateway/message/message.hpp>
+#include <node_gateway/message/command/inv/inv.hpp>
 
 #include <chain/chain_sync_manager/virtual_block.h>
 
@@ -110,7 +110,7 @@ private:
   unsigned int sendElapsedTime() const; // 最終リクエスト送信経過時間 最後にリクエストコマンドを送信してからの経過時間(s)
   
 protected:
-  std::pair< MiyaChainCommand, const char* > downloadCommand(); // 受信済みブロックを考慮してブロックリクエストコマンドを生成する
+  std::pair< miya_core_command, const char* > downloadCommand(); // 受信済みブロックを考慮してブロックリクエストコマンドを生成する
   void sendRequestSyncedCommand(); // windowの状態に従ってリクエストコマンドを送信する
  
   bool downloadWindow( int allowedRetransmissionCount = ALLOWED_RETRANSMISSION_COUNT ); // (segment設定済みのwindowの内セグメントのダウンロードを完了させる) ダウンロードが終了するまでブロッキングする

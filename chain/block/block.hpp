@@ -9,6 +9,9 @@ namespace chain
 {
 
 
+constexpr unsigned int BLOCK_HASH_BITS_LENGTH = 256;
+
+
 struct block // 今後はこっちを使う
 {
 public:

@@ -1,6 +1,6 @@
 #include "node_1.h"
 
-#include "../../ekp2p/network/message/message.h"
+#include "../../ekp2p/network/message/message.hpp"
 #include "../../ekp2p/network/header/header.h"
 
 #include "../../ekp2p/network/socket_manager/socket_manager.h"

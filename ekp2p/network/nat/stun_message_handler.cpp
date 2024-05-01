@@ -1,6 +1,6 @@
-// #include "../message/message.h"
+// #include "../message/message.hpp"
 
-#include "./stun_message.h"
+#include "./stun_message.hpp"
 #include "../inband/inband_manager.h"
 
 namespace ekp2p

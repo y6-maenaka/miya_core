@@ -1,9 +1,5 @@
 #include "virtual_header_sync_manager.h"
 
-#include "./virtual_header_subchain.h"
-#include "./virtual_header_sync_manager.h"
-
-
 namespace chain
 {
 

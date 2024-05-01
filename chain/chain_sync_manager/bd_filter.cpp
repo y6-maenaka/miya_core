@@ -23,7 +23,7 @@ std::shared_ptr<struct BDBCB> BDFilter::filter( std::shared_ptr<unsigned char> t
   {
 	std::shared_ptr<struct BDBCB> newValue = std::shared_ptr<struct BDBCB>( new BDBCB(target) );
 	auto insertRet = _filter.insert( { key , newValue } );
-	if( insertRet.second ) return newValue; 
+	if( insertRet.second ) return newValue;
 	else return nullptr;
   }
   else if( findRet == _filter.end() && isReject ) return nullptr; // isRejectがtrueの場合は追加しない
@@ -44,7 +44,7 @@ std::shared_ptr<struct BDBCB> BDFilter::filter( std::shared_ptr<Block> target , 
 	std::shared_ptr<struct BDBCB> newValue = std::shared_ptr<struct BDBCB>( new BDBCB(target) );
 	auto insertRet = _filter.insert( {key, newValue});
 	if( insertRet.second ) return newValue; // 挿入に成功した場合
-	else return nullptr; 
+	else return nullptr;
   }
   else if( findRet == _filter.end() && isReject ) return nullptr;
 

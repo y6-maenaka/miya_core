@@ -13,9 +13,8 @@
 #include <ctime>
 #include <chrono>
 
-#include <node_gateway/message/message.h>
-#include <node_gateway/message/command/getblocks.h>
-#include "./chain_sync_manager.h"
+#include <node_gateway/message/message.hpp>
+#include <node_gateway/message/command/getblocks.hpp>
 
 #include <hash/sha_hash.h>
 
@@ -38,6 +37,10 @@ namespace chain
 
 constexpr unsigned short STATE_HASH_LENGTH = (160 / 8);
 constexpr unsigned short SUBCHAIN_LIFETIME = 7;
+
+
+using BHPoolFinder = std::function< std::shared_ptr<BlockHeader>(std::shared_ptr<unsigned char>)>;
+using PBHPoolFinder = std::function< std::vector<std::shared_ptr<BlockHeader>>(std::shared_ptr<unsigned char>)>;
 
 
 class VirtualHeaderSubChain
@@ -82,7 +85,7 @@ public:
   uint32_t updatedAt() const;
   void build( std::shared_ptr<BlockHeader> latestBlockHeader );
   bool extend( int collisionAction = 0 ); // stopHashのチェーンに達したら延長を打ち切る
-  MiyaChainMSG_GETBLOCKS extendCommand(); // 本サブチェーンにつながるようなブロックリクエストコマンドを発行する
+  MiyaCoreMSG_GETBLOCKS extendCommand(); // 本サブチェーンにつながるようなブロックリクエストコマンドを発行する
 
   std::vector< std::shared_ptr<BlockHeader> > exportChainVector(); // latestBlockHeaderから遡ってチェーンを生成する
 

@@ -2,19 +2,15 @@
 #define B3C13BE4_E4A4_496E_971D_400E0D09945A
 
 
-#include "./base_command.h"
-
-
 namespace chain
 {
-
 
 /*
   ブロックのある地点からのブロックヘッダを提供するheadersメッセージを要求するメッセージ
 */
 
 
-struct MiyaChainMSG_GETHEADERS
+struct MiyaCoreMSG_GETHEADERS
 {
 private:
   struct __attribute__((packed))
@@ -30,7 +26,6 @@ public:
 
 	size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
 	bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );
-
 
 };
 

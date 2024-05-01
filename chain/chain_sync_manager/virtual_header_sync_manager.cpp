@@ -1,14 +1,5 @@
 #include "virtual_header_sync_manager.h"
 
-#include "./virtual_header_subchain.h"
-#include "../block/block.h"
-
-#include "../../share/stream_buffer/stream_buffer.h"
-#include "../../share/stream_buffer/stream_buffer_container.h"
-
-#include "../chain_manager.h"
-#include "../../ekp2p/daemon/sender/sender.h"
-
 
 namespace chain
 {
@@ -48,7 +39,8 @@ VirtualHeaderSyncManager::VirtualHeaderSyncManager( std::shared_ptr<BlockHeader>
 
 void VirtualHeaderSyncManager::sendRequestSyncedCommand()
 {
-  std::vector< MiyaChainMSG_GETBLOCKS > extendCommandVector;
+  /*
+  std::vector< MiyaCoreMSG_GETBLOCKS > extendCommandVector;
   for( auto itr : _headerSubchainSet )
   {
 	if( itr.isActive() )
@@ -57,12 +49,11 @@ void VirtualHeaderSyncManager::sendRequestSyncedCommand()
 
   for( auto itr : extendCommandVector )
   {
-	MiyaChainCommand command;
-	command = itr;
+	miya_core_command command(itr);
 
 	std::unique_ptr< SBSegment > requestSB = std::make_unique<SBSegment>();
 	requestSB->options.option1 = itr;
-	requestSB->options.option2 = MiyaChainMSG_GETBLOCKS::command;
+	requestSB->options.option2 = MiyaCoreMSG_GETBLOCKS::command;
 
 	requestSB->sendFlag( ekp2p::EKP2P_SEND_BROADCAST );
 	requestSB->forwardingSBCID(DEFAULT_DAEMON_FORWARDING_SBC_ID_REQUESTER);
@@ -76,6 +67,7 @@ void VirtualHeaderSyncManager::sendRequestSyncedCommand()
   }
 
   return;
+  */
 }
 
 size_t VirtualHeaderSyncManager::activeSubchainCount()
@@ -119,12 +111,12 @@ bool VirtualHeaderSyncManager::extend( bool collisionAction ) // あまり良い
   {
 	extendedVector.push_back( itr );
   }
-  
+
   for( auto && itr : extendedVector )
   {
 	if( itr.extend( collisionAction ) ) chainStopFlag = true;
   }
-  
+
   _headerSubchainSet.clear();
 
   for( auto && itr : extendedVector )
@@ -156,11 +148,11 @@ std::vector< std::shared_ptr<VirtualHeaderSubChain> > VirtualHeaderSyncManager::
   std::vector< std::shared_ptr<VirtualHeaderSubChain> > ret;
   for( auto itr : _headerSubchainSet )
 	ret.push_back( std::make_shared<VirtualHeaderSubChain>(itr) );
-  
+
   return ret;
 }
 
-std::shared_ptr<VirtualHeaderSubChain> VirtualHeaderSyncManager::stopedHeaderSubchain() 
+std::shared_ptr<VirtualHeaderSubChain> VirtualHeaderSyncManager::stopedHeaderSubchain()
 {
   for( auto && itr : _headerSubchainSet ){
 	if( itr.isStoped() ) return std::make_shared<VirtualHeaderSubChain>( itr );
@@ -172,7 +164,7 @@ std::shared_ptr<VirtualHeaderSubChain> VirtualHeaderSyncManager::stopedHeaderSub
 bool VirtualHeaderSyncManager::start()
 {
   std::cout << "VirtualHeaderSyncManager::start thread started()" << "\n";
-  
+
   std::cout << "(initial) ActiveSubChainCount :: " << this->activeSubchainCount() << "\n";
   std::cout << "(initial) HeaderSyncManager State :: " << this->status() << "\n";
 
@@ -204,7 +196,7 @@ unsigned short VirtualHeaderSyncManager::subchainCount()
 void VirtualHeaderSyncManager::__printSubChainSet()
 {
   std::cout << "SubChainCount :: " << _headerSubchainSet.size() << "\n";
-  
+
   for( auto __ : _headerSubchainSet )
   {
 	VirtualHeaderSubChain subChain = __;

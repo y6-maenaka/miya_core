@@ -4,7 +4,7 @@
 #include "../../../share/stream_buffer/stream_buffer.h"
 #include "../../../share/stream_buffer/stream_buffer_container.h"
 
-#include <message/message.h>
+#include <message/message.hpp>
 #include <message/command/command_set.h>
 
 #include "../../block/block.h"
@@ -68,21 +68,21 @@ int ChainMaintainer::start()
 
 			switch( msg.commandIndex() )
 			{
-				case static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_BLOCK):
+				case static_cast<int>(MiyaCoreCommandIndex::MiyaCoreMSG_BLOCK):
 				{
-					ReceivedBlock receivedBlock{ std::get<MiyaChainMSG_BLOCK>(msg.payload()).block() };
+					ReceivedBlock receivedBlock{ std::get<MiyaCoreMSG_BLOCK>(msg.payload()).block() };
 				}
 
-				case static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_HEADERS):
+				case static_cast<int>(MiyaCoreCommandIndex::MiyaCoreMSG_HEADERS):
 				{
 				}
 
 			}
 
 
-			if( msg.commandIndex() !=  static_cast<int>(MiyaChainCommandIndex::MiyaChainMSG_BLOCK) ) continue; // BLOCKメッセージ以外は破棄する
+			if( msg.commandIndex() !=  static_cast<int>(MiyaCoreCommandIndex::MiyaCoreMSG_BLOCK) ) continue; // BLOCKメッセージ以外は破棄する
 
-			ReceivedBlock receivedBlock{ std::get<MiyaChainMSG_BLOCK>(msg.payload()).block() };
+			ReceivedBlock receivedBlock{ std::get<MiyaCoreMSG_BLOCK>(msg.payload()).block() };
 
 			// この条件一致で処理が異なる
 			if( receivedBlock.height <= _chainState->latestBlockIterator()->height() ) // receivedBlockHeightがlocalHeadHeight以下であれば自身のチェーンを優先し，無視する

@@ -15,8 +15,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include <node_gateway/message/message.h>
-#include <node_gateway/message/command/command_set.h>
+// #include <node_gateway/message/message.hpp>
+// #include <node_gateway/message/command/command_set.h>
 #include <chain/chain.hpp>
 
 #include <miya_db/miya_db/database_manager.h>

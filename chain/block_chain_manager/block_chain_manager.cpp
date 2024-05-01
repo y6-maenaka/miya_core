@@ -1,17 +1,7 @@
 #include "block_chain_manager.h"
 
-#include "../../share/stream_buffer/stream_buffer.h"
-#include "../../share/stream_buffer/stream_buffer_container.h"
-
-
-
 namespace chain
 {
-
-
-
-
-
 
 BlockChainManager::BlockChainManager( std::shared_ptr<HeaderStore> headerStore , std::shared_ptr<TransactionStore> txStore )
 {
@@ -20,25 +10,17 @@ BlockChainManager::BlockChainManager( std::shared_ptr<HeaderStore> headerStore ,
 }
 
 
-
-
 bool BlockChainManager::syncBlockHeader()
 {
 	// 最先端のブロックを取得してから自身のローカルチェーンの最先端に追いついたら同期を終了する
 
-	
 }
 
 
 
-
-	
 bool BlockChainManager::syncBlock()
 {
 }
-
-
-
 
 
 bool BlockChainManager::InitialiBlockDownload()
@@ -48,16 +30,7 @@ bool BlockChainManager::InitialiBlockDownload()
 	std::unique_ptr<SBSegment> requestSB = std::make_unique<SBSegment>();
 	_toSenderSB->pushOne( std::move(requestSB) );
 
-
-
-
 }
 
 
-
-
-
 };
-
-
-

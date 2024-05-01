@@ -7,8 +7,8 @@
 #include <iostream>
 #include <string>
 
-#include <node_gateway/message/message.h>
-#include <node_gateway/message/command/inv/inv.h>
+#include <node_gateway/message/message.hpp>
+#include <node_gateway/message/command/inv/inv.hpp>
 
 #include <chain/block/block.h>
 #include <chain/block/block_header.h>

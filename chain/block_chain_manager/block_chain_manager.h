@@ -2,41 +2,25 @@
 #define CF253308_7C86_479C_8BEE_58DCE17E283E
 
 
-
 #include <memory>
 #include <iostream>
 
 
-
-
-
-struct SBSegment;
-class StreamBuffer;
-class StreamBufferContainer;
-
-
-
-
-
-
-
+#include <stream_buffer/stream_buffer.h>
+#include <stream_buffer/stream_buffer_container.h>
 
 namespace chain
 {
 
-
-
 class HeaderStore;
 class TransactionStore;
-
-
 
 
 class BlockChainManager
 {
 
 private:
-	struct 
+	struct
 	{
 		std::shared_ptr<HeaderStore> _headerStore;
 		std::shared_ptr<TransactionStore> _txStore;
@@ -45,7 +29,7 @@ private:
 
 	std::shared_ptr<StreamBufferContainer> _toSenderSB; // ノードへのsenderパイプ
 	std::shared_ptr<StreamBufferContainer> _incomingSB; // 本ノードへのリクエストが入ってくる
-	
+
 
 public:
 	BlockChainManager( std::shared_ptr<HeaderStore> headerStore , std::shared_ptr<TransactionStore> txStore );
@@ -57,7 +41,6 @@ public:
 };
 
 
-
 };
 
 /*
@@ -66,13 +49,13 @@ public:
 	- ブロックvalidatorから通知が来たらチェーンに繋げて適切なutxoを作成する
 	- 検証済みブロックが自信が採掘しているチェーンより先を行っていたらそのチェーンを優先する
 	- wrongChainに取り込んでしまっているブロックに含まれているトランザクションをmempoolに戻す
-	- utxoも戻す 
+	- utxoも戻す
 */
 
 
 
 /* ブロックチェーンの順序はどのように保存するか */
-// >>>> chain head 
+// >>>> chain head
 // 最後に保存したchain headが不正チェーンヘッドだった場合は他ノードに問い合わせてもレスポンスがない
 
 
@@ -103,6 +86,3 @@ public:
 
 
 #endif // CF253308_7C86_479C_8BEE_58DCE17E283E
-
-
-

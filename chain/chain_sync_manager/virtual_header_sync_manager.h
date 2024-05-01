@@ -2,7 +2,6 @@
 #define A74365B0_34DD_4F8D_9C6E_F2D872B5916E
 
 
-
 #include <vector>
 #include <unordered_set>
 #include <variant>
@@ -13,8 +12,16 @@
 #include "./bd_filter.h"
 #include "./virtual_header_subchain.h"
 
-#include <node_gateway/message/message.h>
-#include <node_gateway/message/command/command_set.h>
+#include <node_gateway/message/message.hpp>
+#include <node_gateway/message/command/command_set.hpp>
+
+#include <chain/chain_manager.h>
+#include <chain/chain_sync_manager/virtual_header_subchain.h>
+#include <chain/block/block.h>
+#include <chain/chain_sync_manager/prev_block_hash_as_key.h>
+
+#include <stream_buffer/stream_buffer.h>
+#include <stream_buffer/stream_buffer_container.h>
 
 
 namespace block
@@ -96,7 +103,7 @@ private:
   int _status;
 
 protected:
-  std::pair< MiyaChainCommand , const char* > downloadCommand();
+  std::pair< miya_core_command , const char* > downloadCommand();
   void sendRequestSyncedCommand();
   size_t activeSubchainCount();
 

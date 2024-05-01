@@ -3,8 +3,8 @@
 
 #include <memory>
 
-#include <node_gateway/message/message.h>
-#include <node_gateway/message/command/getheaders.h>
+#include <node_gateway/message/message.hpp>
+#include <node_gateway/message/command/getheaders.hpp>
 
 // #include <chain/chain_sync_manager/chain_sync_manager.h>
 // #include <chain/chain_sync_manager/bd_filter.h>

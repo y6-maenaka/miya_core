@@ -1,25 +1,19 @@
-#include "getdata.h"
-
-
-
-
-
+#include "getdata.hpp"
 
 
 namespace chain
 {
 
 
-void MiyaChainMSG_GETDATA::inv( struct MiyaChainMSG_INV target )
+void MiyaCoreMSG_GETDATA::inv( struct MiyaCoreMSG_INV target )
 {
 	_inv = target;
 }
 
-void MiyaChainMSG_GETDATA::__print()
+void MiyaCoreMSG_GETDATA::__print()
 {
 	_inv.__print();
 }
-
 
 
 };

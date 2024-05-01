@@ -3,7 +3,7 @@
 #include "../../../share/stream_buffer/stream_buffer.h"
 #include "../../../share/stream_buffer/stream_buffer_container.h"
 
-#include <message/message.h>
+#include <message/message.hpp>
 #include <message/command/command_set.h>
 
 #include "../../../ekp2p/daemon/sender/sender.h"
@@ -47,25 +47,25 @@ int MiyaChainRequester::start()
 		// sb::option2 = command(名・識別子)
 
 		const char* command;
-		MiyaChainCommand commandBody;
+		MiyaCoreCommand commandBody;
 		MiyaChainMessage message;
 
 		for(;;)
 		{
 			popedSB = _incomingSBC->popOne();
-			commandBody = std::any_cast<MiyaChainCommand>(popedSB->options.option1); // MiyaCommand::command
+			commandBody = std::any_cast<MiyaCoreCommand>(popedSB->options.option1); // MiyaCommand::command
 			command = std::any_cast<const char*>(popedSB->options.option2); // command
 			message.payload( commandBody , command );
 
-			std::shared_ptr<unsigned char> rawMiyaChainMSG; size_t rawMiyaChainMSGLength;
-			rawMiyaChainMSGLength = message.exportRaw( &rawMiyaChainMSG );
+			std::shared_ptr<unsigned char> rawMiyaCoreMSG; size_t rawMiyaCoreMSGLength;
+			rawMiyaCoreMSGLength = message.exportRaw( &rawMiyaCoreMSG );
 
-			std::cout << "Raw MiyaChainMSG(" << rawMiyaChainMSGLength << ") :: ";
-			for( int i=0; i<rawMiyaChainMSGLength ; i++){
-				printf("%02X", rawMiyaChainMSG.get()[i]);
+			std::cout << "Raw MiyaCoreMSG(" << rawMiyaCoreMSGLength << ") :: ";
+			for( int i=0; i<rawMiyaCoreMSGLength ; i++){
+				printf("%02X", rawMiyaCoreMSG.get()[i]);
 			} std::cout << "\n";
 
-			popedSB->body( rawMiyaChainMSG , rawMiyaChainMSGLength );
+			popedSB->body( rawMiyaCoreMSG , rawMiyaCoreMSGLength );
 			popedSB->sendFlag( ekp2p::EKP2P_SENDBACK | ekp2p::EKP2P_SEND_UNICAST );
 
 

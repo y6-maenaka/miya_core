@@ -2,14 +2,14 @@
 
 #include "../socket_manager/socket_manager.h"
 
-#include "./stun_message.h"
+#include "./stun_message.hpp"
 
 #include "../../kademlia/k_node.h"
 //#include "../../kademlia/node.h"
 // #include "../../kademlia/k_tag.h"
 
 #include "../../network/header/header.h"
-#include "../../network/message/message.h"
+#include "../../network/message/message.hpp"
 
 #include "../../../share/json.hpp"
 #include "../../../share/stream_buffer/stream_buffer.h"

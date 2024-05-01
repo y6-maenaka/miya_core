@@ -35,7 +35,7 @@ struct inv
 };
 
 
-struct MiyaChainMSG_INV
+struct MiyaCoreMSG_INV
 {
 	struct
 	{

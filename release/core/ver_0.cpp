@@ -18,7 +18,8 @@ int main( int argc, const char* argv[] )
 
 	n_controller.start();
 
-	message_hub.start( std::bind( &core::core::on_income_message, core, std::placeholders::_1 ) ); // メッセージ受信時のコールバックを設定
+	// 要修正
+	// message_hub.start( std::bind( &core::core::broker::on_income_message, core, std::placeholders::_1 ) ); // メッセージ受信時のコールバックを設定
 
 
 	std::mutex mtx;

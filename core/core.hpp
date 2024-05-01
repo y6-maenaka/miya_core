@@ -52,23 +52,25 @@ public:
 };
 
 // MiyaCore全体統括モジュール
-class core
+class core // core class of miya_core
 {
-private:
   std::shared_ptr<io_context> _io_ctx;
   core_context _context;
 
+public:
   class broker // 受信メッセージを主要管理マネージャーに渡す
   {
-	friend class core;
-	void income_inv();
-	void income_block();
-	void income_get_blocks();
-  
-	broker( class core &p_core ) : _core(p_core){};
-	class core &_core;
-  } _broker;
+	public:
+	  void on_income_message( ss::message_pool::_message_ msg );
+	private:
+	  friend class core;
+	  void income_inv();
+	  void income_block();
+	  void income_get_blocks();
 
+	  broker( class core &p_core ) : _core(p_core){};
+	  class core &_core;
+  } _broker;
   // class chain::chain_manager _chain_manager;
 
 public:

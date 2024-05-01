@@ -102,10 +102,10 @@ unsigned int VirtualBlockSyncManager::sendElapsedTime() const
 }
 
 
-std::pair< MiyaChainCommand , const char* > VirtualBlockSyncManager::downloadCommand()
+std::pair< miya_core_command , const char* > VirtualBlockSyncManager::downloadCommand()
 {
-  MiyaChainMSG_INV inv;
-  MiyaChainMSG_GETDATA getdataCommand;
+  MiyaCoreMSG_INV inv;
+  MiyaCoreMSG_GETDATA getdataCommand;
   for( auto itr : _unChaindedWindow._segmentVector )
   {
 	if( itr.second.second == nullptr ) // ダウンロードされていないブロックを対象に
@@ -113,7 +113,7 @@ std::pair< MiyaChainCommand , const char* > VirtualBlockSyncManager::downloadCom
   }
 
   getdataCommand.inv( inv );
-  MiyaChainCommand wrapCommand = getdataCommand;
+  miya_core_command wrapCommand( getdataCommand );
 
 
   std::cout << "++++++++++++++++++++++" << "\n";
@@ -121,13 +121,13 @@ std::pair< MiyaChainCommand , const char* > VirtualBlockSyncManager::downloadCom
   inv.__print();
   std::cout << "++++++++++++++++++++++" << "\n";
 
-  return std::make_pair( wrapCommand , MiyaChainMSG_INV::command );
+  return std::make_pair( wrapCommand , MiyaCoreMSG_INV::command );
 }
 
 void VirtualBlockSyncManager::sendRequestSyncedCommand()
 {
   /*
-  std::pair< MiyaChainCommand , const char* > requestCommand = this->downloadCommand();
+  std::pair< MiyaCoreCommand , const char* > requestCommand = this->downloadCommand();
 
   std::unique_ptr< SBSegment > requestSB = std::make_unique<SBSegment>();
   requestSB->options.option1 = requestCommand.first;

@@ -140,9 +140,9 @@ bool VirtualHeaderSubChain::extend( int collisionAction )
 }
 
 
-MiyaChainMSG_GETBLOCKS VirtualHeaderSubChain::extendCommand()
+MiyaCoreMSG_GETBLOCKS VirtualHeaderSubChain::extendCommand()
 {
-  MiyaChainMSG_GETBLOCKS ret;
+  MiyaCoreMSG_GETBLOCKS ret;
 
   std::shared_ptr<unsigned char> latestBlockHash = this->_context.latestBlockHash();
   ret.startHash( latestBlockHash );

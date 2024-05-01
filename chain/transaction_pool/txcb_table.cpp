@@ -7,7 +7,6 @@ namespace chain
 {
 
 
-
 TxCBTable::TxCBTable( unsigned int layer ) : _layer(layer)
 {
 	// 配下に1-Fまでのシンボルを持つbucketをTxCBBucketを作成する
@@ -22,16 +21,10 @@ TxCBTable::TxCBTable( unsigned int layer ) : _layer(layer)
 }
 
 
-
 unsigned int TxCBTable::layer()
 {
 	return _layer;
 }
-
-
-
-
-
 
 /*
 void TxCBTable::bucketTableList( void* target , int type ,int index )
@@ -49,16 +42,11 @@ void TxCBTable::txContainer( size_t index , TxCBContainer target )
 }
 
 
-
-
 int TxCBTable::add( std::shared_ptr<TxCB> target )
 {
-
 	unsigned char targetByte = target->txID().get()[ (_layer / 2) ]; // シンボルの対象インデックスを求める
 	unsigned char targetSymbol = (( _layer % 2 ) == 0) ? ( (targetByte & 0xf0 ) >> 4 ) : (targetByte & 0x0f);
 	size_t targetIndex = static_cast<size_t>( targetSymbol );
-
-
 
 	auto targetBucket{ std::get_if<std::shared_ptr<TxCBBucket>>( &(_containerArray.at(targetIndex))) }; // 配下にバケットが配置されている場合
 	if( targetBucket )
@@ -67,17 +55,15 @@ int TxCBTable::add( std::shared_ptr<TxCB> target )
 		return (*targetBucket)->add( target );
 	}
 
-	
 	auto targetTable{ std::get_if<std::shared_ptr<TxCBTable>>( &(_containerArray.at(targetIndex))) }; // 配下にさらにテーブルが配置されている場合
 	if( targetTable )
 	{
 		std::cout << "\x1b[34m" << "TxCBTable::add() 配下Table 再帰追加" << "\x1b[39m" << "\n";
 		return (*targetTable)->add( target );
 	}
-
 	/*
 	// 対象リストの要素がバケットの場合単純追加する 
-	if( _bucketTableList.at(static_cast<unsigned int>(targetSymbol)).second == 1  )	
+	if( _bucketTableList.at(static_cast<unsigned int>(targetSymbol)).second == 1  )
 		return static_cast<TxCBBucket*>((_bucketTableList.at(static_cast<unsigned int>(targetSymbol))).first)->add( target );
 
 	// 対象のリスト要素がテーブルの場合は再起的に追加
@@ -89,16 +75,11 @@ int TxCBTable::add( std::shared_ptr<TxCB> target )
 }
 
 
-
-
 std::shared_ptr<TxCB> TxCBTable::find( std::shared_ptr<TxCB> target )
 {
 	unsigned char targetByte = target->txID().get()[ (_layer / 2) ]; // シンボルの対象インデックスを求める
 	unsigned char targetSymbol = (( _layer % 2 ) == 0) ? ( (targetByte & 0xf0 ) >> 4 ) : (targetByte & 0x0f);
 	size_t targetIndex = static_cast<size_t>( targetSymbol );
-
-
-
 
 	auto targetBucket{ std::get_if<std::shared_ptr<TxCBBucket>>( &(_containerArray.at(targetIndex))) }; // 配下にバケットが配置されている場合
 	if( targetBucket )
@@ -107,7 +88,6 @@ std::shared_ptr<TxCB> TxCBTable::find( std::shared_ptr<TxCB> target )
 		return (*targetBucket)->find( target );
 	}
 
-	
 	auto targetTable{ std::get_if<std::shared_ptr<TxCBTable>>( &(_containerArray.at(targetIndex))) }; // 配下にさらにテーブルが配置されている場合
 	if( targetTable )
 	{
@@ -115,11 +95,9 @@ std::shared_ptr<TxCB> TxCBTable::find( std::shared_ptr<TxCB> target )
 		return (*targetTable)->find( target );
 	}
 
-
-
-	/*	
+	/*
 	// ( _bucketTableList[static_cast<unsigned int>(targetSymbol)].second ) == 1 ; ->対象はテーブル -> 再帰的に検索する
-	if( _bucketTableList.at(static_cast<unsigned int>(targetSymbol)).second == 1  )	
+	if( _bucketTableList.at(static_cast<unsigned int>(targetSymbol)).second == 1  )
 		return static_cast<TxCBBucket*>((_bucketTableList.at(static_cast<unsigned int>(targetSymbol))).first)->find( target );
 
 
@@ -131,9 +109,6 @@ std::shared_ptr<TxCB> TxCBTable::find( std::shared_ptr<TxCB> target )
 	return nullptr;
 }
 
-
-
-
 std::shared_ptr<TxCBBucket> TxCBTable::findBucket( std::shared_ptr<TxCB> target )
 {
 	unsigned char targetByte = target->txID().get()[ (_layer / 2) ];
@@ -142,7 +117,7 @@ std::shared_ptr<TxCBBucket> TxCBTable::findBucket( std::shared_ptr<TxCB> target 
 
 	/*
 	// ( _bucketTableList[static_cast<unsigned int>(targetSymbol)].second ) == 1 ; ->対象はテーブル -> 再帰的に検索する
-	if( _bucketTableList.at(static_cast<unsigned int>(targetSymbol)).second == 1  )	
+	if( _bucketTableList.at(static_cast<unsigned int>(targetSymbol)).second == 1  )
 		return std::make_shared<TxCBBucket>( *(static_cast<TxCBBucket*>((_bucketTableList.at(static_cast<unsigned int>(targetSymbol))).first)) );
 
 
@@ -153,10 +128,6 @@ std::shared_ptr<TxCBBucket> TxCBTable::findBucket( std::shared_ptr<TxCB> target 
 
 	return nullptr;
 }
-
-
-
-
 
 void TxCBTable::remove( std::shared_ptr<TxCB> target )
 {
@@ -172,7 +143,7 @@ void TxCBTable::remove( std::shared_ptr<TxCB> target )
 		return (*targetBucket)->remove( target );
 	}
 
-	
+
 	auto targetTable{ std::get_if<std::shared_ptr<TxCBTable>>( &(_containerArray.at(targetIndex))) }; // 配下にさらにテーブルが配置されている場合
 	if( targetTable )
 	{
@@ -181,16 +152,13 @@ void TxCBTable::remove( std::shared_ptr<TxCB> target )
 	}
 }
 
-
-
-
 void TxCBTable::printTable()
 {
 	for( int i=0; i<16; i++ )
 	{
-		
+
 		auto targetBucket{ std::get_if<std::shared_ptr<TxCBBucket>>( &(_containerArray.at(i))) }; // 配下にバケットが配置されている場合
-		if( targetBucket )	
+		if( targetBucket )
 		{
 			printf("|%d| Bucket\n", i );
 			continue;
@@ -202,6 +170,4 @@ void TxCBTable::printTable()
 	}
 }
 
-
 };
-
