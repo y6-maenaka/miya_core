@@ -15,7 +15,7 @@
 #include <ss_p2p/message_pool.hpp>
 #include <chain/chain_manager.h>
 #include <chain/chain.hpp>
-#include <crypto_utils/w_sha/sha.h>
+#include <crypto_utils/w_sha/sha.hpp>
 #include "../share/json.hpp"
 #include "boost/asio.hpp"
 

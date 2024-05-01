@@ -59,7 +59,7 @@ int virtual_chain_p2()
   std::shared_ptr<tx::P2PKH> p2pkh_0000 = nullptr;
   auto created_p2pkh = CreateTxFromJsonFile( "../control_interface/tx_origin/payment_tx_info_0003.json" , controlInterface , ecdsaManager );
   if( created_p2pkh.first ) p2pkh_0000 = created_p2pkh.second;
-  std::shared_ptr<tx::Coinbase> coinbase_0000 = CreateCoinbase(3, "HelloWorld3" , pubKeyHash , miyaCore->context() );
+  std::shared_ptr<tx::coinbase> coinbase_0000 = CreateCoinbase(3, "HelloWorld3" , pubKeyHash , miyaCore->context() );
 
   std::shared_ptr<block::Block> block_0000 = std::shared_ptr<block::Block>( new block::Block{} );
   block_0000->coinbase( coinbase_0000 );
@@ -86,7 +86,7 @@ int virtual_chain_p2()
   std::shared_ptr<tx::P2PKH> p2pkh_0001 = nullptr;
   created_p2pkh = CreateTxFromJsonFile( "../control_interface/tx_origin/payment_tx_info_0004.json" , controlInterface , ecdsaManager );
   if( created_p2pkh.first ) p2pkh_0001 = created_p2pkh.second;
-  std::shared_ptr<tx::Coinbase> coinbase_0001 = CreateCoinbase(4, "HelloWorld4" , pubKeyHash , miyaCore->context() );
+  std::shared_ptr<tx::coinbase> coinbase_0001 = CreateCoinbase(4, "HelloWorld4" , pubKeyHash , miyaCore->context() );
 
   std::shared_ptr<block::Block> block_0001 = std::shared_ptr<block::Block>( new block::Block{} );
   block_0001->coinbase( coinbase_0001 );
@@ -112,7 +112,7 @@ int virtual_chain_p2()
   std::shared_ptr<tx::P2PKH> p2pkh_0002 = nullptr;
   created_p2pkh = CreateTxFromJsonFile( "../control_interface/tx_origin/payment_tx_info_0005.json" , controlInterface , ecdsaManager );
   if( created_p2pkh.first ) p2pkh_0002 = created_p2pkh.second;
-  std::shared_ptr<tx::Coinbase> coinbase_0002 = CreateCoinbase( 5, "HelloWorld5" , pubKeyHash , miyaCore->context() );
+  std::shared_ptr<tx::coinbase> coinbase_0002 = CreateCoinbase( 5, "HelloWorld5" , pubKeyHash , miyaCore->context() );
 
   std::shared_ptr<block::Block> block_0002 = std::shared_ptr<block::Block>( new block::Block{} );
   block_0002->coinbase( coinbase_0002 );

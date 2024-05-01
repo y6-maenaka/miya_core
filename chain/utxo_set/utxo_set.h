@@ -24,7 +24,7 @@ class MiyaDBSBClient;
 namespace tx
 {
 	struct P2PKH;
-	struct Coinbase;
+	struct coinbase;
 	struct TxOut;
 	struct PrevOut;
 }
@@ -61,13 +61,12 @@ public:
 	std::shared_ptr<UTXO> get( std::shared_ptr<tx::PrevOut> prevOut );
 
 	bool add( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_ptr<unsigned char> txID, uint32_t index );
-	bool add( std::shared_ptr<tx::Coinbase> targetCoinbase );
+	bool add( std::shared_ptr<tx::coinbase> targetCoinbase );
 	bool add( std::shared_ptr<UTXO>  target );
 
 	bool remove( std::shared_ptr<unsigned char> txID , uint32_t index );
 
 	void testInquire( std::shared_ptr<unsigned char> data , size_t dataLength );
-
 };
 
 

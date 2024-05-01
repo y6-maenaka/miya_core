@@ -127,10 +127,10 @@
 	/* ジェネシスブロックの作成 */
 	std::shared_ptr<unsigned char> coinbaseText = std::shared_ptr<unsigned char>( new unsigned char[43] );
 	memcpy( coinbaseText.get(), "(FRB) keeps policy interest rates unchanged" , 43 );
-	tx::Coinbase coinbase( 0 , coinbaseText , 43 , rawPubKeyHash, miyaCore.context() );
+	tx::coinbase coinbase( 0 , coinbaseText , 43 , rawPubKeyHash, miyaCore.context() );
 
 	block::Block block;
-	block.coinbase( std::make_shared<tx::Coinbase>(coinbase) );
+	block.coinbase( std::make_shared<tx::coinbase>(coinbase) );
 	std::shared_ptr<unsigned char> merkleRoot; size_t merkleRootLength;
 	merkleRootLength = block.calcMerkleRoot( &merkleRoot );
 	block.header()->merkleRoot( merkleRoot );

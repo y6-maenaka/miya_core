@@ -1,4 +1,8 @@
-#include "block_header.h"
+#include "block_header.h" // temp
+#include "block_header.hpp"
+
+
+using namespace cu;
 
 
 namespace chain
@@ -212,6 +216,67 @@ bool BlockHeader::cmpPrevBlockHash( std::shared_ptr<unsigned char> target )
 {
 	return (memcmp( _previousBlockHeaderHash , target.get() , sizeof(_previousBlockHeaderHash) ) == 0);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+block_header::header_hash block_header::get_header_hash() const
+{
+  std::size_t header_hash_length; 
+  std::shared_ptr<unsigned char> header_hash;
+
+  if( std::vector<std::uint8_t> md = w_sha::hash( &_meta, sizeof(_meta), w_sha::hash_t::SHA1 ); md.size() == (BLOCK_HASH_BYTES_LENGTH) )
+  {
+	block_header::header_hash ret; 
+	std::copy( md.begin(), md.end(), ret.begin() );
+	return ret;
+  }
+  else{
+	block_header::header_hash ret;
+	std::fill( ret.begin(), ret.end(), 0xff ); // 衝突する可能性あり(限りなく低いが)
+	return ret;
+  }
+}
+
+std::vector<std::uint8_t> block_header::export_to_binary() const
+{
+  std::array< std::uint8_t, sizeof(_meta) > ret_a;
+  std::memcpy( ret_a.data(), &_meta, sizeof(_meta) );
+
+  return std::vector<std::uint8_t>( ret_a.begin(), ret_a.end() );
+}
+
+std::uint32_t block_header::get_time() const
+{
+  return _meta._time;
+}
+
+std::uint32_t block_header::get_nonce() const
+{
+  return _meta._nonce;
+}
+
+#if DEBUG
+void block_header::print_binary() const
+{
+  unsigned char temp[ sizeof(_meta) ]; std::memcpy( temp, &_meta, sizeof(_meta) );
+  for( int i=0; i<sizeof(_meta); i++ ) printf("%02X", temp[i] );
+  std::cout << "\n";
+}
+#endif
 
 
 };

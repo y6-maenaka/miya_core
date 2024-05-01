@@ -3,23 +3,29 @@
 
 
 #include <array>
+#include <vector>
+
+#include <chain/block/block_header.hpp>
+#include <chain/transaction/p2pkh/p2pkh.h>
+#include <chain/transaction/coinbase/coinbase.hpp>
 
 
 namespace chain
 {
 
 
-constexpr unsigned int BLOCK_HASH_BITS_LENGTH = 256;
-
-
 struct block // 今後はこっちを使う
 {
 public:
-  using block_hash = std::array< std::uint8_t, BLOCK_HASH_BITS_LENGTH/8>;
+  using block_hash = block_header::header_hash;
+
+  block_hash get_block_hash() const; 
+  std::vector<std::uint8_t> export_to_binary() const;
 
 private:
-  // class block_header _header;
-  // struct tx::Coinbase _coinbase;
+  class block_header _header;
+  std::vector< struct tx::P2PKH > _tx_v; // transactions
+  struct tx::coinbase _coinbase;
 };
 
 

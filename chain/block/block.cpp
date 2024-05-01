@@ -1,4 +1,5 @@
 #include "block.h"
+#include "block.hpp"
 // #include "block.hpp"
 
 
@@ -18,7 +19,7 @@ void Block::header( std::shared_ptr<BlockHeader> target )
 	_header = target;
 }
 
-std::shared_ptr<tx::Coinbase> Block::coinbase()
+std::shared_ptr<tx::coinbase> Block::coinbase()
 {
 	return _coinbase;
 }
@@ -29,9 +30,9 @@ std::vector< std::shared_ptr<tx::P2PKH> > Block::txVector()
 	return _txVector;
 }
 
-void Block::coinbase( std::shared_ptr<tx::Coinbase> coinbase )
+void Block::coinbase( std::shared_ptr<tx::coinbase> coinbase )
 {
-	_coinbase = coinbase;
+  _coinbase = coinbase;
 }
 
 
@@ -199,6 +200,26 @@ void Block::__printPrevBlockHash()
 	} std::cout << "\n";
 }
 #endif
+
+
+
+
+
+
+
+
+
+block::block_hash block::get_block_hash() const
+{
+  return _header.get_header_hash();
+}
+
+std::vector<std::uint8_t> block::export_to_binary() const
+{
+  std::vector<std::uint8_t> block_header_binary = _header.export_to_binary();
+
+  // return ret;
+}
 
 
 };

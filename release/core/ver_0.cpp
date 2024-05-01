@@ -55,10 +55,10 @@ int main( int argc, const char* argv[] )
 	// ジェネシスブロックの作成
 	std::shared_ptr<unsigned char> coinbaseText = std::shared_ptr<unsigned char>( new unsigned char[43] );
 	memcpy( coinbaseText.get(), "(FRB) keeps policy interest rates unchanged" , 43 );
-	tx::Coinbase coinbase( 0 , coinbaseText , 43 , rawPubKeyHash, miyaCore.context() );
+	tx::coinbase coinbase( 0 , coinbaseText , 43 , rawPubKeyHash, miyaCore.context() );
 
 	block::Block block;
-	block.coinbase( std::make_shared<tx::Coinbase>(coinbase) );
+	block.coinbase( std::make_shared<tx::coinbase>(coinbase) );
 	std::shared_ptr<unsigned char> merkleRoot; size_t merkleRootLength;
 	merkleRootLength = block.calcMerkleRoot( &merkleRoot );
 	block.header()->merkleRoot( merkleRoot );
@@ -168,11 +168,11 @@ int main( int argc, const char* argv[] )
 
 	std::shared_ptr<unsigned char> coinbase_0001_text = std::shared_ptr<unsigned char>( new unsigned char[10] );
 	memcpy( coinbase_0001_text.get() , "HelloWorld" , 10 );
-	tx::Coinbase coinbase_0001( 0 , coinbase_0001_text , 10 , selfAddress , miyaCore.context() );
+	tx::coinbase coinbase_0001( 0 , coinbase_0001_text , 10 , selfAddress , miyaCore.context() );
 
 
 	block::Block block_0001;
-	block_0001.coinbase( std::make_shared<tx::Coinbase>(coinbase_0001) );
+	block_0001.coinbase( std::make_shared<tx::coinbase>(coinbase_0001) );
 	block_0001.add( p2pkh_0001 );
 
 	std::cout << "チェックポイント" << "\n";
@@ -209,9 +209,9 @@ int main( int argc, const char* argv[] )
 	p2pkh_0002->sign();
 	std::shared_ptr<unsigned char> coinbase_0002_text = std::shared_ptr<unsigned char>( new unsigned char[11] );
 	memcpy( coinbase_0002_text.get() , "HelloWorld2", 11 );
-	tx::Coinbase coinbase_0002( 1 , coinbase_0002_text , 11 , selfAddress , miyaCore.context() );
+	tx::coinbase coinbase_0002( 1 , coinbase_0002_text , 11 , selfAddress , miyaCore.context() );
 	block::Block block_0002;
-	block_0002.coinbase( std::make_shared<tx::Coinbase>(coinbase_0002) );
+	block_0002.coinbase( std::make_shared<tx::coinbase>(coinbase_0002) );
 	block_0002.add( p2pkh_0002 );
 	std::shared_ptr<unsigned char> merkleRoot_0002; size_t merkleRoot_0002Length;
 	merkleRoot_0002Length = block_0002.calcMerkleRoot( &merkleRoot_0002 );
@@ -233,9 +233,9 @@ int main( int argc, const char* argv[] )
 	p2pkh_0003->sign();
 	std::shared_ptr<unsigned char> coinbase_0003_text = std::shared_ptr<unsigned char>( new unsigned char[11] );
 	memcpy( coinbase_0003_text.get() , "HelloWorld3", 11 );
-	tx::Coinbase coinbase_0003( 2 , coinbase_0003_text , 11 , selfAddress , miyaCore.context() );
+	tx::coinbase coinbase_0003( 2 , coinbase_0003_text , 11 , selfAddress , miyaCore.context() );
 	block::Block block_0003;
-	block_0003.coinbase( std::make_shared<tx::Coinbase>(coinbase_0003) );
+	block_0003.coinbase( std::make_shared<tx::coinbase>(coinbase_0003) );
 	block_0003.add( p2pkh_0003 );
 	std::shared_ptr<unsigned char> merkleRoot_0003; size_t merkleRoot_0003Length;
 	merkleRoot_0003Length = block_0003.calcMerkleRoot( &merkleRoot_0003 );
@@ -364,10 +364,10 @@ int main( int argc, const char* argv[] )
 	std::cout << "p2pkh_0002 txout count :: " << p2pkh_0002->outCount() << "\n";
 	std::shared_ptr<unsigned char> coinbase_0002Text = std::shared_ptr<unsigned char>( new unsigned char[10] );
 	memcpy( coinbase_0002Text.get() , "HelloWorld", 10 );
-	tx::Coinbase coinbase_0002( 2 , coinbase_0002Text , 10 , selfAddress , miyaCore.context() );
+	tx::coinbase coinbase_0002( 2 , coinbase_0002Text , 10 , selfAddress , miyaCore.context() );
 
 	block::Block block_0002;
-	block_0002.coinbase( std::make_shared<tx::Coinbase>(coinbase_0002) );
+	block_0002.coinbase( std::make_shared<tx::coinbase>(coinbase_0002) );
 	block_0002.add( p2pkh_0001 );
 	block_0002.add( p2pkh_0002 );
 
@@ -472,10 +472,10 @@ int main( int argc, const char* argv[] )
 	// block_2 のcoinbase作成
 	std::shared_ptr<unsigned char> coinbase_0001Text = std::shared_ptr<unsigned char>( new unsigned char[10] );
 	memcpy( coinbase_0001Text.get() , "HelloWorld" , 10 );
-	tx::Coinbase coinbase_0001( 1 , coinbase_0001Text , 10 , selfAddress ,miyaCore.context() );
+	tx::coinbase coinbase_0001( 1 , coinbase_0001Text , 10 , selfAddress ,miyaCore.context() );
 
 	block::Block block_0001;
-	block_0001.coinbase( std::make_shared<tx::Coinbase>(coinbase_0001) );
+	block_0001.coinbase( std::make_shared<tx::coinbase>(coinbase_0001) );
 	std::shared_ptr<unsigned char> merkleRoot; size_t merkleRootLength;
 	merkleRootLength = block_0001.calcMerkleRoot( &merkleRoot );
 	block_0001.header()->merkleRoot( merkleRoot );
@@ -635,7 +635,7 @@ int main( int argc, const char* argv[] )
 
 	std::shared_ptr<unsigned char> text = std::shared_ptr<unsigned char>( new unsigned char[10] ); memcpy( text.get(), "HelloWorld", 10 );
 
-	tx::Coinbase _coinbase( 10 , text, 10 );
+	tx::coinbase _coinbase( 10 , text, 10 );
 
 
 	std::shared_ptr<unsigned char> pubKeyHash = std::shared_ptr<unsigned char>( new unsigned char[20] );
@@ -649,7 +649,7 @@ int main( int argc, const char* argv[] )
 	rawCoinbaseLength = _coinbase.exportRaw(&rawCoinbase);
 
 
-	std::shared_ptr<tx::Coinbase> loadedCoinbase = std::shared_ptr<tx::Coinbase>( new tx::Coinbase );
+	std::shared_ptr<tx::coinbase> loadedCoinbase = std::shared_ptr<tx::coinbase>( new tx::coinbase );
 	loadedCoinbase->importRawSequentially( rawCoinbase );
 
 
@@ -679,7 +679,7 @@ int main( int argc, const char* argv[] )
 
 
 	block::Block block;
-	block.coinbase( std::make_shared<tx::Coinbase>(_coinbase) );
+	block.coinbase( std::make_shared<tx::coinbase>(_coinbase) );
 	block.add( loadedP2PKH );
 	block.add( importP2PKH );
 

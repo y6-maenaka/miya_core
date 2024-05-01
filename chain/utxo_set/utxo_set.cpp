@@ -235,7 +235,7 @@ bool LightUTXOSet::add( std::shared_ptr<UTXO> target )
 
 
 
-bool LightUTXOSet::add( std::shared_ptr<tx::Coinbase> targetCoinbase )
+bool LightUTXOSet::add( std::shared_ptr<tx::coinbase> targetCoinbase )
 {
 	return false;
 }

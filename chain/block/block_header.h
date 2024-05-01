@@ -29,7 +29,7 @@
 namespace tx
 {
 	struct P2PKH;
-	struct Coinbase;
+	struct coinbase;
 }
 
 
@@ -90,40 +90,10 @@ public:
 
     bool cmpMerkleRoot( std::shared_ptr<unsigned char> target ); // ヘッダに格納されているマークルルートとの比較メソッド
 	bool cmpPrevBlockHash( std::shared_ptr<unsigned char> target );
-
 };
 
 
-class block_header
-{
-public:
-  using block_header_hash = std::array<std::uint8_t, BLOCK_HEADER_HASH_BITS_LENGTH/8>;
-  using merkle_root = std::array<std::uint8_t, MERKLE_ROOT_BITS_LENGTH/8>;
-
-private:
-  struct meta
-  {
-	std::int32_t _version;
-	block_header::block_header_hash _prev_block_hash;
-	block_header::merkle_root _merkl_root;
-	std::uint32_t _time;
-	std::uint32_t _n_bits;
-	std::uint32_t _nonce;
-  } _meta;
-
 };
-
-
-
-
-};
-
-
-
-
-
-
-
 
 
 #endif // F68D2B16_A2C5_4CF8_85CE_D3EE525C19EA

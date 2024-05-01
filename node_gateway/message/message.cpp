@@ -12,7 +12,7 @@ std::vector<std::uint8_t> miya_core_message::export_to_binary() const
   std::vector<std::uint8_t> command_binary = _command.export_to_binary();
   if( command_binary.size() <= 0 ) return std::vector<std::uint8_t>(); // if command binary is invalid
 
-  std::vector< std::uint8_t > header_binary; header_binary.reserve( sizeof(_header) );
+  std::vector< std::uint8_t > header_binary; header_binary.resize( sizeof(_header) ); // expand heaer_binary
   std::memcpy( header_binary.data(), &_header, sizeof(_header) );
 
   std::vector< std::uint8_t > ret; ret.reserve( command_binary.size() + header_binary.size() );
@@ -31,7 +31,7 @@ bool miya_core_message::import_from_binary( std::vector<std::uint8_t> from_v )
   return false;
 }
 
-miya_core_message::miya_core_message() : 
+miya_core_message::miya_core_message() :
   _is_valid( false )
   , _command( MiyaCoreMSG_NONE() )
 {

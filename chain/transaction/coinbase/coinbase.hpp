@@ -13,8 +13,6 @@
 #include "../tx/tx_out.h"
 
 
-
-
 namespace core
 {
 	struct MiyaCoreContext;
@@ -27,11 +25,11 @@ namespace tx
 
 struct TxIn;
 struct TxOut;
-struct CoinbaseTxIn;
+struct coinbaseTxIn;
 
 
 
-struct Coinbase
+struct coinbase
 {
 private:
     struct
@@ -45,8 +43,8 @@ private:
 	std::shared_ptr<core::MiyaCoreContext> _mcContext;
 
 public:
-	Coinbase( unsigned int height /*inに埋め込む*/ , std::shared_ptr<unsigned char> text , unsigned int textLength , std::shared_ptr<unsigned char> pubkeyHash , const std::shared_ptr<core::MiyaCoreContext> mcContext );
-	Coinbase();
+	coinbase( unsigned int height /*inに埋め込む*/ , std::shared_ptr<unsigned char> text , unsigned int textLength , std::shared_ptr<unsigned char> pubkeyHash , const std::shared_ptr<core::MiyaCoreContext> mcContext );
+	coinbase();
 
 	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );
 	size_t importRawSequentially( std::shared_ptr<unsigned char> from );
@@ -62,13 +60,7 @@ public:
 };
 
 
-
-
-
-
-
 };
-
 
 
 #endif

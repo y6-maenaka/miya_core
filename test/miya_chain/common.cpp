@@ -56,10 +56,10 @@ std::pair< bool , std::shared_ptr<tx::P2PKH> > CreateTxFromJsonFile( std::string
 }
 
 
-std::shared_ptr<tx::Coinbase> CreateCoinbase( unsigned int height ,std::string coinbaseText ,std::shared_ptr<unsigned char> pubKeyHash , const std::shared_ptr<core::MiyaCoreContext> mcContext )
+std::shared_ptr<tx::coinbase> CreateCoinbase( unsigned int height ,std::string coinbaseText ,std::shared_ptr<unsigned char> pubKeyHash , const std::shared_ptr<core::MiyaCoreContext> mcContext )
 {
   std::shared_ptr<unsigned char> text = std::shared_ptr<unsigned char>( new unsigned char[coinbaseText.size()] ); size_t textLength = coinbaseText.size();
   memcpy( text.get(), coinbaseText.c_str(), coinbaseText.size() );
-  std::shared_ptr<tx::Coinbase> ret = std::shared_ptr<tx::Coinbase>( new tx::Coinbase( height , text , textLength, pubKeyHash , mcContext ) );
+  std::shared_ptr<tx::coinbase> ret = std::shared_ptr<tx::coinbase>( new tx::coinbase( height , text , textLength, pubKeyHash , mcContext ) );
   return ret;
 }

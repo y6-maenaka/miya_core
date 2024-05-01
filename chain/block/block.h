@@ -29,7 +29,7 @@
 namespace tx
 {
   struct P2PKH;
-  struct Coinbase;
+  struct coinbase;
 }
 
 
@@ -40,7 +40,7 @@ namespace chain
 class LightUTXOSet;
 
 
-constexpr unsigned int BLOCK_HASH_BITS_LENGTH = 256;
+constexpr unsigned int _BLOCK_HASH_BITS_LENGTH = 256; // temp
 
 
 struct Block
@@ -52,11 +52,11 @@ public:
   std::shared_ptr<struct BlockHeader> header(){ return _header; };
   void header( std::shared_ptr<struct BlockHeader> target );
 
-  std::shared_ptr<tx::Coinbase> coinbase();
+  std::shared_ptr<tx::coinbase> coinbase();
   std::vector< std::shared_ptr<tx::P2PKH> > txVector();
   size_t txCount(); // coinbaseを含まない
 
-  void coinbase( std::shared_ptr<tx::Coinbase> coinbase ); // setter
+  void coinbase( std::shared_ptr<tx::coinbase> coinbase ); // setter
   void add( std::shared_ptr<tx::P2PKH> p2pkh ); // getter
 
   unsigned int calcMerkleRoot( std::shared_ptr<unsigned char> *ret );
@@ -82,7 +82,7 @@ public:
 private:
 //public:
 	std::shared_ptr<BlockHeader> _header;
-	std::shared_ptr<tx::Coinbase> _coinbase;
+	std::shared_ptr<tx::coinbase> _coinbase;
 	std::vector< std::shared_ptr<tx::P2PKH> > _txVector;
 };
 
@@ -94,7 +94,7 @@ public:
 
 private:
   // class block_header _header;
-  // struct tx::Coinbase _coinbase;
+  // struct tx::coinbase _coinbase;
 }; */
 
 

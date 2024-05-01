@@ -5,7 +5,7 @@ namespace tx
 {
 
 
-Coinbase::Coinbase( unsigned int height , std::shared_ptr<unsigned char> text , unsigned int textLength , std::shared_ptr<unsigned char> pubkeyHash , std::shared_ptr<core::MiyaCoreContext> mcContext )
+coinbase::coinbase( unsigned int height , std::shared_ptr<unsigned char> text , unsigned int textLength , std::shared_ptr<unsigned char> pubkeyHash , std::shared_ptr<core::MiyaCoreContext> mcContext )
 {
   _body._txIn = std::shared_ptr<CoinbaseTxIn>( new CoinbaseTxIn(height, text , textLength) ); // 宣言と同時に初期化する
 	_body._txOut = std::shared_ptr<TxOut>( new TxOut );
@@ -14,15 +14,13 @@ Coinbase::Coinbase( unsigned int height , std::shared_ptr<unsigned char> text , 
 	_mcContext = mcContext;
 }
 
-
-Coinbase::Coinbase()
+coinbase::coinbase()
 {
 	_body._txIn = std::shared_ptr<CoinbaseTxIn>( new CoinbaseTxIn );
 	_body._txOut = std::shared_ptr<TxOut>( new TxOut );
 }
 
-
-unsigned int Coinbase::exportRaw( std::shared_ptr<unsigned char> *retRaw )
+unsigned int coinbase::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 {
 	std::shared_ptr<unsigned char> rawTxIn; unsigned int rawTxInLength;
 	rawTxInLength = _body._txIn->exportRaw( &rawTxIn );
@@ -57,9 +55,7 @@ unsigned int Coinbase::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 	return currentPtr;
 }
 
-
-
-size_t Coinbase::importRawSequentially( std::shared_ptr<unsigned char> from )
+size_t coinbase::importRawSequentially( std::shared_ptr<unsigned char> from )
 {
 	unsigned int currentPtr = 0;
 	memcpy( &(_body._version) , from.get() , sizeof(_body._version) ); currentPtr += sizeof(_body._version);
@@ -80,7 +76,7 @@ size_t Coinbase::importRawSequentially( std::shared_ptr<unsigned char> from )
 }
 
 
-size_t Coinbase::importRawSequentially( void *from )
+size_t coinbase::importRawSequentially( void *from )
 {
 	unsigned char* _from = static_cast<unsigned char *>(from);
 	unsigned int currentPtr = 0;
@@ -97,32 +93,27 @@ size_t Coinbase::importRawSequentially( void *from )
 	return currentPtr;
 }
 
-
-
-
-void Coinbase::add( std::shared_ptr<tx::TxOut> target )
+void coinbase::add( std::shared_ptr<tx::TxOut> target )
 {
 	_body._txOut = target;
 }
 
-int Coinbase::height()
+int coinbase::height()
 {
 	return _body._txIn->height();
 }
 
-
-std::shared_ptr<CoinbaseTxIn> Coinbase::txIn()
+std::shared_ptr<CoinbaseTxIn> coinbase::txIn()
 {
 	return _body._txIn;
 }
 
-std::shared_ptr<TxOut> Coinbase::txOut()
+std::shared_ptr<TxOut> coinbase::txOut()
 {
 	return _body._txOut;
 }
 
-
-unsigned int Coinbase::calcTxID( std::shared_ptr<unsigned char> *ret )
+unsigned int coinbase::calcTxID( std::shared_ptr<unsigned char> *ret )
 {
 	std::shared_ptr<unsigned char> exportedCoinbase; unsigned int exportedCoinbaseLength;
 	exportedCoinbaseLength = this->exportRaw( &exportedCoinbase );

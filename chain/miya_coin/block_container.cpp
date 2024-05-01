@@ -44,7 +44,7 @@ void BlockContainer::importBlockSequentially( std::shared_ptr<unsigned char> fro
 	currentPtr += _block->header()->importRawSequentially( fromRaw.get() + currentPtr );
 
 	// coinbaseの取り込み
-	std::shared_ptr<tx::Coinbase> readedCoinbase = std::make_shared<tx::Coinbase>();
+	std::shared_ptr<tx::coinbase> readedCoinbase = std::make_shared<tx::coinbase>();
 	currentPtr += readedCoinbase->importRawSequentially( fromRaw.get() + currentPtr );
 	_block->coinbase( readedCoinbase );
 

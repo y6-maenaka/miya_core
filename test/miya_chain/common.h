@@ -42,7 +42,7 @@ namespace cipher
 namespace tx
 {
     struct P2PKH;
-    struct Coinbase;
+    struct coinbase;
 }
 
 class ControlInterface;
@@ -57,7 +57,7 @@ void LaunchMiyaChain(
 
 
 std::pair< bool , std::shared_ptr<tx::P2PKH> > CreateTxFromJsonFile( std::string pathToJson , std::shared_ptr<ControlInterface> controlInterface ,std::shared_ptr<cipher::ECDSAManager> ecdsaManager );
-std::shared_ptr<tx::Coinbase> CreateCoinbase( unsigned int height ,std::string coinbaseText , std::shared_ptr<unsigned char> pubKeyHash , const std::shared_ptr<core::MiyaCoreContext> mcContext );
+std::shared_ptr<tx::coinbase> CreateCoinbase( unsigned int height ,std::string coinbaseText , std::shared_ptr<unsigned char> pubKeyHash , const std::shared_ptr<core::MiyaCoreContext> mcContext );
 
 int build_sample_chain_p1( std::shared_ptr<core::MiyaCore> miyaCore ,std::shared_ptr<ControlInterface> controlInterface,std::shared_ptr<cipher::ECDSAManager> ecdsaManager ,std::shared_ptr<chain::MiyaChainManager> miyaChainManager );
 

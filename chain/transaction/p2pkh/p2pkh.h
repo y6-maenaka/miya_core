@@ -9,43 +9,22 @@
 //#include "../tx/tx_in.h"
 //#include "../tx/tx_out.h"
 
-
-
-
-
-
 namespace chain
 {
 	class LightUTXOSet;
 }
 
 
-
-
-
-
 namespace tx{
-
-
 
 
 struct TxIn;
 struct TxOut;
 
 
-
-
-
-
-
-
-
-
-
 struct P2PKH : public std::enable_shared_from_this<P2PKH>
 {
 private:
-
 	struct
 	{
 		int32_t _version;
@@ -53,9 +32,7 @@ private:
 		std::vector< std::shared_ptr<TxOut> > _outs;
 	} _body;
 
-
 	unsigned int formatExportedRawTxVector( std::vector< std::pair<std::shared_ptr<unsigned char>,unsigned int> > exportedRawTxVector, std::shared_ptr<unsigned char> *retRaw ); 
-
 
 public:
 	P2PKH();
@@ -90,23 +67,7 @@ public:
 };
 
 
-
-
-
-
-
-
-
-
-
 };
-
-
-
-
-
-
-
 
 
 /*
@@ -126,14 +87,6 @@ public:
 
  
 */
-
-
-
-
-
-
-
-
 
 
 #endif // C7DC3CB1_3E91_4999_B4AC_A1D44A69A420

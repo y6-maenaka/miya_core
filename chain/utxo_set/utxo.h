@@ -14,7 +14,7 @@
 namespace tx
 {
 	struct P2PKH;
-	struct Coinbase;
+	struct coinbase;
 	struct TxOut;
 	class PkScript;
 }
