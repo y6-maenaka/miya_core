@@ -30,7 +30,7 @@ private:
 		int32_t _version;
 		std::vector< std::shared_ptr<TxIn> > _ins;
 		std::vector< std::shared_ptr<TxOut> > _outs;
-	} _body;
+	} _meta;
 
 	unsigned int formatExportedRawTxVector( std::vector< std::pair<std::shared_ptr<unsigned char>,unsigned int> > exportedRawTxVector, std::shared_ptr<unsigned char> *retRaw ); 
 
@@ -59,11 +59,12 @@ public:
 
 	unsigned int calcTxID( std::shared_ptr<unsigned char> *ret ); // 一旦全てを書き出してハッシュするため頻繁には呼び出さないこと
 	/*
- 必要な機能とデータ
- -> txID(); 
- -> 各tx_inに対しての署名作成
-*/
-
+	必要な機能とデータ
+	-> txID(); 
+	-> 各tx_inに対しての署名作成
+	*/
+  
+  std::vector<std::uint8_t> export_to_binary(); // とりあえず既存exportRawのwrraperで 後で本実装する
 };
 
 

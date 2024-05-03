@@ -18,7 +18,7 @@ using json = nlohmann::json;
 
 namespace tx{
 class SignatureScript;
-struct PrevOut;
+struct prev_out;
 
 
 constexpr unsigned short PREV_OUT_SIZE = /*TX_ID_SIZE*/20 + (32 / 8);
@@ -29,27 +29,23 @@ constexpr unsigned short PREV_OUT_SIZE = /*TX_ID_SIZE*/20 + (32 / 8);
 struct TxIn
 {
 private:
-			
-	struct Body// __attribute__((packed))
+	struct Meta// __attribute__((packed))
 	{
-		std::shared_ptr<PrevOut> _prevOut; // 36 bytes
+		std::shared_ptr<prev_out> _prevOut; // 36 bytes
 		uint32_t _script_bytes; // unLockingScriptのバイト長 // 40
 		std::shared_ptr<SignatureScript> _signatureScript; // unlockingScriptの本体
 		uint32_t _sequence;
-
 		// コンストラクタ
-		Body();
-	} _body;
-
-
+		Meta();
+	} _meta;
 
 	EVP_PKEY *_pkey; // 署名と公開鍵セットに使われる
 
 public:
 	TxIn();
-	std::shared_ptr<SignatureScript> signatureScript(){ return _body._signatureScript; }; // テスト用getter 後に削除する
+	std::shared_ptr<SignatureScript> signatureScript(){ return _meta._signatureScript; }; // テスト用getter 後に削除する
 
-	std::shared_ptr<PrevOut> prevOut(); // getter
+	std::shared_ptr<prev_out> prevOut(); // getter
 
 	unsigned int scriptBytes();
 	void scriptBytes( unsigned int bytes );
@@ -68,20 +64,9 @@ public:
 	int importRaw( std::shared_ptr<unsigned char> fromRaw );
 	int importRaw( unsigned char *fromRaw );
 
-
 	friend void to_json( json& from , const TxIn &to );
 	friend void from_json( const json &from , TxIn &to );
-
-
 };
-
-
-
-
-
-
-
-
 
 
 };

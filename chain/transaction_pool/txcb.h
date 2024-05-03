@@ -7,6 +7,8 @@
 #include <variant>
 #include <memory>
 
+#include <chain/transaction/p2pkh/p2pkh.h>
+
 
 namespace tx
 {
@@ -16,28 +18,17 @@ struct P2PKH;
 
 };
 
-
-
-
-
-
-
 namespace chain
 {
-
-
 
 
 constexpr unsigned int TX_ID_LENGTH = (160 / 8);
 //using Tx = std::variant< std::shared_ptr<tx::P2PKH> >;
 
 
-
-
 struct TxCB
 {
 private:
-
 	struct 
 	{
 		std::shared_ptr<unsigned char> _txID;
@@ -79,11 +70,8 @@ public:
 };
 
 
-
-
 };
 
+
 #endif // DA4E26FE_C166_43AD_9623_B65C14DDB047
-
-
 

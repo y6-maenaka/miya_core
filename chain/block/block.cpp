@@ -214,11 +214,21 @@ block::block_hash block::get_block_hash() const
   return _header.get_header_hash();
 }
 
-std::vector<std::uint8_t> block::export_to_binary() const
+std::vector<std::uint8_t> block::export_to_binary()
 {
   std::vector<std::uint8_t> block_header_binary = _header.export_to_binary();
+  std::vector<std::uint8_t> coinbase_binary = _coinbase.export_to_binary();
+  std::vector<std::uint8_t> tx_v_binary;
+  for( auto &itr : _tx_v ){
+	std::vector< std::uint8_t > tx_binary = itr.export_to_binary();
+	tx_v_binary.insert( tx_v_binary.end() ,tx_binary.begin(), tx_binary.end() );
+  }
 
-  // return ret;
+  std::vector< std::uint8_t > ret;
+  ret.insert( ret.end(), block_header_binary.begin(), block_header_binary.end() );
+  ret.insert( ret.end(), coinbase_binary.begin(), coinbase_binary.end()) ; 
+  ret.insert( ret.end(), tx_v_binary.begin(), tx_v_binary.end() );
+  return ret;
 }
 
 

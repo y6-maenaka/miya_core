@@ -3,52 +3,46 @@
 
 
 #include <memory>
-
-
+#include <vector>
 
 
 namespace tx
 {
 
 
-struct PrevOut;
+struct prev_out;
 class Script;
 
 
-
-
-struct CoinbaseTxIn
+struct coinbase_tx_in
 {
 private:
-			
 	struct Body// __attribute__((packed))
 	{
-		std::shared_ptr<PrevOut> _prevOut; // 36 bytes
-		uint32_t _script_bytes; // unLockingScriptのバイト長 // 40
+		std::shared_ptr<prev_out> _prevOut; // 36 bytes
+		std::uint32_t _script_bytes; // unLockingScriptのバイト長 // 40
 		std::shared_ptr<Script>	_script;
-		uint32_t _sequence;
+		std::uint32_t _sequence;
 
 	} _body;
 
 public:
-	CoinbaseTxIn();
-	CoinbaseTxIn( uint32_t height , std::shared_ptr<unsigned char> text , unsigned int textLength );
+	coinbase_tx_in();
+	coinbase_tx_in( uint32_t height , std::shared_ptr<unsigned char> text , unsigned int textLength );
 
-	std::shared_ptr<PrevOut> prevOut();
+	std::shared_ptr<prev_out> prevOut();
 	unsigned short scriptBytes();
 
 	int height();
 
 	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw );
 	unsigned int importRaw( unsigned char *fromRaw );
+
+	std::vector<std::uint8_t> export_to_binary() const;
 };
 
 
-
 };
-
-
-
 
 
 #endif // 

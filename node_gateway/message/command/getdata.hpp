@@ -26,6 +26,8 @@ public:
 
     void inv( struct MiyaCoreMSG_INV target );
     void __print();
+
+  std::vector<std::uint8_t> export_to_binary() const;
 };
 
 

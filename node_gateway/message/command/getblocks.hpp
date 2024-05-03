@@ -47,6 +47,8 @@ public:
   bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );
 
   void __print();
+  
+  std::vector<std::uint8_t> export_to_binary() const;
 };
 
 

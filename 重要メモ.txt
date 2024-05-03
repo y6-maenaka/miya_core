@@ -87,7 +87,7 @@
 ( 検証項目 )
 - ブロックヘッダ
 - マイニング難易度 (未)
-- マージン(PrevOut) ※ IBDの際はvirtualChainを構築して検証するが,順序制御をしないので,ダブルスペンディングの時系列的な整合性がチェックできない可能性がある
+- マージン(prev_out) ※ IBDの際はvirtualChainを構築して検証するが,順序制御をしないので,ダブルスペンディングの時系列的な整合性がチェックできない可能性がある
 
 - コインベーストランザクション (未)
 - トランザクション
@@ -165,7 +165,7 @@
 	std::cout << readedBlock->header()->verify() << "\n";
 	std::cout << "Done" << "\n";
 
-	std::cout << "PrevOut :: " << "\n";
+	std::cout << "prev_out :: " << "\n";
 	block.coinbase()->txIn()->prevOut()->print();
 	std::cout << "--------------" << "\n";
 	miyaChainManager.utxoSet()->get( txID , 0  );

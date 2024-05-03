@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <cassert>
 #include <filesystem>
+#include <functional>
 
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -21,7 +22,7 @@
 
 #include <miya_db/miya_db/database_manager.h>
 #include <chain/block_chain_iterator/block_chain_iterator.h>
-#include "./IBD.h"
+// #include "./IBD.h"
 
 #include <stream_buffer/stream_buffer.h>
 #include <stream_buffer/stream_buffer_container.h>
@@ -153,13 +154,18 @@ public:
 class chain_manager 
 {
 public:
-  void income_getdata();
-  chain_manager( class BlockLocalStrageManager &block_strage_manager, std::string path_to_chainstate_sr );
+  void income_block();
+  void income_headers();
+
+  chain_manager( class BlockLocalStrageManager &block_strage_manager, std::string path_to_chainstate_sr, std::function<void(void)> on_chain_update );
+
+  // void on_chain_extended(); // chain_manager内部処理で最新ブロックがチェーンに繋がれ,ローカルのチェーンが伸びたときに呼び出されるハンドラ
+  class local_chain &get_local_chain();
 
 private:
   class BlockLocalStrageManager &_block_strage_manager;
   class local_chain _local_chain;
-  class local_chain& get_local_chain();
+  
 };
 
 

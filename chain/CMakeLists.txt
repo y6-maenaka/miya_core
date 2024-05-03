@@ -19,7 +19,6 @@ add_library( CHAIN STATIC
 	  transaction/script/script_validator.cpp
 	  transaction/script/pk_script.cpp
 	  transaction/script/signature_script.cpp
-	  transaction/tx/tx.cpp
 
 	  block/block.cpp
 	  block/block_header.cpp
@@ -67,6 +66,8 @@ add_library( CHAIN STATIC
 	  chain_sync_manager/virtual_block.cpp
 	  chain_sync_manager/block_hash_pool.cpp
 	  chain_sync_manager/block_header_pool.cpp
+
+	  block_assembler.cpp
 )
 
 target_include_directories( CHAIN PUBLIC

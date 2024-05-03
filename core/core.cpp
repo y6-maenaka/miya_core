@@ -32,10 +32,18 @@ bool core_context::load_ecdsa_key( std::string path_to_ecdsa_pem )
 core::core( std::shared_ptr<io_context> io_ctx ) :
   _io_ctx( io_ctx )
   , _context( "../.config/wallet.json" )
-  , _broker( *this )
+  , _message_broker( *this )
   // , _chain_manager( "path/to/l_chain_state" )
 {
   return;
+}
+
+void core::start()
+{
+  // IBD ibd( _chain_manager );
+  // if( !(ibd.start()) ) return;
+
+  
 }
 
 core_context &core::get_context()

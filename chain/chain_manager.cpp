@@ -89,7 +89,7 @@ std::shared_ptr<BlockLocalStrageManager> MiyaChainManager::localStrageManager()
 	return _localStrageManager._strageManager;
 }
 
-chain_manager::chain_manager( BlockLocalStrageManager &block_strage_manager, std::string path_to_chainstate_sr ) : 
+chain_manager::chain_manager( BlockLocalStrageManager &block_strage_manager, std::string path_to_chainstate_sr, std::function<void(void)> on_chain_update ) : 
   _block_strage_manager( block_strage_manager )
   , _local_chain( path_to_chainstate_sr, _block_strage_manager )
 {

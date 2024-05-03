@@ -229,9 +229,18 @@ bool BlockHeader::cmpPrevBlockHash( std::shared_ptr<unsigned char> target )
 
 
 
+/* 改 block_header */
 
+block_header::block_header() : 
+  _target_nonce{0}
+{
+  return;
+}
 
-
+void block_header::increment_nonce()
+{
+  _meta._nonce += 1;
+}
 
 block_header::header_hash block_header::get_header_hash() const
 {

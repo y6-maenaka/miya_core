@@ -7,24 +7,18 @@
 #include "../../../share/cipher/ecdsa_manager.h"
 
 
-namespace tx{
 
-
-
-
-
+namespace tx
+{
 
 
 TxIn::TxIn()
 {
-	_body._prevOut = std::shared_ptr<PrevOut>( new PrevOut );
-	_body._signatureScript = std::shared_ptr<SignatureScript>( new SignatureScript );
+	_meta._prevOut = std::shared_ptr<prev_out>( new prev_out );
+	_meta._signatureScript = std::shared_ptr<SignatureScript>( new SignatureScript );
 }
 
-
-
-
-TxIn::Body::Body()
+TxIn::Meta::Meta()
 {
 	_prevOut = nullptr;
 	_script_bytes = 0;
@@ -33,209 +27,167 @@ TxIn::Body::Body()
 	memset( &_sequence, 0xff , sizeof(_sequence) );
 }
 
-
-
-
-
-std::shared_ptr<PrevOut> TxIn::prevOut()
+std::shared_ptr<prev_out> TxIn::prevOut()
 {
-	return _body._prevOut;
+	return _meta._prevOut;
 }
-
-
-
-
-
 
 unsigned int TxIn::scriptBytes()
 {
-	return ntohl(_body._script_bytes);
+	return ntohl(_meta._script_bytes);
 }
-
 
 void TxIn::scriptBytes( unsigned int bytes )
 {
-	_body._script_bytes = htonl(bytes);
+	_meta._script_bytes = htonl(bytes);
 }
-
-
-
 
 unsigned int TxIn::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 {
-	std::shared_ptr<unsigned char> rawPrevOut; unsigned int rawPrevOutLength;
-	rawPrevOutLength = _body._prevOut->exportRaw( &rawPrevOut ); // PrevOutの書き出し
+	std::shared_ptr<unsigned char> rawprev_out; unsigned int rawprev_outLength;
+	rawprev_outLength = _meta._prevOut->exportRaw( &rawprev_out ); // prev_outの書き出し
 
 	std::shared_ptr<unsigned char> rawScript; unsigned int rawScriptLength;
-	rawScriptLength = _body._signatureScript->script()->exportRaw( &rawScript ); // coinbaseScriptの書き出し
+	rawScriptLength = _meta._signatureScript->script()->exportRaw( &rawScript ); // coinbaseScriptの書き出し
 	this->scriptBytes( rawScriptLength );
 
 
 	int formatPtr = 0;
-	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[rawPrevOutLength + sizeof(_body._script_bytes) + this->scriptBytes() + sizeof(_body._sequence)] );
+	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[rawprev_outLength + sizeof(_meta._script_bytes) + this->scriptBytes() + sizeof(_meta._sequence)] );
 
-	memcpy( (*retRaw).get() , rawPrevOut.get() , rawPrevOutLength ); formatPtr+= rawPrevOutLength;
-	memcpy( (*retRaw).get() + formatPtr , &(_body._script_bytes) , sizeof(_body._script_bytes) ); formatPtr+= sizeof(_body._script_bytes);
+	memcpy( (*retRaw).get() , rawprev_out.get() , rawprev_outLength ); formatPtr+= rawprev_outLength;
+	memcpy( (*retRaw).get() + formatPtr , &(_meta._script_bytes) , sizeof(_meta._script_bytes) ); formatPtr+= sizeof(_meta._script_bytes);
 	memcpy( (*retRaw).get() + formatPtr , rawScript.get() , rawScriptLength ); formatPtr+= rawScriptLength;
-	memcpy( (*retRaw).get() + formatPtr , &(_body._sequence) , sizeof(_body._sequence) );  formatPtr += sizeof(_body._sequence);
+	memcpy( (*retRaw).get() + formatPtr , &(_meta._sequence) , sizeof(_meta._sequence) );  formatPtr += sizeof(_meta._sequence);
 
 	return formatPtr;
 }
 
-
-
-
-
 // トランザクション全体署名用に空で書き出すメソッド
 unsigned int TxIn::exportRawWithEmpty( std::shared_ptr<unsigned char> *retRaw )
 {
-
-
 	/*
 	  空で書き出す際に必要な要素は⭐️のみ
-		⭐️std::shared_ptr<PrevOut> _prevOut;
+		⭐️std::shared_ptr<prev_out> _prevOut;
 		uint32_t _script_bytes; // unLockingScriptのバイト長
 		std::shared_ptr<SignatureScript> _signatureScript; // unlockingScriptの本体
 		⭐️uint32_t _sequence;
 	 */
 	unsigned int formatPtr = 0;
-	std::shared_ptr<unsigned char> rawPrevOut; unsigned int rawPrevOutSize;
-	rawPrevOutSize = _body._prevOut->exportRaw( &rawPrevOut );
+	std::shared_ptr<unsigned char> rawprev_out; unsigned int rawprev_outSize;
+	rawprev_outSize = _meta._prevOut->exportRaw( &rawprev_out );
 
 
-	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[ rawPrevOutSize+ sizeof( _body._sequence)] );
+	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[ rawprev_outSize+ sizeof( _meta._sequence)] );
 
-	memcpy( (*retRaw).get() , rawPrevOut.get() , rawPrevOutSize ); formatPtr+= rawPrevOutSize;
-	memcpy( (*retRaw).get() + formatPtr , &(_body._sequence) , sizeof(_body._sequence) );  formatPtr += sizeof(_body._sequence);
+	memcpy( (*retRaw).get() , rawprev_out.get() , rawprev_outSize ); formatPtr+= rawprev_outSize;
+	memcpy( (*retRaw).get() + formatPtr , &(_meta._sequence) , sizeof(_meta._sequence) );  formatPtr += sizeof(_meta._sequence);
 
-	rawPrevOut.reset(); // 一応削除しておく
+	rawprev_out.reset(); // 一応削除しておく
 	return formatPtr;
 }
-
-
-
-
 
 unsigned int TxIn::exportRawWithPubKeyHash( std::shared_ptr<unsigned char> *retRaw )
 {
 
 	// 生の公開鍵を取得する
-	if( _body._signatureScript->pkey() == nullptr ){
-		_body._signatureScript->pkey( _pkey ); // 署名スクリプトに公開鍵をセット
+	if( _meta._signatureScript->pkey() == nullptr ){
+		_meta._signatureScript->pkey( _pkey ); // 署名スクリプトに公開鍵をセット
 	}
 
 	unsigned int formatPtr = 0;
 
-	// PrevOutの書き出し
-	std::shared_ptr<unsigned char> rawPrevOut; unsigned int rawPrevOutSize;
-	rawPrevOutSize = _body._prevOut->exportRaw( &rawPrevOut );
+	// prev_outの書き出し
+	std::shared_ptr<unsigned char> rawprev_out; unsigned int rawprev_outSize;
+	rawprev_outSize = _meta._prevOut->exportRaw( &rawprev_out );
 
 
 	/* 自身の公開鍵ハッシュの書き出し */
 	std::shared_ptr<unsigned char> exportedPubKeyHash; unsigned int exportedPubKeyHashLength = 0;
-	exportedPubKeyHashLength = _body._signatureScript->exportRawWithPubKeyHash( &exportedPubKeyHash );
+	exportedPubKeyHashLength = _meta._signatureScript->exportRawWithPubKeyHash( &exportedPubKeyHash );
 	this->scriptBytes(exportedPubKeyHashLength);
 
 
 
-	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[ rawPrevOutSize + sizeof(_body._sequence) + sizeof(_body._script_bytes) + this->scriptBytes() ] );
-	memcpy( (*retRaw).get() , rawPrevOut.get() , rawPrevOutSize ); formatPtr+= rawPrevOutSize;
-	memcpy( (*retRaw).get() + formatPtr , &(_body._script_bytes) , sizeof(_body._script_bytes) ); formatPtr+= sizeof(_body._script_bytes);
+	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[ rawprev_outSize + sizeof(_meta._sequence) + sizeof(_meta._script_bytes) + this->scriptBytes() ] );
+	memcpy( (*retRaw).get() , rawprev_out.get() , rawprev_outSize ); formatPtr+= rawprev_outSize;
+	memcpy( (*retRaw).get() + formatPtr , &(_meta._script_bytes) , sizeof(_meta._script_bytes) ); formatPtr+= sizeof(_meta._script_bytes);
 	memcpy( (*retRaw).get() + formatPtr , exportedPubKeyHash.get() , exportedPubKeyHashLength ); formatPtr+= exportedPubKeyHashLength;
-	memcpy( (*retRaw).get() + formatPtr , &(_body._sequence) , sizeof(_body._sequence) );  formatPtr += sizeof(_body._sequence);
+	memcpy( (*retRaw).get() + formatPtr , &(_meta._sequence) , sizeof(_meta._sequence) );  formatPtr += sizeof(_meta._sequence);
 
 
-	//rawPrevOut.reset();
+	//rawprev_out.reset();
 	//exportedPubKeyHash.reset(); // 念の為解放しておく
 
 	return formatPtr;
 }
 
-
-
-
 unsigned int TxIn::exportRawWithSignatureScript( std::shared_ptr<unsigned char> *retRaw )
 {
 	if( !(isSigned()) ) return 0; // 正式な署名が行われていなければリターン
 
-
-	// PrevOutの書き出し
-	std::shared_ptr<unsigned char> rawPrevOut; unsigned int rawPrevOutSize;
-	rawPrevOutSize = _body._prevOut->exportRaw( &rawPrevOut );
+	// prev_outの書き出し
+	std::shared_ptr<unsigned char> rawprev_out; unsigned int rawprev_outSize;
+	rawprev_outSize = _meta._prevOut->exportRaw( &rawprev_out );
 
 	/* 署名スクリプトの書き出し */
 	std::shared_ptr<unsigned char> exportedSignatureScript; unsigned int exportedSignatureScriptLength = 0;
-	exportedSignatureScriptLength = _body._signatureScript->exportRawWithSignatureScript( &exportedSignatureScript );
+	exportedSignatureScriptLength = _meta._signatureScript->exportRawWithSignatureScript( &exportedSignatureScript );
 	this->scriptBytes(exportedSignatureScriptLength); // スクリプト長のセット
 																													 
 	unsigned int formatPtr = 0;
-	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[ rawPrevOutSize + sizeof(_body._sequence) + sizeof(_body._script_bytes) + this->scriptBytes() ] );
-	memcpy( (*retRaw).get() , rawPrevOut.get() , rawPrevOutSize ); formatPtr+= rawPrevOutSize;
-	memcpy( (*retRaw).get() + formatPtr , &(_body._script_bytes) , sizeof(_body._script_bytes) ); formatPtr+= sizeof(_body._script_bytes);
+	*retRaw = std::shared_ptr<unsigned char>( new unsigned char[ rawprev_outSize + sizeof(_meta._sequence) + sizeof(_meta._script_bytes) + this->scriptBytes() ] );
+	memcpy( (*retRaw).get() , rawprev_out.get() , rawprev_outSize ); formatPtr+= rawprev_outSize;
+	memcpy( (*retRaw).get() + formatPtr , &(_meta._script_bytes) , sizeof(_meta._script_bytes) ); formatPtr+= sizeof(_meta._script_bytes);
 	memcpy( (*retRaw).get() + formatPtr , exportedSignatureScript.get() , exportedSignatureScriptLength ); formatPtr+= exportedSignatureScriptLength;
-	memcpy( (*retRaw).get() + formatPtr , &(_body._sequence) , sizeof(_body._sequence) );  formatPtr += sizeof(_body._sequence);
+	memcpy( (*retRaw).get() + formatPtr , &(_meta._sequence) , sizeof(_meta._sequence) );  formatPtr += sizeof(_meta._sequence);
 
-	rawPrevOut.reset();
+	rawprev_out.reset();
 	exportedSignatureScript.reset(); // 念の為解放しておく
 
 	return formatPtr;
 }
 
-
-
-
 bool TxIn::isSigned()
 {
-	return _body._signatureScript->isSigned();
+	return _meta._signatureScript->isSigned();
 }
-
 
 void TxIn::sign( std::shared_ptr<unsigned char> sign , unsigned int signLength , bool isSigned )
 {
-	_body._signatureScript->sign( sign , signLength, isSigned );
+	_meta._signatureScript->sign( sign , signLength, isSigned );
 }
-
-
-
 
 void TxIn::pkey( EVP_PKEY *pkey )
 {
 	_pkey = pkey;
 }
 
-
-
 EVP_PKEY *TxIn::pkey()
 {
 	return _pkey;
 }
-
-
 
 int TxIn::importRaw( unsigned char *fromRaw ) // ポインタの先頭が揃っていることを確認
 {
 	unsigned int currentPtr = 0;
 	unsigned int prevOutLength;
 
-	// _body._prevOut = std::shared_ptr<PrevOut>();
-	prevOutLength = _body._prevOut->importRaw( fromRaw );  currentPtr += prevOutLength;// prevOutの取り込み
+	// _meta._prevOut = std::shared_ptr<prev_out>();
+	prevOutLength = _meta._prevOut->importRaw( fromRaw );  currentPtr += prevOutLength;// prevOutの取り込み
 
-	memcpy( &_body._script_bytes , fromRaw + currentPtr , sizeof(_body._script_bytes) ); currentPtr += sizeof(_body._script_bytes);  // script_bytesの取り込み
+	memcpy( &_meta._script_bytes , fromRaw + currentPtr , sizeof(_meta._script_bytes) ); currentPtr += sizeof(_meta._script_bytes);  // script_bytesの取り込み
 
 	unsigned int signatureScriptLength = 0;
-	signatureScriptLength = _body._signatureScript->importRaw( fromRaw + currentPtr, this->scriptBytes() ); currentPtr += signatureScriptLength; // 署名スクリプトの取り込み
+	signatureScriptLength = _meta._signatureScript->importRaw( fromRaw + currentPtr, this->scriptBytes() ); currentPtr += signatureScriptLength; // 署名スクリプトの取り込み
 
-	unsigned char rawPubKeyLength = _body._signatureScript->script()->OP_DATALength( _body._signatureScript->script()->at(1).first );
-	_pkey = cipher::ECDSAManager::toPkey( _body._signatureScript->script()->at(1).second.get() , static_cast<unsigned short>(rawPubKeyLength) );
+	unsigned char rawPubKeyLength = _meta._signatureScript->script()->OP_DATALength( _meta._signatureScript->script()->at(1).first );
+	_pkey = cipher::ECDSAManager::toPkey( _meta._signatureScript->script()->at(1).second.get() , static_cast<unsigned short>(rawPubKeyLength) );
 
-	memcpy( &_body._sequence , fromRaw + currentPtr  , sizeof(_body._sequence) ); currentPtr += sizeof(_body._sequence);
+	memcpy( &_meta._sequence , fromRaw + currentPtr  , sizeof(_meta._sequence) ); currentPtr += sizeof(_meta._sequence);
 
 	return currentPtr;
 }
-
-
-
-
 
 void from_json( const json &from , TxIn &to )
 {
@@ -243,8 +195,6 @@ void from_json( const json &from , TxIn &to )
 	std::string sUTXOTxID = from["utxo_tx_id"].get<std::string>();
 
 	//std::string sUTXOTxID = "e7a4cf8a4a6f5b12c087adfc4d0be4a8108b5c13c6a4c856ab2aecd6e9731f2d";
-
-
 	std::vector<unsigned char> hexBinaryVector;
 	for( size_t i = 0; i<64; i+=2 ) // あとで修正
 	{
@@ -253,21 +203,15 @@ void from_json( const json &from , TxIn &to )
 		hexBinaryVector.push_back(byte);
 	}
 
-
 	unsigned char *hexBinary = new unsigned char[hexBinaryVector.size()];
 	std::copy( hexBinaryVector.begin() , hexBinaryVector.end(), hexBinary );
 	to.prevOut()->txID(reinterpret_cast<const unsigned char*>(hexBinary));
 
-
 	to.prevOut()->index( static_cast<int>(from["index"]) );
 
 }
-
-
-
 /*
-PrevOut::PrevOut(){
-
+prev_out::prev_out(){
 
 	// dummy
 	const char* id = "aaaaaaaaaabbbbbbbbbb";
@@ -278,7 +222,7 @@ PrevOut::PrevOut(){
 
 
 
-unsigned int PrevOut::exportRaw( unsigned char **ret )
+unsigned int prev_out::exportRaw( unsigned char **ret )
 {
 
 	unsigned int pos = 0;
@@ -291,31 +235,10 @@ unsigned int PrevOut::exportRaw( unsigned char **ret )
 }
 
 
-unsigned int PrevOut::exportRawSize()
+unsigned int prev_out::exportRawSize()
 {
 	return TX_ID_SIZE + sizeof( _index ) ;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -353,7 +276,7 @@ unsigned int TxIn::sigSize(){
 
 
 
-PrevOut *TxIn::prevOut()
+prev_out *TxIn::prevOut()
 {
 	return _prevOut;
 }
@@ -445,7 +368,7 @@ unsigned int TxIn::exportEmptyRaw( unsigned char **ret )
 	unsigned char* prevOutBuff;   unsigned int prevOutBuffSize = 0;
 
 	// dummyで仮置き
-	_prevOut = new PrevOut;
+	_prevOut = new prev_out;
 
 	prevOutBuffSize = _prevOut->exportRaw( &prevOutBuff );
 
@@ -477,11 +400,11 @@ unsigned int TxIn::exportRaw( unsigned char **ret )
 	*ret = new unsigned char[ exportRawSize() ];
 
 
-	 //= PrevOut の書き出し ==================================================
+	 //= prev_out の書き出し ==================================================
 	unsigned char* prevOutBuff = NULL; unsigned int prevOutBuffSize = 0;
 
 	// dummyで仮置き
-	_prevOut = new PrevOut;
+	_prevOut = new prev_out;
 
 	prevOutBuffSize = _prevOut->exportRaw( &prevOutBuff );
 	// =====================================================================
@@ -527,9 +450,6 @@ unsigned short TxIn::inIndex()
 }
 
 */
-
-
-
 
 
 }; // close tx namespace

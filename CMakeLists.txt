@@ -20,6 +20,7 @@ add_subdirectory( chain )
 add_subdirectory( miya_db )
 add_subdirectory( control_interface )
 add_subdirectory( node_gateway )
+add_subdirectory( mining_manager )
 add_subdirectory( share )
 add_subdirectory( core )
 
@@ -36,6 +37,7 @@ target_link_libraries( core_ver_0 PRIVATE
 	MIYA_DB
 	CHAIN
 	CONTROL_INTERFACE
+	MINING_MANAGER
 	node_gateway
 	SHARE
 	SS_P2P

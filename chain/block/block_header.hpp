@@ -5,6 +5,7 @@
 #include <array>
 #include <memory>
 #include <algorithm>
+#include <vector>
 #include <crypto_utils/w_sha/sha.hpp>
 
 
@@ -14,6 +15,7 @@ namespace chain
 
 constexpr unsigned int BLOCK_HASH_BITS_LENGTH = 256;
 constexpr unsigned int BLOCK_HASH_BYTES_LENGTH = BLOCK_HASH_BITS_LENGTH / 8;
+constexpr unsigned int MERKLE_ROOT_BITS_LENGTH = 256;
 
 
 class block_header
@@ -25,8 +27,13 @@ public:
   std::uint32_t get_time() const;
   std::uint32_t get_nonce() const;
   header_hash get_header_hash() const;
-  std::vector<std::uint8_t> export_to_binary() const;
+  std::vector<std::uint8_t> export_to_binary() const; 
+  
+  void increment_nonce(); // nonceを1インクリメントする
+  bool check_nonce() const; // マイニング用(_target_nonceと_meta._nonceを比較する)
+  std::vector<std::uint8_t> self_hash256() const;
 
+  block_header();
 protected:
   #if DEBUG
   void print_binary() const;
@@ -42,11 +49,9 @@ private:
 	std::uint32_t _n_bits;
 	std::uint32_t _nonce;
   } _meta;
- 
 
+  std::uint32_t _target_nonce; // マイニング用
 };
-
-
 
 
 };

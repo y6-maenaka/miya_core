@@ -26,7 +26,7 @@ namespace tx
 	struct P2PKH;
 	struct coinbase;
 	struct TxOut;
-	struct PrevOut;
+	struct prev_out;
 }
 
 namespace chain
@@ -58,7 +58,7 @@ public:
 	std::shared_ptr<unsigned char> generateUTxOKey( std::shared_ptr<unsigned char> txID , uint32_t index );
 
 	std::shared_ptr<UTXO> get( std::shared_ptr<unsigned char> txID , uint32_t index );
-	std::shared_ptr<UTXO> get( std::shared_ptr<tx::PrevOut> prevOut );
+	std::shared_ptr<UTXO> get( std::shared_ptr<tx::prev_out> prevOut );
 
 	bool add( std::shared_ptr<tx::TxOut> targetTxOut, std::shared_ptr<unsigned char> txID, uint32_t index );
 	bool add( std::shared_ptr<tx::coinbase> targetCoinbase );

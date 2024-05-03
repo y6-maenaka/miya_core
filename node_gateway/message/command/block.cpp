@@ -20,7 +20,7 @@ std::shared_ptr<struct Block> MiyaCoreMSG_BLOCK::block()
 
 std::vector<std::uint8_t> MiyaCoreMSG_BLOCK::export_to_binary() const
 {
-
+  return std::vector< std::uint8_t >();
 }
 
 

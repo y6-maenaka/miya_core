@@ -93,7 +93,7 @@ int main( int argc, const char* argv[] )
 	std::cout << readedBlock->header()->verify() << "\n";
 	std::cout << "Done" << "\n";
 
-	std::cout << "PrevOut :: " << "\n";
+	std::cout << "prev_out :: " << "\n";
 	block.coinbase()->txIn()->prevOut()->print();
 	std::cout << "--------------" << "\n";
 	miyaChainManager.utxoSet()->get( txID , 0  );
@@ -768,7 +768,7 @@ int main( int argc, const char* argv[] )
 
 
 	/*
-	tx::PrevOut prevOut;
+	tx::prev_out prevOut;
 	const char* id = "aaaaaaaaaabbbbbbbbbb";
 	prevOut._txID = (unsigned char *)id;
 	prevOut._index = htonl( 10 );
@@ -808,7 +808,7 @@ int main( int argc, const char* argv[] )
 	ecdsaManager.init( (unsigned char *)"hello", 6);
 
 
-	tx::PrevOut prevOut;
+	tx::prev_out prevOut;
 	const char* id = "aaaaaaaaaabbbbbbbbbb";
 	prevOut._txID = (unsigned char *)id;
 	prevOut._index = htonl( 10 );

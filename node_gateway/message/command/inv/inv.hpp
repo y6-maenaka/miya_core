@@ -61,6 +61,8 @@ public:
 
 	std::vector<struct inv> invVector();
 	void __print();
+
+	std::vector< std::uint8_t > export_to_binary() const;
 };
 
 

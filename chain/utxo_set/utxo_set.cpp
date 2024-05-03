@@ -139,7 +139,7 @@ std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<unsigned char> txID , u
 
 
 
-std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<tx::PrevOut> prevOut )
+std::shared_ptr<UTXO> LightUTXOSet::get( std::shared_ptr<tx::prev_out> prevOut )
 {
 	return get( prevOut->txID() , prevOut->index() );
 }

@@ -15,11 +15,6 @@
 namespace tx{
 
 
-
-
-
-
-
 class PkScript 
 {
 //private:
@@ -37,18 +32,7 @@ public:
 };
 
 
-
-
-
-
-
-
-
-
-
-
-}
-
+};
 
 
 #endif // A464F000_6B41_4360_B39C_A3EA44A8E80B

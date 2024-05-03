@@ -9,6 +9,7 @@
 #include "openssl/evp.h"
 #include <algorithm>
 #include <iostream>
+#include <vector>
 
 #ifdef __linux__
 	#include <endian.h>
@@ -27,18 +28,18 @@ using json = nlohmann::json;
 namespace tx
 {
 
-struct PrevOut
+struct prev_out
 {
 //private:
 public:
 	struct __attribute__((packed))
 	{
 		std::shared_ptr<unsigned char> _txID; // 参照するトランザクションID
-		uint32_t _index; // 参照するtx_outのインデックス
-	} _body;
+		std::uint32_t _index; // 参照するtx_outのインデックス
+	} _meta;
 
 //public:
-	PrevOut();
+	prev_out();
 
 	std::shared_ptr<unsigned char> txID();
 	void txID( std::shared_ptr<unsigned char> target );
@@ -52,6 +53,8 @@ public:
 	int importRaw( unsigned char* fromRaw );
 
 	void print();
+
+	std::vector<std::uint8_t> export_to_binary() const;
 };
 
 

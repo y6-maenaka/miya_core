@@ -13,9 +13,6 @@ GetRawCode getRawCode; // st::visitの第一引数にはラムダ or 関数オ�
 
 
 
-
-
-
 bool OP_DUP::exe( ValidationStack *stack, ValidationOptions *optionsPtr )
 {
 	/* スタックのトップから要素を一つ取り出して複製してプッシュ */
@@ -313,12 +310,6 @@ std::vector< std::pair< OP_CODES, std::shared_ptr<unsigned char> > >::iterator S
 {
 	return _script.end();
 }
-
-
-
-
-
-
 
 
 }; // close tx namespace

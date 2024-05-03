@@ -49,7 +49,7 @@ namespace chain
  */
 
 constexpr unsigned int BLOCK_HEADER_HASH_BITS_LENGTH = 256;
-constexpr unsigned int MERKLE_ROOT_BITS_LENGTH = 256;
+// constexpr unsigned int MERKLE_ROOT_BITS_LENGTH = 256;
 
 
 struct BlockHeader
