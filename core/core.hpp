@@ -18,10 +18,12 @@
 #include <ss_p2p/message_pool.hpp>
 #include <ss_p2p_node_controller/include/ss_p2p/message_pool.hpp>
 #include <crypto_utils/w_sha/sha.hpp>
-#include <chain/chain_manager.h>
-#include <chain/chain.hpp>
+#include <chain/chain_manager.hpp>
 #include <chain/transaction_pool/transaction_pool.h>
 #include <chain/IBD.hpp>
+#include <core/core_context.hpp>
+// #include <chain/miya_coin/local_strage_manager.h>
+#include <chain/utxo_set/utxo_set.h>
 
 
 using json = nlohmann::json;
@@ -32,35 +34,14 @@ namespace core
 {
 
 
-struct core_context
-{
-private:
-    std::string _ecdsa_pem_pass;
-
-    struct mining_info
-    {
-        std::uint32_t _version;
-        struct coinbase
-        {
-            std::size_t _mining_reward;
-            std::string _mining_text; // conibaseに埋め込むテキスト
-        } _coinbase;
-    };
-
-public:
-    core_context( std::string path_to_ecdsa_pem );
-    std::string get_ecdsa_pem_pass();
-    bool load_ecdsa_key( std::string path_to_ecdsa_pem );
-};
-
 // MiyaCore全体統括モジュール
 class core // core class of miya_core
 {
   friend class message_broker;
 public:
-  core( std::shared_ptr<io_context> io_ctx = std::make_shared<io_context>() );
-  core_context &get_context();
+  core();
 
+  core_context &get_context();
   void start(); // 本体プログラムの実行
 
 protected:
@@ -69,9 +50,12 @@ protected:
   void on_failure_mine();
 
 private:
-  std::shared_ptr<io_context> _io_ctx;
+  io_context io_ctx;
   core_context _context;
   // class chain::chain_manager _chain_manager;
+  // class BlockLocalStrage _block_local_strage;
+  // class chain::TransactionPool _transaction_pool;
+  // class chain::LightUTXOSet _utxoSet;
 
   class message_broker // 受信メッセージを主要管理マネージャーに渡す(ss_p2pからの受信メッセージを流す)
   {

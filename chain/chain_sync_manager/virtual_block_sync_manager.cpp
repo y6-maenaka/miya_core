@@ -71,7 +71,7 @@ void VirtualBlockSyncManager::UnChaindedWindow::__print()
   }
 }
 
-VirtualBlockSyncManager::VirtualBlockSyncManager( std::vector< std::shared_ptr<BlockHeader> > virtualHeaderChainVector, std::shared_ptr<BlockLocalStrageManager> localStrageManager , std::shared_ptr<StreamBufferContainer> toRequesterSBC )
+VirtualBlockSyncManager::VirtualBlockSyncManager( std::vector< std::shared_ptr<BlockHeader> > virtualHeaderChainVector, std::shared_ptr<BlockLocalStrage> localStrageManager , std::shared_ptr<StreamBufferContainer> toRequesterSBC )
 {
   _localStrageManager = localStrageManager;
   _toRequesterSBC = toRequesterSBC;

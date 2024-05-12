@@ -6,6 +6,26 @@
 #include <vector>
 #include <memory>
 
+
+#include <chain/transaction/tx/tx_in.h>
+#include <chain/transaction/tx/tx_out.h>
+#include <chain/transaction/script/script.h>
+#include <chain/transaction/script/script_validator.h>
+#include <chain/transaction/script/signature_script.h>
+#include <chain/transaction/script/pk_script.h>
+#include <cipher/ecdsa_manager.h>
+#include <hash/sha_hash.h>
+
+#include <chain/utxo_set/utxo.h>
+#include <chain/utxo_set/utxo_set.h>
+#include <chain/validation/validation.h>
+
+#include "openssl/bio.h" 
+#include "openssl/evp.h"
+
+#include <chain/transaction/tx.params.hpp>
+
+
 //#include "../tx/tx_in.h"
 //#include "../tx/tx_out.h"
 
@@ -65,6 +85,7 @@ public:
 	*/
   
   std::vector<std::uint8_t> export_to_binary(); // とりあえず既存exportRawのwrraperで 後で本実装する
+  tx_id get_id() const;
 };
 
 

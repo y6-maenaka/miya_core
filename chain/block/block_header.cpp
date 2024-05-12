@@ -1,5 +1,5 @@
-#include "block_header.h" // temp
 #include "block_header.hpp"
+#include "block_header.h" // temp
 
 
 using namespace cu;
@@ -234,7 +234,7 @@ bool BlockHeader::cmpPrevBlockHash( std::shared_ptr<unsigned char> target )
 block_header::block_header() : 
   _target_nonce{0}
 {
-  return;
+  std::memset( &_meta, 0x00, sizeof(_meta) );
 }
 
 void block_header::increment_nonce()
@@ -258,6 +258,11 @@ block_header::header_hash block_header::get_header_hash() const
 	std::fill( ret.begin(), ret.end(), 0xff ); // 衝突する可能性あり(限りなく低いが)
 	return ret;
   }
+}
+
+block_header::header_hash block_header::get_prev_block_hash() const
+{
+  return _meta._prev_block_hash;
 }
 
 std::vector<std::uint8_t> block_header::export_to_binary() const

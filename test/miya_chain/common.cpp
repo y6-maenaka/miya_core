@@ -26,7 +26,7 @@ void LaunchMiyaChain(
   std::shared_ptr<StreamBufferContainer> toEKP2PBrokerDummySBC = std::make_shared<StreamBufferContainer>();
   (*miyaChainManager)->init( toEKP2PBrokerDummySBC );
 
-  std::shared_ptr<chain::BlockLocalStrageManager> localStrageManager; // ブロック保存用のファイルマネージャー
+  std::shared_ptr<chain::BlockLocalStrage> localStrageManager; // ブロック保存用のファイルマネージャー
   localStrageManager = (*miyaChainManager)->localStrageManager();
 
   std::shared_ptr<chain::LightUTXOSet> utxoSet; // UTXOのセットアップ

@@ -1,6 +1,5 @@
-#include "block.h"
 #include "block.hpp"
-// #include "block.hpp"
+#include "block.h"
 
 
 namespace chain
@@ -214,10 +213,15 @@ block::block_hash block::get_block_hash() const
   return _header.get_header_hash();
 }
 
+block::block_hash block::get_prev_block_hash() const
+{
+  return _header.get_prev_block_hash();
+}
+
 std::vector<std::uint8_t> block::export_to_binary()
 {
   std::vector<std::uint8_t> block_header_binary = _header.export_to_binary();
-  std::vector<std::uint8_t> coinbase_binary = _coinbase.export_to_binary();
+  std::vector<std::uint8_t> coinbase_binary ;//= _coinbase.export_to_binary();
   std::vector<std::uint8_t> tx_v_binary;
   for( auto &itr : _tx_v ){
 	std::vector< std::uint8_t > tx_binary = itr.export_to_binary();

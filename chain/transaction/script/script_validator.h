@@ -11,6 +11,9 @@
 #include <map>
 #include <string>
 
+#include <chain/transaction/script/script.h>
+#include "./pk_script.h"
+#include "./signature_script.h"
 
 
 namespace tx
@@ -21,9 +24,6 @@ class PkScript;
 class SignatureScript;
 struct P2PKH;
 class ValidationOptions;
-
-
-
 
 
 struct ValidationStack
@@ -67,17 +67,6 @@ public:
 
 		
 };
-
-
-
-
-
-
-
-
-
-
-
 
 
 };

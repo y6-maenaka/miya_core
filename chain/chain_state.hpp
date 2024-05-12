@@ -3,31 +3,8 @@
 
 
 #include <memory>
-
-
-
-namespace block
-{
-	struct Block;
-}
-
-
-
-namespace chain
-{
-
-
-
-
-
-
-
-
-};
+#include <chain/block/block.h>
+#include <chain/block/block_header.h>
 
 
 #endif //
-
-
-
-

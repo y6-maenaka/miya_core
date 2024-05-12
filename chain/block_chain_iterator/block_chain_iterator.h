@@ -8,15 +8,6 @@
 #include <chain/block/block_header.h>
 #include <chain/transaction/coinbase/coinbase.hpp>
 
-#include <chain/miya_coin/local_strage_manager.h>
-
-
-namespace chain
-{
-  class BlockLocalStrageManager;
-};
-
-
 
 namespace block
 {
@@ -35,7 +26,7 @@ class BlockChainIterator // const iterator
 private:
 	std::shared_ptr<struct Block> _body = nullptr;
 	// std::shared_ptr<unsigned char> _blockHashCache;
-	std::shared_ptr<BlockLocalStrageManager> _localStrageManager = nullptr;
+	std::shared_ptr<BlockLocalStrage> _localStrageManager = nullptr;
 	bool setupFromBlockHash( std::shared_ptr<unsigned char> from ); // 実質的なコンストラクタ
 
   struct // 毎回bodyから取得するのは面倒だからキャッシュを設ける
@@ -46,8 +37,8 @@ private:
 
 public:
   BlockChainIterator( const BlockChainIterator& bcitr );
-  BlockChainIterator( std::shared_ptr<BlockLocalStrageManager> localStrageManager , std::shared_ptr<unsigned char> blockHash ); // ブロックボディの取得はコンストラクタ内で行う
-  BlockChainIterator( std::shared_ptr<BlockLocalStrageManager> localStrageManager , std::shared_ptr<Block> body ); // ブロック本体からイテレータを作成する
+  BlockChainIterator( std::shared_ptr<BlockLocalStrage> localStrageManager , std::shared_ptr<unsigned char> blockHash ); // ブロックボディの取得はコンストラクタ内で行う
+  BlockChainIterator( std::shared_ptr<BlockLocalStrage> localStrageManager , std::shared_ptr<Block> body ); // ブロック本体からイテレータを作成する
 
   std::shared_ptr<struct Block> operator*(); // デリファレンス
   BlockChainIterator &operator--(); // ブロックチェーンの逆方向参照

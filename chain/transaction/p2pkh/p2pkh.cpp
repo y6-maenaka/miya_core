@@ -1,23 +1,5 @@
 #include "p2pkh.h"
 
-#include "../tx/tx_in.h"
-#include "../tx/tx_out.h"
-#include "../script/script.h"
-#include "../script/script_validator.h"
-#include "../script/signature_script.h"
-#include "../script/pk_script.h"
-#include "../../../share/cipher/ecdsa_manager.h"
-#include "../../../share/hash/sha_hash.h"
-
-
-#include "../../utxo_set/utxo.h"
-#include "../../utxo_set/utxo_set.h"
-
-#include "../../validation/validation.h"
-
-#include "openssl/bio.h" 
-#include "openssl/evp.h"
-
 
 namespace tx{
 

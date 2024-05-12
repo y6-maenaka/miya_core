@@ -1,4 +1,5 @@
 #include "block_chain_iterator.h"
+#include <chain/miya_coin/local_strage_manager.h>
 
 
 namespace chain
@@ -29,7 +30,7 @@ BlockChainIterator::BlockChainIterator( const BlockChainIterator& bcitr )
 	this->_cache = bcitr._cache;
 }
 
-BlockChainIterator::BlockChainIterator( std::shared_ptr<BlockLocalStrageManager> localStrageManager , std::shared_ptr<unsigned char> blockHash )
+BlockChainIterator::BlockChainIterator( std::shared_ptr<BlockLocalStrage> localStrageManager , std::shared_ptr<unsigned char> blockHash )
 {
 	if( localStrageManager == nullptr || blockHash == nullptr ) return;
 
@@ -52,7 +53,7 @@ BlockChainIterator::BlockChainIterator( std::shared_ptr<BlockLocalStrageManager>
   return;
 }
 
-BlockChainIterator::BlockChainIterator( std::shared_ptr<BlockLocalStrageManager> localStrageManager , std::shared_ptr<Block> body )
+BlockChainIterator::BlockChainIterator( std::shared_ptr<BlockLocalStrage> localStrageManager , std::shared_ptr<Block> body )
 {
 	if( localStrageManager == nullptr ) return;
 

@@ -1,27 +1,14 @@
 #include "script_validator.h"
 
 
-#include "./pk_script.h"
-#include "./signature_script.h"
-
-
 namespace tx
 {
-
-
-
-
-
-
-
 
 
 void ValidationStack::pushBack( OP_CODES opcode , std::shared_ptr<unsigned char> data )
 {
 	_body.push_back( std::make_pair( opcode, data ) );
 }
-
-
 
 std::shared_ptr< std::pair<OP_CODES, std::shared_ptr<unsigned char>> > ValidationStack::popBack()
 {
@@ -33,29 +20,11 @@ std::shared_ptr< std::pair<OP_CODES, std::shared_ptr<unsigned char>> > Validatio
 	return std::make_shared< std::pair<OP_CODES,std::shared_ptr<unsigned char>> >( popedElem );
 }
 
-
-
-
 int ValidationStack::controlStack( const std::function<bool( ValidationStack*, ValidationOptions *optionsPtr )>& callback , ValidationOptions *optionsPtr )
 {
 	if( !(callback( this, optionsPtr )) ) return -1;
 	return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ScriptValidator::ScriptValidator( std::shared_ptr<PkScript> pkScript , std::shared_ptr<SignatureScript> signatureScript )
@@ -66,9 +35,6 @@ ScriptValidator::ScriptValidator( std::shared_ptr<PkScript> pkScript , std::shar
 
 	
 }
-
-
-
 
 bool ScriptValidator::verifyP2PKHScript( std::shared_ptr<unsigned char> txHash  , unsigned int txHashLength , bool showHistory )
 {
@@ -121,7 +87,6 @@ bool ScriptValidator::verifyP2PKHScript( std::shared_ptr<unsigned char> txHash  
 	}
 	return true;
 }
-
 
 
 }

@@ -13,6 +13,13 @@
 
 #include "openssl/evp.h"
 
+#include <chain/transaction/tx/common.h>
+#include <chain/transaction/tx/prev_out.h>
+#include <chain/transaction/script/signature_script.h>
+#include <chain/transaction/script/script.h>
+#include <cipher/ecdsa_manager.h>
+
+
 #include "../../../share/json.hpp"
 using json = nlohmann::json;
 

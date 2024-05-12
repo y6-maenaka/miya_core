@@ -10,9 +10,9 @@
 #include <array>
 
 #include <chain/block/block_header.h>
-#include <chain/transaction/coinbase/coinbase.hpp>
-#include <chain/transaction/p2pkh/p2pkh.h>
-#include <chain/utxo_set/utxo_set.h>
+// #include <chain/transaction/coinbase/coinbase.hpp>
+// #include <chain/transaction/p2pkh/p2pkh.h>
+// #include <chain/utxo_set/utxo_set.h>
 
 #include <hash/sha_hash.h>
 
@@ -28,9 +28,9 @@
 
 namespace tx
 {
-  struct P2PKH;
   struct coinbase;
-}
+  struct P2PKH;
+};
 
 
 namespace chain
@@ -46,7 +46,7 @@ constexpr unsigned int _BLOCK_HASH_BITS_LENGTH = 256; // temp
 struct Block
 {
 public:
-  using block_hash = std::array<std::uint8_t, 160/8>;
+  using block_hash = std::array<std::uint8_t, 256/8>;
 
   Block(); //
   std::shared_ptr<struct BlockHeader> header(){ return _header; };

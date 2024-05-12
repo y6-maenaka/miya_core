@@ -22,6 +22,7 @@
 
 #include <miya_db/miya_db/database_manager.h>
 #include <chain/block_chain_iterator/block_chain_iterator.h>
+#include <chain/miya_coin/local_strage_manager.h>
 // #include "./IBD.h"
 
 #include <stream_buffer/stream_buffer.h>
@@ -52,7 +53,6 @@ constexpr unsigned short DEFAULT_DAEMON_FORWARDING_SBC_ID_RESPONDER = 1;
 
 class MiyaChainBrocker;
 class MiyaChainRequester;
-class BlockLocalStrageManager;
 class LightUTXOSet;
 class BlockChainIterator;
 
@@ -78,10 +78,10 @@ private:
 	int _stateFileFD;
 	struct stat _filestat;
 
-	std::shared_ptr<BlockLocalStrageManager> _localStrageManager; // block_c_iterator生成よ用
+	std::shared_ptr<BlockLocalStrage> _localStrageManager; // block_c_iterator生成よ用
 
 public:
-	MiyaChainState( std::shared_ptr<BlockLocalStrageManager> localStrageManager ); // 寄贈時にchain_stateファイルを読み込む
+	MiyaChainState( std::shared_ptr<BlockLocalStrage> localStrageManager ); // 寄贈時にchain_stateファイルを読み込む
 	~MiyaChainState();
 
 	void update( std::shared_ptr<unsigned char> blockHash , unsigned short height ); // ファイルにも書き込む
@@ -124,7 +124,7 @@ private:
 
 	struct  // ローカルストレージマネージャーへの呼び出しは現在の実装では同期的に行われる
 	{
-		std::shared_ptr<BlockLocalStrageManager> _strageManager;
+		std::shared_ptr<BlockLocalStrage> _strageManager;
 	} _localStrageManager;
 
 
@@ -146,26 +146,8 @@ public:
 	std::shared_ptr<MiyaChainState> chainState();
 	std::shared_ptr<LightUTXOSet> utxoSet();
 
-	std::shared_ptr<BlockLocalStrageManager> localStrageManager();
+	std::shared_ptr<BlockLocalStrage> localStrageManager();
 	void __unitTest( std::vector<std::shared_ptr<Block>> blocks );
-};
-
-
-class chain_manager 
-{
-public:
-  void income_block();
-  void income_headers();
-
-  chain_manager( class BlockLocalStrageManager &block_strage_manager, std::string path_to_chainstate_sr, std::function<void(void)> on_chain_update );
-
-  // void on_chain_extended(); // chain_manager内部処理で最新ブロックがチェーンに繋がれ,ローカルのチェーンが伸びたときに呼び出されるハンドラ
-  class local_chain &get_local_chain();
-
-private:
-  class BlockLocalStrageManager &_block_strage_manager;
-  class local_chain _local_chain;
-  
 };
 
 

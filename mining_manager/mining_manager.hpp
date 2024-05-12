@@ -21,7 +21,7 @@
 
 
 #include <chain/block/block.hpp>
-#include <chain/block/block_header.hpp>
+// #include <chain/block/block_header.hpp>
 
 
 using namespace boost::asio;
@@ -48,17 +48,17 @@ public:
 	 };
 
 	 mb_id _id;
-	 struct block _block_header;
-	 std::vector< boost::thread, struct segment > _segments;
+	 // struct block_header _block_header;
+	 // std::vector< boost::thread, struct segment > _segments;
 	 boost::recursive_mutex _rmtx; 
 	 bool _exit_flag = {false};
 
-	 mining_control_block( io_context &io_ctx, struct blcok_header *block_header );
+	 mining_control_block( io_context &io_ctx, struct blcok_header block_header );
 	 static bool (invalid)( const mb_id &id );
   };
   using mcb = struct mining_control_block;
 
-  std::unordered_set< std::shared_ptr<mcb> > _active_mcb_st; // 基本的にマイニング中のブロックは一つ
+  std::unordered_set< std::shared_ptr<mcb> > _active_mcb_set; // 基本的にマイニング中のブロックは一つ
  
   mb_id mine_block( struct chain::block target /*マークルルートのシャッフルが必要になる可能性があるためblock本体 ※コピーして渡す*/
 	  , std::function<void(void)> on_success_mine/*マイニングに成功した時のコールバック*/

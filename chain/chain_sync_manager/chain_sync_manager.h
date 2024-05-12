@@ -44,7 +44,7 @@
 #include <chain/transaction/coinbase/coinbase.hpp>
 
 #include <chain/utxo_set/utxo_set.h>
-#include <chain/miya_coin/local_strage_manager.h>
+// #include <chain/miya_coin/local_strage_manager.h>
 
 
 namespace block
@@ -66,11 +66,9 @@ namespace chain
 class BDFilter;
 class BDVirtualChain;
 class LightUTXOSet;
-class BlockLocalStrageManager;
 class VirtualSubChainManager;
 class VirtualHeaderSyncManager;
 class VirtualBlockSyncManager;
-
 
 
 constexpr unsigned int DEFAULT_BLOCK_HEADER_DOWNLOAD_AGENT_COUNT = 1; // メインスレッドと切り離してブロックヘッダーの受信を担当するスレッド個数
@@ -106,7 +104,7 @@ private:
   BlockChainIterator &_forkPoint; // フォーク分岐点 下がることもある
   std::shared_ptr< LightUTXOSet > _utxoSet;
   std::shared_ptr<StreamBufferContainer> _toRequesterSBC;
-  std::shared_ptr<BlockLocalStrageManager> _localStrageManager = nullptr;
+  std::shared_ptr<BlockLocalStrage> _localStrageManager = nullptr;
   int _status;
 
   std::shared_ptr< BDFilter > _filter; // フィルター本体
@@ -117,7 +115,7 @@ private:
   } _syncManager;
 
 public:
-  ChainSyncManager( BlockChainIterator& initialForkPoint , std::shared_ptr<BlockLocalStrageManager> localStrageManager ,std::shared_ptr<StreamBufferContainer> toRequesterSBC );
+  ChainSyncManager( BlockChainIterator& initialForkPoint , std::shared_ptr<BlockLocalStrage> localStrageManager ,std::shared_ptr<StreamBufferContainer> toRequesterSBC );
 
   void forward(); // 目的(最終)を指定せず(自動的に最終を取得)して,それに達するように仮想チェーンを構築する ※ IBDなど
   void backward( std::shared_ptr<BlockHeader> objectiveHeader ); // 目的(最終)を指定して,それに達するように仮想チェーンを構築する ※ 他ノードが新たにブロックを発掘した時など

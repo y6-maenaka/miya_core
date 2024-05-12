@@ -1,5 +1,18 @@
 #include "local_strage_manager.h"
 
+#include <chain/transaction/coinbase/coinbase.hpp>
+#include <chain/transaction/p2pkh/p2pkh.h>
+#include <chain/block/block.hpp>
+#include <chain/utxo_set/utxo.h>
+#include <chain/utxo_set/utxo_set.h>
+
+#include <json.hpp>
+#include <stream_buffer/stream_buffer.h>
+#include <stream_buffer/stream_buffer_container.h>
+#include <miya_db_client/common.h>
+#include <miya_db_client/miya_db_sb_client.h>
+
+
 
 namespace chain
 {
@@ -40,7 +53,7 @@ void BlockIndex::importRaw( std::shared_ptr<unsigned char> fromRaw , size_t from
 
 
 // ## ファイルがひとつもない場合はエラーが発生する(ジェネシスブロックを必ず書き込む)
-BlockLocalStrageManager::BlockLocalStrageManager( std::shared_ptr<StreamBufferContainer> toIndexDBSBC , std::shared_ptr<StreamBufferContainer> fromIndexDBSBC )
+BlockLocalStrage::BlockLocalStrage( std::shared_ptr<StreamBufferContainer> toIndexDBSBC , std::shared_ptr<StreamBufferContainer> fromIndexDBSBC )
 {
 	_miyaDBClient = std::make_shared<MiyaDBSBClient>( toIndexDBSBC , fromIndexDBSBC );
 	_blkFileManager = std::make_shared<BlkFileManager>( "" );
@@ -69,7 +82,7 @@ BlockLocalStrageManager::BlockLocalStrageManager( std::shared_ptr<StreamBufferCo
 }
 
 
-std::vector< std::shared_ptr<UTXO> > BlockLocalStrageManager::writeBlock( std::shared_ptr<Block> targetBlock )
+std::vector< std::shared_ptr<UTXO> > BlockLocalStrage::writeBlock( std::shared_ptr<Block> targetBlock )
 {
 	std::shared_ptr<BlockContainer> container = std::make_shared<BlockContainer>(targetBlock); // pack block to blockContainer
 
@@ -128,7 +141,7 @@ std::vector< std::shared_ptr<UTXO> > BlockLocalStrageManager::writeBlock( std::s
 }
 
 
-std::shared_ptr<Block> BlockLocalStrageManager::readBlock( std::shared_ptr<unsigned char> blockHash )
+std::shared_ptr<Block> BlockLocalStrage::readBlock( std::shared_ptr<unsigned char> blockHash )
 {
 	std::shared_ptr<unsigned char> queryRetRaw; size_t queryRetRawLength;
 	queryRetRawLength = _miyaDBClient->get( blockHash , &queryRetRaw );
@@ -164,13 +177,13 @@ std::shared_ptr<Block> BlockLocalStrageManager::readBlock( std::shared_ptr<unsig
 }
 
 
-std::shared_ptr<struct Block> BlockLocalStrageManager::read_block( std::array<std::uint8_t, 256/8>  bh )
+std::shared_ptr<struct Block> BlockLocalStrage::read_block( std::array<std::uint8_t, 256/8>  bh )
 {
   return nullptr;
 }
 
 
-std::vector< std::shared_ptr<UTXO> > BlockLocalStrageManager::readUndo( std::shared_ptr<unsigned char> blockHash )
+std::vector< std::shared_ptr<UTXO> > BlockLocalStrage::readUndo( std::shared_ptr<unsigned char> blockHash )
 {
 	std::shared_ptr<unsigned char> queryRetRaw; size_t queryRetRawLength;
 	queryRetRawLength = _miyaDBClient->get( blockHash , &queryRetRaw );
@@ -204,7 +217,7 @@ std::vector< std::shared_ptr<UTXO> > BlockLocalStrageManager::readUndo( std::sha
 }
 
 
-std::vector< std::shared_ptr<UTXO> > BlockLocalStrageManager::releaseBlock( std::shared_ptr<unsigned char> blockHash )
+std::vector< std::shared_ptr<UTXO> > BlockLocalStrage::releaseBlock( std::shared_ptr<unsigned char> blockHash )
 {
 	std::vector< std::shared_ptr<UTXO> > utxoVector = this->readUndo( blockHash );
 

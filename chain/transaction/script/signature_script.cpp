@@ -1,8 +1,5 @@
 #include "signature_script.h"
 
-#include "../../../share/cipher/ecdsa_manager.h"
-#include "../../../share/hash/sha_hash.h"
-#include "openssl/asn1.h"
 
 namespace tx{
 

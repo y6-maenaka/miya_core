@@ -1,5 +1,9 @@
 #include "local_strage_manager.h"
 
+#include <chain/block/block.h>
+#include <chain/transaction/coinbase/coinbase.hpp>
+#include <chain/transaction/p2pkh/p2pkh.h>
+
 
 namespace chain
 {

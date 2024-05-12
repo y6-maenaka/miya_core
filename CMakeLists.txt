@@ -44,6 +44,7 @@ target_link_libraries( core_ver_0 PRIVATE
 
 	# TEST_chain
 	Boost::program_options
+	${Boost_LIBRARIES}
 )
 
 target_compile_options( core_ver_0 PUBLIC -Wall )

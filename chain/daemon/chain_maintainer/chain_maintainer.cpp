@@ -22,7 +22,7 @@ namespace chain
 
 
 
-ChainMaintainer::ChainMaintainer( std::shared_ptr<StreamBufferContainer> incomingSBC , std::shared_ptr<MiyaChainState> chainState, std::shared_ptr<LightUTXOSet> utxoSet, std::shared_ptr<BlockLocalStrageManager> localStrageManager )
+ChainMaintainer::ChainMaintainer( std::shared_ptr<StreamBufferContainer> incomingSBC , std::shared_ptr<MiyaChainState> chainState, std::shared_ptr<LightUTXOSet> utxoSet, std::shared_ptr<BlockLocalStrage> localStrageManager )
 {
 	_incomingSBC = incomingSBC;
 	_chainState = chainState;

@@ -1,9 +1,5 @@
 #include "pk_script.h"
 
-#include "./script.h"
-
-#include "../../../share/cipher/ecdsa_manager.h"
-
 
 namespace tx{
 

@@ -1,7 +1,5 @@
 #include "tx_out.h"
 
-#include "../script/pk_script.h"
-
 
 namespace tx{
 

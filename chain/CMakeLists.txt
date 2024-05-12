@@ -31,6 +31,8 @@ add_library( CHAIN STATIC
 	  transaction_pool/txcb_table.cpp
 	  #transaction_pool/provisional_utxo_cache/provisional_utxo_cache.cpp
 	  transaction_pool/unit_test.cpp
+	  transaction_pool/mempool.cpp
+	  transaction_pool/mempool_entry.cpp
 
 	  # daemon/transaction_validator/transaction_validator.cpp
 	  # daemon/block_validator/block_validator.cpp

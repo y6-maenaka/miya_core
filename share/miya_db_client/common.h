@@ -1,6 +1,8 @@
+#ifndef E4D70A82_D2BE_48C2_B4A0_B17FA941E9DE
+#define E4D70A82_D2BE_48C2_B4A0_B17FA941E9DE
+
 #include <unistd.h>
 #include <random>
-
 
 
 namespace miya_db
@@ -24,14 +26,15 @@ constexpr int MIYA_DB_STATUS_BAD = -1;
 
 static uint32_t generateQueryID()
 {
-	std::random_device rd; // シードの初期化
-	std::mt19937 gen(rd());  // 乱数生成機の初期化
+  std::random_device rd; // シードの初期化
+  std::mt19937 gen(rd());  // 乱数生成機の初期化
 
-	std::uniform_int_distribution<uint32_t> dis; // 生成範囲の設定
-	return dis(gen);
-
+  std::uniform_int_distribution<uint32_t> dis; // 生成範囲の設定
+  return dis(gen);
 }
 
 
-
 };
+
+
+#endif 

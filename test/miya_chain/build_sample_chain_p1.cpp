@@ -129,7 +129,7 @@ int build_sample_chain_p1
 
 
 
-std::shared_ptr<chain::BlockLocalStrageManager> localStrageManager;
+std::shared_ptr<chain::BlockLocalStrage> localStrageManager;
   localStrageManager = miyaChainManager->localStrageManager();
 
   std::shared_ptr<chain::MiyaChainState> chainState = miyaChainManager->chainState();

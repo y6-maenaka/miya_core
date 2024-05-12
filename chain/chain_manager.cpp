@@ -1,4 +1,5 @@
 #include "chain_manager.h"
+#include "chain_manager.hpp"
 
 
 namespace chain
@@ -28,7 +29,7 @@ int MiyaChainManager::init( std::shared_ptr<StreamBufferContainer> toEKP2PBroker
 
 
 	// ローカルデータストア(生ブロックを直接ファイルに保存している)
-	_localStrageManager._strageManager = std::make_shared<BlockLocalStrageManager>( _blockIndexDB._toBlockIndexDBSBC , _blockIndexDB._fromBlockIndexDBSBC );
+	_localStrageManager._strageManager = std::make_shared<BlockLocalStrage>( _blockIndexDB._toBlockIndexDBSBC , _blockIndexDB._fromBlockIndexDBSBC );
 
 	// ChainStateのセットアップ
 	_chainState = std::make_shared<MiyaChainState>( _localStrageManager._strageManager );
@@ -84,22 +85,30 @@ std::shared_ptr<LightUTXOSet> MiyaChainManager::utxoSet()
 	return _utxoSet;
 }
 
-std::shared_ptr<BlockLocalStrageManager> MiyaChainManager::localStrageManager()
+std::shared_ptr<BlockLocalStrage> MiyaChainManager::localStrageManager()
 {
 	return _localStrageManager._strageManager;
 }
 
-chain_manager::chain_manager( BlockLocalStrageManager &block_strage_manager, std::string path_to_chainstate_sr, std::function<void(void)> on_chain_update ) : 
-  _block_strage_manager( block_strage_manager )
-  , _local_chain( path_to_chainstate_sr, _block_strage_manager )
+
+
+
+
+
+
+chain_manager::chain_manager( io_context &io_ctx, class core_context &core_ctx, class BlockLocalStrage &block_strage, std::string path_to_chainstate_sr, std::function<void(void)> on_chain_update ) : 
+  _block_strage( block_strage )
+  // , _local_chain( path_to_chainstate_sr, _block_strage )
+  , _io_ctx( io_ctx )
+  , _refresh_timer( io_ctx )
 {
   return;
 }
 
-class local_chain& chain_manager::get_local_chain()
+/* class local_chain& chain_manager::get_local_chain()
 {
-  return _local_chain;
-}
+  // return _local_chain;
+} */
 
 
 };

@@ -1,12 +1,5 @@
 #include "tx_in.h"
 
-#include "./common.h"
-#include "./prev_out.h"
-#include "../script/signature_script.h"
-#include "../script/script.h"
-#include "../../../share/cipher/ecdsa_manager.h"
-
-
 
 namespace tx
 {

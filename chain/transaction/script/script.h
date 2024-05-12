@@ -9,6 +9,8 @@
 
 #include <unistd.h>
 
+#include "../../../share/hash/sha_hash.h"
+#include "../../../share/cipher/ecdsa_manager.h"
 
 
 namespace tx{
@@ -18,9 +20,6 @@ class Script;
 class ScriptStack;
 class ValidationStack;
 class ValidationOptions;
-
-
-
 
 
 // 継承で作った方がいい
@@ -79,10 +78,6 @@ template <typename T>
 
 
 
-
-
-
-
 enum class OP_CODES_ID : int
 {
 COMMON = 0,
@@ -133,10 +128,6 @@ public:
 	std::vector< std::pair< OP_CODES, std::shared_ptr<unsigned char> > >::iterator begin();
 	std::vector< std::pair< OP_CODES, std::shared_ptr<unsigned char> > >::iterator end();
 };
-
-
-
-
 
 
 }; // close tx namespace

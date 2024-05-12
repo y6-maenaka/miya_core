@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <set>
 #include <cassert>
+#include <functional>
+#include <optional>
 
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -19,18 +21,7 @@
 #include <unistd.h>
 #include <arpa/inet.h> // htons用 使っていい？
 
-#include <chain/block/block.h>
-
-#include <chain/transaction/coinbase/coinbase.hpp>
-#include <chain/transaction/p2pkh/p2pkh.h>
-#include <chain/utxo_set/utxo.h>
-#include <chain/utxo_set/utxo_set.h>
-
-#include <json.hpp>
-#include <stream_buffer/stream_buffer.h>
-#include <stream_buffer/stream_buffer_container.h>
-#include <miya_db_client/common.h>
-#include <miya_db_client/miya_db_sb_client.h>
+// #include <chain/block/block.h>
 
 
 namespace tx
@@ -55,6 +46,7 @@ constexpr unsigned short BLK_REV_META_BLOCK_SIZE = 100; // メタ情報の領域
 
 
 struct UTXO;
+struct block;
 
 
 // access free
@@ -62,7 +54,6 @@ struct BlockContainer
 {
 //private:
 public:
-
 	struct Meta
 	{
 		unsigned char _magicBytes[4];
@@ -167,7 +158,7 @@ public:
 	long write( std::shared_ptr<unsigned char> data , size_t dataLength );
 	//(return):実際に読み込みたデータ数   (data):読み込みデータ , (size):読み込みデータ長, (offset):開始地点
 	size_t read( std::shared_ptr<unsigned char> *data, size_t size ,off_t offset );
-  
+
 	// std::shared_ptr<BlockContainer> read( off_t offset );
 
 
@@ -225,7 +216,7 @@ public:
 };
 
 
-class BlockLocalStrageManager
+class BlockLocalStrage
 {
 private:
 	//std::shared_ptr<StreamBufferContainer> _toIndexDBSBC;
@@ -236,7 +227,7 @@ private:
 
 	unsigned int _lastIndex = 0;
 public:
-	BlockLocalStrageManager( std::shared_ptr<StreamBufferContainer> toIndexDBSBC , std::shared_ptr<StreamBufferContainer> fromIndexDBSBC );
+	BlockLocalStrage( std::shared_ptr<StreamBufferContainer> toIndexDBSBC = nullptr , std::shared_ptr<StreamBufferContainer> fromIndexDBSBC = nullptr );
 
 	// ブロック操作
 	std::vector<std::shared_ptr<UTXO>> writeBlock( std::shared_ptr<Block> targetBlock ); // 保存はブロック単位  Revファイルも同時に作成される
@@ -244,12 +235,13 @@ public:
 	std::shared_ptr<struct Block> read_block( std::array<std::uint8_t, 256/8> bh /*後で修正する*/);
 	// トランザクション操作
 	std::shared_ptr<tx::P2PKH> readTx( std::shared_ptr<unsigned char> txHash );
-	
+
 	// Rev操作
 	std::vector< std::shared_ptr<UTXO> > readUndo( std::shared_ptr<unsigned char> blockHash );
 
 	std::vector< std::shared_ptr<UTXO> > releaseBlock( std::shared_ptr<unsigned char> blockHash );  // ブロック・Revが共に管理外となる
 																																															// undoはリターンする
+  using read_block_func = std::function<std::shared_ptr<struct block>( const std::array<std::uint8_t, 256/8>/*後で修正*/ &bh )>;
 };
 
 /*

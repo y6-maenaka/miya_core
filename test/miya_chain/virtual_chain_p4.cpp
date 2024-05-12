@@ -142,7 +142,7 @@ int virtual_chain_p4()
 
 
   std::shared_ptr<StreamBufferContainer> toRequesterSBC = std::make_shared<StreamBufferContainer>();
-  std::shared_ptr<chain::BlockLocalStrageManager> localStrageManager = miyaChainManager->localStrageManager();
+  std::shared_ptr<chain::BlockLocalStrage> localStrageManager = miyaChainManager->localStrageManager();
   std::shared_ptr<chain::ChainSyncManager> virtualChain = std::shared_ptr<chain::ChainSyncManager>( new chain::ChainSyncManager( *latestBlockItr , localStrageManager ,toRequesterSBC ) );
 
   std::vector< std::shared_ptr<block::BlockHeader> > requestHeaderVector;

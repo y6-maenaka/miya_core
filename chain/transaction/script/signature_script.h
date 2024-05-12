@@ -2,7 +2,6 @@
 #define BC1FA169_C231_4488_BB6B_A681BFDA6156
 
 
-
 #include <memory>
 #include <variant>
 #include <iostream>
@@ -12,11 +11,12 @@
 #include "./script.h"
 #include "openssl/evp.h"
 
+#include "../../../share/cipher/ecdsa_manager.h"
+#include "../../../share/hash/sha_hash.h"
+#include "openssl/asn1.h"
 
 
 namespace tx{
-
-
 
 
 enum class SCRIPT_TYPE : int {
@@ -25,11 +25,6 @@ enum class SCRIPT_TYPE : int {
 	Sig	,
 
 };
-
-
-
-
-
 
 
 class SignatureScript // unLockingScript // 秘密鍵を持っていることの証明
@@ -67,9 +62,6 @@ public:
 	unsigned short exportRawWithSignatureScript( std::shared_ptr<unsigned char> *ret ); //  署名が格納されたものを書き出す(本命)
 	// unsigned short exportRaw( std::shared_ptr<unsigned char> ret );
 };
-
-
-
 
 
 }; // close tx namespace

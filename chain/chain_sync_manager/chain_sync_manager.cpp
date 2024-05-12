@@ -6,7 +6,7 @@ namespace chain
 
 
 
-ChainSyncManager::ChainSyncManager( BlockChainIterator& initialForkPoint , std::shared_ptr<BlockLocalStrageManager> localStrageManager ,std::shared_ptr<StreamBufferContainer> toRequesterSBC ) : _forkPoint(initialForkPoint)
+ChainSyncManager::ChainSyncManager( BlockChainIterator& initialForkPoint , std::shared_ptr<BlockLocalStrage> localStrageManager ,std::shared_ptr<StreamBufferContainer> toRequesterSBC ) : _forkPoint(initialForkPoint)
 {
   _forkPoint = initialForkPoint;
   _toRequesterSBC = toRequesterSBC;

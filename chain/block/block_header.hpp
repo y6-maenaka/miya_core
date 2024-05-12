@@ -27,6 +27,7 @@ public:
   std::uint32_t get_time() const;
   std::uint32_t get_nonce() const;
   header_hash get_header_hash() const;
+  header_hash get_prev_block_hash() const;
   std::vector<std::uint8_t> export_to_binary() const; 
   
   void increment_nonce(); // nonceを1インクリメントする

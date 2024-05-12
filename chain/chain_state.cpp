@@ -1,17 +1,9 @@
 #include "chain_manager.h"
 #include "./chain_state.hpp"
 
-#include "./block/block.h"
-#include "./block/block_header.h"
-#include "./miya_coin/local_strage_manager.h"
-
-
 
 namespace chain
 {
-
-
-
 
 
 std::shared_ptr<unsigned char> MiyaChainState::ChainMeta::blockHash()
@@ -22,7 +14,7 @@ std::shared_ptr<unsigned char> MiyaChainState::ChainMeta::blockHash()
 }
 
 
-MiyaChainState::MiyaChainState( std::shared_ptr<BlockLocalStrageManager> localStrageManager )
+MiyaChainState::MiyaChainState( std::shared_ptr<BlockLocalStrage> localStrageManager )
 {
 	std::cout << "This is MiyaChainState コンストラクタ" << "\n";
 
@@ -30,7 +22,7 @@ MiyaChainState::MiyaChainState( std::shared_ptr<BlockLocalStrageManager> localSt
 	_localStrageManager = localStrageManager;
 
 
-	// MiyaChainState( std::shared_ptr<BlockLocalStrageManager> localStrageManager ); // 寄贈時にchain_stateファイルを読み込む
+	// MiyaChainState( std::shared_ptr<BlockLocalStrage> localStrageManager ); // 寄贈時にchain_stateファイルを読み込む
 
 
 	_systemPageSize = sysconf (_SC_PAGESIZE); // 本アーキテクチャのページサイズを取得
@@ -109,16 +101,6 @@ unsigned int MiyaChainState::height()
 	return static_cast<unsigned int>(_chainMeta->_heigth);
 }
 */
-
-
-
-
-
-
-
-
-
-
 
 
 

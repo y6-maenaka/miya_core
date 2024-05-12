@@ -40,11 +40,6 @@ bool BlockValidation::verifyBlockHeader( block::BlockHeader *target )
 }
 
 
-
-
-
-
-
 bool BlockValidation::verifyP2PKH( std::shared_ptr<tx::P2PKH> target ,std::shared_ptr<LightUTXOSet> utxoSet )
 {
 	// 参照しているUTXOからlockingScriptを取り出し,tx_inのlockingScriptと結合する

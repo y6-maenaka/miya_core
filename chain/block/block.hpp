@@ -20,6 +20,7 @@ public:
   using block_hash = block_header::header_hash;
 
   block_hash get_block_hash() const; 
+  block_hash get_prev_block_hash() const;
   std::vector<std::uint8_t> export_to_binary();
 
   bool check_pow() const; // 重要(ブロックハッシュの検証)
@@ -28,7 +29,7 @@ protected:
 private:
   class block_header _header;
   std::vector< struct tx::P2PKH > _tx_v; // transactions
-  struct tx::coinbase _coinbase;
+  // struct tx::coinbase _coinbase; // 後で修正
 };
 
 

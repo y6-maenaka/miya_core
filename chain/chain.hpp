@@ -16,24 +16,20 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <array>
+
+#include <chain/miya_coin/local_strage_manager.h>
+#include "./miya_coin/local_strage_manager.h"
+#include <chain/block/block.hpp>
 
 
 namespace chain
 {
 
 
-struct Block;
-
-
 class block_iterator //block_iterator と block本体の違いは
 {
 public:
-  std::shared_ptr<struct Block> _body;
-  class BlockLocalStrageManager&  _local_strage_manager;
-
-  // block_iterator & operator++(); // 前置
-  // block_iterator & operator++(int); // 後置
-
   block_iterator & operator--();
   block_iterator & operator--(int);
 
@@ -41,11 +37,16 @@ public:
   block_iterator& operator*();
 
   std::size_t get_height() const; // _bodyのheightの関節呼び出し
+  
   bool is_valid() const;
+  static bool (invalid)( const block_iterator &bi );
+
+  block_iterator( BlockLocalStrage::read_block_func read_block_f );
 
 private:
-  std::function<std::shared_ptr<struct Block>(std::array<std::uint8_t, 256/8>)/*あとで 置き換える*/> _read_block_f;
-  bool _is_vaild;
+  BlockLocalStrage::read_block_func _read_block_f;
+  std::shared_ptr<struct block> _body;
+  bool _is_valid;
 };
 
 
@@ -64,18 +65,18 @@ class local_chain // 基本的にチェーン先頭のブロックだけを持�
 	struct local_synced_file_io; // 先頭が更新んされると,ローカルの記録領域も変更する
   } _chain_head;
 
-  class BlockLocalStrageManager &_block_strage_manager;
+  class BlockLocalStrage &_block_strage;
   class chain_iterator get_chain_iterator();
 
 public:
-  local_chain( std::string path_to_l_chainstate_st, BlockLocalStrageManager &block_strage_manager );
+  local_chain( std::string path_to_l_chainstate_st/* path to local chainstate st*/, class BlockLocalStrage &block_strage );
   void init();
 };
 
 struct local_chain::chain_head::local_synced_file_io
 {
-  void write( std::vector<std::uint8_t> );
-  std::vector<std::uint8_t> read( std::size_t bytes );
+  // void write( std::vector<std::uint8_t> );
+  // std::vector<std::uint8_t> read( std::size_t bytes );
 };
 
 

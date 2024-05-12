@@ -2,14 +2,17 @@
 #define A464F000_6B41_4360_B39C_A3EA44A8E80B
 
 
-#include "./script.h"
-
 #include <iostream>
 #include <vector>
 #include <map>
 #include <variant>
 
+#include <chain/transaction/script/script.h>
+#include <cipher/ecdsa_manager.h>
+
 #include "openssl/evp.h"
+
+#include "./script.h"
 
 
 namespace tx{
