@@ -3,9 +3,16 @@
 #include "../../core/core.hpp"
 #include "../../ss_p2p_node_controller/include/ss_p2p/node_controller.hpp"
 
+#include <test/miya_chain/setup_mempool.cpp>
+// #include "../../test/miya_chain/setup_mempool.cpp"
+
 
 int main( int argc, const char* argv[] )
 {
+
+  setup_mempool() ;
+  return 0;
+
 	core::core core = core::core();
 	std::string pem_pass = core.get_context().get_ecdsa_pem_pass();
 	std::cout << pem_pass << "\n";

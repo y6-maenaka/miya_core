@@ -6,6 +6,19 @@ namespace chain
 {
 
 
+class mempool;
+class chain_state;
+
+
+class block_template 
+{ 
+  /*
+  block;
+  block_fee;
+  その他のメタ情報
+  */
+};
+
 class block_assembler
 {
   /*
@@ -13,7 +26,10 @@ class block_assembler
   chain_state
   options.min_fee 等
   */
+public: 
+  block_assembler( const mempool *mpool ); // トランザクション参照の為
 
+  block_template create_new_block( chain_state &chain_state, const mempool *mpool ); 
 };
 
 

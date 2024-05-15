@@ -52,7 +52,7 @@ private:
 		std::vector< std::shared_ptr<TxOut> > _outs;
 	} _meta;
 
-	unsigned int formatExportedRawTxVector( std::vector< std::pair<std::shared_ptr<unsigned char>,unsigned int> > exportedRawTxVector, std::shared_ptr<unsigned char> *retRaw ); 
+	unsigned int formatExportedRawTxVector( std::vector< std::pair<std::shared_ptr<unsigned char>,unsigned int> > exportedRawTxVector, std::shared_ptr<unsigned char> *retRaw ) const;
 
 public:
 	P2PKH();
@@ -71,7 +71,7 @@ public:
 	bool sign(); // 全てのtxに対して署名を行う
 	bool verify( std::shared_ptr<chain::LightUTXOSet> utxoSet /* prevOutの問い合わせ用オブジェクト */ ); 
 
-	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw ); // 書き出しに先駆けて必ず署名を完了させる必要がある
+	unsigned int exportRaw( std::shared_ptr<unsigned char> *retRaw ) const; // 書き出しに先駆けて必ず署名を完了させる必要がある
 	size_t importRawSequentially( std::shared_ptr<unsigned char> fromRaw );
 	size_t importRawSequentially( void* fromRaw );
 
@@ -84,7 +84,8 @@ public:
 	-> 各tx_inに対しての署名作成
 	*/
   
-  std::vector<std::uint8_t> export_to_binary(); // とりあえず既存exportRawのwrraperで 後で本実装する
+  std::vector<std::uint8_t> export_to_binary() const; // とりあえず既存exportRawのwrraperで 後で本実装する
+  tx_hash get_hash() const;
   tx_id get_id() const;
 };
 

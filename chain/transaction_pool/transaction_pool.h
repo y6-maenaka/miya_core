@@ -28,7 +28,6 @@ namespace chain
 
 struct TxCB;
 class TxCBTable;
-class P2PKH;
 class ProvisionalUTxOCache; // トランザクションプール内にストックされているtxが参照しているutxo(暫定)が管理されているマップ
 
 // トランザクションの重複を許可しないメモリープール

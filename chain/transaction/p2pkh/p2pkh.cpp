@@ -41,7 +41,7 @@ std::vector< std::shared_ptr<TxOut> > P2PKH::outs()
 	return _meta._outs;
 }
 
-unsigned int P2PKH::formatExportedRawTxVector( std::vector< std::pair<std::shared_ptr<unsigned char>,unsigned int> > exportedRawTxVector, std::shared_ptr<unsigned char> *retRaw )
+unsigned int P2PKH::formatExportedRawTxVector( std::vector< std::pair<std::shared_ptr<unsigned char>,unsigned int> > exportedRawTxVector, std::shared_ptr<unsigned char> *retRaw ) const
 {
 	if( exportedRawTxVector.size() <= 0 ) return 0;
 
@@ -198,7 +198,7 @@ bool P2PKH::verify( std::shared_ptr<chain::LightUTXOSet> utxoSet )
 	return flag;
 }
 
-unsigned int P2PKH::exportRaw( std::shared_ptr<unsigned char> *retRaw )
+unsigned int P2PKH::exportRaw( std::shared_ptr<unsigned char> *retRaw ) const
 {
 	// 全てのtx_inの署名が住んでいることを確認する
 	for( auto itr : _meta._ins )
@@ -407,9 +407,8 @@ unsigned int P2PKH::calcTxID( std::shared_ptr<unsigned char> *ret )
 	return hash::SHAHash( exportedP2PKH, exportedP2PKHLength , ret , "sha256" );
 }
 
-std::vector<std::uint8_t> P2PKH::export_to_binary()
+std::vector<std::uint8_t> P2PKH::export_to_binary() const
 {
-  
   // 仮の実装 後で修正する
   unsigned int p2pkh_binary_length; 
   std::shared_ptr<unsigned char> p2pkh_binary;
@@ -419,6 +418,15 @@ std::vector<std::uint8_t> P2PKH::export_to_binary()
   ret.resize( p2pkh_binary_length );
   std::memcpy( ret.data(), p2pkh_binary.get(), p2pkh_binary_length );
   return ret;
+}
+
+tx_hash P2PKH::get_hash() const
+{
+  auto self_binary = this->export_to_binary();
+}
+
+tx_id P2PKH::get_id() const
+{
 }
 
 /*
