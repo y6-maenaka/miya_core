@@ -20,19 +20,29 @@ mempool_entry::mempool_entry( const tx::transaction_ref &tx_ref, std::uint32_t f
   return;
 }
 
+tx::tx_id mempool_entry::get_tx_id() const
+{
+  return _tx_ref->get_id();
+}
+
 std::size_t mempool_entry::get_tx_fee() const
 {
-  return 0; // 一旦
+  return static_cast<std::size_t>(_meta._fee);
 }
 
 std::size_t mempool_entry::get_tx_size_bytes() const
 {
-  return 0; // 一旦
+  return static_cast<std::size_t>(_tx_ref->get_size());
 }
 
 std::size_t mempool_entry::get_entry_size_bytes() const
 {
-  return 0; // 一旦
+  return ( this->get_tx_size_bytes() + sizeof(_meta) );
+}
+
+std::time_t mempool_entry::get_entryed_at() const
+{
+  return _meta._entryed_at;
 }
 
 

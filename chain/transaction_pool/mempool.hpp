@@ -15,6 +15,7 @@
 #include "boost/multi_index/sequenced_index.hpp"
 
 #include <mutex>
+#include <string>
 #include <optional>
 
 // #include <chain/transaction/tx.hpp>
@@ -39,45 +40,47 @@ struct mempool_entry_tx_id
 {
   typedef tx::tx_id result_type; // タグの指定に必要
   result_type operator()( const mempool_entry &entry ) const{
-	// return entry.get_tx().get_id();
+	return entry.get_tx_id();
   } // multi_index_containerで使用するには,さらにハッシュ関数を指定する必要がある
 };
 
 class mempool_entry_compare_tx_fee
 {
 public:
-  bool operator()( const mempool_entry &entry_a, const mempool_entry &entry_b ) const
+  bool operator()( const mempool_entry &entry_1, const mempool_entry &entry_2 ) const
   {
-	return false;
+	return entry_1.get_tx_fee() < entry_2.get_tx_fee();
   }
 };
 
 class mempool_entry_compare_entryed_at
 {
 public:
-  bool operator()( const mempool_entry &entry_a, const mempool_entry &entry_b ) const
+  bool operator()( const mempool_entry &entry_1, const mempool_entry &entry_2 ) const
   {
-	return false;
+	return entry_1.get_entryed_at() < entry_2.get_entryed_at();
   }
 };
 
-class mempool_entry_compare_entry_bytes
+class mempool_entry_compare_entry_size_bytes
 {
 public:
-  bool operator()( const mempool_entry &entry_a, const mempool_entry &entry_b ) const
+  bool operator()( const mempool_entry &entry_1, const mempool_entry &entry_2 ) const
   {
-	return false;
+	return entry_1.get_entry_size_bytes() < entry_2.get_entry_size_bytes();
   }
 };
 
-class tx_linear_hasher 
+class tx_id_linear_hasher 
 {
 public:
   std::size_t operator()( const mempool_entry_tx_id::result_type &input ) const
   {
-	return 10;
+	std::string input_str( reinterpret_cast<const char*>(input.data(), input.size() ) );
+	return std::hash<std::string>()(input_str);
   }
 };
+
 
 // 検索用の名前(タグ定義)
 struct index_by_tx_id;
@@ -99,10 +102,10 @@ public:
   typedef boost::multi_index_container<
 	class mempool_entry
 	, boost::multi_index::indexed_by<
-		boost::multi_index::hashed_unique< mempool_entry_tx_id , tx_linear_hasher> // indexed by tx_id
+		boost::multi_index::hashed_unique< mempool_entry_tx_id , tx_id_linear_hasher> // indexed by tx_id
 		, boost::multi_index::ordered_non_unique< boost::multi_index::tag<index_by_tx_fee>, boost::multi_index::identity<mempool_entry>, mempool_entry_compare_tx_fee > // indexed by fee
 		, boost::multi_index::ordered_non_unique< boost::multi_index::tag<index_by_entryed_at>, boost::multi_index::identity<mempool_entry>, mempool_entry_compare_entryed_at > // indexed by entryed_at
-		, boost::multi_index::ordered_non_unique< boost::multi_index::tag<index_by_entry_bytes>, boost::multi_index::identity<mempool_entry>, mempool_entry_compare_entry_bytes > // indexed by entry bytes
+		, boost::multi_index::ordered_non_unique< boost::multi_index::tag<index_by_entry_bytes>, boost::multi_index::identity<mempool_entry>, mempool_entry_compare_entry_size_bytes > // indexed by entry bytes
 	  >	
 	> indexed_tx_set;
 

@@ -1,4 +1,5 @@
 #include "p2pkh.h"
+#include <binary_utils.hpp> // for hash tx body
 
 
 namespace tx{
@@ -412,7 +413,7 @@ std::vector<std::uint8_t> P2PKH::export_to_binary() const
   // 仮の実装 後で修正する
   unsigned int p2pkh_binary_length; 
   std::shared_ptr<unsigned char> p2pkh_binary;
-  p2pkh_binary_length = this->exportRaw( &p2pkh_binary );
+  p2pkh_binary_length = this->exportRaw( &p2pkh_binary ); // 仮の実装(exportRawメソッドは廃止する)
 
   std::vector<std::uint8_t> ret;
   ret.resize( p2pkh_binary_length );
@@ -422,11 +423,23 @@ std::vector<std::uint8_t> P2PKH::export_to_binary() const
 
 tx_hash P2PKH::get_hash() const
 {
-  auto self_binary = this->export_to_binary();
+  std::vector<std::uint8_t> self_binary = this->export_to_binary();
+  std::vector<std::uint8_t> self_binary_md = cu::w_sha::hash( self_binary.data(), self_binary.size(), cu::w_sha::hash_t::SHA256 );
+
+  if( auto ret = vector_to_array< std::uint8_t, TX_ID_LENGTH>(self_binary_md); ret != std::nullopt ){
+	return ret.value();
+  }
+  return invaild_tx_id;
 }
 
 tx_id P2PKH::get_id() const
 {
+  return get_hash();
+}
+
+std::size_t P2PKH::get_size() const
+{
+  return 100; // 算出方法が未定な為仮
 }
 
 /*

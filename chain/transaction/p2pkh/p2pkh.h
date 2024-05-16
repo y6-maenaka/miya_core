@@ -85,8 +85,9 @@ public:
 	*/
   
   std::vector<std::uint8_t> export_to_binary() const; // とりあえず既存exportRawのwrraperで 後で本実装する
-  tx_hash get_hash() const;
+  tx_hash get_hash() const; // 本体のハッシュ(=tx_id)
   tx_id get_id() const;
+  std::size_t get_size() const;
 };
 
 

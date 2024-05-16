@@ -19,10 +19,8 @@ public:
   using mempool_entry_ref = std::reference_wrapper<mempool_entry>;
 
 private:
-  const tx::transaction_ref _tx_ref;
+  const tx::transaction_ref _tx_ref; // 本体
  
-  tx::tx_id _id;
-
   struct meta
   {
 	std::uint32_t _fee;
@@ -37,8 +35,8 @@ public:
 
   tx::transaction_ref get_tx(); // 本体txの取得
 
-  tx::tx_id get_id();
-  std::chrono::seconds get_entryed_at() const;
+  tx::tx_id get_tx_id() const;
+  std::time_t get_entryed_at() const;
   std::size_t get_entry_size_bytes() const; // エントリー(もちろんtxも含む)のサイズ取得
   std::size_t get_tx_size_bytes() const; // txのサイズ取得
   std::size_t get_tx_fee() const;
