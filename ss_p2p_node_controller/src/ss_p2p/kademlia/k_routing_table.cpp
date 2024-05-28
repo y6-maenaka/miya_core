@@ -7,12 +7,10 @@ namespace kademlia
 {
 
 
-k_routing_table::k_routing_table( node_id self_id ) :
+k_routing_table::k_routing_table( node_id self_id, ss_logger *logger ) :
   _self_id( self_id )
+  , _logger( logger )
 {
-  #if SS_VERBOSE
-  std::cout << "k routing table hosting with :: "; _self_id.print(); std::cout << "\n";
-  #endif
   return;
 }
 
@@ -39,6 +37,7 @@ k_bucket::update_state k_routing_table::auto_update( k_node kn )
   auto ret = target_bucket.auto_update( kn );
 
   #if SS_VERBOSE
+  /*
   std::cout << "\x1b[31m" << "[ routing table update ]" << "\x1b[39m ";
   std::cout << "(endpoint): " << kn.get_endpoint();
   std::cout << "| (branch): " << branch_idx + 1;
@@ -48,6 +47,7 @@ k_bucket::update_state k_routing_table::auto_update( k_node kn )
   else if( ret == k_bucket::update_state::not_found ) std::cout << "not found" << "\n";
   else if ( ret == k_bucket::update_state::overflow ) std::cout << "\x1b[31m" << "overflow" << "\x1b[39m" << "\n";
   else std::cout << "error" << "\n";
+  */  
   #endif
 
   return ret;

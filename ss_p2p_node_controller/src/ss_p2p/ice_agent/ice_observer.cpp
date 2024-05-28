@@ -52,9 +52,9 @@ void signaling_request::init( ip::udp::endpoint &dest_ep, std::string param, jso
 		   , std::placeholders::_1 )
 	  );
 
-	#if SS_VERBOSE
-  std::cout << "(signaling_request observer)[init] init message send -> " << itr << "\n";
-	#endif
+	/* #if SS_VERBOSE
+	std::cout << "(signaling_request observer)[init] init message send -> " << itr << "\n";
+	#endif */
   }
 
   return;
@@ -62,10 +62,12 @@ void signaling_request::init( ip::udp::endpoint &dest_ep, std::string param, jso
 
 void signaling_request::on_send_done( const boost::system::error_code &ec )
 {
-  #if SS_VERBOSE
+  return;
+  
+  /* #if SS_VERBOSE
   if( !ec ) ;// std::cout << "(signaling_request observer)[send_done]" << "\n";
   else std::cout << "(signaling_request observer)" << "\x1b[31m" << " send failure" << "\x1b[39m" << "\n";
-  #endif
+  #endif */
 }
 
 void signaling_request::on_traversal_done( const boost::system::error_code &ec )
@@ -144,10 +146,10 @@ signaling_response::signaling_response( io_context &io_ctx, class sender &sender
 
 void signaling_response::init( const boost::system::error_code &ec )
 {
-  #if SS_VERBOSE
+  /* #if SS_VERBOSE
   if( !ec ); // std::cout << "signaling_response::init success" << "\n";
   else std::cout << "(signaling_request observer)" << "\x1b[31m" << " init failure" << "\x1b[39m" << "\n";
-  #endif
+  #endif */
 
   if( !ec ) extend_expire_at( 30 ); // 有効期限を30秒延長する
 }
@@ -174,10 +176,6 @@ signaling_relay::signaling_relay( io_context &io_ctx, class sender &sender, clas
 
 void signaling_relay::init()
 {
-  #if SS_VERBOSE
-  std::cout << "(signaling_relay)[init]" << "\n";
-  #endif
-
   extend_expire_at( 20 );
 }
 
@@ -327,10 +325,6 @@ void binding_request::on_timeout( const boost::system::error_code &ec )
 
 void binding_request::update_sr( const consensus_ctx &cctx )
 {
-  #if SS_VERBOSE
-  std::cout << "[binding_request observer][update state]" << "\n";
-  #endif
-
   // 状態変数の更新
   if( cctx.state == binding_request::consensus_ctx::done )
   {

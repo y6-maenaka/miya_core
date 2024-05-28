@@ -24,9 +24,9 @@ void ice_observer_strage::refresh_tick( const boost::system::error_code &ec )
 		  ((delete_expires_observer(args)), ...);
 	  }, _strage );
 
-  #if SS_VERBOSE
+  /* #if SS_VERBOSE
   std::cout << "(ice_observer_strage) refresh_tick called" << "\n";
-  #endif
+  #endif */
 
   call_tick(); // 循環的に呼び出し
 }

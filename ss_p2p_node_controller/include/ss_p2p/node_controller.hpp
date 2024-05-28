@@ -24,6 +24,7 @@
 #include <ss_p2p/message_pool.hpp>
 #include <ss_p2p/socket_manager.hpp>
 #include <ss_p2p/sender.hpp>
+#include <ss_p2p/ss_logger.hpp>
 #include <utils.hpp>
 
 
@@ -63,6 +64,7 @@ public:
   message_pool::message_hub& get_message_hub();
 
   void update_global_self_endpoint( ip::udp::endpoint ep );
+
   #if SS_DEBUG
   kademlia::k_routing_table &get_routing_table();
   ice::ice_agent &get_ice_agent();
@@ -90,6 +92,8 @@ private:
   std::shared_ptr<ice::ice_agent> _ice_agent;
   std::shared_ptr<kademlia::dht_manager> _dht_manager;
   message_pool _msg_pool;
+
+  ss_logger _logger;
 };
 
 

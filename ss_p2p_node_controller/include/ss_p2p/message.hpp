@@ -19,9 +19,13 @@ namespace ss
 
 using encoded_message = std::span<char const>;
 
-  
+
+class ss_message;
+
+
 class message
 {
+  friend ss_message;
 public:
   using app_id = std::array<char, 8>;
   message( app_id id );
@@ -34,7 +38,7 @@ public:
 
   using encoded_message = std::span<char>;
   // static message (request)(app_id &id);
-  static std::vector<std::uint8_t> encode( const message &from ); 
+  static std::vector<std::uint8_t> encode( const message &from );
   static message decode( std::vector<std::uint8_t> from ); // 生メッセージのデコード
 
   json& operator()();
@@ -48,4 +52,4 @@ private:
 };
 
 
-#endif 
+#endif

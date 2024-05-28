@@ -9,6 +9,7 @@
 #include <functional>
 
 #include <utils.hpp>
+#include <ss_p2p/ss_logger.hpp>
 #include <ss_p2p/observer.hpp>
 #include <ss_p2p/observer_strage.hpp>
 #include "./ice_observer.hpp"
@@ -42,9 +43,9 @@ protected:
 	{
 	  if( (*itr).is_expired() )
 	  {
-		#if SS_VERBOSE
+		/* #if SS_VERBOSE
 		std::cout << "\x1b[33m" << " | [ice observer strage](delete observer) :: " <<"\x1b[39m" << (*itr).get_id() << "\n";
-		#endif
+		#endif */
 		itr = entry.erase(itr);
 	  }
 	  else itr++;
@@ -56,7 +57,8 @@ protected:
   void print_entry_state( observer_strage_entry<T> &entry )
   {
 	for( int i=0; i<get_console_width()/2; i++ ){ printf("="); } std::cout << "\n";
-	if constexpr (std::is_same_v<T, signaling_request>) std::cout << "| signaling_request" << "\n";
+	if constexpr (std::is_same_v<T, signaling_request>)
+	  std::cout << "| signaling_request" << "\n";
 	else if constexpr (std::is_same_v<T, signaling_relay>) std::cout << "| signaling_relay" << "\n";
 	else if constexpr (std::is_same_v<T, signaling_response>) std::cout << "| signaling_response" << "\n";
 	else if constexpr (std::is_same_v<T, binding_request>) std::cout << "| binding_request" << "\n";
@@ -85,7 +87,7 @@ public:
   {
    auto &s_entry = std::get< observer_strage_entry<T> >(_strage);
 	for( auto &itr : s_entry )
-	  if( itr.get_id() == id ) return itr;
+	  if( itr.get_id() == id && !(itr.is_expired()) ) return itr;
 
 	return std::nullopt;
   }
@@ -93,13 +95,13 @@ public:
   template < typename T >
   void add_observer( observer<T> obs ) // 追加メソッド
   {
-	#if SS_VERBOSE
+	/* #if SS_VERBOSE
 	if constexpr (std::is_same_v<T, signaling_request>) std::cout << "| [ice observer strage](signaling_request observer) store" << "\n";
 	else if constexpr (std::is_same_v<T, signaling_relay>) std::cout << "| [ice observer strage](signaling_relay observer) store" << "\n";
 	else if constexpr (std::is_same_v<T, signaling_response>) std::cout << "| [ice observer strage](signaling_response observer) store" << "\n";
 	else if constexpr (std::is_same_v<T, binding_request>) std::cout << "| [ice observer strage](binding_request observer) store" << "\n";
 	else std::cout << "| [ice observer strage](undefined observer) store" << "\n";
-	#endif
+	#endif */
 
 	auto &s_entry = std::get< observer_strage_entry<T> >(_strage);
 	s_entry.insert(obs);

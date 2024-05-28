@@ -14,11 +14,11 @@ add_library( SHARE SHARED
 	miya_db_client/miya_db_client.cpp
 	miya_db_client/miya_db_sb_client.cpp
 
-	crypto_utils/w_base64/base64.cpp
-	crypto_utils/w_sha/sha.cpp
-	crypto_utils/w_evp_pkey/evp_pkey.cpp
-	crypto_utils/w_rsa/rsa_manager.cpp
-	crypto_utils/w_aes/aes_manager.cpp
+	# crypto_utils/w_base64/base64.cpp
+	# crypto_utils/w_sha/sha.cpp
+	# crypto_utils/w_evp_pkey/evp_pkey.cpp
+	# crypto_utils/w_rsa/rsa_manager.cpp
+	# crypto_utils/w_aes/aes_manager.cpp
 
 	observer/observer.cpp
 	observer/observer_strage.cpp

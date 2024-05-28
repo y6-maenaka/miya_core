@@ -91,26 +91,10 @@ public:
 };
 
 
+struct P2PKH generate_test_P2PKH(); // テスト用
+
+
 };
-
-
-/*
- 
-	int32_t version
-	int16_t in_cnt
-	  
-		tx_in
-
-	int16_t out_cnt
-
-		tx_out
-
-	
-
-
-
- 
-*/
 
 
 #endif // C7DC3CB1_3E91_4999_B4AC_A1D44A69A420

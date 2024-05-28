@@ -7,7 +7,6 @@ namespace core
 
 core::core() : 
   _context( "../.config/wallet.json" )
-  , _message_broker( *this )
   // , _chain_manager( "path/to/l_chain_state", _context, )
 {
   return;

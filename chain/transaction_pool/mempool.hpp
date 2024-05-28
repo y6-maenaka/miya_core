@@ -18,9 +18,6 @@
 #include <string>
 #include <optional>
 
-// #include <chain/transaction/tx.hpp>
-// #include <chain/transaction/tx.utils.hpp>
-// #include <chain/transaction/p2pkh/p2pkh.h>
 #include <chain/transaction_pool/mempool_entry.hpp>
 
 
@@ -40,7 +37,8 @@ struct mempool_entry_tx_id
 {
   typedef tx::tx_id result_type; // タグの指定に必要
   result_type operator()( const mempool_entry &entry ) const{
-	return entry.get_tx_id();
+	auto ret = entry.get_tx_id();
+	return ret;
   } // multi_index_containerで使用するには,さらにハッシュ関数を指定する必要がある
 };
 
@@ -76,7 +74,7 @@ class tx_id_linear_hasher
 public:
   std::size_t operator()( const mempool_entry_tx_id::result_type &input ) const
   {
-	std::string input_str( reinterpret_cast<const char*>(input.data(), input.size() ) );
+	std::string input_str( input.begin(), input.end() );
 	return std::hash<std::string>()(input_str);
   }
 };

@@ -16,6 +16,7 @@
 
 #include <hash.hpp>
 #include <utils.hpp>
+#include <ss_p2p/ss_logger.hpp>
 #include "./k_bucket.hpp"
 #include "./k_node.hpp"
 #include "./node_id.hpp"
@@ -46,7 +47,7 @@ private:
   node_id _self_id;
   unsigned short calc_branch( k_node &kn );
 public:
-  k_routing_table( node_id self_id );
+  k_routing_table( node_id self_id, ss_logger *logger );
   void swap_node( k_node &node_src, k_node node_dest );
 
   using update_state = k_bucket::update_state;
@@ -63,6 +64,7 @@ public:
   k_bucket& get_bucket( unsigned short branch );
   unsigned short calc_branch_index( k_node &kn );
   std::size_t get_node_count();
+  ss_logger *_logger;
 
   k_bucket_iterator get_begin_bucket_iterator();
   

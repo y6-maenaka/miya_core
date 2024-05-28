@@ -10,7 +10,7 @@ node_controller::node_controller( ip::udp::endpoint &self_ep, std::shared_ptr<io
   , _core_io_ctx( io_ctx )
   , _u_sock_manager( self_ep, std::ref(*io_ctx) )
   , _tick_timer( *io_ctx )
-  , _msg_pool( *io_ctx, true )
+  , _msg_pool( *io_ctx, &_logger, true )
   , _sender( _u_sock_manager, _id )
 {
   ip::udp::endpoint init_ep( ip::address::from_string("0.0.0.0"), 0 ); // 一旦適当な初期値で開始する
@@ -21,11 +21,11 @@ node_controller::node_controller( ip::udp::endpoint &self_ep, std::shared_ptr<io
 		, this
 		, std::placeholders::_1
 		, std::placeholders::_2)
+	  , &_logger
 	  );
-  _dht_manager = std::make_shared<dht_manager>( *io_ctx, _self_ep, _sender );
+  _dht_manager = std::make_shared<dht_manager>( *io_ctx, _self_ep, _sender, &_logger );
   _ice_agent = std::make_shared<ice::ice_agent>( *_core_io_ctx, _u_sock_manager, self_ep/*一旦*/, _id, _sender
-	  , _dht_manager->get_direct_routing_table_controller() );
-
+	  , _dht_manager->get_direct_routing_table_controller(), &_logger );
 
   /* 必ず初期化する */
   _dht_manager->init( _ice_agent->get_signaling_send_func() );
@@ -82,10 +82,8 @@ void node_controller::update_global_self_endpoint( ip::udp::endpoint ep )
 
   _glob_self_ep = ep;
 
-  #if SS_VERBOSE
-  std::cout << "\x1b[33m" << "[node_controller](update global self endpoint)" << "\n" << "\x1b[39m";
-  std::cout << __prev_global_self_ep << " -> " << _glob_self_ep << "\n";
-  std::cout << "\n";
+  #if SS_LOGGING_DISABLE
+  _logger.log( logger::log_level::INFO, "(@node_controller)", "update global self endpoint", endpoint_to_str(__prev_global_self_ep).c_str(), " ->", endpoint_to_str(__prev_global_self_ep).c_str() );
   #endif
 
   _ice_agent->update_global_self_endpoint( ep );
@@ -114,9 +112,9 @@ void node_controller::start( std::vector<ip::udp::endpoint> boot_eps )
 	});
   daemon.detach();
 
-  #if SS_VERBOSE
-  std::cout << "[\x1b[32m start \x1b[39m] node controller" << "\n";
-  std::cout << "(self endpoint) : " << _self_ep << "\n";
+  #ifndef SS_LOGGING_DISABLE
+  _logger.log( logger::log_level::INFO, "(@node_controller)", "start" );
+  _logger.log( logger::log_level::INFO, "(@node_controller)" ,"self endpoint: " + endpoint_to_str(_self_ep) );
   #endif
 }
 
@@ -127,15 +125,15 @@ void node_controller::stop()
   _msg_pool.requires_refresh(false); // msg_poolの定期リフレッシュを再開する
   _dht_manager->stop();
 
-  #if SS_VERBOSE
-  std::cout << "[\x1b[31m stop \x1b[39m] node controller" << "\n";
+  #ifndef SS_LOGGING_DISABLE
+  _logger.log( logger::log_level::ALERT, "(@node_controller)","stop" );
   #endif
 }
 
 void node_controller::tick()
 {
-  #if SS_VERBOSE
-  std::cout << "\x1b[31m" << "(node controller) グローバルアドレスの再取得" << "\x1b[39m" << "\n";
+  #if SS_LOGGING_DISABLE
+  _logger.log( logger::log_level::INFO, "(@node_controller)", "reacquire a global address");
   #endif
   // グローバルアドレスの再取得
   auto sr_obj = _ice_agent->get_stun_server().binding_request();
@@ -165,16 +163,6 @@ void node_controller::on_receive_packet( std::vector<std::uint8_t> raw_msg, ip::
   int flag = 1;
   std::shared_ptr<message> msg = std::make_shared<message>( message::decode(raw_msg) );
   if( msg == nullptr ) return;
-
-  #if SS_CAPTURE_PACKET
-  /*
-  for( int i=0; i<get_console_width(); i++ ) printf("*");
-  std::cout << "\n";
-  std::cout << "(recv) from : " << ep << "\n";
-  msg->print();
-  for( int i=0; i<get_console_width(); i++ ) printf("*");
-  */
-  #endif
 
   if( msg->is_contain_param("kademlia") )
   {

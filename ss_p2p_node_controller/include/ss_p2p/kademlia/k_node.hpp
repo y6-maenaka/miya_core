@@ -5,7 +5,6 @@
 #include <array>
 #include <string>
 
-#include <ss_p2p/endpoint.hpp>
 #include "./node_id.hpp"
 #include <utils.hpp>
 

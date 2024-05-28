@@ -13,6 +13,7 @@
 #include <utils.hpp>
 #include <ss_p2p/observer.hpp>
 #include <ss_p2p/observer_strage.hpp>
+#include <ss_p2p/ss_logger.hpp>
 #include "./k_observer.hpp"
 
 #include "boost/asio.hpp"
@@ -49,9 +50,9 @@ protected:
 	for( auto itr = entry.begin(); itr != entry.end(); )
 	{
 	  if( (*itr).is_expired() ){
-		#if SS_VERBOSE
+		/* #if SS_VERBOSE
 		std::cout << "\x1b[33m" << " | [k observer strage](delete observer) " <<"\x1b[39m" << (*itr).get_id() << "\n";
-		#endif
+		#endif */
 		itr = entry.erase(itr);
 	  }
 	  else itr++;
@@ -88,8 +89,9 @@ public:
   std::optional< observer<T> > find_observer( observer_id id )
   {
    auto &s_entry = std::get< observer_strage_entry<T> >(_strage);
-	for( auto &itr : s_entry )
-	  if( itr.get_id() == id ) return itr;
+	for( auto &itr : s_entry ){
+	  if( itr.get_id() == id && !(itr.is_expired()) ) return itr; // 有効期限が切れていれば返さない
+	}
 
 	return std::nullopt;
   }
@@ -100,11 +102,11 @@ public:
 	auto &s_entry = std::get< observer_strage_entry<T> >(_strage);
 	s_entry.insert(obs);
 
-	#if SS_VERBOSE
+	/* #if SS_VERBOSE
 	if constexpr (std::is_same_v<T, ping>) std::cout << "| [k observer strage](pign observer) store" << "\n";
 	else if constexpr (std::is_same_v<T, find_node>) std::cout << "| [k observer strage](find_node observer) store" << "\n";
 	else std::cout << "| [k observer strage](undefined observer) store" << "\n";
-	#endif
+	#endif */
   }
 
   k_observer_strage( io_context &io_ctx );

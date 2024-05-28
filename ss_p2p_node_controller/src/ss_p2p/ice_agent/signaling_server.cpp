@@ -9,13 +9,14 @@ namespace ice
 {
 
 
-signaling_server::signaling_server( io_context &io_ctx, sender &sender, ice_sender &ice_sender, ip::udp::endpoint &glob_self_ep, direct_routing_table_controller &d_routing_table_controller, ice_observer_strage &obs_strage ) :
+signaling_server::signaling_server( io_context &io_ctx, sender &sender, ice_sender &ice_sender, ip::udp::endpoint &glob_self_ep, direct_routing_table_controller &d_routing_table_controller, ice_observer_strage &obs_strage, ss_logger* logger ) :
    _io_ctx( io_ctx )
   , _sender( sender )
   , _ice_sender( ice_sender )
   , _glob_self_ep( glob_self_ep )
   , _d_routing_table_controller( d_routing_table_controller )
   , _obs_strage( obs_strage )
+  , _logger(logger)
 {
   return;
 }
@@ -45,10 +46,6 @@ int signaling_server::income_message( std::shared_ptr<message> msg, ip::udp::end
 		  , std::placeholders::_1 )
 		);
 
-	#if SS_VERBOSE
-  std::cout << "(signaling server)[income message] init message send -> " << src_ep << "\n";
-	#endif
-
 	_obs_strage.add_observer<class signaling_response>( sgnl_response_obs ); // ストレージに追加する
 	return 0;
   }
@@ -67,8 +64,8 @@ int signaling_server::income_message( std::shared_ptr<message> msg, ip::udp::end
 		  , *(sgnl_relay_obs.get_raw()) )
 		);
 
-	#if SS_VERBOSE
-  std::cout << "[signaling_server](income message) signaling relay fin(success) <===> " << dest_ep << "\n";
+	#ifndef SS_LOGGING_DISABLE
+	_logger->log_packet( logger::log_level::INFO, ss_logger::packet_direction::OUTGOING, dest_ep, "(@signaling_server)", "signaling relay fin" ); // 次ホップで到達
 	#endif
 
 	_obs_strage.add_observer<class signaling_relay>( sgnl_relay_obs );
@@ -93,8 +90,9 @@ int signaling_server::income_message( std::shared_ptr<message> msg, ip::udp::end
 		  , *(sgnl_relay_obs.get_raw()) )
 		);
 
-	#if SS_VERBOSE
-  std::cout << "[signaling_server](income_message)<self=relay_host> signaling relay message send -> " << itr << "\n";
+	#ifndef SS_LOGGING_DISABLE
+	std::cout << "[signaling_server](income_message)<self=relay_host> signaling relay message send -> " << itr << "\n";
+	_logger->log_packet( logger::log_level::INFO, ss_logger::packet_direction::OUTGOING, itr, "(@signaling_server)", "signaling relay" );
 	#endif
   }
 
@@ -106,7 +104,7 @@ void signaling_server::on_send_done( const boost::system::error_code &ec )
 {
   #if SS_VERBOSE
   if( !ec ); // std::cout << "(signaling server) send done" << "\n";
-  else std::cout << "(signaling_server)" << "\x1b[31m" << " send failure" << "\x1b[39m" << "\n";
+  else ;// std::cout << "(signaling_server)" << "\x1b[31m" << " send failure" << "\x1b[39m" << "\n";
   #endif
 }
 

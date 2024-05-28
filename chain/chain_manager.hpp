@@ -18,7 +18,7 @@ namespace chain
 {
 
 
-class chain_manager 
+class chain_manager  // = chain_state
 {
 public:
   void income_block( struct MiyaCoreMSG_BLOCK command ); 

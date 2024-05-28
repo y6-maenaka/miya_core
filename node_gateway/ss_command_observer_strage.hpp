@@ -26,7 +26,7 @@ protected:
 	{
 	  if( (*itr).is_expired() )
 	  {
-		#if VERBOSE
+		#if L1_VERBOSE
 		std::cout << "\x1b[33m" << " | [ice observer strage](delete observer) :: " <<"\x1b[39m" << (*itr).get_id() << "\n";
 		#endif
 		itr = e.erase(itr);

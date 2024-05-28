@@ -101,9 +101,6 @@ void k_bucket::delete_node( k_node &kn )
   auto itr = std::find( _nodes.begin(), _nodes.end(), kn );
   if( itr == _nodes.end() ) return;
 
-  #if SS_VERBOSE
-  std::cout << "(delete node) " << kn.get_endpoint() << "\n";
-  #endif
   _nodes.erase(itr);
 }
 

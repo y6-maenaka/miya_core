@@ -173,7 +173,7 @@ bool Block::compare( std::shared_ptr<unsigned char> targetBlockHash )
 	return memcmp( this->blockHash().get(), targetBlockHash.get(), 32 ) == 0;
 }
 
-#if DEBUG
+#if L1_DEBUG
 void Block::__printBlockHash()
 {
 	std::shared_ptr<unsigned char> blockHash; size_t blockHashLength;
@@ -187,7 +187,7 @@ void Block::__printBlockHash()
 }
 #endif
 
-#if DEBUG
+#if L1_DEBUG
 void Block::__printPrevBlockHash()
 {
 	std::shared_ptr<unsigned char> prevHash; size_t prevHashLength;

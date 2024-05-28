@@ -5,10 +5,11 @@ namespace ss
 {
 
 
-udp_server::udp_server( udp_socket_manager &sock_manager, io_context &io_ctx, const recv_packet_handler recv_handler ) :
-  _sock_manager(sock_manager) ,
-  _io_ctx(io_ctx) ,
-  _recv_handler(recv_handler)
+udp_server::udp_server( udp_socket_manager &sock_manager, io_context &io_ctx, const recv_packet_handler recv_handler, ss_logger *logger ) : 
+  _sock_manager(sock_manager)
+  , _io_ctx(io_ctx)
+  , _recv_handler(recv_handler)
+  , _logger(logger)
 {
   return;
 }
@@ -18,12 +19,6 @@ bool udp_server::start()
   // ブートストラップする
   if( !(_sock_manager.self_sock().is_open()) ) return false;
   this->call_receiver();
-
- #if SS_VERBOSE
-  std::cout << "\n";
-  std::cout << "[\x1b[32m start \x1b[39m] udp server" << "\n";
-  std::cout << "\n";
-  #endif 
 
   return true;
 }
@@ -49,6 +44,10 @@ void udp_server::call_income_message_handler( const boost::system::error_code &e
 	return call_receiver();
   }
 
+  #ifndef SS_LOGGING_DISABLE // write log
+  _logger->log_packet( logger::log_level::INFO, ss_logger::packet_direction::INCOMING, _src_ep );
+  #endif
+
   std::vector<std::uint8_t> raw_msg; raw_msg.reserve( bytes_transferred );
   std::copy( _recv_buff.begin(), _recv_buff.begin() + bytes_transferred, std::back_inserter(raw_msg) );
   _io_ctx.post([this, raw_msg]()
@@ -62,9 +61,10 @@ void udp_server::call_income_message_handler( const boost::system::error_code &e
 void udp_server::stop()
 {
   _sock_manager.self_sock().cancel();
- #if SS_VERBOSE
-  std::cout << "[\x1b[31m stop \x1b[39m] udp server" << "\n";
-  #endif 
+
+  #ifndef SS_LOGGING_DISABLE
+  _logger->log( logger::log_level::ALERT, "(@udp_server)","stop" );
+  #endif
 }
 
 

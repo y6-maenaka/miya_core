@@ -13,12 +13,13 @@ namespace ice
 {
 
 
-stun_server::stun_server( io_context &io_ctx, class sender &sender, class ice_sender &ice_sender, ss::kademlia::direct_routing_table_controller &d_routing_table_controller, ice_observer_strage &obs_strage ) :
+stun_server::stun_server( io_context &io_ctx, class sender &sender, class ice_sender &ice_sender, ss::kademlia::direct_routing_table_controller &d_routing_table_controller, ice_observer_strage &obs_strage, ss_logger *logger ) :
   _io_ctx( io_ctx )
   , _sender( sender )
   , _ice_sender( ice_sender )
   , _d_routing_table_controller( d_routing_table_controller )
   , _obs_strage( obs_strage )
+  , _logger( logger )
 {
   return;
 }
@@ -27,7 +28,7 @@ void stun_server::on_send_done( const boost::system::error_code &ec, std::size_t
 {
   #if SS_VERBOSE
   if( !ec );// std::cout << "(stun server) send done -> " << bytes_transferred << " [bytes]" << "\n";
-  else std::cout << "(stun_server)" << "\x1b[31m" << " send failure" << "\x1b[39m" << "\n";
+  else ; // std::cout << "(stun_server)" << "\x1b[31m" << " send failure" << "\x1b[39m" << "\n";
   #endif
 }
 
@@ -80,12 +81,11 @@ int stun_server::income_message( std::shared_ptr<message> msg, ip::udp::endpoint
 	msg_controller.set_sub_protocol( ice_message::stun::sub_protocol_t::binding_response ); // メッセージをレスポンスへ
 	msg_controller.set_global_ep(ep); // 送信元ノードのグローバル(ローカルの場合もある)アドレスをセット
 
-	std::cout << "\x1b[31m" << " -- ** -- " << "\x1b[39m" << "\n";
 	_ice_sender.async_ice_send( ep, ice_msg
 		, std::bind( &stun_server::on_send_done, this, std::placeholders::_1, std::placeholders::_2 ) );
 
-	#if SS_VERBOSE
-	std::cout << "binding response -> " << ep << "\n";
+	#ifndef SS_LOGGING_DISABLE
+	_logger->log_packet( logger::log_level::INFO, ss_logger::packet_direction::OUTGOING, ep, "(@stun_server)", "binding response" );
 	#endif
 
 	return 0;

@@ -1,5 +1,6 @@
 #include "p2pkh.h"
 #include <binary_utils.hpp> // for hash tx body
+#include <crypto_utils/crypto_utils.hpp>
 
 
 namespace tx{
@@ -424,11 +425,13 @@ std::vector<std::uint8_t> P2PKH::export_to_binary() const
 tx_hash P2PKH::get_hash() const
 {
   std::vector<std::uint8_t> self_binary = this->export_to_binary();
-  std::vector<std::uint8_t> self_binary_md = cu::w_sha::hash( self_binary.data(), self_binary.size(), cu::w_sha::hash_t::SHA256 );
+  cu::cu_result self_binary_md = cu::cu_result::empty();
+  if( self_binary_md = cu::sha2::hash<256>( self_binary ); self_binary_md.is_invalid() ) 
+	return invaild_tx_id;
 
-  if( auto ret = vector_to_array< std::uint8_t, TX_ID_LENGTH>(self_binary_md); ret != std::nullopt ){
-	return ret.value();
-  }
+  std::array< std::uint8_t, TX_ID_LENGTH > ret = self_binary_md.to_array<std::uint8_t, TX_ID_LENGTH>();
+  if( !(ret.empty()) ) return ret;
+
   return invaild_tx_id;
 }
 
@@ -440,6 +443,16 @@ tx_id P2PKH::get_id() const
 std::size_t P2PKH::get_size() const
 {
   return 100; // 算出方法が未定な為仮
+}
+
+
+struct P2PKH generate_test_P2PKH()
+{
+  struct P2PKH ret;
+  TxIn txin;
+
+  ret.add( std::make_shared<TxIn>(txin) );
+  return ret;
 }
 
 /*

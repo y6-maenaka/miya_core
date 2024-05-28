@@ -1,0 +1,3 @@
+[submodule "share/crypto_utils"]
+	path = share/crypto_utils
+	url = https://github.com/y6-maenaka/crypto-utils.git

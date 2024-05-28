@@ -1,11 +1,13 @@
 *
 !*.*
 !*/
+.vscode/*
 
 .DS_Store
 *.sw?
 
 
 build/*
+./libs.txt
 
-.config/ecdsa_private_key.pem
+!Dockerfile

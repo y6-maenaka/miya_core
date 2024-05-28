@@ -52,8 +52,8 @@ std::size_t ice_sender::sync_ice_send( ip::udp::endpoint &dest_ep, ice_message &
 void ice_sender::on_send_done( const boost::system::error_code &ec )
 {
   #if SS_VERBOSE
-  if( !ec ) std::cout << "ice_sender::send success" << "\n";
-  else std::cout << "ice_sender::send error" << "\n";
+  if( !ec ) ;//std::cout << "ice_sender::send success" << "\n";
+  else ;// std::cout << "ice_sender::send error" << "\n";
   #endif
 }
 

@@ -6,7 +6,7 @@
 #include <memory>
 #include <algorithm>
 #include <vector>
-#include <crypto_utils/w_sha/sha.hpp>
+// #include <crypto_utils/w_sha/sha.hpp>
 
 
 namespace chain
@@ -22,7 +22,7 @@ class block_header
 {
 public:
   using header_hash = std::array< std::uint8_t, BLOCK_HASH_BITS_LENGTH/8>;
-  using merkle_root = std::array<std::uint8_t, MERKLE_ROOT_BITS_LENGTH/8>;
+  using merkle_root = std::array< std::uint8_t, MERKLE_ROOT_BITS_LENGTH/8>;
 
   std::uint32_t get_time() const;
   std::uint32_t get_nonce() const;
@@ -36,7 +36,7 @@ public:
 
   block_header();
 protected:
-  #if DEBUG
+  #if L1_DEBUG
   void print_binary() const;
   #endif
 

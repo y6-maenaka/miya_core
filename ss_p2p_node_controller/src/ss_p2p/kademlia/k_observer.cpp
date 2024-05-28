@@ -27,10 +27,6 @@ ping::ping( io_context &io_ctx, ip::udp::endpoint ep, on_pong_handler pong_handl
 
 void ping::init()
 {
-  #if SS_VERBOSE
-  std::cout << "[ping observer]:<" << get_id_str() << ">" << "(init)" << "\n";
-  #endif
-
   _timer.expires_from_now( boost::posix_time::seconds(DEFAULT_PING_RESPONSE_TIMEOUT_s-1) ); // observerの方が先に削除されないように
   _timer.async_wait( std::bind( &ping::timeout, this, std::placeholders::_1 ) );
 
@@ -42,9 +38,9 @@ void ping::timeout( const boost::system::error_code &ec )
 {
   if( _is_pong_arrived ) return; // pongが到着していれば特に何もしない
 
-  #if SS_VERBOSE
+  /* #if SS_VERBOSE
   std::cout << "\x1b[33m" << "[ping observer]:<" << get_id_str() << "> ::" << "\x1b[39m" <<" timeout" << "\n";
-  #endif
+  #endif */
 
   if( !_is_pong_arrived ){
   _io_ctx.post( [this]() // タイムアウトした時ようのハンドラを呼び出す
@@ -57,9 +53,9 @@ void ping::timeout( const boost::system::error_code &ec )
 
 int ping::income_message( message &msg, ip::udp::endpoint &ep )
 {
-  #if SS_VERBOSE
+  /* #if SS_VERBOSE
   std::cout << "\x1b[33m" << "[ping observer]:<"<< get_id_str() <<"> :: " << "\x1b[39m" <<" pong arrive" << "\n";
-  #endif
+  #endif */
 
   _is_pong_arrived = true;
 
@@ -89,6 +85,8 @@ find_node::find_node( io_context &io_ctx, on_response_handler response_handler )
 
 void find_node::init()
 {
+  return;
+
   #if SS_VERBOSE
   std::cout << "[find_node observer]:<" << get_id_str() << ">(init)" << "\n";
   #endif
@@ -96,9 +94,9 @@ void find_node::init()
 
 int find_node::income_message( message &msg, ip::udp::endpoint &ep )
 {
-  #if SS_VERBOSE
+  /* #if SS_VERBOSE
   std::cout << "\x1b[31m" << "[find_node observer]:<" << get_id_str() << ">(response arrive)" << "\x1b[39m" << "\n";
-  #endif
+  #endif */
 
   if( auto k_param = msg.get_param("kademlia"); k_param == nullptr ) return 0;
   k_message k_msg( *(msg.get_param("kademlia")) );

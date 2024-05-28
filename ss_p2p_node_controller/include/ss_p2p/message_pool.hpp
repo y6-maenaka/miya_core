@@ -18,6 +18,7 @@
 #include "boost/lexical_cast.hpp"
 
 #include <utils.hpp>
+#include <ss_p2p/ss_logger.hpp>
 #include "./message.hpp"
 
 
@@ -77,6 +78,22 @@ public:
   void print() const;
 };
 
+
+struct ss_message // 他アプリケーションから参照される
+{
+  json body; // メッセージ本体
+  
+  struct
+  {
+    ip::udp::endpoint src_endpoint; // 送信元
+    std::vector< ip::udp::endpoint > relay_endpoints; // 中継ノードリスト
+	std::time_t timestamp; // 受信時間
+  } meta;
+
+  ss_message( struct message_peer_entry::_message_entry_ &from, ip::udp::endpoint src_ep );
+};
+
+
 class message_pool
 {
 private:
@@ -90,38 +107,30 @@ private:
   io_context &_io_ctx;
   deadline_timer _refresh_tick_timer;
   bool _requires_refresh;
+  ss_logger *_logger;
 
   void call_refresh_tick();
   void refresh_tick( const boost::system::error_code& ec ); // エントリーごと削除するか検討する
   entry allocate_entry( ip::udp::endpoint &ep ); // 空のmessage_peer_entryを作成する
 
 public:
-  message_pool( io_context &io_ctx ,bool requires_refresh = true );
+  message_pool( io_context &io_ctx, ss_logger *logger, bool requires_refresh = true );
 
   void requires_refresh( bool b );
   void store( std::shared_ptr<message> msg, ip::udp::endpoint &ep ); // 追加
   
-  struct _message_
-  {
-	bool valid:1;
-	ip::udp::endpoint src_ep;
-	std::shared_ptr<message> msg;
-	std::time_t time;
-
-	_message_( struct message_peer_entry::_message_entry_ &from, ip::udp::endpoint src_ep );
-  };
-
   struct message_hub
   {
 	friend message_pool;
 	public:
 	  ~message_hub();
-	  void start( std::function<void(_message_)> f );
+	  void start( std::function<void(ss_message)> f );
+	  // void start( std::function<void( json, ip::udp::endpoint, std::time_t)> f );
 	  void stop();
  
 	private:
-	  void on_arrive_message( std::function<message_peer_entry::message_entry(void)> pop_func, ip::udp::endpoint src_ep );
-	  std::function<void(message_pool::_message_)> _msg_handler;
+	  void on_receive_message( std::function<message_peer_entry::message_entry(void)> pop_func, ip::udp::endpoint src_ep );
+	  std::function<void(ss_message)> _msg_handler;
 
 	  bool _is_active = false;
 	  std::mutex _mtx;

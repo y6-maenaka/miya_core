@@ -36,7 +36,8 @@ protected:
 
 public:
   observer_strage( io_context &io_ctx );
-};
+
+ };
 
 
 };

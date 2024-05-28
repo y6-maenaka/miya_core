@@ -9,15 +9,16 @@ namespace kademlia
 {
 
 
-rpc_manager::rpc_manager( node_id &self_id, io_context &io_ctx, k_observer_strage &obs_strage, sender &sender, s_send_func &send_func ) :
+rpc_manager::rpc_manager( node_id &self_id, io_context &io_ctx, k_observer_strage &obs_strage, sender &sender, s_send_func &send_func, ss_logger *logger ) :
   _self_id( self_id )
   , _io_ctx( io_ctx )
   , _tick_timer( io_ctx )
   , _obs_strage( obs_strage )
   , _sender( sender )
   , _s_send_func( send_func )
-  , _routing_table( self_id )
+  , _routing_table( self_id, logger )
   , _d_routing_table_controller( _routing_table )
+  , _logger( logger )
 {
   return;
 }
@@ -32,8 +33,9 @@ void rpc_manager::ping_request( ip::udp::endpoint ep, on_pong_handler pong_handl
   k_msg.set_observer_id( ping_obs.get_id() );
 
   _s_send_func( ep, "kademlia", k_msg.encode() );
-  #if SS_VERBOSE
-  std::cout << "\x1b[33m" << "[rpc_manager](ping_request) send -> " << "\x1b[39m" << ep << "\n";
+
+  #ifndef SS_LOGGING_DISABLE
+  _logger->log_packet( logger::log_level::INFO, ss_logger::packet_direction::OUTGOING, ep, "(kademlia ping request)" );
   #endif
 }
 
@@ -51,10 +53,9 @@ void rpc_manager::find_node_request( ip::udp::endpoint ep, std::vector<ip::udp::
 
   _s_send_func( ep, "kademlia", k_msg.encode() );
 
-  #if SS_VERBOSE
-  std::cout << "\x1b[33m" << "[rpc_manager](find_node_request) send -> " << "\x1b[39m" << ep << "\n";
+  #ifndef SS_LOGGING_DISABLE
+  _logger->log_packet( logger::log_level::INFO, ss_logger::packet_direction::OUTGOING, ep, "(kademlia find_node request)" );
   #endif
-
 }
 
 void rpc_manager::ping_response( k_message &k_msg, ip::udp::endpoint &ep )
@@ -69,8 +70,8 @@ void rpc_manager::ping_response( k_message &k_msg, ip::udp::endpoint &ep )
   std::vector<ip::udp::endpoint> eps;  eps.push_back( ep );
   _d_routing_table_controller.auto_update_batch( eps );
 
-  #if SS_VERBOSE
-  std::cout << "[rpc_manager](ping_response) send -> " << ep << "\n";
+  #ifndef SS_LOGGING_DISABLE
+  _logger->log_packet( logger::log_level::INFO, ss_logger::packet_direction::OUTGOING, ep, "(kademlia ping response)" );
   #endif
 }
 
@@ -89,8 +90,8 @@ void rpc_manager::find_node_response( k_message &k_msg, ip::udp::endpoint &ep )
 	  , std::bind( &rpc_manager::on_send_done, this, std::placeholders::_1 )
 	  );
 
-  #if SS_VERBOSE
-  std::cout << "[rpc_manager](find_node_response) send -> " << ep << "\n";
+  #ifndef SS_LOGGING_DISABLE
+  _logger->log_packet( logger::log_level::INFO, ss_logger::packet_direction::OUTGOING, ep, "(kademlia find_node response)" );
   #endif
 }
 
@@ -134,7 +135,7 @@ void rpc_manager::on_send_done( const boost::system::error_code &ec )
 {
   #if SS_VERBOSE
   if( !ec ); //std::cout << "[rpc_manager](send_done)" << "\n";
-  else std::cout << "(rpc_manager)" << "\x1b[31m" << " send failure" << "\x1b[39m" << "\n";
+  else;
   #endif
 }
 

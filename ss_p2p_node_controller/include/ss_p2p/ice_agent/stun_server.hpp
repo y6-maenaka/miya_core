@@ -13,6 +13,7 @@
 
 #include <ss_p2p/message.hpp>
 #include <ss_p2p/sender.hpp>
+#include <ss_p2p/ss_logger.hpp>
 
 #include "boost/asio.hpp"
 
@@ -41,7 +42,7 @@ class ice_observer_strage;
 class stun_server
 {
 public:
-  stun_server( io_context &io_ctx, class sender &sender, class ice_sender &ice_sender, ss::kademlia::direct_routing_table_controller &d_routing_table_controller, ice_observer_strage &obs_strage );
+  stun_server( io_context &io_ctx, class sender &sender, class ice_sender &ice_sender, ss::kademlia::direct_routing_table_controller &d_routing_table_controller, ice_observer_strage &obs_strage, ss_logger* logger );
   int income_message( std::shared_ptr<message> msg, ip::udp::endpoint &ep );
   void on_send_done( const boost::system::error_code &ec, std::size_t bytes_transferred );
 
@@ -85,6 +86,7 @@ private:
   ice_sender &_ice_sender;
   ice_observer_strage &_obs_strage; // ice_observer_strage
   ss::kademlia::direct_routing_table_controller &_d_routing_table_controller;
+  ss_logger *_logger;
 };
 
 

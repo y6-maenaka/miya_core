@@ -10,6 +10,8 @@
 #include <ss_p2p/message.hpp>
 #include <ss_p2p/socket_manager.hpp>
 #include <ss_p2p/sender.hpp>
+#include <ss_p2p/ss_logger.hpp>
+#include <utils.hpp>
 #include "./ice_message.hpp"
 #include "./ice_sender.hpp"
 #include "./ice_observer_strage.hpp"
@@ -31,7 +33,7 @@ namespace ice
 class ice_agent
 {
 public:
-  ice_agent( io_context &io_ctx, udp_socket_manager &sock_manager, ip::udp::endpoint &glob_self_ep, message::app_id id, sender &sender, ss::kademlia::direct_routing_table_controller &d_routing_table_controller );
+  ice_agent( io_context &io_ctx, udp_socket_manager &sock_manager, ip::udp::endpoint &glob_self_ep, message::app_id id, sender &sender, ss::kademlia::direct_routing_table_controller &d_routing_table_controller, ss_logger *logger );
   void hello();
 
   int income_message( std::shared_ptr<message> msg, ip::udp::endpoint &ep /*original_src_ep*/ ); // メッセージ受信
@@ -58,6 +60,7 @@ public:
 
   ice_sender _ice_sender;
   ice_sender& get_ice_sender();
+  ss_logger *_logger;
 };
 
 

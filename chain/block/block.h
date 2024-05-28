@@ -74,7 +74,7 @@ public:
   bool verify( std::shared_ptr<LightUTXOSet> utxoSet );
   bool compare( std::shared_ptr<unsigned char> targetBlockHash );
 
-  #if DEBUG
+  #if L1_DEBUG
   void __printPrevBlockHash();
   void __printBlockHash();
   #endif

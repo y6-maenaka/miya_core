@@ -9,8 +9,10 @@
 #include <string>
 #include <chrono>
 #include <vector>
+#include <memory>
 
 #include "./socket_manager.hpp"
+#include <ss_p2p/ss_logger.hpp>
 
 #include "boost/asio.hpp"
 
@@ -23,7 +25,7 @@ class udp_server
 {
 public:
   using recv_packet_handler = std::function<void(std::vector<std::uint8_t>, ip::udp::endpoint&)>;
-  udp_server( udp_socket_manager &sock_manager, io_context &io_ctx, const recv_packet_handler recv_handler );
+  udp_server( udp_socket_manager &sock_manager, io_context &io_ctx, const recv_packet_handler recv_handler, ss_logger *logger );
   bool start();
   void stop();
 
@@ -41,6 +43,7 @@ private:
   std::mutex _mtx;
   std::condition_variable _cv;
   recv_packet_handler const _recv_handler;
+  ss_logger *_logger;
 };
 
 

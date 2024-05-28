@@ -5,7 +5,7 @@ namespace core
 {
 
 
-void core::message_broker::on_income_message( ss::message_pool::_message_ msg )
+/* void core::message_broker::on_income_message( ss::message_pool::_message_ msg )
 {
   auto miya_msg_j = msg.get_param("core"); // 本アプリケーションメッセージの取り出し
   auto miya_msg = chain::decode( miya_msg_j );
@@ -33,7 +33,7 @@ void core::message_broker::on_income_message( ss::message_pool::_message_ msg )
 
   std::cout << "(recv) <- " << msg.src_ep << "\n";
   std::cout << "message received" << "\n";
-}
+} */
 
 
 }; // namespace core

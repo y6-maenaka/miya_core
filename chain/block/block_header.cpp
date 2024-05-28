@@ -1,5 +1,6 @@
 #include "block_header.hpp"
 #include "block_header.h" // temp
+#include <crypto_utils/crypto_utils.hpp>
 
 
 using namespace cu;
@@ -247,9 +248,10 @@ block_header::header_hash block_header::get_header_hash() const
   std::size_t header_hash_length; 
   std::shared_ptr<unsigned char> header_hash;
 
-  if( std::vector<std::uint8_t> md = w_sha::hash( &_meta, sizeof(_meta), w_sha::hash_t::SHA1 ); md.size() == (BLOCK_HASH_BYTES_LENGTH) )
+  if( auto cu_ret = sha1::hash( reinterpret_cast<const unsigned char*>(&_meta), sizeof(_meta) ); (*cu_ret).size() == (BLOCK_HASH_BYTES_LENGTH) )
   {
 	block_header::header_hash ret; 
+	auto md = cu_ret.to_vector< block_header::header_hash::value_type >();
 	std::copy( md.begin(), md.end(), ret.begin() );
 	return ret;
   }
@@ -283,7 +285,7 @@ std::uint32_t block_header::get_nonce() const
   return _meta._nonce;
 }
 
-#if DEBUG
+#if L1_DEBUG
 void block_header::print_binary() const
 {
   unsigned char temp[ sizeof(_meta) ]; std::memcpy( temp, &_meta, sizeof(_meta) );

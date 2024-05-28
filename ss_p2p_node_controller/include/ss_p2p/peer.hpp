@@ -12,7 +12,6 @@
 #include <chrono>
 
 #include <json.hpp>
-#include "./endpoint.hpp"
 #include "./message.hpp"
 #include "./message_pool.hpp"
 

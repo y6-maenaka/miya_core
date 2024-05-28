@@ -16,6 +16,7 @@
 #include "../test/setup_ice_agent.cpp"
 #include "../test/setup_signaling_relay_host.cpp"
 #include "../test/setup_k_bucket_iterator.cpp"
+#include "../test/setup_logger.cpp"
 
 
 using boost::asio::ip::udp;
@@ -24,9 +25,9 @@ using boost::asio::ip::udp;
 int main()
 {
   std::cout << "Hello node_1" << "\n";
-
-
-  setup_k_bucket_iterator();
+  
+  setup_logger();
+  // setup_k_bucket_iterator();
   // setup_signaling_relay_host();
 
 

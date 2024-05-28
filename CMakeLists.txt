@@ -50,8 +50,8 @@ target_link_libraries( core_ver_0 PRIVATE
 target_compile_options( core_ver_0 PUBLIC -Wall )
 # add_dependencies( TEST_chain SS_P2P)
 add_dependencies( core_ver_0 SS_P2P)
-add_compile_definitions( DEBUG )
-add_compile_definitions( VERBOSE )
+add_compile_definitions( L1_DEBUG )
+add_compile_definitions( L1_VERBOSE )
 endif()
 
 

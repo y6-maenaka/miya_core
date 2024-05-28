@@ -25,8 +25,7 @@ node_id::node_id( const node_id &nid )
 
 std::string node_id::to_str() const 
 {
-  std::string ret( _id.begin(), _id.end() );
-  return ret;
+  return std::string(); // 後で修正 
 }
 
 bool node_id::operator ==( const node_id &nid ) const

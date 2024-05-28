@@ -23,9 +23,9 @@ private:
  
   struct meta
   {
-	std::uint32_t _fee;
-	std::uint32_t _mem_usage_size; // バイト数
-	std::time_t _entryed_at; // 作成された時間(mempoolに挿入された時間の方がいいのでは)
+	const std::uint32_t _fee;
+	const std::uint32_t _mem_usage_size; // バイト数
+	const std::time_t _entryed_at; // 作成された時間(mempoolに挿入された時間の方がいいのでは)
 	
 	meta( std::uint32_t fee, std::uint32_t bytes, std::time_t entryed_at );
   } _meta;

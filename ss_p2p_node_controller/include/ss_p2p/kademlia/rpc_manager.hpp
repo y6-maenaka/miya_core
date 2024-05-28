@@ -9,6 +9,7 @@
 #include <hash.hpp>
 #include <ss_p2p/observer.hpp>
 #include <ss_p2p/sender.hpp>
+#include <ss_p2p/ss_logger.hpp>
 #include "./k_observer.hpp"
 #include "./k_observer_strage.hpp"
 #include "./node_id.hpp"
@@ -35,7 +36,7 @@ class rpc_manager
 {
 public:
   using s_send_func = std::function<void(ip::udp::endpoint&, std::string, json)>;
-  rpc_manager( node_id &self_id, io_context &io_ctx, k_observer_strage &obs_strage, sender &sender, s_send_func &send_func );
+  rpc_manager( node_id &self_id, io_context &io_ctx, k_observer_strage &obs_strage, sender &sender, s_send_func &send_func, ss_logger *logger );
 
   int income_message( std::shared_ptr<message> msg, ip::udp::endpoint &ep );
 
@@ -71,6 +72,7 @@ private:
   sender &_sender;
   s_send_func &_s_send_func;
   k_observer_strage &_obs_strage;
+  ss_logger *_logger;
 };
 
 

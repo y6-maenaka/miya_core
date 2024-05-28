@@ -7,8 +7,8 @@
 #include <functional>
 
 #include <ss_p2p/message.hpp>
-#include <ss_p2p/endpoint.hpp>
 #include <ss_p2p/sender.hpp>
+#include <ss_p2p/ss_logger.hpp>
 #include <json.hpp>
 #include <utils.hpp>
 
@@ -40,7 +40,7 @@ class dht_manager
 {
 public:
   using s_send_func = std::function<void(ip::udp::endpoint&, std::string, json)>;
-  dht_manager( boost::asio::io_context &io_ctx , ip::udp::endpoint &ep, sender &sender );
+  dht_manager( boost::asio::io_context &io_ctx , ip::udp::endpoint &ep, sender &sender, ss_logger *logger );
 
   int income_message( std::shared_ptr<message> msg, ip::udp::endpoint &ep );
   k_routing_table &get_routing_table();
@@ -66,6 +66,7 @@ private:
   k_observer_strage _obs_strage;
   sender &_sender;
   s_send_func _s_send_func; // initにより初期化され
+  ss_logger *_logger;
 
   void tick();
 
@@ -83,12 +84,13 @@ private:
 
 	std::time_t send_refresh_ping(); // 全てのping_responseが買ってくる時間を取得
  
-	connection_maintainer( class dht_manager *manager, rpc_manager &rpc_manager, io_context &io_ctx ); 
+	connection_maintainer( class dht_manager *manager, rpc_manager &rpc_manager, io_context &io_ctx, ss_logger *logger ); 
 	private:
 	  dht_manager *_d_manager;
 	  io_context &_io_ctx;
 	  class rpc_manager &_rpc_manager;
 	  deadline_timer _timer;
+	  ss_logger *_logger;
 
   } _maintainer;
 };

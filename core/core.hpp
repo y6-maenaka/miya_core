@@ -17,7 +17,7 @@
 
 #include <ss_p2p/message_pool.hpp>
 #include <ss_p2p_node_controller/include/ss_p2p/message_pool.hpp>
-#include <crypto_utils/w_sha/sha.hpp>
+// #include <crypto_utils/w_sha/sha.hpp>
 #include <chain/chain_manager.hpp>
 #include <chain/transaction_pool/transaction_pool.h>
 #include <chain/IBD.hpp>
@@ -57,7 +57,7 @@ private:
   // class chain::TransactionPool _transaction_pool;
   // class chain::LightUTXOSet _utxoSet;
 
-  class message_broker // 受信メッセージを主要管理マネージャーに渡す(ss_p2pからの受信メッセージを流す)
+  /* class message_broker // 受信メッセージを主要管理マネージャーに渡す(ss_p2pからの受信メッセージを流す)
   {
 	public:
 	  void on_income_message( ss::message_pool::_message_ msg );
@@ -69,7 +69,7 @@ private:
 
 	  message_broker( class core &p_core ) : _core(p_core){};
 	  class core &_core;
-  } _message_broker;
+  } _message_broker; */
 };
 
 

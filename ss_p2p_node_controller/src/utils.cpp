@@ -19,7 +19,7 @@ std::pair< std::shared_ptr<unsigned char>, std::size_t > endpoint_to_binary( ip:
   return std::make_pair( addr_binary, cpyOffset );
 }
 
-std::string endpoint_to_str( ip::udp::endpoint &ep )
+std::string endpoint_to_str( const ip::udp::endpoint &ep )
 {
   std::string ret = ep.address().to_string() + ":" + std::to_string(ep.port());
   return ret;

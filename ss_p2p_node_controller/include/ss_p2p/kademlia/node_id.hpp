@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <iostream>
 
-#include <ss_p2p/endpoint.hpp>
 #include <utils.hpp>
 #include <hash.hpp>
 

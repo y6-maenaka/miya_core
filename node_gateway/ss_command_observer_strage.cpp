@@ -17,7 +17,7 @@ void ss_command_observer_strage::refresh_tick( const boost::system::error_code &
 		((delete_expires_observer(args)), ...);
 	  }, _strage );
 
-  #if VERBOSE
+  #if L1_VERBOSE
   std::cout << "(ss_command_observer_strage) refresh_tick called" << "\n";
   #endif
 
