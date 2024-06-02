@@ -20,7 +20,7 @@ void net_processing::start()
 
 void net_processing::process_message( ss::ss_message income_msg )
 {
-  // auto peer = make_peer();
+  // auto peer_ref = make_peer();
 }
 
 
