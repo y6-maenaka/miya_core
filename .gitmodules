@@ -1,3 +1,6 @@
 [submodule "share/crypto_utils"]
 	path = share/crypto_utils
 	url = https://github.com/y6-maenaka/crypto-utils.git
+[submodule "ss_p2p_node_controller"]
+	path = ss_p2p_node_controller
+	url = https://github.com/y6-maenaka/ss_p2p_node_controller.git

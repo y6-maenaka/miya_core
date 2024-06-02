@@ -15,7 +15,7 @@ net_processing::net_processing( chain::chain_manager &chain_manager, chain::memp
 
 void net_processing::start()
 {
-  return _message_hub->start( std::bind( &net_processing::process_message, this, std::placeholders::_1) );
+  // return _message_hub->start( std::bind( &net_processing::process_message, this, std::placeholders::_1) );
 }
 
 void net_processing::process_message( ss::ss_message income_msg )

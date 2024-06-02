@@ -28,7 +28,7 @@ add_subdirectory( core )
 # add_subdirectory( test/ekp2p )
 # add_subdirectory( test/chain )
 
-add_dependencies( core SS_P2P )
+# add_dependencies( core SS_P2P )
 
 if( _BUILD_CORE_DEBUG )
 add_executable( core_ver_0 ./release/core/ver_0.cpp )
@@ -40,7 +40,7 @@ target_link_libraries( core_ver_0 PRIVATE
 	MINING_MANAGER
 	node_gateway
 	SHARE
-	SS_P2P
+	ss_p2p
 
 	# TEST_chain
 	Boost::program_options
@@ -49,7 +49,7 @@ target_link_libraries( core_ver_0 PRIVATE
 
 target_compile_options( core_ver_0 PUBLIC -Wall )
 # add_dependencies( TEST_chain SS_P2P)
-add_dependencies( core_ver_0 SS_P2P)
+# add_dependencies( core_ver_0 SS_P2P )
 add_compile_definitions( L1_DEBUG )
 add_compile_definitions( L1_VERBOSE )
 endif()
