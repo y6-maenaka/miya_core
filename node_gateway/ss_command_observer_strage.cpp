@@ -1,6 +1,6 @@
 #include <node_gateway/ss_command_observer_strage.hpp>
 
-
+/*
 ss_command_observer_strage::ss_command_observer_strage( io_context &io_ctx ) :
   observer_strage(io_ctx)
   , _requires_refresh(true)
@@ -31,5 +31,4 @@ void ss_command_observer_strage::call_tick()
   _refresh_tick_timer.expires_from_now( boost::posix_time::seconds(DEFAULT_OBSERVER_STRAGE_REFRESH_TIME_s) );
   _refresh_tick_timer.async_wait( std::bind(&ss_command_observer_strage::refresh_tick, this, std::placeholders::_1) );
 }
-
-
+*/

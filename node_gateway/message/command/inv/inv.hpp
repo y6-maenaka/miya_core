@@ -6,7 +6,8 @@
 #include <vector>
 #include <memory>
 #include <string>
-
+// #include <unordered_map>
+#include <map>
 
 // https://en.bitcoin.it/wiki/Protocol_documentation#inv
 
@@ -14,56 +15,91 @@ namespace chain
 {
 
 
-enum class TypeID
-{
-	None = 0, // 無効
-	MSG_TX = 1,
-	MSG_BLOCK,
-};
-
 // アクセスフリー
-struct inv
+struct inv : public std::enable_shared_from_this<struct inv>
 {
-	unsigned short _typeID = 0;
-	unsigned char _hash[32];
+  using ref = std::shared_ptr<struct inv>;
+  enum class type_id
+  {
+	MSG_TX = 0
+	  , MSG_BLOCK
 
-	void hash( std::shared_ptr<unsigned char> target );
-	unsigned char* hash();
+	  , None // 無設定
+  };
 
-	inv( unsigned short typeID, std::shared_ptr<unsigned char> fromHash );
-	inv( std::string type, std::shared_ptr<unsigned char> fromHash );
+  const type_id id = type_id::None;
+  const std::array< std::uint8_t, 32 > hash; 
+  ref to_ref();
+
+  // inv() = default;
+  inv( const inv::type_id &id_from, const std::array< std::uint8_t, 32 > &hash_from );
+
+  struct Hash;
 };
+
+struct inv::Hash
+{
+  typedef std::size_t result_type;
+  std::size_t operator()( const inv::type_id &id ) const;
+  bool operator()( const inv::type_id &id_1, const inv::type_id &id_2 ) const;
+};
+
+inline std::size_t inv::Hash::operator()( const inv::type_id &id ) const
+{
+  return static_cast<std::size_t>(id);
+}
+
+inline bool inv::Hash::operator()( const inv::type_id &id_1, const inv::type_id &id_2 ) const 
+{
+  return true;
+}
 
 
 struct MiyaCoreMSG_INV
 {
-	struct
-	{
-		uint32_t _count;
-		std::vector<struct inv> _invVector;
-	} _body;
+  // using inv_ref_vector = std::vector< inv::ref >;
+  // inv_ref_vector _invs;
+  using inv_ref_map = std::multimap< inv::type_id, inv::ref, inv::Hash >;
+  inv_ref_map _invs;
 
 protected:
-	void add( struct inv target );
+  void add( struct inv target );
 
 public:
-	static constexpr char command[12] = "inv";
+  // using iterator = inv_ref_vector::iterator;
+  using iterator = inv_ref_map::iterator;
+  iterator (begin)();
+  iterator (end)();
+  iterator (itr)();
 
-	size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
+  static constexpr char command[12] = "inv";
 
-	/* Getter */
-	size_t count();
+  size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
 
-	/* Setter */
-	void count( size_t count );
-	void addTx( std::shared_ptr<unsigned char> hash );
-	void addBlock( std::shared_ptr<unsigned char> hash );
+  /* Getter */
+  size_t count();
 
-	std::vector<struct inv> invVector();
-	void __print();
+  /* Setter */
+  void count( size_t count );
+  void addTx( std::shared_ptr<unsigned char> hash );
+  void addBlock( std::shared_ptr<unsigned char> hash );
 
-	std::vector< std::uint8_t > export_to_binary() const;
+  template< typename T > std::vector<std::shared_ptr<T>> pick_inv_by_key( const inv::type_id &id_as_key );
+
+  std::vector<struct inv> invVector();
+  void __print();
+
+  std::vector< std::uint8_t > export_to_binary() const;
 };
+
+template< typename T > std::vector<std::shared_ptr<T>> MiyaCoreMSG_INV::pick_inv_by_key( const inv::type_id &id_as_key )
+{
+  std::vector< std::shared_ptr<T> > ret;
+  auto range = _invs.equal_range(id_as_key);
+  for( auto itr = range.first; itr != range.second; ++itr ){
+	ret.push_back(itr->second);
+  }
+}
 
 
 };

@@ -88,6 +88,7 @@ struct index_by_entryed_at;
 
 
 class mempool
+  // 未確認トランザクションプール
 {
 private:
   io_context &_io_ctx; // 基本的にリフレッシュのみに使用する

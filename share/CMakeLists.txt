@@ -20,8 +20,8 @@ add_library( SHARE SHARED
 	# crypto_utils/w_rsa/rsa_manager.cpp
 	# crypto_utils/w_aes/aes_manager.cpp
 
-	observer/observer.cpp
-	observer/observer_strage.cpp
+	# observer/observer.cpp 仮でss_p2p_node_controllerのobserverを使う
+	# observer/observer_strage.cpp 仮でss_p2p_node_controllerのobserverを使う
 )
 
 target_link_libraries( SHARE PUBLIC

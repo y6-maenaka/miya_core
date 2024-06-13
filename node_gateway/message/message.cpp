@@ -5,6 +5,21 @@ namespace chain
 {
 
 
+miya_core_command::command_type miya_core_command::get_command_type() const
+{
+  return _command_t;
+}
+
+template < typename T > T& miya_core_command::get_command()
+{
+  return std::get<T>(_command);
+}
+
+miya_core_command::ref miya_core_command::get_ref() 
+{
+  return shared_from_this();
+}
+
 std::vector<std::uint8_t> miya_core_message::export_to_binary() const
 {
   if( !(_command.is_valid()) ) return std::vector<std::uint8_t>(); // if member of command is invalid
@@ -36,6 +51,16 @@ miya_core_message::miya_core_message() :
   , _command( MiyaCoreMSG_NONE() )
 {
   return;
+}
+
+miya_core_command &miya_core_message::get_command()
+{
+  return _command;
+}
+
+miya_core_command::ref miya_core_message::get_command_ref()
+{
+  return _command.get_ref();
 }
 
 

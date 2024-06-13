@@ -20,6 +20,7 @@
 #include <iomanip>
 
 #include <json.hpp>
+#include <node_gateway/services.hpp>
 #include "boost/variant.hpp"
 
 #include <node_gateway/message/command/inv/inv.hpp>
@@ -50,9 +51,10 @@ constexpr unsigned short chain_MSG_COMMAND_LENGTH = 12;
 struct MiyaCoreMSG_NONE{};
 
 
-struct miya_core_command
+struct miya_core_command : public std::enable_shared_from_this<struct miya_core_command>
 {
 public:
+  using ref = std::shared_ptr<struct miya_core_command>;
   using command = std::variant<
 	  MiyaCoreMSG_INV
 	  , MiyaCoreMSG_GETBLOCKS
@@ -86,9 +88,10 @@ private:
   bool _is_valid;
 
 public:
-  template < typename T >
-  miya_core_command( const T c );
-  command_type get_command_type( const command &c );
+  template < typename T > miya_core_command( const T c );
+  command_type get_command_type() const;
+  template < typename T > T& get_command(); 
+  ref get_ref();
 
   std::vector<std::uint8_t> export_to_binary() const;
   bool import_from_binary( std::vector<std::uint8_t> from_v );
@@ -104,6 +107,8 @@ public:
 
 struct miya_core_message
 {
+  using ref = std::shared_ptr<miya_core_message>;
+
 private:
   struct header
   {
@@ -117,10 +122,16 @@ private:
 
 public:
   miya_core_message();
-  miya_core_command get_command();
+  miya_core_message( const json &from );
+  miya_core_command &get_command();
+  miya_core_command::ref get_command_ref();
+
+  core::MIYA_SERVICES get_services() const;
+  miya_core_command::command_type get_command_type() const;
 
   std::vector<std::uint8_t> export_to_binary() const;
   bool import_from_binary( std::vector<std::uint8_t> from );
+  bool import_from_binary( const json &from );
 };
 
 

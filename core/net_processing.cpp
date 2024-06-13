@@ -1,4 +1,10 @@
 #include <core/net_processing.hpp>
+#include <json.hpp>
+#include <node_gateway/message/message.hpp>
+#include <node_gateway/services.hpp>
+#include <chain/chain_manager.hpp>
+
+using json = nlohmann::json;
 
 
 namespace core
@@ -14,13 +20,95 @@ net_processing::net_processing( chain::chain_manager &chain_manager, chain::memp
 }
 
 void net_processing::start()
-{
-  // return _message_hub->start( std::bind( &net_processing::process_message, this, std::placeholders::_1) );
+{ 
+  return _message_hub->start( std::bind( &net_processing::process_message, this, std::placeholders::_1, std::placeholders::_2) );
 }
 
-void net_processing::process_message( ss::ss_message income_msg )
+void net_processing::process_message( ss::peer::ref peer, ss::ss_message::ref income_msg )
 {
-  // auto peer_ref = make_peer();
+  json dumped_msg = income_msg->get( "miya"/*仮*/ ); // 本アプリケーションのメッセージを取り出す
+  chain::miya_core_message::ref income_miya_msg = std::make_shared<chain::miya_core_message>(dumped_msg);
+
+  switch( income_miya_msg->get_services() )
+  {
+	case MIYA_SERVICES::NETWORKING :
+	  {
+		std::cout << "this is networking request msg" << "\n";
+	  }
+	case MIYA_SERVICES::TRANSACTION :
+	  {
+		std::cout << "this is transaction request msg" << "\n";
+		switch( income_miya_msg->get_command_type() )
+		{
+		  case chain::miya_core_command::command_type::INV :
+			// ノードが他ノードに自分が持っているブロックやトランザクションのハッシュリストを通知する
+		  {
+			// INVの中身 : TX -> mempool
+			// INVの中身 : BLOCK -> chain_sync_manager
+			/*
+			auto inv_itr = cmd->get_command<struct MiyaCoreMSG_INV>().begin();
+			while( inv_itr != cmd->get_command<struct MiyaCoreMSG_INV>().end() )
+			{
+			  if( (*inv_itr)->id == inv::type_id::MSG_TX ){
+			  } else if( (*inv_itr)->id == inv::type_id::MSG_BLOCK ){
+				_chain_manager.income_inv( peer, *inv_itr );
+			  }
+			}
+			*/
+
+			break;
+		  };
+		  case chain::miya_core_command::command_type::BLOCK :
+			// 実際のブロックデータ本体を送信する(GETDATAのレスポンスに用いられる)
+		  {
+			break;
+		  }
+		  case chain::miya_core_command::command_type::GETBLOCKS :
+			// ノードが他のノードに対して、特定の範囲のブロックのハッシュをリクエストするため
+			// 特定のブロックから最新のブロックまでのハッシュリストを取得するために使用
+		  {
+			break;
+		  }
+		  case chain::miya_core_command::command_type::GETHEADERS :
+			// ノードが他のノードに対して、特定の範囲のブロックヘッダーをリクエストするため
+			// 特定のヘッダーから最新のブロックまでのハッシュリストを取得するために使用(bitcoin coreでは最大2000個を一回にリクエストできる)
+		  {
+			break;
+		  }
+		  case chain::miya_core_command::command_type::HEADERS : 
+			// GETHEADERSメッセージに応答して、ブロックヘッダーのリストを送信するため
+		  {
+			break;
+		  }
+		  case chain::miya_core_command::command_type::MEMPOOL :
+			// ノードが他のノードに対して、そのノードのメモリプール（未確認トランザクションのプール）内のトランザクションのリストをリクエストするため
+			// 新規にネットワークに参加した時などに使用
+		  {
+			break;
+		  }
+		  case chain::miya_core_command::command_type::NOTFOUND :
+			// ノードが他のノードから要求されたデータが見つからない場合に、そのことを通知するため
+			// 見つからなかったトランザクションやブロックのハッシュリストが乗る
+		  {
+			break;
+		  }
+		  default :
+		  {
+			return;
+		  }
+		};
+	  }
+	case MIYA_SERVICES::API :
+	  {
+		std::cout << "this is api request msg" << "\n";
+	  } 
+  };
+
+  // ルーティングの優先順位
+  // 1. サービス
+  // 2. コマンド
+  // 3> 
+
 }
 
 

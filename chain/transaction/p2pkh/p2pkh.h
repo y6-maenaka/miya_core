@@ -6,7 +6,6 @@
 #include <vector>
 #include <memory>
 
-
 #include <chain/transaction/tx/tx_in.h>
 #include <chain/transaction/tx/tx_out.h>
 #include <chain/transaction/script/script.h>

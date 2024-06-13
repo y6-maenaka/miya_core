@@ -55,7 +55,7 @@ bool VirtualBlock::compare( std::shared_ptr<unsigned char> targetBlockHash )
 
 struct inv VirtualBlock::downloadInv()
 {
- return inv( std::string("BLOCK") , this->blockHash() );
+ // return inv( std::string("BLOCK") , this->blockHash() );
 }
 
 void VirtualBlock::__print()

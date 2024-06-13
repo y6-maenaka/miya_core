@@ -13,7 +13,7 @@
 using namespace boost::asio;
 constexpr unsigned short DEFAULT_OBSERVER_STRAGE_REFRESH_TIME_s = 10;
 
-
+/*
 class ss_command_observer_strage : observer_strage
 {
 protected:
@@ -61,6 +61,7 @@ public:
 
   ss_command_observer_strage( io_context &io_ctx );
 };
+*/
 
 
 #endif 

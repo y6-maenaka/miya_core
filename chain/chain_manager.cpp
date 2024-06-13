@@ -1,5 +1,7 @@
 #include "chain_manager.h"
 #include "chain_manager.hpp"
+#include <chain/chain_sync_observer.hpp>
+#include <node_gateway/message/command/inv/inv.hpp>
 
 
 namespace chain
@@ -98,17 +100,47 @@ std::shared_ptr<BlockLocalStrage> MiyaChainManager::localStrageManager()
 
 chain_manager::chain_manager( io_context &io_ctx, class core_context &core_ctx, class BlockLocalStrage &block_strage, std::string path_to_chainstate_sr, std::function<void(void)> on_chain_update ) : 
   _block_strage( block_strage )
-  // , _local_chain( path_to_chainstate_sr, _block_strage )
+  // , _mempool( io_ctx )
   , _io_ctx( io_ctx )
   , _refresh_timer( io_ctx )
 {
   return;
 }
 
-/* class local_chain& chain_manager::get_local_chain()
+void chain_manager::income_command( ss::peer::ref peer, miya_core_command::ref cmd )
 {
-  // return _local_chain;
-} */
+  switch( cmd->get_command_type() )
+  {
+	case miya_core_command::command_type::INV :  
+	  // syncシーケンスをスタートするか否かを決定する
+	{
+	  /*
+	  auto inv_itr = cmd->get_command<struct MiyaCoreMSG_INV>().begin();
+	  while( inv_itr != cmd->get_command<struct MiyaCoreMSG_INV>().end() )
+	  {
+		if( (*inv_itr)->id == inv::type_id::MSG_TX ){
+		} else if( (*inv_itr)->id == inv::type_id::MSG_BLOCK ){
+		  _chain_sync_manager.income_inv( peer, *inv_itr );
+		}
+	  }
+	  */
+	  break;
+	}
+	case miya_core_command::command_type::BLOCK : 
+	{
+	  break;
+	}
+	case miya_core_command::command_type::NOTFOUND :
+	{
+	  break;
+	}
 
+	default : 
+	{
+	  return;
+	}
+  }
+  return;
+}
 
 };

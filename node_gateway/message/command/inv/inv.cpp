@@ -5,38 +5,21 @@ namespace chain
 {
 
 
-void inv::hash( std::shared_ptr<unsigned char> target )
+inv::inv( const inv::type_id &id_from, const std::array< std::uint8_t, 32 > &hash_from ) : 
+  hash( hash_from )
+  , id( id_from )
 {
-    if( target == nullptr )
-        memset( _hash , 0x00 , sizeof(_hash) );
-    else
-        memcpy( _hash , target.get() , sizeof(_hash) );
+  return;
 }
 
-unsigned char* inv::hash()
+inv::ref inv::to_ref()
 {
-    return _hash;
+  return shared_from_this();
 }
-
-inv::inv( unsigned short typeID , std::shared_ptr<unsigned char> fromHash )
-{
-    _typeID = typeID;
-    this->hash( fromHash );
-}
-
-inv::inv( std::string type , std::shared_ptr<unsigned char> fromHash )
-{
-    if( type == "TX" ) _typeID = static_cast<unsigned short>(TypeID::MSG_TX);
-    else if( type == "BLOCK" ) _typeID = static_cast<unsigned short>(TypeID::MSG_BLOCK);
-
-    this->hash( fromHash );
-}
-
-
-
 
 size_t MiyaCoreMSG_INV::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 {
+  /*
     size_t retRawLength = sizeof(_body._count) + (sizeof(struct inv) * _body._invVector.size() );
     *retRaw = std::shared_ptr<unsigned char>( new unsigned char[retRawLength] );
     this->count( _body._invVector.size() ); // inv数の最終更新
@@ -51,21 +34,27 @@ size_t MiyaCoreMSG_INV::exportRaw( std::shared_ptr<unsigned char> *retRaw )
     }
 
     return formatPtr;
+	*/
 }
 
 void MiyaCoreMSG_INV::add( struct inv target )
 {
+  /*
     _body._invVector.push_back( target );
     this->count( this->count() + 1 );
+	*/
 }
 
 size_t MiyaCoreMSG_INV::count()
 {
+  /*
     return static_cast<size_t>(_body._count);
+	*/
 }
 
 void MiyaCoreMSG_INV::__print()
 {
+  /*
     printf(" .... %s .... \n" , MiyaCoreMSG_INV::command );
 
     int i=0;
@@ -77,35 +66,54 @@ void MiyaCoreMSG_INV::__print()
             printf("%02X", _.hash()[j] );
         } std::cout << "\n\n";
     }
+	*/
 }
 
 void MiyaCoreMSG_INV::count( size_t count )
 {
-    _body._count = static_cast<uint32_t>( count );
+    // _body._count = static_cast<uint32_t>( count );
 }
 
 void MiyaCoreMSG_INV::addTx( std::shared_ptr<unsigned char> hash )
 {
+  /*
     struct inv target = inv( static_cast<unsigned short>(TypeID::MSG_TX), hash );
     // target._typeID = static_cast<unsigned short>(TypeID::MSG_TX);
     // target.hash( hash );
     this->add( target );
+	*/
 }
 
 
 void MiyaCoreMSG_INV::addBlock( std::shared_ptr<unsigned char> hash )
 {
+  /*
     struct inv target = inv( static_cast<unsigned short>(TypeID::MSG_BLOCK) , hash );
     // target._typeID = static_cast<unsigned short>(TypeID::MSG_BLOCK);
     // target.hash( hash );
     this->add( target );
+  */
 }
-
 
 std::vector<struct inv> MiyaCoreMSG_INV::invVector()
 {
-    return _body._invVector;
+    // return _body._invVector;
 }
 
+MiyaCoreMSG_INV::iterator MiyaCoreMSG_INV::begin()
+{
+  return _invs.begin();
+}
+
+MiyaCoreMSG_INV::iterator MiyaCoreMSG_INV::end()
+{
+  return _invs.end();
+  // return inv_ref_vector.end();
+}
+
+MiyaCoreMSG_INV::iterator MiyaCoreMSG_INV::itr()
+{
+  return _invs.begin();
+}
 
 };

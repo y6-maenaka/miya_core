@@ -3,6 +3,7 @@
 
 
 #include <ss_p2p_node_controller/include/ss_p2p/node_controller.hpp>
+#include <string>
 
 
 namespace chain
@@ -32,7 +33,7 @@ public:
 public:
   net_processing( chain::chain_manager &chain_manager, chain::mempool &mempool, ss::message_pool &message_pool );
   // message_hubがイベント稼働であるため、net_processingもイベント稼働型になる
-  void process_message( ss::ss_message income_msg ); // 恐らく変更になる
+  void process_message( ss::peer::ref peer, ss::ss_message::ref income_msg ); // 恐らく変更になる
   void start();
 
 protected:
