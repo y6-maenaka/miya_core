@@ -116,4 +116,14 @@ MiyaCoreMSG_INV::iterator MiyaCoreMSG_INV::itr()
   return _invs.begin();
 }
 
+std::vector<inv::ref> MiyaCoreMSG_INV::pick_inv_by_key( const inv::type_id &id_as_key )
+{
+  std::vector<inv::ref> ret;
+  auto range = _invs.equal_range(id_as_key);
+  for( auto itr = range.first; itr != range.second; ++itr ){
+	ret.push_back(itr->second);
+  }
+}
+
+
 };

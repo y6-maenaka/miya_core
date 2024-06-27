@@ -26,6 +26,7 @@ private:
 	} _body;
 
 public:
+  using ref = std::shared_ptr<MiyaCoreMSG_HEADERS>;
   static constexpr char command[12] = "headers";
 
 	void count( size_t target );

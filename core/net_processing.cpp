@@ -38,6 +38,11 @@ void net_processing::process_message( ss::peer::ref peer, ss::ss_message::ref in
 	case MIYA_SERVICES::TRANSACTION :
 	  {
 		std::cout << "this is transaction request msg" << "\n";
+
+		/*
+		 Chain Manager に転送するmiya_core_command
+		 // inv : 
+		*/
 		switch( income_miya_msg->get_command_type() )
 		{
 		  case chain::miya_core_command::command_type::INV :
@@ -45,16 +50,18 @@ void net_processing::process_message( ss::peer::ref peer, ss::ss_message::ref in
 		  {
 			// INVの中身 : TX -> mempool
 			// INVの中身 : BLOCK -> chain_sync_manager
+			
+			auto &command_inv = income_miya_msg->get_command<chain::MiyaCoreMSG_INV>(); // メッセージからコマンド本体の取り出し
+			auto inv_tx_vector = command_inv.pick_inv_by_key( chain::inv::type_id::MSG_TX );
+			auto inv_block_vector = command_inv.pick_inv_by_key( chain::inv::type_id::MSG_BLOCK );
+
 			/*
-			auto inv_itr = cmd->get_command<struct MiyaCoreMSG_INV>().begin();
-			while( inv_itr != cmd->get_command<struct MiyaCoreMSG_INV>().end() )
-			{
-			  if( (*inv_itr)->id == inv::type_id::MSG_TX ){
-			  } else if( (*inv_itr)->id == inv::type_id::MSG_BLOCK ){
-				_chain_manager.income_inv( peer, *inv_itr );
-			  }
-			}
+			tx : 新規発行のトランザクションの通知等
+			block : 新たなブロックの通知
 			*/
+
+			// _mempool.add( inv_tx_vector ); // mempoolに追加
+			_chain_manager.income_command_block_invs( peer, inv_block_vector );
 
 			break;
 		  };

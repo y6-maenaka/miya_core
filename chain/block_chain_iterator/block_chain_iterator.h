@@ -21,6 +21,9 @@ namespace chain
 {
 
 
+class BlockLocalStrage;
+
+
 class BlockChainIterator // const iterator
 {
 private:

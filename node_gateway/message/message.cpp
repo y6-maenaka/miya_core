@@ -10,12 +10,7 @@ miya_core_command::command_type miya_core_command::get_command_type() const
   return _command_t;
 }
 
-template < typename T > T& miya_core_command::get_command()
-{
-  return std::get<T>(_command);
-}
-
-miya_core_command::ref miya_core_command::get_ref() 
+miya_core_command::ref miya_core_command::to_ref() 
 {
   return shared_from_this();
 }
@@ -60,7 +55,7 @@ miya_core_command &miya_core_message::get_command()
 
 miya_core_command::ref miya_core_message::get_command_ref()
 {
-  return _command.get_ref();
+  return _command.to_ref();
 }
 
 

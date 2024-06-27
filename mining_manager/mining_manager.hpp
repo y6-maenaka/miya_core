@@ -21,7 +21,8 @@
 
 
 #include <chain/block/block.hpp>
-// #include <chain/block/block_header.hpp>
+
+#include "boost/asio.hpp"
 
 
 using namespace boost::asio;

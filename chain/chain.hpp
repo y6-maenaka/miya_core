@@ -19,6 +19,7 @@
 #include <array>
 
 #include <chain/miya_coin/local_strage_manager.h>
+#include <chain/block/block.params.hpp>
 #include "./miya_coin/local_strage_manager.h"
 #include <chain/block/block.hpp>
 
@@ -65,8 +66,11 @@ class local_chain // 基本的にチェーン先頭のブロックだけを持�
 	struct local_synced_file_io; // 先頭が更新んされると,ローカルの記録領域も変更する
   } _chain_head;
 
+public:
   class BlockLocalStrage &_block_strage;
-  class chain_iterator get_chain_iterator();
+  class block_iterator get_latest_chain_iterator(); // 最先端のチェーンイテレータを取得
+  block_iterator (iterator)();
+  bool find_block( const BLOCK_ID &block_id, unsigned int depth = 6 ) const;
 
 public:
   local_chain( std::string path_to_l_chainstate_st/* path to local chainstate st*/, class BlockLocalStrage &block_strage );

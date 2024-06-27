@@ -9,6 +9,8 @@
 // #include <unordered_map>
 #include <map>
 
+#include <chain/block/block.params.hpp>
+
 // https://en.bitcoin.it/wiki/Protocol_documentation#inv
 
 namespace chain
@@ -28,10 +30,11 @@ struct inv : public std::enable_shared_from_this<struct inv>
   };
 
   const type_id id = type_id::None;
-  const std::array< std::uint8_t, 32 > hash; 
+  const BASE_ID hash; 
   ref to_ref();
 
   // inv() = default;
+  inv( std::pair< type_id, BASE_ID> from );
   inv( const inv::type_id &id_from, const std::array< std::uint8_t, 32 > &hash_from );
 
   struct Hash;
@@ -52,6 +55,13 @@ inline std::size_t inv::Hash::operator()( const inv::type_id &id ) const
 inline bool inv::Hash::operator()( const inv::type_id &id_1, const inv::type_id &id_2 ) const 
 {
   return true;
+}
+
+inv::inv( std::pair< inv::type_id, BASE_ID> from ) : 
+  id( from.first )
+  , hash( from.second )
+{
+  return;
 }
 
 
@@ -84,7 +94,7 @@ public:
   void addTx( std::shared_ptr<unsigned char> hash );
   void addBlock( std::shared_ptr<unsigned char> hash );
 
-  template< typename T > std::vector<std::shared_ptr<T>> pick_inv_by_key( const inv::type_id &id_as_key );
+  std::vector<inv::ref> pick_inv_by_key( const inv::type_id &id_as_key );
 
   std::vector<struct inv> invVector();
   void __print();
@@ -92,14 +102,6 @@ public:
   std::vector< std::uint8_t > export_to_binary() const;
 };
 
-template< typename T > std::vector<std::shared_ptr<T>> MiyaCoreMSG_INV::pick_inv_by_key( const inv::type_id &id_as_key )
-{
-  std::vector< std::shared_ptr<T> > ret;
-  auto range = _invs.equal_range(id_as_key);
-  for( auto itr = range.first; itr != range.second; ++itr ){
-	ret.push_back(itr->second);
-  }
-}
 
 
 };

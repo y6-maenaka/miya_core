@@ -25,6 +25,7 @@ private:
   std::shared_ptr<struct Block> _block;
 
 public:
+  using ref = std::shared_ptr<struct MiyaCoreMSG_BLOCK>;
   static constexpr char command[12] = "block";
 
   std::shared_ptr<unsigned char> blockHash();

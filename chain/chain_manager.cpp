@@ -94,53 +94,36 @@ std::shared_ptr<BlockLocalStrage> MiyaChainManager::localStrageManager()
 
 
 
-
-
-
-
-chain_manager::chain_manager( io_context &io_ctx, class core_context &core_ctx, class BlockLocalStrage &block_strage, std::string path_to_chainstate_sr, std::function<void(void)> on_chain_update ) : 
+chain_manager::chain_manager( io_context &io_ctx, class core_context &core_ctx, class BlockLocalStrage &block_strage, class local_chain& lc, std::function<void(void)> on_chain_update ) : 
   _block_strage( block_strage )
-  // , _mempool( io_ctx )
+  , _local_chain( lc )
   , _io_ctx( io_ctx )
   , _refresh_timer( io_ctx )
 {
   return;
 }
 
-void chain_manager::income_command( ss::peer::ref peer, miya_core_command::ref cmd )
+void chain_manager::income_command_block_invs( ss::peer::ref peer, std::vector<inv::ref> block_invs )
 {
-  switch( cmd->get_command_type() )
+  /*
+   FLOW
+   1. 既知 or 未知の判定
+   2. 同期中の仮想チェーンがあるか否か
+  */
+  for( auto itr : block_invs )
   {
-	case miya_core_command::command_type::INV :  
-	  // syncシーケンスをスタートするか否かを決定する
+	if( const bool is_local_exists = _local_chain.find_block( itr->hash ); !(is_local_exists) ) break;
+	for( auto &man_itr : _sync_managers ) 
 	{
-	  /*
-	  auto inv_itr = cmd->get_command<struct MiyaCoreMSG_INV>().begin();
-	  while( inv_itr != cmd->get_command<struct MiyaCoreMSG_INV>().end() )
+	  if( const bool is_sync_manager_exists = man_itr->find_block( itr->hash ); !(is_sync_manager_exists) )
 	  {
-		if( (*inv_itr)->id == inv::type_id::MSG_TX ){
-		} else if( (*inv_itr)->id == inv::type_id::MSG_BLOCK ){
-		  _chain_sync_manager.income_inv( peer, *inv_itr );
-		}
+		chain_sync_manager::ref new_sync_manager = std::make_shared<chain_sync_manager>( _io_ctx ); // 新たなsync_managerの種を作成する
+		if( new_sync_manager->init( peer, itr->hash ) ) _sync_managers.push_back( new_sync_manager );
 	  }
-	  */
-	  break;
-	}
-	case miya_core_command::command_type::BLOCK : 
-	{
-	  break;
-	}
-	case miya_core_command::command_type::NOTFOUND :
-	{
-	  break;
-	}
-
-	default : 
-	{
-	  return;
 	}
   }
   return;
 }
+
 
 };

@@ -6,23 +6,18 @@
 #include <memory>
 #include <algorithm>
 #include <vector>
-// #include <crypto_utils/w_sha/sha.hpp>
+#include <chain/block/block.params.hpp>
 
 
 namespace chain
 {
 
 
-constexpr unsigned int BLOCK_HASH_BITS_LENGTH = 256;
-constexpr unsigned int BLOCK_HASH_BYTES_LENGTH = BLOCK_HASH_BITS_LENGTH / 8;
-constexpr unsigned int MERKLE_ROOT_BITS_LENGTH = 256;
-
-
 class block_header
 {
 public:
-  using header_hash = std::array< std::uint8_t, BLOCK_HASH_BITS_LENGTH/8>;
-  using merkle_root = std::array< std::uint8_t, MERKLE_ROOT_BITS_LENGTH/8>;
+  using header_hash = BLOCK_HEADER_HASH;
+  using merkle_root = MERKLE_ROOT;
 
   std::uint32_t get_time() const;
   std::uint32_t get_nonce() const;

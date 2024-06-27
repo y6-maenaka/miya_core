@@ -18,6 +18,7 @@ struct block // 今後はこっちを使う
 {
 public:
   using block_hash = block_header::header_hash;
+  using id = block_hash;
 
   block_hash get_block_hash() const; 
   block_hash get_prev_block_hash() const;

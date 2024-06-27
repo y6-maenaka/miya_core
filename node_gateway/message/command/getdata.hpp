@@ -19,6 +19,8 @@ private:
 	MiyaCoreMSG_INV _inv;
 
 public:
+	MiyaCoreMSG_GETDATA();
+	MiyaCoreMSG_GETDATA( const std::vector< inv::ref > &invs );
     static constexpr char command[12] = "getdata";
 
 	size_t exportRaw( std::shared_ptr<unsigned char> *retRaw ){};
@@ -29,6 +31,12 @@ public:
 
   std::vector<std::uint8_t> export_to_binary() const;
 };
+
+
+MiyaCoreMSG_GETDATA::MiyaCoreMSG_GETDATA( const std::vector< inv::ref > &invs )
+{
+  return;
+}
 
 
 }; // namespace chain

@@ -5,6 +5,7 @@
 #include <ss_p2p/observer.hpp>
 #include <ss_p2p/peer.hpp>
 #include <node_gateway/message/message.hpp>
+#include <chain/block/block.params.hpp>
 
 #include <string>
 #include <functional>
@@ -29,8 +30,8 @@ struct transition_context
 class chain_sync_observer : public ss::base_observer
 {
 public:
-  chain_sync_observer( io_context &io_ctx, std::string t_name );
-  virtual void income_message() = 0; // レスポンスが到着した時のエントリーポイント
+  chain_sync_observer( io_context &io_ctx, std::string t_name = "chain_sync" );
+  virtual void income_command() = 0; // レスポンスが到着した時のエントリーポイント
 
 protected:
   void decrement_counter();
@@ -53,8 +54,15 @@ private:
 class getdata_observer : public chain_sync_observer
 {
 public:
-  void init();
+  getdata_observer( io_context &io_ctx, std::string t_name = "getdata" );
+
+  void init( ss::peer::ref peer_ref, const BLOCK_ID &block_id );
+  void income_command() override;
   void income_message( ss::peer::ref peer, miya_core_command::ref cmd );
+
+private: 
+  const ss::peer::ref _peer = nullptr;
+
 }; using getdata_obs = class getdata_observer;
 
 class block_observer : public chain_sync_observer

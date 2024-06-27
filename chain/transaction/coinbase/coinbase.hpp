@@ -7,12 +7,8 @@
 #include <cassert>
 #include <array>
 
-#include <core/core.hpp>
 #include <share/hash/sha_hash.h>
 #include <share/binary_utils.hpp>
-
-#include "./coinbase_tx_in.h"
-#include "../tx/tx_out.h"
 
 
 namespace core
@@ -25,9 +21,8 @@ namespace tx
 {
 
 
-struct TxIn;
+struct coinbase_tx_in;
 struct TxOut;
-struct coinbaseTxIn;
 
 
 

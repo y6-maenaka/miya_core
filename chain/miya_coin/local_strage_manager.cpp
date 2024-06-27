@@ -2,6 +2,7 @@
 
 #include <chain/transaction/coinbase/coinbase.hpp>
 #include <chain/transaction/p2pkh/p2pkh.h>
+#include <chain/block/block.h>
 #include <chain/block/block.hpp>
 #include <chain/utxo_set/utxo.h>
 #include <chain/utxo_set/utxo_set.h>
@@ -11,7 +12,6 @@
 #include <stream_buffer/stream_buffer_container.h>
 #include <miya_db_client/common.h>
 #include <miya_db_client/miya_db_sb_client.h>
-
 
 
 namespace chain

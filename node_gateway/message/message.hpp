@@ -55,6 +55,7 @@ struct miya_core_command : public std::enable_shared_from_this<struct miya_core_
 {
 public:
   using ref = std::shared_ptr<struct miya_core_command>;
+
   using command = std::variant<
 	  MiyaCoreMSG_INV
 	  , MiyaCoreMSG_GETBLOCKS
@@ -88,10 +89,12 @@ private:
   bool _is_valid;
 
 public:
+  template < typename CommandType, typename... Args > miya_core_command( Args&&... args );
   template < typename T > miya_core_command( const T c );
   command_type get_command_type() const;
-  template < typename T > T& get_command(); 
-  ref get_ref();
+
+  template < typename T > T& get_command();  // variantの中身を返却する
+  ref to_ref(); // return self shared_ptr
 
   std::vector<std::uint8_t> export_to_binary() const;
   bool import_from_binary( std::vector<std::uint8_t> from_v );
@@ -126,6 +129,8 @@ public:
   miya_core_command &get_command();
   miya_core_command::ref get_command_ref();
 
+  template <typename T> T& get_command();
+
   core::MIYA_SERVICES get_services() const;
   miya_core_command::command_type get_command_type() const;
 
@@ -135,6 +140,21 @@ public:
 };
 
 
+template < typename CommandType, typename... Args > miya_core_command::miya_core_command( Args&&... args )  :
+  _command( CommandType(std::forward<Args>(args)...) )
+{
+  return; 
+} 
+
+template < typename T > T& miya_core_command::get_command()
+{
+  return std::get<T>(_command);
+}
+
+template <typename T> T& miya_core_message::get_command()
+{
+  return _command.get_command<T>();
+}
 
 
 /* struct MiyaChainMessage

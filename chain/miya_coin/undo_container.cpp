@@ -3,6 +3,7 @@
 #include <chain/block/block.h>
 #include <chain/transaction/coinbase/coinbase.hpp>
 #include <chain/transaction/p2pkh/p2pkh.h>
+#include <chain/utxo_set/utxo.h>
 
 
 namespace chain

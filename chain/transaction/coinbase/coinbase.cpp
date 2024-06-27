@@ -1,5 +1,6 @@
 #include "coinbase.hpp"
-
+#include "./coinbase_tx_in.h"
+#include "../tx/tx_out.h"
 
 namespace tx
 {

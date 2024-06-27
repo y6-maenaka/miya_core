@@ -1,6 +1,16 @@
 #include "p2pkh.h"
 #include <binary_utils.hpp> // for hash tx body
 #include <crypto_utils/crypto_utils.hpp>
+#include <chain/transaction/tx/tx_in.h>
+#include <chain/transaction/tx/tx_out.h>
+#include <chain/transaction/script/script.h>
+#include <chain/transaction/script/script_validator.h>
+#include <chain/transaction/script/signature_script.h>
+#include <chain/transaction/script/pk_script.h>
+
+#include <chain/utxo_set/utxo.h>
+#include <chain/utxo_set/utxo_set.h>
+#include <chain/validation/validation.h>
 
 
 namespace tx{

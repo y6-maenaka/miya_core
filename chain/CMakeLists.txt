@@ -6,6 +6,7 @@ add_library( CHAIN STATIC
 
 	  chain.cpp
 	  chain_manager.cpp
+	  chain_sync_manager.cpp
 	  chain_state.cpp
 	  IBD.cpp
 
