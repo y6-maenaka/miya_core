@@ -1,7 +1,7 @@
 #include "chain_manager.h"
 #include "chain_manager.hpp"
 #include <chain/chain_sync_observer.hpp>
-#include <node_gateway/message/command/inv/inv.hpp>
+#include <node_gateway/message/command/inv.hpp>
 
 
 namespace chain

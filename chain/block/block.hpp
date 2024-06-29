@@ -4,6 +4,7 @@
 
 #include <array>
 #include <vector>
+#include <memory>
 
 #include <chain/block/block_header.hpp>
 #include <chain/transaction/p2pkh/p2pkh.h>
@@ -17,6 +18,7 @@ namespace chain
 struct block // 今後はこっちを使う
 {
 public:
+  using ref = std::shared_ptr<struct block>;
   using block_hash = block_header::header_hash;
   using id = block_hash;
 

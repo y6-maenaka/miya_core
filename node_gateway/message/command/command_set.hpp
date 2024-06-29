@@ -10,7 +10,7 @@
 #include "./mempool.hpp"
 #include "./notfound.hpp"
 #include "./tx.hpp"
-#include "./inv/inv.hpp"
+#include "./inv.hpp"
 
 
 #endif // F226EC61_1209_427C_ADD6_D0A3379825CF

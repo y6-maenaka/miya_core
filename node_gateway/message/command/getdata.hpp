@@ -1,7 +1,7 @@
 #ifndef BE75CE29_95AE_41A8_A9D7_39C43A973FC0
 #define BE75CE29_95AE_41A8_A9D7_39C43A973FC0
 
-#include "./inv/inv.hpp"
+#include "./inv.hpp"
 
 namespace chain
 {
@@ -36,6 +36,16 @@ public:
 MiyaCoreMSG_GETDATA::MiyaCoreMSG_GETDATA( const std::vector< inv::ref > &invs )
 {
   return;
+}
+
+void MiyaCoreMSG_GETDATA::inv( struct MiyaCoreMSG_INV target )
+{
+	_inv = target;
+}
+
+void MiyaCoreMSG_GETDATA::__print()
+{
+	_inv.__print();
 }
 
 

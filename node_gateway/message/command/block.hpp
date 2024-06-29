@@ -4,6 +4,8 @@
 
 // #include <chain/block/block.h>
 #include <memory>
+#include <chain/block/block.h>
+#include <chain/block/block.hpp>
 
 
 namespace chain
@@ -36,6 +38,24 @@ public:
   
   std::vector<std::uint8_t> export_to_binary() const;
 };
+
+
+std::shared_ptr<unsigned char> MiyaCoreMSG_BLOCK::blockHash()
+{
+    std::shared_ptr<unsigned char> blockHash;
+    _block->blockHash( &blockHash );
+    return blockHash;
+}
+
+std::shared_ptr<struct Block> MiyaCoreMSG_BLOCK::block()
+{
+    return _block;
+}
+
+std::vector<std::uint8_t> MiyaCoreMSG_BLOCK::export_to_binary() const
+{
+  return std::vector< std::uint8_t >();
+}
 
 
 }

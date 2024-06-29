@@ -26,6 +26,7 @@ void getdata_observer::init( ss::peer::ref peer_ref, const BLOCK_ID &block_id )
   const auto exported_cmd = request_cmd->export_to_binary();
 
   peer_ref->send( exported_cmd ); // リクエストコマンド(getdata)の送信
+  std::cout << "getdata_observer waitinig response. expire time :: " << (_expire_at - std::time(nullptr)) << "\n"; // DEBUG
 }
 
 

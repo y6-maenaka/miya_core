@@ -23,7 +23,7 @@
 #include <node_gateway/services.hpp>
 #include "boost/variant.hpp"
 
-#include <node_gateway/message/command/inv/inv.hpp>
+#include <node_gateway/message/command/inv.hpp>
 #include <node_gateway/message/command/block.hpp>
 #include <node_gateway/message/command/getblocks.hpp>
 #include <node_gateway/message/command/getdata.hpp>
