@@ -1,0 +1,21 @@
+#ifndef C01B18A7_6BBC_4590_84EB_E1502772C352
+#define C01B18A7_6BBC_4590_84EB_E1502772C352
+
+
+namespace chain
+{
+
+
+enum class COMMAND_TYPE_ID
+{
+  MSG_TX 
+	, MSG_BLOCK
+	, MSG_FILTERED_BLOCK
+	, MSG_CMPCT_BLOCK
+};
+
+
+};
+
+
+#endif

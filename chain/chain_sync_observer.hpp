@@ -5,14 +5,21 @@
 #include <ss_p2p/observer.hpp>
 #include <ss_p2p/peer.hpp>
 #include <node_gateway/message/message.hpp>
+#include <node_gateway/message/command/command.params.hpp>
 #include <chain/block/block.params.hpp>
 
 #include <string>
 #include <functional>
 #include "boost/asio.hpp"
+#include "boost/uuid/uuid.hpp"
+#include "boost/uuid/uuid_io.hpp"
+#include "boost/algorithm/string/erase.hpp"
+#include "boost/uuid/uuid_generators.hpp"
+#include "boost/lexical_cast.hpp"
 
 
 using namespace boost::asio;
+using namespace boost::uuids;
 
 
 namespace chain
@@ -22,15 +29,15 @@ namespace chain
 constexpr int DEFUALT_OBSERVER_EXPIRE_COUNT = 5;
 
 
-struct transition_context 
+template < std::size_t N > uuid generate_sync_command_observer_id( const COMMAND_TYPE_ID type_id, const base_id<N> &id )
 {
-  // observerの遷移法を制御するコンテキスト
-};
+  return ss::generate_uuid_from_str( std::to_string(static_cast<int>(type_id)) + id.to_string() );
+}
 
 class chain_sync_observer : public ss::base_observer
 {
 public:
-  chain_sync_observer( io_context &io_ctx, std::string t_name = "chain_sync" );
+  chain_sync_observer( io_context &io_ctx, std::string t_name = "chain_sync", const ss::base_observer::id &id_from = ss::base_observer::id() );
   virtual void income_command() = 0; // レスポンスが到着した時のエントリーポイント
 
 protected:
@@ -54,7 +61,7 @@ private:
 class getdata_observer : public chain_sync_observer
 {
 public:
-  getdata_observer( io_context &io_ctx, std::string t_name = "getdata" );
+  getdata_observer( io_context &io_ctx, const ss::base_observer::id &id_from = ss::base_observer::id(), std::string t_name = "getdata" );
 
   void init( ss::peer::ref peer_ref, const BLOCK_ID &block_id );
   void income_command() override;

@@ -23,6 +23,7 @@ add_library( CHAIN STATIC
 
 	  block/block.cpp
 	  block/block_header.cpp
+	  block/block.params.cpp
 
 	  block_chain_iterator/block_chain_iterator.cpp
 

@@ -30,27 +30,29 @@ void chain_sync_manager::income_notfound( ss::peer::ref peer, MiyaCoreMSG_NOTFOU
   */
 
   auto inv_itr = (ntf->get_inv()).begin(); // 該当するpeerとobserverをobserver_strageから検索する
-  
-  if( inv_itr.id == inv::type_id::MSG_BLOCK )
+ 
+  while( inv_itr == ntf->get_inv().end() )
   {
-	return;
-  } 
-  else if( inv_itr.id == inv::type_id:: MSG_TX )
-  {
-	return;
+	if( inv_itr->first == inv::type_id::MSG_BLOCK )
+	{
+	  return;
+	} 
+	else if( inv_itr->first == inv::type_id:: MSG_TX )
+	{
+	  return;
+	}
+	else 
+	{
+	  return;
+	}
   }
-  else 
-  {
-	return;
-  }
-
 
   return;
 }
 
 bool chain_sync_manager::init( ss::peer::ref peer_ref, const BLOCK_ID &block_id )
 {
-  ss::observer<getdata_observer> getdata_obs( _io_ctx );
+  ss::observer<getdata_observer> getdata_obs( _io_ctx, generate_sync_command_observer_id<BLOCK_ID_BYTES_LENGTH>( COMMAND_TYPE_ID::MSG_BLOCK, block_id ) );
   getdata_obs.init( peer_ref, block_id );
 
   _chain_sync_obs_strage.add_observer( getdata_obs );

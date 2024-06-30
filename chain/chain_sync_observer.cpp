@@ -5,14 +5,14 @@ namespace chain
 {
 
 
-chain_sync_observer::chain_sync_observer( io_context &io_ctx, std::string t_name ) :
-  base_observer( io_ctx, t_name )
+chain_sync_observer::chain_sync_observer( io_context &io_ctx, std::string t_name, const ss::base_observer::id &id_from ) :
+  base_observer( io_ctx, t_name, id_from )
 {
   return;
 }
 
-getdata_observer::getdata_observer( io_context &io_ctx, std::string t_name ) : 
-  chain_sync_observer( io_ctx, t_name )
+getdata_observer::getdata_observer( io_context &io_ctx, const ss::base_observer::id &id_from, std::string t_name ) : 
+  chain_sync_observer( io_ctx, t_name, id_from )
 {
   return;
 }
