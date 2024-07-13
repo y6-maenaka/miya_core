@@ -27,7 +27,7 @@ using BASE_ID = BLOCK_ID;
 using MERKLE_ROOT = std::array< std::uint8_t, MERKLE_ROOT_BITS_LENGTH/8>;
 
 
-template < std::size_t N > class base_id
+template < std::size_t N = BASE_ID_BYTES_LENGTH > class base_id
 {
 public:
   using ret = std::shared_ptr<base_id>;

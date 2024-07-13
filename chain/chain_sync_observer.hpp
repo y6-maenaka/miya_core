@@ -29,10 +29,12 @@ namespace chain
 constexpr int DEFUALT_OBSERVER_EXPIRE_COUNT = 5;
 
 
-template < std::size_t N > uuid generate_sync_command_observer_id( const COMMAND_TYPE_ID type_id, const base_id<N> &id )
+template < std::size_t N > ss::base_observer::id generate_chain_sync_observer_id( const COMMAND_TYPE_ID type_id, const base_id<N> &id )
+  // chain_sync用のobserver_idを生成
 {
   return ss::generate_uuid_from_str( std::to_string(static_cast<int>(type_id)) + id.to_string() );
 }
+
 
 class chain_sync_observer : public ss::base_observer
 {

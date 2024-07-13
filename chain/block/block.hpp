@@ -21,6 +21,7 @@ public:
   using ref = std::shared_ptr<struct block>;
   using block_hash = block_header::header_hash;
   using id = block_hash;
+  static constexpr std::size_t id_length = 32; // 仮
 
   block_hash get_block_hash() const; 
   block_hash get_prev_block_hash() const;
