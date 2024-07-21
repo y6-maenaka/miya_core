@@ -24,37 +24,21 @@ struct MiyaCoreMSG_BLOCK
 {
 private:
   // ※生のブロックデータを送信する
-  std::shared_ptr<struct Block> _block;
+  block::ref _block;
 
 public:
   using ref = std::shared_ptr<struct MiyaCoreMSG_BLOCK>;
   static constexpr char command[12] = "block";
 
-  std::shared_ptr<unsigned char> blockHash();
-  std::shared_ptr<struct Block> block();
+  block::ref get_block();
 
-  size_t exportRaw( std::shared_ptr<unsigned char> *retRaw ){};
-  bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength ){};
-  
   std::vector<std::uint8_t> export_to_binary() const;
 };
 
 
-std::shared_ptr<unsigned char> MiyaCoreMSG_BLOCK::blockHash()
+block::ref MiyaCoreMSG_BLOCK::get_block()
 {
-    std::shared_ptr<unsigned char> blockHash;
-    _block->blockHash( &blockHash );
-    return blockHash;
-}
-
-std::shared_ptr<struct Block> MiyaCoreMSG_BLOCK::block()
-{
-    return _block;
-}
-
-std::vector<std::uint8_t> MiyaCoreMSG_BLOCK::export_to_binary() const
-{
-  return std::vector< std::uint8_t >();
+  return _block;
 }
 
 

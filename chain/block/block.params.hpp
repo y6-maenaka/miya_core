@@ -41,6 +41,8 @@ public:
   template < typename T > std::vector<T> to_vector() const;
   template < typename T, std::size_t M > std::array<T, M> to_array() const;
 
+  void fill( unsigned char hex );
+
   static base_id<N> none();
   bool operator == ( const base_id<N> &id );
 
@@ -105,6 +107,11 @@ template < std::size_t N > template < typename T, std::size_t M > std::array<T, 
   return ret;
 }
 
+template < std::size_t N > base_id<N>::fill( unsigned char hex )
+{
+  std::fill( _body.begin(), _body.end(), hex );
+}
+
 template < std::size_t N > class union_id : public base_id<N>
 {
   // as alias
@@ -118,6 +125,7 @@ class transaction_id : public base_id<TX_ID_BITS_LENGTH>
 class block_id : public base_id<BLOCK_HASH_BYTES_LENGTH>
 {
   // as alias
+  static block_id (invalid)();
 };
 
 

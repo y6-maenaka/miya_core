@@ -26,7 +26,7 @@ public:
   size_t exportRaw( std::shared_ptr<unsigned char> *retRaw );
   bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength );
   
-  MiyaCoreMSG_INV &get_inv();
+  struct MiyaCoreMSG_INV &get_inv();
   std::vector<std::uint8_t> export_to_binary() const;
 };
 

@@ -18,6 +18,7 @@ class block_header
 public:
   using header_hash = BLOCK_HEADER_HASH;
   using merkle_root = MERKLE_ROOT;
+  using ref = std::shared_ptr<block_header>;
 
   std::uint32_t get_time() const;
   std::uint32_t get_nonce() const;

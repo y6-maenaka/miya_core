@@ -104,21 +104,23 @@ chain_manager::chain_manager( io_context &io_ctx, class core_context &core_ctx, 
 }
 
 void chain_manager::income_command_block_invs( ss::peer::ref peer, std::vector<inv::ref> block_invs )
+	// 他peerが発掘した新たなblock通知の可能性がある
 {
   /*
    FLOW
    1. 既知 or 未知の判定
    2. 同期中の仮想チェーンがあるか否か
   */
+
   for( auto itr : block_invs )
   {
-	if( const bool is_local_exists = _local_chain.find_block( itr->hash ); !(is_local_exists) ) break;
+	if( const bool is_local_exists = _local_chain.find_block( itr->hash ); !(is_local_exists) ) break; // 既にチェーンに取り込まれたブロックか否かを調べる
 	for( auto &man_itr : _sync_managers ) 
 	{
-	  if( const bool is_sync_manager_exists = man_itr->find_block( itr->hash ); !(is_sync_manager_exists) )
-	  {
+	  if( const bool is_sync_manager_exists = man_itr->find_block( itr->hash ); !(is_sync_manager_exists) ) // 同期用チェーンに取り込まれているか否かを調べる
+	  { // ローカルチェーンにも,同期中チェーンにも取り込まれていない場合は新たにchain_sync_managerを作成する
 		chain_sync_manager::ref new_sync_manager = std::make_shared<chain_sync_manager>( _io_ctx ); // 新たなsync_managerの種を作成する
-		if( new_sync_manager->init( peer, itr->hash ) ) _sync_managers.push_back( new_sync_manager );
+		if( new_sync_manager->init( peer, itr->hash ) ) _sync_managers.push_back( new_sync_manager ); 
 	  }
 	}
   }

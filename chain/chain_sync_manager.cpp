@@ -14,6 +14,14 @@ chain_sync_manager::chain_sync_manager( io_context &io_ctx ) :
   return;
 }
 
+bool init( ss::peer::ref peer_ref, const BLOCK_ID &block_id/*目標(最先端)のblock_ID*/ )
+{
+	ss::observer<getdata_observer>::ref getdata_obs_ref = std::make_shared<ss::observer<getdata_observer>>( block_id );
+	this->register_command_getdata( getdata_obs_ref );
+
+	getdata_obs_ref->init();
+}
+
 const bool chain_sync_manager::find_block( const BLOCK_ID &block_id ) const
 {
   std::unique_lock<boost::recursive_mutex> lock(_rmtx);
@@ -21,6 +29,46 @@ const bool chain_sync_manager::find_block( const BLOCK_ID &block_id ) const
 	return std::equal( block_id.begin(), block_id.end(), c_block_pair.first.begin() );
 	  });
   return false;
+}
+
+void chain_sync_manager::find_forkpoint()
+{
+	_block_itr;
+}
+
+void chain_sync_manager::register_command_getdata( const MiyaCoreMSG_GETDATA &getdata_cmd )
+{
+	for( auto itr =  getdata_cmd.get_inv().begin(); itr != getdata_cmd.get_inv().end(); itr++ )
+	{
+		switch( itr.id )
+		{
+			case ( inv::type_id::MSG_BLOCK )
+			{
+				ss::observer<block_observer>::ref block_obs = std::make_shared<ss::observer<block_observer>>( itr.hash );
+				block_obs.init();
+
+				_obs_strage.add_observer<block_observer>( block_obs );
+				break;
+			}
+
+			case ( inv::type_id::MSG_TX )
+			{
+				break;
+			}
+		}
+	}
+}
+
+void chain_sync_manager::find_forkpoint()
+{
+	ss::observer<getblocks>::ref getblocks_obs = std::make_shared<ss::observer<getblocks_observer>>();
+	getblocks_obs.init();
+}
+
+void chain_sync_manager::request_prev_block( const block::id &block_id )
+{
+	// ss::observer<getdata_observer>::ref request_obs_ref = std::make_shared<ss::observer<getdata_observer>>( _io_ctx, generate_chain_sync_observer_id<BLOCK_ID_BYTES_LENGTH>( COMMAND_TYPE_ID::MSG_BLOCK, block_ref->get_prev_block_hash() )  );
+	// request_obs_ref->init();
 }
 
 bool chain_sync_manager::init( ss::peer::ref peer_ref, const BLOCK_ID &block_id )
@@ -34,16 +82,16 @@ bool chain_sync_manager::init( ss::peer::ref peer_ref, const BLOCK_ID &block_id 
 }
 
 void chain_sync_manager::income_command_block( ss::peer::ref peer, MiyaCoreMSG_BLOCK::ref cmd )
+	// 他peerが発掘したブロック本体が送信されてきた時
 {
-  return;
+  block::id target_block_id = cmd->get_block()->get_id();
+  ss::observer<getdata_observer>::ref target_obs = _obs_strage.find_observer<getdata_observer>( generate_chain_sync_observer_id<block::id_length>( COMMAND_TYPE_ID::MSG_BLOCK, target_block_id ) );
+  
+  if( target_obs != nullptr ) target_obs->get_raw()->on_receive( peer, cmd->get_block() );
 }
 
 void chain_sync_manager::income_command_notfound( ss::peer::ref peer, MiyaCoreMSG_NOTFOUND::ref cmd )
 {
-  /*
-    逆引きするにはどうしたらいい
-  */
-
   auto inv_itr = (cmd->get_inv()).begin(); // 該当するpeerとobserverをobserver_strageから検索する
  
   while( inv_itr == cmd->get_inv().end() )
@@ -55,13 +103,19 @@ void chain_sync_manager::income_command_notfound( ss::peer::ref peer, MiyaCoreMS
 	{
 	  case inv::type_id::MSG_TX : 
 	  {
-		_obs_strage.find_observer<getdata_observer>( generate_chain_sync_observer_id<block::id_length>( COMMAND_TYPE_ID::MSG_TX, ntf_id) );
+		ss::observer<getdata_observer>::ref target_obs = _obs_strage.find_observer<getdata_observer>( generate_chain_sync_observer_id<block::id_length>( COMMAND_TYPE_ID::MSG_TX, ntf_id) );
+		target_obs->get_raw()->on_notfound( peer );
 		break;
 	  }
 
 	  case inv::type_id::MSG_BLOCK :
 	  {
-		_obs_strage.find_observer<getdata_observer>( generate_chain_sync_observer_id<block::id_length>( COMMAND_TYPE_ID::MSG_BLOCK, ntf_id) );
+
+		if( ntf_id == _start_block_id ) // 集取スタート点と一致した場合は開始点を下げる
+		{
+		}
+
+		ss::observer<getdata_observer>::ref target_obs = _obs_strage.find_observer<getdata_observer>( generate_chain_sync_observer_id<block::id_length>( COMMAND_TYPE_ID::MSG_BLOCK, ntf_id) );
 		break;
 	  }
 	}
@@ -69,6 +123,11 @@ void chain_sync_manager::income_command_notfound( ss::peer::ref peer, MiyaCoreMS
   }
 
   return;
+}
+
+void serial_backward_chain_sync_manager::async_start()
+{
+	ss::observer<getdata_observer>::ref getdata_obs = std::make_shared<ss::observer<getdata_observer>>( _target_block_id );
 }
 
 

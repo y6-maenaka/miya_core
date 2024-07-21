@@ -25,6 +25,8 @@ public:
 
   block_hash get_block_hash() const; 
   block_hash get_prev_block_hash() const;
+  id get_id() const; // alias
+  id get_prev_block_id() const; // alias
   std::vector<std::uint8_t> export_to_binary();
 
   bool check_pow() const; // 重要(ブロックハッシュの検証)

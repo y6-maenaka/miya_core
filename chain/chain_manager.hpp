@@ -34,8 +34,10 @@ public:
 
   void IBD();
 protected:
+
   void extend(); // 他のノードがブロック発掘に成功した時に最先端チェーンを伸ばす
-  void merge(); // アクシデントフォークしたチェーンを繋げる
+  void merge( const chain_sync_manager &sync_man ); // アクシデントフォークしたチェーンを繋げる
+  /* merge or extend が完了したら, 現在同期中のsync_managersに割り込みを入れる->適切に動機を終了させる */
 
 private:
   // class chain_sync_manager _chain_sync_manager;

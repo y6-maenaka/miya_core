@@ -235,5 +235,9 @@ std::vector<std::uint8_t> block::export_to_binary()
   return ret;
 }
 
+block::id block::get_id() const
+{
+  return get_block_hash();
+}
 
 };

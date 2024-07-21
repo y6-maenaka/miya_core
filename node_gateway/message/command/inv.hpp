@@ -10,6 +10,7 @@
 #include <map>
 
 #include <chain/block/block.params.hpp>
+#include <chain/block/block.hpp>
 #include <node_gateway/message/command/command.params.hpp>
 
 // https://en.bitcoin.it/wiki/Protocol_documentation#inv
@@ -32,7 +33,6 @@ struct inv : public std::enable_shared_from_this<struct inv>
 
   const type_id id = type_id::None;
   const BASE_ID hash; 
-  const union_id<BASE_ID_BYTES_LENGTH> _hash;
   ref to_ref();
 
   // inv() = default;
