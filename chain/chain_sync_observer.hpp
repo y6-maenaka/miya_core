@@ -40,6 +40,7 @@ class chain_sync_observer : public ss::base_observer
 {
 public:
   chain_sync_observer( io_context &io_ctx, std::string t_name = "chain_sync", const ss::base_observer::id &id_from = ss::base_observer::id() );
+  const std::size_t get_peer_id();
   // virtual void income_command() = 0; // レスポンスが到着した時のエントリーポイント
 
 protected:
@@ -99,6 +100,12 @@ public:
   , std::string t_name = "block" );
 
   void on_receive( const ss::peer::ref &peer_ref, block::ref block_ref );
+
+private:
+  struct message_context
+  {
+	// on_receiveした時に受け取ったメッセージが本get_blocksメッセージに対応するものか判断するためのcontext情報を保持
+  };
 }; using block_obs = class block_observer;
 
 class getheader_observer : public chain_sync_observer

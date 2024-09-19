@@ -107,10 +107,14 @@ template < std::size_t N > template < typename T, std::size_t M > std::array<T, 
   return ret;
 }
 
-template < std::size_t N > base_id<N>::fill( unsigned char hex )
+template < std::size_t N > void base_id<N>::fill( unsigned char hex )
 {
   std::fill( _body.begin(), _body.end(), hex );
 }
+
+
+
+
 
 template < std::size_t N > class union_id : public base_id<N>
 {
@@ -125,6 +129,7 @@ class transaction_id : public base_id<TX_ID_BITS_LENGTH>
 class block_id : public base_id<BLOCK_HASH_BYTES_LENGTH>
 {
   // as alias
+public: 
   static block_id (invalid)();
 };
 

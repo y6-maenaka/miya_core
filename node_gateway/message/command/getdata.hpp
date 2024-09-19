@@ -24,7 +24,9 @@ public:
   using ref = std::shared_ptr<MiyaCoreMSG_GETDATA>;
 
   MiyaCoreMSG_GETDATA();
-  template< const block::id... Args > MiyaCoreMSG_GETDATA( Args... args );
+  template< typename... Args > MiyaCoreMSG_GETDATA( Args... args );
+  // template < const block::id... Args > MiyaCoreMSG_GETDATA( Args... args );
+
   MiyaCoreMSG_GETDATA( const std::vector< inv::ref > &invs );
   static constexpr char command[12] = "getdata";
 
@@ -41,10 +43,10 @@ public:
 };
 
 
-template< const block::id... Args > MiyaCoreMSG_GETDATA::MiyaCoreMSG_GETDATA( Args... args )
+template< typename... Args > MiyaCoreMSG_GETDATA::MiyaCoreMSG_GETDATA( Args... args )
 {
-  for( const auto& block_id : std::initializer_list<const block::id>{args...} )
-    _inv.add( inv(std::make_pair(inv::type_id::MSG_BLOCK, block_id)) );
+  /* for( const auto& block_id : std::initializer_list<const block::id>{args...} )
+    _inv.add( inv(std::make_pair(inv::type_id::MSG_BLOCK, block_id)) ); */
 }
 
 MiyaCoreMSG_GETDATA::MiyaCoreMSG_GETDATA( const std::vector< inv::ref > &invs )

@@ -7,7 +7,7 @@ namespace chain
 {
 
 
-chain_sync_manager::chain_sync_manager( io_context &io_ctx ) : 
+chain_sync_manager::chain_sync_manager( io_context &io_ctx, block_iterator &fork_point_itr ) : 
   _io_ctx( io_ctx )
   , _obs_strage( io_ctx )
 {

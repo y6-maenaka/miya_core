@@ -8,5 +8,6 @@
 
 build/*
 .vscode/*
+dev_docs/*
 
 .config/ecdsa_private_key.pem

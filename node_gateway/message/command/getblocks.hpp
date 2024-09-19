@@ -63,7 +63,7 @@ MiyaCoreMSG_GETBLOCKS::MiyaCoreMSG_GETBLOCKS( size_t hashCount )
 }
 
 
-MiyaCoreMSG_GETBLOCKS::MiyaCoreMSG_GETBLOCKS( block_id start_hash, block_id end_hash, unsigned short hash_count ) : 
+MiyaCoreMSG_GETBLOCKS::MiyaCoreMSG_GETBLOCKS( block_id start_hash, block_id end_hash, unsigned short hash_count )
 {
   _body._start_hash = start_hash;
   _body._end_hash = end_hash;

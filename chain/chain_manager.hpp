@@ -45,6 +45,7 @@ private:
   class BlockLocalStrage &_block_strage;
   class local_chain &_local_chain;
   std::vector< std::shared_ptr<class chain_sync_manager> > _sync_managers;
+  void on_update_chain_sync_manager( chain_sync_manager::sync_result sync_ret ); 
  
   io_context &_io_ctx;
   deadline_timer _refresh_timer;

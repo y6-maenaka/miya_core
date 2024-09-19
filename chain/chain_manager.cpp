@@ -119,12 +119,36 @@ void chain_manager::income_command_block_invs( ss::peer::ref peer, std::vector<i
 	{
 	  if( const bool is_sync_manager_exists = man_itr->find_block( itr->hash ); !(is_sync_manager_exists) ) // 同期用チェーンに取り込まれているか否かを調べる
 	  { // ローカルチェーンにも,同期中チェーンにも取り込まれていない場合は新たにchain_sync_managerを作成する
+	
+		/*
 		chain_sync_manager::ref new_sync_manager = std::make_shared<chain_sync_manager>( _io_ctx ); // 新たなsync_managerの種を作成する
 		if( new_sync_manager->init( peer, itr->hash ) ) _sync_managers.push_back( new_sync_manager ); 
+		*/ 
 	  }
 	}
   }
   return;
+}
+
+void chain_manager::on_update_chain_sync_manager( chain_sync_manager::sync_result sync_ret )
+{
+  /*
+  switch( sync_ret.state )
+  {
+	case ( sync_ret.state == chain_sync_manager::done_successfully ):
+	{
+	  return;
+	}
+	case ( sync_ret.state == chain_sync_manager::invalid_forkpoint ):
+	{
+	  return;
+	}
+	case ( sync_ret.state == chain_sync_manager::error ) :
+	{
+	  return;
+	}
+  }
+  */
 }
 
 
