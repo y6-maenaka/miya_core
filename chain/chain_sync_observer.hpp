@@ -66,7 +66,7 @@ class getdata_observer : public chain_sync_observer
 {
 public:
   getdata_observer( io_context &io_ctx
-  , ss::peer::ref peer_ref, const BLOCK_ID &block_id 
+  , ss::peer::ref peer_ref, const block_id &block_id 
   , const ss::base_observer::id &id_from = ss::base_observer::id(), std::string t_name = "getdata" );
 
   void init();

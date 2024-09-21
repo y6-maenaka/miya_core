@@ -12,7 +12,7 @@ chain_sync_observer::chain_sync_observer( io_context &io_ctx, std::string t_name
 }
 
 getdata_observer::getdata_observer( io_context &io_ctx
-, ss::peer::ref peer_ref, const BLOCK_ID &block_id
+, ss::peer::ref peer_ref, const block_id &block_id
 , const ss::base_observer::id &id_from, std::string t_name ) : 
   chain_sync_observer( io_ctx, t_name, id_from )
   , _peer( peer_ref )
@@ -24,7 +24,7 @@ getdata_observer::getdata_observer( io_context &io_ctx
 void getdata_observer::init()
 { // invで受信したオブジェクトリストから特定のデータオブジェクトを取得する為に使用. 既にチェーンに取り込まれたトランザクションなどは要求できない
   std::vector< inv::ref > request_hash_v;
-  request_hash_v.push_back( std::make_shared<inv>( std::make_pair(inv::type_id::MSG_BLOCK, _block_id) ) );
+  request_hash_v.push_back( std::make_shared<inv>( std::make_pair(inv::type_id::MSG_BLOCK, _base_id) ) );
 
   auto request_cmd = std::make_shared<miya_core_command>( MiyaCoreMSG_GETDATA() ); // リクエストメッセージの作成
   const auto exported_cmd = request_cmd->export_to_binary(); // メッセージをダンプ

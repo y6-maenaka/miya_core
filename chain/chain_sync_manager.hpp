@@ -110,7 +110,7 @@ public:
   chain_sync_manager( io_context &io_ctx, block_iterator &fork_point_itr, std::vector<block_header::ref> chain_frame );
   // IBDなどで,chain_sync_managerに先駆けて最新のブロックまでのheader(block_id)を持っている場合は提供する
 
-  bool init( ss::peer::ref peer_ref, const BLOCK_ID &block_id/*目標(最先端)のblock_ID*/ );
+  bool init( ss::peer::ref peer_ref, const block_id &block_id/*目標(最先端)のblock_ID*/ );
   bool init( std::function<void()> on_failure_confirm_fork_point );
   /* (初期化でやること]
     - fork_pointの確定 -> できなかったらchain_managerに通知して,fork_pointを下げてもらうように依頼する
@@ -120,7 +120,7 @@ public:
   void income_command_block( ss::peer::ref peer, MiyaCoreMSG_BLOCK::ref cmd ); // (処理対象) : getdata_observer
   void income_command_notfound( ss::peer::ref peer, MiyaCoreMSG_NOTFOUND::ref cmd );
 
-  const bool find_block( const BLOCK_ID &block_id ) const; // 現在構築している同期用のチェーンの中から該当のブロックを検索する
+  const bool find_block( const block_id &block_id ) const; // 現在構築している同期用のチェーンの中から該当のブロックを検索する
 
   // observerにハンドラとして渡す
   virtual void get_valid_block( block::ref &block_ref ) = 0;
@@ -186,7 +186,7 @@ public:
 
   serial_chain_sync_manager( io_context &io_ctx, block_iterator fork_point, block::ref target_block /*このブロックまでのチェーンを構築*/ );
   serial_chain_sync_manager( io_context &io_ctx, block_iterator fork_point, std::vector<block_header::ref> target_headers /*このヘッダーベクターを元にチェーンを構築*/ );
-  bool init( ss::peer::ref peer_ref, const BLOCK_ID &block_id/*目標(最先端)のblock_ID*/ );
+  bool init( ss::peer::ref peer_ref, const block_id &block_id/*目標(最先端)のblock_ID*/ );
 
   virtual void async_start( std::function<void(sync_result)> ret_callback_func ) = 0;
 };

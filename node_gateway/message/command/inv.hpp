@@ -23,6 +23,7 @@ namespace chain
 struct inv : public std::enable_shared_from_this<struct inv>
 {
   using ref = std::shared_ptr<struct inv>;
+  using hash_common = union_id<32>; // block_id or transaction_id
   enum class type_id
   {
 	MSG_TX = static_cast<int>(COMMAND_TYPE_ID::MSG_TX)
@@ -32,11 +33,11 @@ struct inv : public std::enable_shared_from_this<struct inv>
   };
 
   const type_id id = type_id::None;
-  const BASE_ID hash; 
+  const hash_common hash;
   ref to_ref();
 
   // inv() = default;
-  inv( std::pair< type_id, BASE_ID> from );
+  inv( std::pair< type_id, block_id> from );
   inv( const inv::type_id &id_from, const std::array< std::uint8_t, 32 > &hash_from );
 
   struct Hash;
@@ -59,11 +60,23 @@ inline bool inv::Hash::operator()( const inv::type_id &id_1, const inv::type_id 
   return true;
 }
 
-inv::inv( std::pair< inv::type_id, BASE_ID> from ) : 
+inv::inv( std::pair< inv::type_id, block_id> from ) : 
   id( from.first )
-  , hash( from.second )
+  , hash( union_id<32>(from.second) )
 {
   return;
+}
+
+inv::inv( const inv::type_id &id_from, const std::array< std::uint8_t, 32 > &hash_from ) : 
+  id( id_from )
+  , hash( union_id<32>( hash_from ) )
+{
+  return;
+}
+
+inv::ref inv::to_ref()
+{
+  return shared_from_this();
 }
 
 
@@ -104,18 +117,6 @@ public:
   std::vector< std::uint8_t > export_to_binary() const;
 };
 
-
-inv::inv( const inv::type_id &id_from, const std::array< std::uint8_t, 32 > &hash_from ) : 
-  hash( hash_from )
-  , id( id_from )
-{
-  return;
-}
-
-inv::ref inv::to_ref()
-{
-  return shared_from_this();
-}
 
 size_t MiyaCoreMSG_INV::exportRaw( std::shared_ptr<unsigned char> *retRaw )
 {

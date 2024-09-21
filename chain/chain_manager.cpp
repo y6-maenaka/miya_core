@@ -114,10 +114,10 @@ void chain_manager::income_command_block_invs( ss::peer::ref peer, std::vector<i
 
   for( auto itr : block_invs )
   {
-	if( const bool is_local_exists = _local_chain.find_block( itr->hash ); !(is_local_exists) ) break; // 既にチェーンに取り込まれたブロックか否かを調べる
+	if( const bool is_local_exists = _local_chain.find_block( static_cast<const block_id&>(itr->hash) ); !(is_local_exists) ) break; // 既にチェーンに取り込まれたブロックか否かを調べる
 	for( auto &man_itr : _sync_managers ) 
 	{
-	  if( const bool is_sync_manager_exists = man_itr->find_block( itr->hash ); !(is_sync_manager_exists) ) // 同期用チェーンに取り込まれているか否かを調べる
+	  if( const bool is_sync_manager_exists = man_itr->find_block( static_cast<const block_id&>(itr->hash) ); !(is_sync_manager_exists) ) // 同期用チェーンに取り込まれているか否かを調べる
 	  { // ローカルチェーンにも,同期中チェーンにも取り込まれていない場合は新たにchain_sync_managerを作成する
 	
 		/*

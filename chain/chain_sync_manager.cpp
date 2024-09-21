@@ -15,7 +15,7 @@ chain_sync_manager::chain_sync_manager( io_context &io_ctx, block_iterator &fork
   return;
 }
 
-const bool chain_sync_manager::find_block( const BLOCK_ID &block_id ) const
+const bool chain_sync_manager::find_block( const block_id &block_id ) const
 {
   /*
   std::unique_lock<boost::recursive_mutex> lock(_rmtx);
@@ -62,14 +62,16 @@ void chain_sync_manager::request_prev_block( const block::id &block_id )
 	// request_obs_ref->init();
 }
 
-bool chain_sync_manager::init( ss::peer::ref peer_ref, const BLOCK_ID &block_id )
+bool chain_sync_manager::init( ss::peer::ref peer_ref, const block_id &block_id )
 {
+  /*
   ss::observer<getdata_observer> getdata_obs( _io_ctx, generate_chain_sync_observer_id<BLOCK_ID_BYTES_LENGTH>( COMMAND_TYPE_ID::MSG_BLOCK, block_id ) ); // (type_id): block + (id): block_id からobserver_idを生成する
   getdata_obs.init( peer_ref, block_id );
 
   _obs_strage.add_observer( getdata_obs );
 
   return true;
+  */
 }
 
 void chain_sync_manager::income_command_block( ss::peer::ref peer, MiyaCoreMSG_BLOCK::ref cmd )

@@ -70,7 +70,7 @@ public:
   class BlockLocalStrage &_block_strage;
   class block_iterator get_latest_chain_iterator(); // 最先端のチェーンイテレータを取得
   block_iterator (iterator)();
-  bool find_block( const BLOCK_ID &block_id, unsigned int depth = 6 ) const;
+  bool find_block( const block_id &block_id, unsigned int depth = 6 ) const;
 
 public:
   local_chain( std::string path_to_l_chainstate_st/* path to local chainstate st*/, class BlockLocalStrage &block_strage );
