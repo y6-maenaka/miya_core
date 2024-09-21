@@ -6,6 +6,7 @@
 #include <chain/block/block.params.hpp>
 // #include <chain/block/block_header.hpp>
 #include <chain/chain.hpp>
+#include <ss_p2p/observer.hpp>
 #include <ss_p2p/observer_strage.hpp>
 #include <ss_p2p/peer.hpp>
 #include <node_gateway/message/command/inv.hpp>
@@ -22,10 +23,11 @@
 #include "boost/multi_index/ordered_index.hpp"
 #include "boost/multi_index/sequenced_index.hpp"
 #include "boost/multi_index/member.hpp"
+#include "boost/multi_index/global_fun.hpp"
 #include "boost/multi_index/mem_fun.hpp"
 
-
 #include <functional>
+#include <type_traits>
 
 using namespace boost::asio;
 
@@ -42,23 +44,54 @@ struct by_content_id;
 
 template <typename T> struct CHAIN_SYNC_OBSERVER_STRAGE_POLICY
 {
+
+  // SFINAEで実装(テンプレートの書き換えに失敗してもエラーにならない)
+  template < typename U, typename = void > struct has_peer_id : std::false_type{}; // get_peer_idメソッドがあるかどうかを判定, 初期でfalse_typeを継承
+  template < typename U > struct has_peer_id<U, std::void_t<decltype(std::declval<U>().get()->get_peer_id())> > : std::true_type{} ; // 引数が有効な型を表す場合はtrue_typeを継承
+  /*
+   - std::void_t : 引数が有効な型を表す場合にのみvoid型を生成, decltype(std::declval<T>().get_peer_id())が有効な値を取得できたか否か
+   - std::declval<T>() : T型のオブジェクトを"仮"に生成
+  */
+
+  template < typename U = T >
+  static std::enable_if_t<has_peer_id<U>::value, std::size_t >
+  get_peer_id( const std::shared_ptr<U>& obj ){
+	// return obj->get_peer_id();
+	return 10;
+  } // enable_if_t: 条件が満たされた場合にのみテンプレート関数を有効にする
+	// enable_if_t<>の<>の中に判別する型を入れる, 戻り値は書かず enable_ifに制御を任せる(第2引数で指定も可能), _tはエイリアス
+
+  template < typename U = T >
+  static std::enable_if_t<!has_peer_id<U>::value, std::size_t >
+  get_peer_id( const std::shared_ptr<U>& ){
+	return static_cast<std::size_t>(0);
+  }
+
+  static auto get_peer_id_s( typename ss::observer<T>::ref obs_ref ) 
+	-> decltype(get_peer_id(obs_ref->get()))
+  {
+	 return get_peer_id(obs_ref->get());
+	 // return boost::uuids::random_generator()();
+  }
+  
   typedef boost::multi_index::indexed_by
 	<
-	  boost::multi_index::hashed_unique< boost::multi_index::tag<ss::by_observer_id>
-	  , boost::multi_index::identity <  typename ss::observer<T>::ref >  // identity:インデックスに使用するキーを指定(基本的にオブジェクトの特定のメンバなどが使われるが, identityは直接オブジェクト自体を直接指定)
-	  , typename ss::observer<T>::Hash, typename ss::observer<T>::Equal // 第3引数: hashed_uniqueが使用するハッシュ関数, 第4引数: hashed_uniqueが使用する比較関数を指定
-	  > 
 
-	  /* 
+	  boost::multi_index::hashed_unique< boost::multi_index::tag<ss::by_observer_id>
+	  , boost::multi_index::const_mem_fun< ss::observer<T>, typename ss::observer<T>::id, &ss::observer<T>::get_id>
+	  , typename ss::observer<T>::Hash
+	  , typename ss::observer<T>::Equal 
+	  > // observer_id
+
 	  , 
+
 	  boost::multi_index::hashed_non_unique< boost::multi_index::tag<by_peer_id> 
-	  , boost::multi_index::const_global_fun< typename ss::observer<T>::ref, std::size_t, get_peer_id >
+	  , boost::multi_index::global_fun< typename ss::observer<T>::ref, std::size_t, &CHAIN_SYNC_OBSERVER_STRAGE_POLICY<T>::get_peer_id_s >
 	  // const_mem_fun: クラスのメンバ関数を使ってインデックスのキーを取得する
-	    // - 第1引数: メンバ関数が属するクラスの型
-	    // - 第2引数: メンバ関数の戻り値の型
-		// - 第3引数: 使用するメンバ関数そのもの
-	  >
-	  */
+	    // - 第1引数: メンバ関数が属するクラスの型(インデックスのキーとなるオブジェクトの型)
+	    // - 第2引数: メンバ関数の戻り値の型(インデックスのキーの型)
+		// - 第3引数: 使用するメンバ関数そのもの(インデックスとして使用する関数へのポインタ)
+		>
 	> index;
 };
 

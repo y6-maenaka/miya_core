@@ -40,7 +40,7 @@ class chain_sync_observer : public ss::base_observer
 {
 public:
   chain_sync_observer( io_context &io_ctx, std::string t_name = "chain_sync", const ss::base_observer::id &id_from = ss::base_observer::id() );
-  const std::size_t get_peer_id();
+  const ss::peer::id get_peer_id() const;
   // virtual void income_command() = 0; // レスポンスが到着した時のエントリーポイント
 
 protected:
