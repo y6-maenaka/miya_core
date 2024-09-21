@@ -10,34 +10,30 @@ namespace chain
 chain_sync_manager::chain_sync_manager( io_context &io_ctx, block_iterator &fork_point_itr ) : 
   _io_ctx( io_ctx )
   , _obs_strage( io_ctx )
+  , _forkpoint( fork_point_itr )
 {
   return;
 }
 
-bool init( ss::peer::ref peer_ref, const BLOCK_ID &block_id/*目標(最先端)のblock_ID*/ )
-{
-	ss::observer<getdata_observer>::ref getdata_obs_ref = std::make_shared<ss::observer<getdata_observer>>( block_id );
-	this->register_command_getdata( getdata_obs_ref );
-
-	getdata_obs_ref->init();
-}
-
 const bool chain_sync_manager::find_block( const BLOCK_ID &block_id ) const
 {
+  /*
   std::unique_lock<boost::recursive_mutex> lock(_rmtx);
   std::find_if( _candidate_chain.begin(), _candidate_chain.end(), [block_id](const std::pair<const BLOCK_ID, block::ref> &c_block_pair){
 	return std::equal( block_id.begin(), block_id.end(), c_block_pair.first.begin() );
 	  });
   return false;
+  */
 }
 
-void chain_sync_manager::find_forkpoint()
+const bool chain_sync_manager::find_forkpoint()
 {
-	_block_itr;
+  return false;
 }
 
-void chain_sync_manager::register_command_getdata( const MiyaCoreMSG_GETDATA &getdata_cmd )
+void chain_sync_manager::register_command_getdata( MiyaCoreMSG_GETDATA &getdata_cmd )
 {
+  /*
 	for( auto itr =  getdata_cmd.get_inv().begin(); itr != getdata_cmd.get_inv().end(); itr++ )
 	{
 		switch( itr.id )
@@ -57,12 +53,7 @@ void chain_sync_manager::register_command_getdata( const MiyaCoreMSG_GETDATA &ge
 			}
 		}
 	}
-}
-
-void chain_sync_manager::find_forkpoint()
-{
-	ss::observer<getblocks>::ref getblocks_obs = std::make_shared<ss::observer<getblocks_observer>>();
-	getblocks_obs.init();
+  */
 }
 
 void chain_sync_manager::request_prev_block( const block::id &block_id )
@@ -84,14 +75,17 @@ bool chain_sync_manager::init( ss::peer::ref peer_ref, const BLOCK_ID &block_id 
 void chain_sync_manager::income_command_block( ss::peer::ref peer, MiyaCoreMSG_BLOCK::ref cmd )
 	// 他peerが発掘したブロック本体が送信されてきた時
 {
+  /*
   block::id target_block_id = cmd->get_block()->get_id();
   ss::observer<getdata_observer>::ref target_obs = _obs_strage.find_observer<getdata_observer>( generate_chain_sync_observer_id<block::id_length>( COMMAND_TYPE_ID::MSG_BLOCK, target_block_id ) );
   
-  if( target_obs != nullptr ) target_obs->get_raw()->on_receive( peer, cmd->get_block() );
+  if( target_obs != nullptr ) target_obs->get()->on_receive( peer, cmd->get_block() );
+  */
 }
 
 void chain_sync_manager::income_command_notfound( ss::peer::ref peer, MiyaCoreMSG_NOTFOUND::ref cmd )
 {
+  /*
   auto inv_itr = (cmd->get_inv()).begin(); // 該当するpeerとobserverをobserver_strageから検索する
  
   while( inv_itr == cmd->get_inv().end() )
@@ -123,11 +117,12 @@ void chain_sync_manager::income_command_notfound( ss::peer::ref peer, MiyaCoreMS
   }
 
   return;
+  */
 }
 
-void serial_backward_chain_sync_manager::async_start()
+void serial_chain_sync_manager::async_start( std::function<void(sync_result)> ret_callback_func )
 {
-	ss::observer<getdata_observer>::ref getdata_obs = std::make_shared<ss::observer<getdata_observer>>( _target_block_id );
+	// ss::observer<getdata_observer>::ref getdata_obs = std::make_shared<ss::observer<getdata_observer>>( _target_block_id );
 }
 
 

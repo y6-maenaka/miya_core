@@ -128,7 +128,7 @@ public:
   void send_command_getblocks();
   void send_command_getdata( ss::observer<getdata_observer>::ref getdata_obs ); 
   // getdata_obsのコンテキストに基づいて, getdataの送信と, レスポンス用のobserverをセットアップする
-  void register_command_getdata( const MiyaCoreMSG_GETDATA &getdata_cmd ); // 自動的にgetdataの展開(block_observerへの変換)とobserver_strageへの追加を行う
+  void register_command_getdata( MiyaCoreMSG_GETDATA &getdata_cmd ); // 自動的にgetdataの展開(block_observerへの変換)とobserver_strageへの追加を行う
   
   void request_prev_block( const block::id &block_id );
 
@@ -175,7 +175,7 @@ protected:
 
   int allow_failure_per_block = 5;
   int allow_failure_total = 8;
-  block_iterator &_block_itr;
+  block_iterator &_forkpoint;
 };
 
 class serial_chain_sync_manager : public chain_sync_manager
