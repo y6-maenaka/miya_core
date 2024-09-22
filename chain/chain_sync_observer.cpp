@@ -5,8 +5,9 @@ namespace chain
 {
 
 
-chain_sync_observer::chain_sync_observer( io_context &io_ctx, std::string t_name, const ss::base_observer::id &id_from ) :
+chain_sync_observer::chain_sync_observer( io_context &io_ctx, ss::peer::ref target_peer, std::string t_name, const ss::base_observer::id &id_from ) :
   base_observer( io_ctx, t_name, id_from )
+  , _peer( target_peer )
 {
   return;
 }
@@ -14,8 +15,7 @@ chain_sync_observer::chain_sync_observer( io_context &io_ctx, std::string t_name
 getdata_observer::getdata_observer( io_context &io_ctx
 , ss::peer::ref peer_ref, const block_id &block_id
 , const ss::base_observer::id &id_from, std::string t_name ) : 
-  chain_sync_observer( io_ctx, t_name, id_from )
-  , _peer( peer_ref )
+  chain_sync_observer( io_ctx, peer_ref, t_name, id_from )
   , _base_id( block_id )
 {
   return;
@@ -55,6 +55,22 @@ void block_observer::on_receive( const ss::peer::ref &peer_ref, block::ref block
   // 2. prev_blockがローカルチェーンに繋がるか否か( height, id )
   //   (yes) : chain_sync_managerにmerge依頼を出す
   //   (no) : prev_block_idをキーにget_block依頼を出す
+}
+
+getblocks_observer::getblocks_observer( io_context &io_ctx, ss::peer::ref target_peer, const block_id start_blkid, const block_id stop_blkid, std::string t_name ) :
+  chain_sync_observer( io_ctx, target_peer, t_name )
+  , _start_blkid( start_blkid )
+  , _stop_blkid( stop_blkid )
+{
+  return;
+}
+
+void getblocks_observer::request()
+{
+  struct MiyaCoreMSG_GETBLOCKS getblocks_msg( _start_blkid, _stop_blkid );
+  getblocks_msg.export_to_binary<std::uint8_t>();
+  // _peer->send();
+  return;
 }
 
 

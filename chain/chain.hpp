@@ -30,6 +30,11 @@ namespace chain
 
 class block_iterator //block_iterator と block本体の違いは
 {
+private:
+  BlockLocalStrage::read_block_func _read_block_f;
+  std::shared_ptr<struct block> _body;
+  bool _is_valid;
+
 public:
   block_iterator & operator--();
   block_iterator & operator--(int);
@@ -37,17 +42,13 @@ public:
   bool operator ==( const block_iterator &itr );
   block_iterator& operator*();
 
+  auto get_id() const -> decltype(_body->get_id());
   std::size_t get_height() const; // _bodyのheightの関節呼び出し
   
   bool is_valid() const;
   static bool (invalid)( const block_iterator &bi );
 
   block_iterator( BlockLocalStrage::read_block_func read_block_f );
-
-private:
-  BlockLocalStrage::read_block_func _read_block_f;
-  std::shared_ptr<struct block> _body;
-  bool _is_valid;
 };
 
 

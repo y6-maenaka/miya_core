@@ -210,7 +210,7 @@ void Block::__printPrevBlockHash()
 
 block::block_hash block::get_block_hash() const
 {
-  return _header.get_header_hash();
+  return _header.generate_header_hash();
 }
 
 block::block_hash block::get_prev_block_hash() const

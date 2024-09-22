@@ -16,13 +16,13 @@ namespace chain
 class block_header
 {
 public:
-  using header_hash = BLOCK_HEADER_HASH;
+  using header_hash = header_hash;
   using merkle_root = MERKLE_ROOT;
   using ref = std::shared_ptr<block_header>;
 
   std::uint32_t get_time() const;
   std::uint32_t get_nonce() const;
-  header_hash get_header_hash() const;
+  header_hash generate_header_hash() const; // 自身のヘッダーハッシュを"生成"する
   header_hash get_prev_block_hash() const;
   std::vector<std::uint8_t> export_to_binary() const; 
   

@@ -39,7 +39,9 @@ template < std::size_t N > ss::base_observer::id generate_chain_sync_observer_id
 class chain_sync_observer : public ss::base_observer
 {
 public:
-  chain_sync_observer( io_context &io_ctx, std::string t_name = "chain_sync", const ss::base_observer::id &id_from = ss::base_observer::id() );
+  chain_sync_observer( io_context &io_ctx
+	  , ss::peer::ref taget_peer = nullptr
+	  , std::string t_name = "chain_sync", const ss::base_observer::id &id_from = ss::base_observer::id() );
   const ss::peer::id get_peer_id() const;
   // virtual void income_command() = 0; // レスポンスが到着した時のエントリーポイント
 
@@ -56,8 +58,9 @@ protected:
   virtual void on_failure() = 0;
   */
   // virtual void on_success( const ss::peer::ref &peer_ref ) = 0;
-  virtual void on_notfound( const ss::peer::ref &peer_ref ) = 0; // 他peerにリクエストした要素に対してnotfoundが帰ってきた場合
+  // virtual void on_notfound( const ss::peer::ref &peer_ref ) = 0; // 他peerにリクエストした要素に対してnotfoundが帰ってきた場合
 
+  const ss::peer::ref _peer = nullptr;
 private:
   int expire_counter = DEFUALT_OBSERVER_EXPIRE_COUNT; 
 };
@@ -84,7 +87,6 @@ public:
   const MiyaCoreMSG_GETDATA _command;
 
 private: 
-  const ss::peer::ref _peer = nullptr;
   const block_id _base_id;
 
 }; using getdata_obs = class getdata_observer;
@@ -115,7 +117,14 @@ class getheader_observer : public chain_sync_observer
 
 class getblocks_observer : public chain_sync_observer
 {
+public:
+  using ref = std::shared_ptr<getblocks_observer>;
+  getblocks_observer( io_context &io_ctx, ss::peer::ref target_peer, const block_id start_blkid, const block_id stop_blkid /*最終目的のblock_id*/, std::string t_name = "getblocks" );
+  void request();
 
+private:
+  const block_id _start_blkid;
+  const block_id _stop_blkid;
 }; using getblocks_obs = class getblocks_observer;
 
 

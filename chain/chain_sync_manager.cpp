@@ -7,10 +7,11 @@ namespace chain
 {
 
 
-chain_sync_manager::chain_sync_manager( io_context &io_ctx, block_iterator &fork_point_itr ) : 
+chain_sync_manager::chain_sync_manager( io_context &io_ctx, block_iterator& forkpoint_itr, chain_sync_manager::on_sync_done_callback notify_func ) :
   _io_ctx( io_ctx )
   , _obs_strage( io_ctx )
-  , _forkpoint( fork_point_itr )
+  , _forkpoint( forkpoint_itr )
+  , _notify_func( notify_func )
 {
   return;
 }
@@ -122,9 +123,15 @@ void chain_sync_manager::income_command_notfound( ss::peer::ref peer, MiyaCoreMS
   */
 }
 
-void serial_chain_sync_manager::async_start( std::function<void(sync_result)> ret_callback_func )
+void serial_chain_sync_manager::async_start( std::pair<block::ref, ss::peer::ref> target )
 {
-	// ss::observer<getdata_observer>::ref getdata_obs = std::make_shared<ss::observer<getdata_observer>>( _target_block_id );
+	ss::observer<getblocks_observer>::ref getblocks_obs = std::make_shared<ss::observer<getblocks_observer>>( _io_ctx, target.second, _forkpoint.get_id(), target.first->get_id() );
+
+	if( !is_forkpoint_validated ) _notify_func( sync_result::status::WRONG_FORKPOINT );
+	_obs_strage.add_observer<class getblocks_observer>( getblocks_obs ); // リクエストを送信する前にobserver_strageに追加する
+	getblocks_obs->get()->request(); 
+		
+	return;
 }
 
 

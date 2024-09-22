@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string.h> // for use memset() on LinuxOS
 #include <chain/block/block.params.hpp>
+#include <node_gateway/message/command/base_command.hpp>
 
 
 namespace chain
@@ -15,25 +16,24 @@ namespace chain
     ノード起動時にまだローカルノードに存在しないブロックを取得するのに使用する
 */
 
-struct MiyaCoreMSG_GETBLOCKS 
+struct MiyaCoreMSG_GETBLOCKS  : public MiyaCoreMSG_Utils
 {
-
 private:
-  struct __attribute__((packed))
+  struct // __attribute__((packed)) block_idがfixedでないのでpacked付与する必要ない
   {
 	  unsigned char _version[4];
 	  uint32_t _hash_count; // 基本的に1-200
 	  //unsigned char _startHash[32]; // スタートハッシュ // 初回ネットワーク参加であればジェネシスブロックハッシュとなる
 	  block_id _start_hash;
 	  // unsigned char _stopHash[32]; // ストップハッシュを0埋めすることで，後続のブロックヘッダを個数分要求する
-	  block_id _end_hash;
+	  block_id _stop_hash;
   } _body ;
 
 public:
   static constexpr char command[12] = "getblocks";
 
   MiyaCoreMSG_GETBLOCKS( size_t hashCount = 200 );
-  MiyaCoreMSG_GETBLOCKS( block_id start_hash, block_id end_hash = block_id::invalid(), unsigned short hash_count = 200 );
+  MiyaCoreMSG_GETBLOCKS( block_id start_hash, block_id stop_hash = block_id::invalid(), unsigned short hash_count = 200 );
   MiyaCoreMSG_GETBLOCKS( std::shared_ptr<struct BlockHeader> startHashHeader /* このヘッダーをprevHashにとるblock(blockHash)をリクエストする*/ ,size_t hashCount = 200 ); //　コマンド作成時は基本的にこれを使う
 
   /* Getter*/
@@ -52,7 +52,7 @@ public:
 
   void __print();
   
-  std::vector<std::uint8_t> export_to_binary() const;
+  template< typename T > std::vector<T> export_to_binary();
 };
 
 
@@ -63,14 +63,22 @@ MiyaCoreMSG_GETBLOCKS::MiyaCoreMSG_GETBLOCKS( size_t hashCount )
 }
 
 
-MiyaCoreMSG_GETBLOCKS::MiyaCoreMSG_GETBLOCKS( block_id start_hash, block_id end_hash, unsigned short hash_count )
+MiyaCoreMSG_GETBLOCKS::MiyaCoreMSG_GETBLOCKS( block_id start_hash, block_id stop_hash, unsigned short hash_count )
 {
   _body._start_hash = start_hash;
-  _body._end_hash = end_hash;
+  _body._stop_hash = stop_hash;
   _body._hash_count = hash_count;
 }
 
-
+template < typename T > std::vector<T> MiyaCoreMSG_GETBLOCKS::export_to_binary()
+{
+  auto ret = MiyaCoreMSG_Utils::format<T>( 
+	  std::make_pair( (_body._version), sizeof(_body._version) )
+	  , std::make_pair( &(_body._hash_count), sizeof(_body._hash_count) )
+	  , std::make_pair(_body._start_hash.to_ptr(), _body._start_hash.get_length()) 
+	  , std::make_pair(_body._stop_hash.to_ptr(), _body._stop_hash.get_length()) 
+	  );
+}
 
 /*
 

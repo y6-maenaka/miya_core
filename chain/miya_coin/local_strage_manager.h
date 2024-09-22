@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <arpa/inet.h> // htons用 使っていい？
 
+#include <chain/block/block.params.hpp>
 // #include <chain/block/block.h>
 
 
@@ -241,7 +242,7 @@ public:
 
 	std::vector< std::shared_ptr<UTXO> > releaseBlock( std::shared_ptr<unsigned char> blockHash );  // ブロック・Revが共に管理外となる
 																																															// undoはリターンする
-  using read_block_func = std::function<std::shared_ptr<struct block>( const std::array<std::uint8_t, 256/8>/*後で修正*/ &bh )>;
+  using read_block_func = std::function<std::shared_ptr<struct block>( const block_id/*後で修正*/ &bh )>;
 };
 
 /*

@@ -9,12 +9,35 @@ namespace chain
 {
 
 
-struct MiyaChainPayloadFunction
+template <typename P> concept IsPair = requires(P p){
+	{ p.first };
+	{ p.second };
+	requires std::is_pointer_v<decltype(p.first)>;
+	requires std::is_same_v<decltype(p.second), std::size_t>;
+};
+
+
+struct MiyaCoreMSG_Utils
 {
 public:
-	virtual size_t exportRaw( std::shared_ptr<unsigned char> *retRaw ) = 0;
-	virtual bool importRaw( std::shared_ptr<unsigned char> fromRaw , size_t fromRawLength ) = 0;
+  template < typename T, typename... Args > requires(IsPair<Args> && ...) std::vector<T> format( Args... args ) const;
 };
+
+
+template < typename T, typename... Args > 
+requires (IsPair<Args> && ...)
+std::vector<T> MiyaCoreMSG_Utils::format( Args... args ) const
+{
+  auto export_length = (0 + ... + args.second);
+  std::vector<T> ret; ret.reserve( export_length );
+  
+  auto itr = ret.begin();
+  ([&](const auto& arg){
+	itr = std::copy_n( arg.first, arg.second, itr );
+  } (args), ... );
+
+  return ret;
+}
 
 
 }

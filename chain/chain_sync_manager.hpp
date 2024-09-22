@@ -56,8 +56,7 @@ template <typename T> struct CHAIN_SYNC_OBSERVER_STRAGE_POLICY
   template < typename U = T >
   static std::enable_if_t<has_peer_id<U>::value, std::size_t >
   get_peer_id( const std::shared_ptr<U>& obj ){
-	// return obj->get_peer_id();
-	return 10;
+	return obj->get_peer_id();
   } // enable_if_t: 条件が満たされた場合にのみテンプレート関数を有効にする
 	// enable_if_t<>の<>の中に判別する型を入れる, 戻り値は書かず enable_ifに制御を任せる(第2引数で指定も可能), _tはエイリアス
 
@@ -106,21 +105,50 @@ public:
   using on_complete_handler = std::function<void(void)>; // 仮想チェーンの同期が完了した際のハンドラ
   using on_abort_handler = std::function<void(void)>; // 仮想チェーンの同期が失敗した際のハンドラ
 
-  chain_sync_manager( io_context &io_ctx, block_iterator &fork_point_itr );
-  chain_sync_manager( io_context &io_ctx, block_iterator &fork_point_itr, std::vector<block_header::ref> chain_frame );
+  struct sync_result
+  {
+	public:
+    enum status{
+	  SYNC_COMPLETE
+		, WRONG_FORKPOINT
+		, SYNC_ERROR
+		, CONNECTION_ERROR
+		, NONE
+
+	  // 正常に同期が終了した
+	  // 同期に失敗した
+	  // フォークポイントが間違っている
+	  // ネットワークエラー(peerとの接続ができない)
+    };
+
+    const status state = status::NONE;
+    std::vector< block::ref > synced_chain;
+	// block_iterator forkpoint;
+  
+	sync_result( status s, std::vector<block::ref> sc = std::vector<block::ref>() ) : state(s), synced_chain(sc){};
+  };
+
+  using on_sync_done_callback = std::function<void(sync_result)>; // 同期の可否にかかわらずchain_managerへの通知用のコールバックを利用
+  chain_sync_manager( io_context &io_ctx, block_iterator &forkpoint_itr, on_sync_done_callback notify_func );
   // IBDなどで,chain_sync_managerに先駆けて最新のブロックまでのheader(block_id)を持っている場合は提供する
+
+    // 同期開始系メソッド 
+  virtual void async_start( std::pair< block::ref/*未知の最先端ブロック*/, ss::peer::ref/*ブロック受信元peer*/> target ) = 0;
+  // 未知のブロックを発見した時の同期シーケンス開始
+  // virtual void async_start( std::function<void(sync_result)> ret_callback_func, bool is_use_chain_frame = false ) = 0;
+  // virtual sync_result sync_start() = 0; // 成功の可否が分かるまでブロッキングする
+  on_sync_done_callback _notify_func;
+
 
   bool init( ss::peer::ref peer_ref, const block_id &block_id/*目標(最先端)のblock_ID*/ );
   bool init( std::function<void()> on_failure_confirm_fork_point );
-  /* (初期化でやること]
-    - fork_pointの確定 -> できなかったらchain_managerに通知して,fork_pointを下げてもらうように依頼する
-  */
 
   void income_command_invs( ss::peer::ref peer, inv::ref invs_ref ); // (処理対象) : getblocks_observer, mempool_observer
   void income_command_block( ss::peer::ref peer, MiyaCoreMSG_BLOCK::ref cmd ); // (処理対象) : getdata_observer
   void income_command_notfound( ss::peer::ref peer, MiyaCoreMSG_NOTFOUND::ref cmd );
 
   const bool find_block( const block_id &block_id ) const; // 現在構築している同期用のチェーンの中から該当のブロックを検索する
+  bool validate_forkpoint( block_iterator &forkpoint_itr ) const; // 指定したforkpointが有効なものかチェック
 
   // observerにハンドラとして渡す
   virtual void get_valid_block( block::ref &block_ref ) = 0;
@@ -135,27 +163,7 @@ public:
   // std::function<void(void)> _on_complete_func = nullptr; // 同期が成功した
   // std::function<void(void)> _on_abort_func = nullptr; // 同期を中断する
 
-  struct sync_result
-  {
-	public:
-    enum status{
-      COMPLETE
-      , FAILURE_NOT_CONFIRM_BRANCH_POINT
-      , ABORT
-
-	  // 正常に同期が終了した
-	  // 同期に失敗した
-	  // フォークポイントが間違っている
-	  // ネットワークエラー(peerとの接続ができない)
-    };
-
-    const status state;
-    std::vector< block::ref > synced_chain;
-  };
-  virtual void async_start( std::function<void(sync_result)> ret_callback_func ) = 0;
-  virtual sync_result sync_start() = 0; // 成功の可否が分かるまでブロッキングする
-
-
+   
 protected:
   template < typename T > std::vector< typename ss::observer<T>::ref > expand_command_getdata( const MiyaCoreMSG_GETDATA::ref &cmd ); // Tに合致するobserverを抽出する
 
@@ -164,18 +172,21 @@ protected:
 
   const bool find_forkpoint(); // グローバルチェーンと同期するためにローカルチェーンの分岐点を探す
   
-  using chain_sync_observer_strage = ss::observer_strage< CHAIN_SYNC_OBSERVER_STRAGE_POLICY, getdata_observer, block_observer, getheader_observer >;
+  using chain_sync_observer_strage = ss::observer_strage< CHAIN_SYNC_OBSERVER_STRAGE_POLICY, getdata_observer, block_observer, getheader_observer, getblocks_observer >;
   chain_sync_observer_strage _obs_strage __attribute__((guarded_by(_rmtx)));
 
   std::vector< std::pair< const block_id, block::ref > > _candidate_synced_chain __attribute__((guarded_by(_rmtx))); // 同期中の仮想チェーン
   std::vector< std::pair<block_id, bool/*is_downloaded*/> > _chain_frame; 
+  std::vector< ss::peer::ref > _boot_peers;
   // このblock_is_vectorに従ってブロックを収集していく　
   // chain_frameの最後尾までブロックが取得できたらチェーンの同期作業を終了する
   // chain_frameの末尾をどうやって定めるか
 
   int allow_failure_per_block = 5;
   int allow_failure_total = 8;
-  block_iterator &_forkpoint;
+  
+  block_iterator &_forkpoint; 
+  bool is_forkpoint_validated = false;
 };
 
 class serial_chain_sync_manager : public chain_sync_manager
@@ -188,7 +199,7 @@ public:
   serial_chain_sync_manager( io_context &io_ctx, block_iterator fork_point, std::vector<block_header::ref> target_headers /*このヘッダーベクターを元にチェーンを構築*/ );
   bool init( ss::peer::ref peer_ref, const block_id &block_id/*目標(最先端)のblock_ID*/ );
 
-  virtual void async_start( std::function<void(sync_result)> ret_callback_func ) = 0;
+  void async_start( std::pair< block::ref, ss::peer::ref > target /*同期最終目標, invで受信したもの*/ );
 };
 
 
@@ -198,6 +209,8 @@ template < typename T > std::vector< typename ss::observer<T>::ref > chain_sync_
   // return ret;
 }
 
+
 };
+
 
 #endif 

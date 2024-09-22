@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 
+#include <chain/block/block.params.hpp>
 #include <chain/block/block_header.hpp>
 #include <chain/transaction/p2pkh/p2pkh.h>
 #include <chain/transaction/coinbase/coinbase.hpp>

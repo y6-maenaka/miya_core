@@ -33,10 +33,15 @@ template < std::size_t N = BASE_ID_BYTES_LENGTH > class base_id
 {
   friend block_id;
   friend transaction_id;
+
 public:
   using ret = std::shared_ptr<base_id>;
   using value_type = std::uint8_t;
 
+protected:
+  std::array< value_type, N > _body;
+
+public:
   base_id( const base_id<N> &from ) : _body(from._body){};
   base_id( void* from, std::size_t from_size );
   base_id();
@@ -54,10 +59,13 @@ public:
   template < typename T > struct is_allow_container< std::vector<T> > : std::true_type{};
   template < typename Container > auto check_container(Container*) -> typename std::enable_if<is_container<Container>::value, void*>::type;
   template< typename Container > base_id( const Container &container ) -> decltype(check_container<Container>(nullptr)); */
-  
+
+  auto to_ptr() -> value_type*;
   std::string to_string() const;
   template < typename T > std::vector<T> to_vector() const;
   template < typename T, std::size_t M > std::array<T, M> to_array() const;
+
+  std::size_t get_length() const;
 
   void fill( unsigned char hex );
 
@@ -65,9 +73,6 @@ public:
   bool operator == ( const base_id<N> &id );
 
   std::array< value_type, N > get_raw_with_array(); // bodyの取り出し
-
-protected:
-  std::array< value_type, N > _body;
 };
 
 /* template < std::size_t N > template < typename Container > base_id<N>::base_id( const Container &container ) : 
@@ -94,6 +99,17 @@ template < std::size_t N > base_id<N> base_id<N>::none()
 template < std::size_t N > bool base_id<N>::operator ==( const base_id<N> &id )
 {
   return std::equal( _body.begin(), _body.end(), id._body.begin() );
+}
+
+template < std::size_t N > std::size_t base_id<N>::get_length() const
+{
+  return N;
+}
+
+template < std::size_t N > auto base_id<N>::to_ptr()
+  -> base_id<N>::value_type*
+{
+  return _body.data();
 }
 
 template < std::size_t N > std::string base_id<N>::to_string() const
@@ -170,6 +186,7 @@ class block_id : public base_id<BLOCK_HASH_BYTES_LENGTH>
 public: 
   static block_id (invalid)();
 };
+using header_hash = block_id;
 
 template < std::size_t N > union_id<N>::union_id( block_id &id ) 
 {

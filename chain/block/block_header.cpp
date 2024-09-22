@@ -243,22 +243,26 @@ void block_header::increment_nonce()
   _meta._nonce += 1;
 }
 
-block_header::header_hash block_header::get_header_hash() const
+block_header::header_hash block_header::generate_header_hash() const
 {
-  std::size_t header_hash_length; 
-  std::shared_ptr<unsigned char> header_hash;
+  // std::size_t header_hash_length; 
+  // std::shared_ptr<unsigned char> header_hash;
 
   if( auto cu_ret = sha1::hash( reinterpret_cast<const unsigned char*>(&_meta), sizeof(_meta) ); (*cu_ret).size() == (BLOCK_HASH_BYTES_LENGTH) )
   {
 	block_header::header_hash ret; 
 	auto md = cu_ret.to_vector< block_header::header_hash::value_type >();
-	std::copy( md.begin(), md.end(), ret.begin() );
-	return ret;
+	return block_header::header_hash( md );
+	// std::copy( md.begin(), md.end(), ret.begin() );
+	// return block_header::header_hash(ret);
   }
   else{
 	block_header::header_hash ret;
-	std::fill( ret.begin(), ret.end(), 0xff ); // 衝突する可能性あり(限りなく低いが)
+	ret.fill(0x00);
 	return ret;
+
+	// std::fill( ret.begin(), ret.end(), 0xff ); // 衝突する可能性あり(限りなく低いが)
+	// return ret;
   }
 }
 
