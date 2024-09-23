@@ -5,7 +5,7 @@
 #include <iostream>
 #include <string.h> // for use memset() on LinuxOS
 #include <chain/block/block.params.hpp>
-#include <node_gateway/message/command/base_command.hpp>
+#include <node_gateway/message/command/command_utils.hpp>
 
 
 namespace chain

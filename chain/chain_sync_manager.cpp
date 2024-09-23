@@ -63,6 +63,40 @@ void chain_sync_manager::request_prev_block( const block::id &block_id )
 	// request_obs_ref->init();
 }
 
+void chain_sync_manager::on_getblocks_done( getblocks_observer::obs_ctx ctx )
+{
+	/* -- 条件 --
+	1. getblocks_observerが取得してきたblock_id_vectorのチェック(2個以上, 1個目はchain_frameの分岐点)
+	2. chain_frameの未ダウンロード部先頭を探す
+	3. getblocks_observerが取得してきたblock_id_vectorの先頭とchain_frameの先頭が合致しているかチェック
+	*/
+	if( ctx.status == getblocks_observer::obs_ctx::state::complete && !(ctx.received_block_id_v.empty()) )
+	{
+		if( auto itr = get_undownloaded_blkid_head(); itr != _chain_frame.end() )
+		{
+			if( itr->first == ctx.start_blkid )
+			{
+				std::vector< chain_sync_manager::chain_frame::value_type > insert_pairs;
+				std::transform( ctx.received_block_id_v.begin(), ctx.received_block_id_v.end()
+				, std::back_inserter(insert_pairs), [](const block_id &id){
+					return std::make_pair(id, false);
+				});
+				_chain_frame.insert( itr + 1, insert_pairs.begin(), insert_pairs.end() );
+			}
+		}
+	}
+	else if( ctx.status == getblocks_observer::obs_ctx::state::notfound )
+	{
+		// 次のシーケンスにうつる?
+		return;
+	}
+	else
+	{
+		return;
+		// 再送 or 他のpeerへの送信
+	}
+}
+
 bool chain_sync_manager::init( ss::peer::ref peer_ref, const block_id &block_id )
 {
   /*
@@ -73,6 +107,41 @@ bool chain_sync_manager::init( ss::peer::ref peer_ref, const block_id &block_id 
 
   return true;
   */
+}
+
+chain_sync_manager::chain_frame::iterator chain_sync_manager::get_undownloaded_blkid_head()
+{
+	for( auto itr = _chain_frame.begin(); itr != _chain_frame.end(); itr++ ) {
+		if( itr->second == true ) return (itr == _chain_frame.begin()) ? _chain_frame.end() : std::prev(itr);
+	}
+	return _chain_frame.end();
+}
+
+void chain_sync_manager::income_command_inv( ss::peer::ref peer, inv::ref cmd )
+{	
+	/*
+	1. 受信元のpeerをKeyにcmdと対応するobserver(getblocks or mempool)を取り出す
+	2. 1.で取り出したobserverに対してincome通知をする
+	*/
+
+	// getblocksの取り出し
+	if( auto found_observers = _obs_strage.find_observer<getblocks_observer, by_peer_id>( peer->get_id() ); found_observers.size() == 0 )
+	{
+		for( auto obs_itr : found_observers )
+		{
+			// 該当するobserverを取り出す
+			if( bool is_correspond = obs_itr->get()->is_correspond_inv( cmd ); !is_correspond ) continue;
+
+			obs_itr->get()->income_inv( cmd );
+			 _obs_strage.delete_observer<getblocks_observer, ss::by_observer_id/*一応*/>(obs_itr->get_id());
+		}
+		return;
+	}
+	else
+	{
+
+	}
+
 }
 
 void chain_sync_manager::income_command_block( ss::peer::ref peer, MiyaCoreMSG_BLOCK::ref cmd )
@@ -125,12 +194,18 @@ void chain_sync_manager::income_command_notfound( ss::peer::ref peer, MiyaCoreMS
 
 void serial_chain_sync_manager::async_start( std::pair<block::ref, ss::peer::ref> target )
 {
-	ss::observer<getblocks_observer>::ref getblocks_obs = std::make_shared<ss::observer<getblocks_observer>>( _io_ctx, target.second, _forkpoint.get_id(), target.first->get_id() );
+	ss::observer<getblocks_observer>::ref getblocks_obs = std::make_shared<ss::observer<getblocks_observer>>( _io_ctx, target.second
+	, _forkpoint.get_id(), target.first->get_id(), std::bind( &chain_sync_manager::on_getblocks_done, this, std::placeholders::_1) );
 
 	if( !is_forkpoint_validated ) _notify_func( sync_result::status::WRONG_FORKPOINT );
+
 	_obs_strage.add_observer<class getblocks_observer>( getblocks_obs ); // リクエストを送信する前にobserver_strageに追加する
-	getblocks_obs->get()->request(); 
-		
+	getblocks_obs->get()->request();  // メッセージコマンドを送信
+	return;
+}
+
+void serial_chain_sync_manager::start_block_download_sequence()
+{
 	return;
 }
 

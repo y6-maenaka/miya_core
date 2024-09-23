@@ -28,15 +28,23 @@ template < typename T, typename... Args >
 requires (IsPair<Args> && ...)
 std::vector<T> MiyaCoreMSG_Utils::format( Args... args ) const
 {
-  auto export_length = (0 + ... + args.second);
+  auto export_length = (0 + ... + args.second); // ...をつけることでカンマ区切りでパラメータパックが展開される
   std::vector<T> ret; ret.reserve( export_length );
   
   auto itr = ret.begin();
   ([&](const auto& arg){
 	itr = std::copy_n( arg.first, arg.second, itr );
-  } (args), ... );
+  } (args), ... ); // フォールド式パラメータパックの展開
 
   return ret;
+
+  /*
+   フォールド式 : 
+   - (expression op(+, *, &&, ||) ... op expression ) : Left fold expression 
+   
+   パック展開のカンマ演算子 : 
+	 パラメータパックの要素ごとにラムダ関数が実行される	
+   */
 }
 
 

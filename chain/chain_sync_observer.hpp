@@ -8,6 +8,7 @@
 #include <node_gateway/message/command/command.params.hpp>
 #include <chain/block/block.params.hpp>
 
+#include <iostream>
 #include <string>
 #include <set>
 #include <functional>
@@ -119,13 +120,36 @@ class getblocks_observer : public chain_sync_observer
 {
 public:
   using ref = std::shared_ptr<getblocks_observer>;
-  getblocks_observer( io_context &io_ctx, ss::peer::ref target_peer, const block_id start_blkid, const block_id stop_blkid /*最終目的のblock_id*/, std::string t_name = "getblocks" );
+  struct obs_ctx {
+	enum state{
+	  complete
+		, notfound
+		, error
+	};
+
+	const state status;
+	const block_id start_blkid;
+	std::vector<const block_id> received_block_id_v; // 本observerにより取得できたブロックidのリスト
+  };
+
+  using on_done_notify_func = std::function<void(obs_ctx ctx)>; // 本observerの終了を大元のchain_sync_managerに通知する関数
+  getblocks_observer( io_context &io_ctx, ss::peer::ref target_peer, const block_id start_blkid, const block_id stop_blkid /*最終目的のblock_id*/, on_done_notify_func notify_func, std::string t_name = "getblocks" );
   void request();
 
-private:
+  bool is_correspond_inv( inv::ref target ) const;  // targetが自身が送信したgetblocksメッセージが送信新たメッセージの応答メッセージかチェックする
+  void income_inv( inv::ref cmd ); // 応答が帰ってきたことを通知する
+  
+private: 
   const block_id _start_blkid;
   const block_id _stop_blkid;
+ 
+  const on_done_notify_func _notify_func;
 }; using getblocks_obs = class getblocks_observer;
+
+class mempool_observer : public chain_sync_observer
+{
+
+}; using mempool_obs = class mempool_observer;
 
 
 };

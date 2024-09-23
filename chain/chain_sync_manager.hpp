@@ -32,14 +32,17 @@
 using namespace boost::asio;
 
 
+
 namespace chain
 {
 
 
 class block;
 
-struct by_peer_id;
-struct by_content_id;
+struct by_peer_id
+{
+  template<typename T> using key_type = ss::peer::id;
+};
 
 
 template <typename T> struct CHAIN_SYNC_OBSERVER_STRAGE_POLICY
@@ -54,22 +57,23 @@ template <typename T> struct CHAIN_SYNC_OBSERVER_STRAGE_POLICY
   */
 
   template < typename U = T >
-  static std::enable_if_t<has_peer_id<U>::value, std::size_t >
+  static std::enable_if_t<has_peer_id<U>::value, ss::peer::id >
   get_peer_id( const std::shared_ptr<U>& obj ){
 	return obj->get_peer_id();
   } // enable_if_t: 条件が満たされた場合にのみテンプレート関数を有効にする
 	// enable_if_t<>の<>の中に判別する型を入れる, 戻り値は書かず enable_ifに制御を任せる(第2引数で指定も可能), _tはエイリアス
 
   template < typename U = T >
-  static std::enable_if_t<!has_peer_id<U>::value, std::size_t >
+  static std::enable_if_t<!has_peer_id<U>::value, ss::peer::id >
   get_peer_id( const std::shared_ptr<U>& ){
-	return static_cast<std::size_t>(0);
+	// return static_cast<std::size_t>(0);
+	return ss::peer::id::none();
   }
 
   static auto get_peer_id_s( typename ss::observer<T>::ref obs_ref ) 
 	-> decltype(get_peer_id(obs_ref->get()))
   {
-	 return get_peer_id(obs_ref->get());
+	 return get_peer_id(obs_ref->get()); // observer本体を取り出して渡す 
 	 // return boost::uuids::random_generator()();
   }
   
@@ -85,7 +89,7 @@ template <typename T> struct CHAIN_SYNC_OBSERVER_STRAGE_POLICY
 	  , 
 
 	  boost::multi_index::hashed_non_unique< boost::multi_index::tag<by_peer_id> 
-	  , boost::multi_index::global_fun< typename ss::observer<T>::ref, std::size_t, &CHAIN_SYNC_OBSERVER_STRAGE_POLICY<T>::get_peer_id_s >
+	  , boost::multi_index::global_fun< typename ss::observer<T>::ref, ss::peer::id, &CHAIN_SYNC_OBSERVER_STRAGE_POLICY<T>::get_peer_id_s >
 	  // const_mem_fun: クラスのメンバ関数を使ってインデックスのキーを取得する
 	    // - 第1引数: メンバ関数が属するクラスの型(インデックスのキーとなるオブジェクトの型)
 	    // - 第2引数: メンバ関数の戻り値の型(インデックスのキーの型)
@@ -143,7 +147,7 @@ public:
   bool init( ss::peer::ref peer_ref, const block_id &block_id/*目標(最先端)のblock_ID*/ );
   bool init( std::function<void()> on_failure_confirm_fork_point );
 
-  void income_command_invs( ss::peer::ref peer, inv::ref invs_ref ); // (処理対象) : getblocks_observer, mempool_observer
+  void income_command_inv( ss::peer::ref peer, inv::ref invs_ref ); // (処理対象) : getblocks_observer, mempool_observer
   void income_command_block( ss::peer::ref peer, MiyaCoreMSG_BLOCK::ref cmd ); // (処理対象) : getdata_observer
   void income_command_notfound( ss::peer::ref peer, MiyaCoreMSG_NOTFOUND::ref cmd );
 
@@ -163,6 +167,7 @@ public:
   // std::function<void(void)> _on_complete_func = nullptr; // 同期が成功した
   // std::function<void(void)> _on_abort_func = nullptr; // 同期を中断する
 
+  void on_getblocks_done( getblocks_observer::obs_ctx ctx );
    
 protected:
   template < typename T > std::vector< typename ss::observer<T>::ref > expand_command_getdata( const MiyaCoreMSG_GETDATA::ref &cmd ); // Tに合致するobserverを抽出する
@@ -176,8 +181,11 @@ protected:
   chain_sync_observer_strage _obs_strage __attribute__((guarded_by(_rmtx)));
 
   std::vector< std::pair< const block_id, block::ref > > _candidate_synced_chain __attribute__((guarded_by(_rmtx))); // 同期中の仮想チェーン
-  std::vector< std::pair<block_id, bool/*is_downloaded*/> > _chain_frame; 
-  std::vector< ss::peer::ref > _boot_peers;
+  using chain_frame = std::vector< std::pair<block_id, bool> >;
+  chain_frame _chain_frame; 
+  chain_frame::iterator get_undownloaded_blkid_head();
+
+
   // このblock_is_vectorに従ってブロックを収集していく　
   // chain_frameの最後尾までブロックが取得できたらチェーンの同期作業を終了する
   // chain_frameの末尾をどうやって定めるか
@@ -196,10 +204,11 @@ public:
   using ref = std::shared_ptr<serial_chain_sync_manager>;
 
   serial_chain_sync_manager( io_context &io_ctx, block_iterator fork_point, block::ref target_block /*このブロックまでのチェーンを構築*/ );
-  serial_chain_sync_manager( io_context &io_ctx, block_iterator fork_point, std::vector<block_header::ref> target_headers /*このヘッダーベクターを元にチェーンを構築*/ );
   bool init( ss::peer::ref peer_ref, const block_id &block_id/*目標(最先端)のblock_ID*/ );
 
   void async_start( std::pair< block::ref, ss::peer::ref > target /*同期最終目標, invで受信したもの*/ );
+  void start_block_download_sequence();
+
 };
 
 
