@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(git -C /Users/yuri/Desktop/program/miya_core log --oneline -20)",
+      "Bash(git -C /Users/yuri/Desktop/program/miya_core diff HEAD~5 HEAD --stat)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

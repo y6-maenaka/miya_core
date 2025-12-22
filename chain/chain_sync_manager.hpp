@@ -9,6 +9,7 @@
 #include <ss_p2p/observer.hpp>
 #include <ss_p2p/observer_strage.hpp>
 #include <ss_p2p/peer.hpp>
+#include <ss_p2p/multicast_manager.hpp>
 #include <node_gateway/message/command/inv.hpp>
 #include <node_gateway/message/command/notfound.hpp>
 #include <node_gateway/message/command/block.hpp>
@@ -133,7 +134,7 @@ public:
   };
 
   using on_sync_done_callback = std::function<void(sync_result)>; // 同期の可否にかかわらずchain_managerへの通知用のコールバックを利用
-  chain_sync_manager( io_context &io_ctx, block_iterator &forkpoint_itr, on_sync_done_callback notify_func );
+  chain_sync_manager( io_context &io_ctx, block_iterator &forkpoint_itr, on_sync_done_callback notify_func, ss::multicast_manager _multicast_manager );
   // IBDなどで,chain_sync_managerに先駆けて最新のブロックまでのheader(block_id)を持っている場合は提供する
 
     // 同期開始系メソッド 
@@ -195,6 +196,9 @@ protected:
   
   block_iterator &_forkpoint; 
   bool is_forkpoint_validated = false;
+
+private:
+  ss::multicast_manager _multicast_manager;
 };
 
 class serial_chain_sync_manager : public chain_sync_manager

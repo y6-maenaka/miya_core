@@ -7,11 +7,12 @@ namespace chain
 {
 
 
-chain_sync_manager::chain_sync_manager( io_context &io_ctx, block_iterator& forkpoint_itr, chain_sync_manager::on_sync_done_callback notify_func ) :
+chain_sync_manager::chain_sync_manager( io_context &io_ctx, block_iterator& forkpoint_itr, chain_sync_manager::on_sync_done_callback notify_func, ss::multicast_manager multicast_manager ) :
   _io_ctx( io_ctx )
   , _obs_strage( io_ctx )
   , _forkpoint( forkpoint_itr )
   , _notify_func( notify_func )
+  , _multicast_manager( multicast_manager )
 {
   return;
 }
